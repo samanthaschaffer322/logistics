@@ -3,22 +3,16 @@
   "version": "1.0.0",
   "private": true,
   "description": "AI-Powered Logistics Management Platform with Advanced AI Optimization",
-  "keywords": [
-    "logistics",
-    "ai",
-    "optimization",
-    "supply-chain",
-    "forecasting",
-    "openai"
-  ],
+  "keywords": ["logistics", "ai", "optimization", "supply-chain", "forecasting", "openai"],
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
+    "export": "next build && next export",
     "lint": "next lint --fix",
     "type-check": "tsc --noEmit",
     "clean": "rm -rf .next out",
-    "build:fast": "SKIP_ENV_VALIDATION=1 next build"
+    "build:static": "next build"
   },
   "dependencies": {
     "@supabase/ssr": "^0.6.1",
@@ -27,7 +21,7 @@
     "date-fns": "^4.1.0",
     "lucide-react": "^0.536.0",
     "next": "15.4.5",
-    "openai": "^4.104.0",
+    "openai": "^4.67.3",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "recharts": "^3.1.0",
