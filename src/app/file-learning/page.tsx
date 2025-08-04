@@ -3,7 +3,7 @@
 import React, { useState, useRef } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
-import { FileText, Upload, Brain, Download, AlertCircle, CheckCircle } from 'lucide-react'
+import { FileText, Upload, Brain, AlertCircle, CheckCircle } from 'lucide-react'
 import { supabase } from '../../../supabase/client'
 import { useAuth } from '@/contexts/AuthContext'
 
@@ -11,7 +11,7 @@ interface UploadedFile {
   id: string
   file_name: string
   storage_path: string
-  parsed_json: any
+  parsed_json: Record<string, unknown>
   created_at: string
 }
 

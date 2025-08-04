@@ -5,7 +5,7 @@ import { supabase } from '../../../supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
-import { Truck, Plus, MapPin, Clock, User, AlertCircle } from 'lucide-react'
+import { Truck, Plus, MapPin, User, AlertCircle } from 'lucide-react'
 
 interface Vehicle {
   id: string

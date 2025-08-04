@@ -20,7 +20,7 @@ import {
   XCircle,
   Filter
 } from 'lucide-react'
-import { formatDate, formatDateTime } from '@/lib/utils'
+import { formatDate } from '@/lib/utils'
 
 interface Shipment {
   id: string

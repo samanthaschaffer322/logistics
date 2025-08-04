@@ -73,7 +73,7 @@ export default function Navigation() {
   const { userRole, signOut } = useAuth()
 
   const filteredItems = navigationItems.filter((item) =>
-    item.roles.includes(userRole as any)
+    item.roles.includes(userRole as string)
   )
 
   return (
