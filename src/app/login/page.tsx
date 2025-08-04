@@ -3,11 +3,10 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
-import { LogIn, Eye, EyeOff, Shield, Truck, AlertTriangle, Copy, CheckCircle } from 'lucide-react'
+import { LogIn, Eye, EyeOff, Shield, Truck, AlertTriangle } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useTranslation } from '@/lib/i18n/useTranslation'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
-import { getDemoCredentials } from '@/lib/auth/simple-auth'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -15,12 +14,9 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
-  const [copiedCredential, setCopiedCredential] = useState<string | null>(null)
   const router = useRouter()
   const { signIn } = useAuth()
   const { t, locale } = useTranslation()
-
-  const demoCredentials = getDemoCredentials()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -46,269 +42,143 @@ export default function LoginPage() {
     }
   }
 
-  const copyToClipboard = async (text: string, type: string) => {
-    try {
-      await navigator.clipboard.writeText(text)
-      setCopiedCredential(type)
-      setTimeout(() => setCopiedCredential(null), 2000)
-    } catch (error) {
-      console.error('Failed to copy:', error)
-    }
-  }
-
-  const fillCredentials = (email: string, password: string) => {
-    setEmail(email)
-    setPassword(password)
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
         {/* Language Switcher */}
-        <div className="flex justify-end mb-4">
+        <div className="flex justify-end mb-6">
           <LanguageSwitcher />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Login Form */}
-          <div>
-            {/* Logo and Title */}
-            <div className="text-center mb-8">
-              <div className="flex items-center justify-center mb-4">
-                <div className="bg-blue-600 p-3 rounded-full">
-                  <Truck className="h-8 w-8 text-white" />
-                </div>
-              </div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">LogiAI</h1>
-              <p className="text-gray-600">
-                {locale === 'vi' 
-                  ? 'Nền tảng Quản lý Logistics được hỗ trợ bởi AI'
-                  : 'AI-Powered Logistics Management Platform'
-                }
-              </p>
+        {/* Logo and Title */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center mb-6">
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 rounded-2xl shadow-lg">
+              <Truck className="h-10 w-10 text-white" />
             </div>
+          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
+            LogiAI
+          </h1>
+          <p className="text-gray-600 text-lg">
+            {locale === 'vi' 
+              ? 'Nền tảng Quản lý Logistics được hỗ trợ bởi AI'
+              : 'AI-Powered Logistics Management Platform'
+            }
+          </p>
+        </div>
 
-            {/* Login Card */}
-            <Card className="shadow-xl border-0">
-              <CardHeader className="space-y-1 pb-6">
-                <CardTitle className="text-2xl font-bold text-center flex items-center justify-center">
-                  <Shield className="mr-2 h-5 w-5 text-blue-600" />
-                  {locale === 'vi' ? 'Đăng nhập an toàn' : 'Secure Login'}
-                </CardTitle>
-                <CardDescription className="text-center">
-                  {locale === 'vi' 
-                    ? 'Nhập thông tin đăng nhập của bạn'
-                    : 'Enter your login credentials'
-                  }
-                </CardDescription>
-              </CardHeader>
-              
-              <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  {/* Email Field */}
-                  <div className="space-y-2">
-                    <label htmlFor="email" className="text-sm font-medium text-gray-700">
-                      {locale === 'vi' ? 'Email' : 'Email'}
-                    </label>
-                    <input
-                      id="email"
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder={locale === 'vi' ? 'Nhập email của bạn' : 'Enter your email'}
-                      required
-                      disabled={isLoading}
-                    />
-                  </div>
+        {/* Login Card */}
+        <Card className="shadow-2xl border-0 backdrop-blur-sm bg-white/90">
+          <CardHeader className="space-y-1 pb-6">
+            <CardTitle className="text-2xl font-bold text-center flex items-center justify-center">
+              <Shield className="mr-2 h-6 w-6 text-blue-600" />
+              {locale === 'vi' ? 'Đăng nhập an toàn' : 'Secure Login'}
+            </CardTitle>
+            <CardDescription className="text-center text-gray-600">
+              {locale === 'vi' 
+                ? 'Nhập thông tin đăng nhập của bạn để truy cập hệ thống'
+                : 'Enter your credentials to access the system'
+              }
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {/* Email Field */}
+              <div className="space-y-2">
+                <label htmlFor="email" className="text-sm font-semibold text-gray-700">
+                  {locale === 'vi' ? 'Địa chỉ Email' : 'Email Address'}
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+                  placeholder={locale === 'vi' ? 'Nhập địa chỉ email của bạn' : 'Enter your email address'}
+                  required
+                  disabled={isLoading}
+                />
+              </div>
 
-                  {/* Password Field */}
-                  <div className="space-y-2">
-                    <label htmlFor="password" className="text-sm font-medium text-gray-700">
-                      {locale === 'vi' ? 'Mật khẩu' : 'Password'}
-                    </label>
-                    <div className="relative">
-                      <input
-                        id="password"
-                        type={showPassword ? 'text' : 'password'}
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder={locale === 'vi' ? 'Nhập mật khẩu' : 'Enter your password'}
-                        required
-                        disabled={isLoading}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                        disabled={isLoading}
-                      >
-                        {showPassword ? (
-                          <EyeOff className="h-4 w-4 text-gray-400" />
-                        ) : (
-                          <Eye className="h-4 w-4 text-gray-400" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Error Message */}
-                  {error && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                      <div className="flex items-start">
-                        <AlertTriangle className="h-4 w-4 text-red-600 mt-0.5 mr-2 flex-shrink-0" />
-                        <p className="text-sm text-red-600">{error}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Login Button */}
-                  <button
-                    type="submit"
+              {/* Password Field */}
+              <div className="space-y-2">
+                <label htmlFor="password" className="text-sm font-semibold text-gray-700">
+                  {locale === 'vi' ? 'Mật khẩu' : 'Password'}
+                </label>
+                <div className="relative">
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-gray-50 focus:bg-white"
+                    placeholder={locale === 'vi' ? 'Nhập mật khẩu của bạn' : 'Enter your password'}
+                    required
                     disabled={isLoading}
-                    className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                    disabled={isLoading}
                   >
-                    {isLoading ? (
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" />
                     ) : (
-                      <>
-                        <LogIn className="mr-2 h-4 w-4" />
-                        {locale === 'vi' ? 'Đăng nhập' : 'Sign In'}
-                      </>
+                      <Eye className="h-5 w-5" />
                     )}
                   </button>
-                </form>
+                </div>
+              </div>
 
-                {/* Security Notice */}
-                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+              {/* Error Message */}
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-4">
                   <div className="flex items-start">
-                    <Shield className="h-5 w-5 text-gray-400 mt-0.5 mr-2 flex-shrink-0" />
-                    <div>
-                      <p className="text-xs text-gray-600">
-                        <strong>{locale === 'vi' ? 'Thông báo bảo mật' : 'Security Notice'}:</strong>{' '}
-                        {locale === 'vi' 
-                          ? 'Hệ thống được bảo vệ bằng mã hóa cấp doanh nghiệp.'
-                          : 'System protected with enterprise-grade encryption.'
-                        }
-                      </p>
-                    </div>
+                    <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" />
+                    <p className="text-sm text-red-700 font-medium">{error}</p>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              )}
 
-          {/* Demo Credentials Panel */}
-          <div>
-            <Card className="shadow-xl border-0 bg-gradient-to-br from-green-50 to-emerald-50">
-              <CardHeader>
-                <CardTitle className="text-xl font-bold text-green-800 flex items-center">
-                  <CheckCircle className="mr-2 h-5 w-5" />
-                  {locale === 'vi' ? 'Thông tin đăng nhập Demo' : 'Demo Login Credentials'}
-                </CardTitle>
-                <CardDescription className="text-green-700">
-                  {locale === 'vi' 
-                    ? 'Sử dụng các thông tin đăng nhập sau để truy cập hệ thống'
-                    : 'Use the following credentials to access the system'
-                  }
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {demoCredentials.map((credential, index) => (
-                  <div key={index} className="bg-white rounded-lg p-4 border border-green-200">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="font-semibold text-gray-900">
-                        {locale === 'vi' ? `Tài khoản Admin ${index + 1}` : `Admin Account ${index + 1}`}
-                      </h3>
-                      <button
-                        onClick={() => fillCredentials(credential.email, credential.password)}
-                        className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded hover:bg-blue-200 transition-colors"
-                      >
-                        {locale === 'vi' ? 'Sử dụng' : 'Use'}
-                      </button>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">
-                          {locale === 'vi' ? 'Email:' : 'Email:'}
-                        </span>
-                        <div className="flex items-center">
-                          <code className="text-xs bg-gray-100 px-2 py-1 rounded mr-2">
-                            {credential.email}
-                          </code>
-                          <button
-                            onClick={() => copyToClipboard(credential.email, `email-${index}`)}
-                            className="text-gray-400 hover:text-gray-600"
-                          >
-                            {copiedCredential === `email-${index}` ? (
-                              <CheckCircle className="h-3 w-3 text-green-500" />
-                            ) : (
-                              <Copy className="h-3 w-3" />
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">
-                          {locale === 'vi' ? 'Mật khẩu:' : 'Password:'}
-                        </span>
-                        <div className="flex items-center">
-                          <code className="text-xs bg-gray-100 px-2 py-1 rounded mr-2">
-                            {credential.password}
-                          </code>
-                          <button
-                            onClick={() => copyToClipboard(credential.password, `password-${index}`)}
-                            className="text-gray-400 hover:text-gray-600"
-                          >
-                            {copiedCredential === `password-${index}` ? (
-                              <CheckCircle className="h-3 w-3 text-green-500" />
-                            ) : (
-                              <Copy className="h-3 w-3" />
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                      
-                      <div className="text-xs text-gray-500">
-                        {locale === 'vi' ? 'Người dùng:' : 'User:'} {credential.name}
-                      </div>
-                    </div>
-                  </div>
-                ))}
+              {/* Login Button */}
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-6 rounded-xl hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              >
+                {isLoading ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                ) : (
+                  <>
+                    <LogIn className="mr-2 h-5 w-5" />
+                    {locale === 'vi' ? 'Đăng nhập' : 'Sign In'}
+                  </>
+                )}
+              </button>
+            </form>
 
-                {/* Quick Instructions */}
-                <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                  <h4 className="font-semibold text-blue-800 mb-2">
-                    {locale === 'vi' ? 'Hướng dẫn nhanh:' : 'Quick Instructions:'}
-                  </h4>
-                  <ol className="text-sm text-blue-700 space-y-1">
-                    <li>
-                      1. {locale === 'vi' 
-                        ? 'Nhấp "Sử dụng" để tự động điền thông tin'
-                        : 'Click "Use" to auto-fill credentials'
-                      }
-                    </li>
-                    <li>
-                      2. {locale === 'vi' 
-                        ? 'Hoặc sao chép và dán thủ công'
-                        : 'Or copy and paste manually'
-                      }
-                    </li>
-                    <li>
-                      3. {locale === 'vi' 
-                        ? 'Nhấp "Đăng nhập" để truy cập hệ thống'
-                        : 'Click "Sign In" to access the system'
-                      }
-                    </li>
-                  </ol>
+            {/* Security Notice */}
+            <div className="mt-6 p-4 bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl border border-gray-200">
+              <div className="flex items-start">
+                <Shield className="h-5 w-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-gray-800 mb-1">
+                    {locale === 'vi' ? 'Bảo mật doanh nghiệp' : 'Enterprise Security'}
+                  </p>
+                  <p className="text-xs text-gray-600">
+                    {locale === 'vi' 
+                      ? 'Hệ thống được bảo vệ bằng mã hóa cấp doanh nghiệp và xác thực đa lớp.'
+                      : 'System protected with enterprise-grade encryption and multi-layer authentication.'
+                    }
+                  </p>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Footer */}
         <div className="text-center mt-8">

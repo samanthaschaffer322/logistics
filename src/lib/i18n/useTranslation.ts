@@ -1,38 +1,32 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import { Locale, defaultLocale } from './config'
-import enTranslations from './translations/en.json'
-import viTranslations from './translations/vi.json'
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { translations } from './translations'
 
-const translations = {
-  en: enTranslations,
-  vi: viTranslations
+type Locale = 'en' | 'vi'
+
+interface TranslationContextType {
+  locale: Locale
+  setLocale: (locale: Locale) => void
+  t: (key: string) => string
 }
 
-export function useTranslation() {
-  const [locale, setLocale] = useState<Locale>(defaultLocale)
+const TranslationContext = createContext<TranslationContextType | undefined>(undefined)
+
+export function TranslationProvider({ children }: { children: ReactNode }) {
+  const [locale, setLocaleState] = useState<Locale>('en')
 
   useEffect(() => {
-    // Get locale from localStorage or browser
+    // Load saved locale from localStorage
     const savedLocale = localStorage.getItem('logiai_locale') as Locale
-    if (savedLocale && ['en', 'vi'].includes(savedLocale)) {
-      setLocale(savedLocale)
-    } else {
-      // Detect browser language
-      const browserLang = navigator.language.toLowerCase()
-      if (browserLang.startsWith('vi')) {
-        setLocale('vi')
-        localStorage.setItem('logiai_locale', 'vi')
-      }
+    if (savedLocale && (savedLocale === 'en' || savedLocale === 'vi')) {
+      setLocaleState(savedLocale)
     }
   }, [])
 
-  const changeLocale = (newLocale: Locale) => {
-    setLocale(newLocale)
+  const setLocale = (newLocale: Locale) => {
+    setLocaleState(newLocale)
     localStorage.setItem('logiai_locale', newLocale)
-    // Trigger a re-render by updating state
-    window.dispatchEvent(new Event('languageChanged'))
   }
 
   const t = (key: string): string => {
@@ -59,14 +53,23 @@ export function useTranslation() {
     return typeof value === 'string' ? value : key
   }
 
-  return {
+  const contextValue: TranslationContextType = {
     locale,
-    changeLocale,
+    setLocale,
     t
   }
+
+  return React.createElement(
+    TranslationContext.Provider,
+    { value: contextValue },
+    children
+  )
 }
 
-// Simple provider component for compatibility
-export function TranslationProvider({ children }: { children: React.ReactNode }) {
-  return React.createElement(React.Fragment, null, children)
+export function useTranslation() {
+  const context = useContext(TranslationContext)
+  if (context === undefined) {
+    throw new Error('useTranslation must be used within a TranslationProvider')
+  }
+  return context
 }
