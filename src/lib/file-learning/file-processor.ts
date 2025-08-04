@@ -5,20 +5,33 @@
  */
 
 import * as XLSX from 'xlsx'
+import { KeyMetrics } from './ai-insights-generator'
+
+export interface PdfProcessedData {
+  text: string;
+  pages: number;
+  metadata: { [key: string]: any };
+}
+
+export interface CsvProcessedData {
+  headers: string[];
+  data: string[][];
+  rowCount: number;
+}
 
 export interface FileData {
   id: string
   fileName: string
   fileType: string
   uploadDate: string
-  processedData: any
+  processedData: LogisticsData | PdfProcessedData | CsvProcessedData
   insights: FileInsights
   status: 'processing' | 'completed' | 'error'
 }
 
 export interface FileInsights {
   summary: string
-  keyMetrics: { [key: string]: any }
+  keyMetrics: KeyMetrics
   recommendations: string[]
   dataStructure: DataStructure[]
   patterns: Pattern[]
@@ -44,6 +57,7 @@ export interface LogisticsData {
   routes?: RouteData[]
   costs?: CostData[]
   performance?: PerformanceData[]
+  [key: string]: any
 }
 
 export interface ShipmentData {
@@ -116,15 +130,15 @@ export class FileProcessor {
         case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
         case 'application/vnd.ms-excel':
           processedData = await this.processExcelFile(file)
-          insights = this.generateExcelInsights(processedData)
+          insights = await this.generateExcelInsights(processedData)
           break
         case 'application/pdf':
           processedData = await this.processPDFFile(file)
-          insights = this.generatePDFInsights(processedData)
+          insights = await this.generatePDFInsights(processedData)
           break
         case 'text/csv':
           processedData = await this.processCSVFile(file)
-          insights = this.generateCSVInsights(processedData)
+          insights = await this.generateCSVInsights(processedData)
           break
         default:
           throw new Error(`Unsupported file type: ${file.type}`)
@@ -156,7 +170,7 @@ export class FileProcessor {
   /**
    * Process Excel files (like the Vietnamese logistics plans)
    */
-  private async processExcelFile(file: File): Promise<any> {
+  private async processExcelFile(file: File): Promise<LogisticsData> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
       
@@ -172,7 +186,7 @@ export class FileProcessor {
             const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 })
             
             // Process Vietnamese logistics data
-            result[sheetName] = this.processVietnameseLogisticsData(jsonData, sheetName)
+            result[sheetName] = this.processVietnameseLogisticsData(jsonData as string[][], sheetName)
           })
           
           resolve(result)
@@ -189,7 +203,7 @@ export class FileProcessor {
   /**
    * Process Vietnamese logistics planning data
    */
-  private processVietnameseLogisticsData(data: any[][], sheetName: string): LogisticsData {
+  private processVietnameseLogisticsData(data: string[][], sheetName: string): LogisticsData {
     const logisticsData: LogisticsData = {
       shipments: [],
       inventory: [],
@@ -271,7 +285,7 @@ export class FileProcessor {
   /**
    * Parse shipment data from Vietnamese Excel
    */
-  private parseShipmentData(headers: string[], row: any[], index: number): ShipmentData | null {
+  private parseShipmentData(headers: string[], row: string[], index: number): ShipmentData | null {
     try {
       return {
         id: `shipment_${index}`,
@@ -291,7 +305,7 @@ export class FileProcessor {
   /**
    * Parse inventory data from Vietnamese Excel
    */
-  private parseInventoryData(headers: string[], row: any[], index: number): InventoryData | null {
+  private parseInventoryData(headers: string[], row: string[], index: number): InventoryData | null {
     try {
       return {
         item: this.extractValue(row, headers, ['hàng hóa', 'sản phẩm', 'mặt hàng']) || `item_${index}`,
@@ -309,7 +323,7 @@ export class FileProcessor {
   /**
    * Parse route data from Vietnamese Excel
    */
-  private parseRouteData(headers: string[], row: any[], index: number): RouteData | null {
+  private parseRouteData(headers: string[], row: string[], index: number): RouteData | null {
     try {
       return {
         routeId: `route_${index}`,
@@ -327,7 +341,7 @@ export class FileProcessor {
   /**
    * Parse cost data from Vietnamese Excel
    */
-  private parseCostData(headers: string[], row: any[], index: number): CostData | null {
+  private parseCostData(headers: string[], row: string[], index: number): CostData | null {
     try {
       return {
         category: this.extractValue(row, headers, ['loại', 'danh mục', 'category']) || 'general',
@@ -343,7 +357,7 @@ export class FileProcessor {
   /**
    * Parse performance data from Vietnamese Excel
    */
-  private parsePerformanceData(headers: string[], row: any[], index: number): PerformanceData | null {
+  private parsePerformanceData(headers: string[], row: string[], index: number): PerformanceData | null {
     try {
       const value = this.extractNumber(row, headers, ['giá trị', 'value', 'số']) || 0
       const target = this.extractNumber(row, headers, ['mục tiêu', 'target']) || 0
@@ -363,7 +377,7 @@ export class FileProcessor {
   /**
    * Helper methods for data extraction
    */
-  private extractValue(row: any[], headers: string[], keywords: string[]): string | null {
+  private extractValue(row: string[], headers: string[], keywords: string[]): string | null {
     for (const keyword of keywords) {
       const index = headers.findIndex(h => h.toLowerCase().includes(keyword.toLowerCase()))
       if (index !== -1 && row[index] !== undefined) {
@@ -373,7 +387,7 @@ export class FileProcessor {
     return null
   }
 
-  private extractNumber(row: any[], headers: string[], keywords: string[]): number | null {
+  private extractNumber(row: string[], headers: string[], keywords: string[]): number | null {
     const value = this.extractValue(row, headers, keywords)
     if (value === null) return null
     
@@ -381,7 +395,7 @@ export class FileProcessor {
     return isNaN(num) ? null : num
   }
 
-  private extractDate(row: any[], headers: string[]): string | null {
+  private extractDate(row: string[], headers: string[]): string | null {
     const dateKeywords = ['ngày', 'date', 'thời gian', 'time']
     const value = this.extractValue(row, headers, dateKeywords)
     if (!value) return null
@@ -394,7 +408,7 @@ export class FileProcessor {
     }
   }
 
-  private extractArray(row: any[], headers: string[], keywords: string[]): string[] {
+  private extractArray(row: string[], headers: string[], keywords: string[]): string[] {
     const value = this.extractValue(row, headers, keywords)
     if (!value) return []
     
@@ -410,7 +424,7 @@ export class FileProcessor {
   /**
    * Generate insights from processed Excel data
    */
-  private async generateExcelInsights(data: any): Promise<FileInsights> {
+  private async generateExcelInsights(data: LogisticsData): Promise<FileInsights> {
     const aiGenerator = new (await import('./ai-insights-generator')).AIInsightsGenerator()
     
     // Convert processed data to LogisticsData format
@@ -425,11 +439,13 @@ export class FileProcessor {
     // Aggregate data from all sheets
     Object.keys(data).forEach(sheetName => {
       const sheetData = data[sheetName] as LogisticsData
-      if (sheetData.shipments) logisticsData.shipments?.push(...sheetData.shipments)
-      if (sheetData.inventory) logisticsData.inventory?.push(...sheetData.inventory)
-      if (sheetData.routes) logisticsData.routes?.push(...sheetData.routes)
-      if (sheetData.costs) logisticsData.costs?.push(...sheetData.costs)
-      if (sheetData.performance) logisticsData.performance?.push(...sheetData.performance)
+      if (sheetData && typeof sheetData === 'object') {
+        if (sheetData.shipments) logisticsData.shipments?.push(...sheetData.shipments)
+        if (sheetData.inventory) logisticsData.inventory?.push(...sheetData.inventory)
+        if (sheetData.routes) logisticsData.routes?.push(...sheetData.routes)
+        if (sheetData.costs) logisticsData.costs?.push(...sheetData.costs)
+        if (sheetData.performance) logisticsData.performance?.push(...sheetData.performance)
+      }
     })
 
     // Generate comprehensive insights using AI
@@ -464,7 +480,7 @@ export class FileProcessor {
     return types
   }
 
-  private calculateSheetMetrics(data: LogisticsData): any {
+  private calculateSheetMetrics(data: LogisticsData): KeyMetrics {
     const metrics: any = {}
 
     if (data.shipments?.length) {
@@ -592,11 +608,11 @@ export class FileProcessor {
     })
 
     // Analyze metrics for recommendations
-    Object.values(insights.keyMetrics).forEach((metrics: any) => {
+    Object.values(insights.keyMetrics).forEach((metrics: KeyMetrics['overview'] & KeyMetrics['performance'] & KeyMetrics['costs'] & KeyMetrics['inventory'] & KeyMetrics['routes']) => {
       if (metrics.lowStockItems > 0) {
         recommendations.push(`Inventory alert: ${metrics.lowStockItems} items are below reorder level`)
       }
-      if (metrics.averageEfficiency < 70) {
+      if (metrics.avgEfficiency && metrics.avgEfficiency < 70) {
         recommendations.push('Route optimization: Average route efficiency is below optimal levels')
       }
     })
@@ -611,7 +627,7 @@ export class FileProcessor {
   /**
    * Process PDF files
    */
-  private async processPDFFile(file: File): Promise<any> {
+  private async processPDFFile(file: File): Promise<PdfProcessedData> {
     // PDF processing would be implemented here
     // For now, return basic structure
     return {
@@ -624,7 +640,7 @@ export class FileProcessor {
   /**
    * Process CSV files
    */
-  private async processCSVFile(file: File): Promise<any> {
+  private async processCSVFile(file: File): Promise<CsvProcessedData> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader()
       
@@ -646,20 +662,30 @@ export class FileProcessor {
     })
   }
 
-  private generatePDFInsights(data: any): FileInsights {
+  private generatePDFInsights(data: PdfProcessedData): FileInsights {
     return {
       summary: 'PDF file processed successfully',
-      keyMetrics: { pages: data.pages },
+      keyMetrics: { 
+        overview: { totalShipments: 0 },
+        performance: { deliveryRate: 0 },
+        costs: { avgCostPerKg: 0 },
+        risks: {}
+      },
       recommendations: ['PDF analysis capabilities will be enhanced in future updates'],
       dataStructure: [{ columns: ['text'], rowCount: 1, dataTypes: { text: 'string' } }],
       patterns: []
     }
   }
 
-  private generateCSVInsights(data: any): FileInsights {
+  private generateCSVInsights(data: CsvProcessedData): FileInsights {
     return {
       summary: `CSV file with ${data.headers.length} columns and ${data.rowCount} rows`,
-      keyMetrics: { columns: data.headers.length, rows: data.rowCount },
+      keyMetrics: { 
+        overview: { totalShipments: data.rowCount },
+        performance: { deliveryRate: 0 },
+        costs: { avgCostPerKg: 0 },
+        risks: {}
+      },
       recommendations: ['CSV data ready for analysis'],
       dataStructure: [{ 
         columns: data.headers, 
@@ -673,7 +699,12 @@ export class FileProcessor {
   private generateErrorInsights(error: Error): FileInsights {
     return {
       summary: `File processing failed: ${error.message}`,
-      keyMetrics: {},
+      keyMetrics: {
+        overview: { totalShipments: 0 },
+        performance: { deliveryRate: 0 },
+        costs: { avgCostPerKg: 0 },
+        risks: {}
+      },
       recommendations: ['Please check file format and try again'],
       dataStructure: [],
       patterns: []

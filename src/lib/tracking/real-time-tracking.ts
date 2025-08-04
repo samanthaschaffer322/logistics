@@ -73,6 +73,11 @@ export interface RouteProgress {
   }
 }
 
+export interface TrackingUpdateData {
+  event: string;
+  data: any;
+}
+
 export class RealTimeTrackingSystem {
   private trackingPoints: Map<string, TrackingPoint[]> = new Map()
   private geofences: Map<string, Geofence> = new Map()
@@ -164,7 +169,7 @@ export class RealTimeTrackingSystem {
       const newPoint = this.generateNextTrackingPoint(vehicleId, lastPoint)
       
       this.addTrackingPoint(newPoint)
-      this.notifySubscribers('location_update', { vehicleId, point: newPoint })
+      this.notifySubscribers({ event: 'location_update', data: { vehicleId, point: newPoint } })
     })
   }
 
@@ -407,7 +412,7 @@ export class RealTimeTrackingSystem {
       this.alerts.pop()
     }
     
-    this.notifySubscribers('alert', alert)
+    this.notifySubscribers({ event: 'alert', data: alert })
   }
 
   /**
@@ -439,7 +444,7 @@ export class RealTimeTrackingSystem {
   /**
    * Subscribe to real-time updates
    */
-  subscribe(id: string, callback: (data: any) => void) {
+  subscribe(id: string, callback: (data: TrackingUpdateData) => void) {
     this.subscribers.set(id, callback)
   }
 
@@ -453,9 +458,9 @@ export class RealTimeTrackingSystem {
   /**
    * Notify subscribers
    */
-  private notifySubscribers(event: string, data: any) {
+  private notifySubscribers(updateData: TrackingUpdateData) {
     this.subscribers.forEach(callback => {
-      callback({ event, data })
+      callback(updateData)
     })
   }
 
@@ -478,7 +483,7 @@ export class RealTimeTrackingSystem {
    */
   updateRouteProgress(progress: RouteProgress) {
     this.routeProgress.set(progress.tripId, progress)
-    this.notifySubscribers('route_progress', progress)
+    this.notifySubscribers({ event: 'route_progress', data: progress })
   }
 
   /**

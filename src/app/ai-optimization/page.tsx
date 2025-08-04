@@ -166,11 +166,11 @@ export default function AIOptimizationPage() {
             { id: 'overview', label: 'Overview', icon: BarChart3 },
             { id: 'forecast', label: 'Demand Forecast', icon: TrendingUp },
             { id: 'inventory', label: 'Inventory Optimization', icon: Target },
-            { id: 'routing', label: 'Route Optimization', icon: AlertTriangle }
+            { id: 'routing', icon: AlertTriangle }
           ].map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => setActiveTab(tab.id as 'overview' | 'forecast' | 'inventory' | 'routing')}
               className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center ${
                 activeTab === tab.id
                   ? 'border-blue-500 text-blue-600'

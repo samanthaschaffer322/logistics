@@ -39,6 +39,16 @@ export interface RouteWaypoint {
   notes: string
 }
 
+interface RouteResult {
+  path: string[];
+  totalDistance: number;
+  totalDuration: number;
+  totalCost: number;
+  fuelCost: number;
+  tollCost: number;
+  viaDepot?: string;
+}
+
 export class VietnamRouteOptimizer {
   private locations: Map<string, VietnamLocation>
   private routes: Map<string, VietnamRoute[]>
@@ -125,7 +135,7 @@ export class VietnamRouteOptimizer {
   /**
    * Find all possible routes between two points
    */
-  private findAllRoutes(from: string, to: string, request: RouteOptimizationRequest): any[] {
+  private findAllRoutes(from: string, to: string, request: RouteOptimizationRequest): RouteResult[] {
     const visited = new Set<string>()
     const routes: any[] = []
 
@@ -176,7 +186,7 @@ export class VietnamRouteOptimizer {
   /**
    * Find routes through intermediate depots
    */
-  private findRoutesWithDepots(from: string, to: string, request: RouteOptimizationRequest): any[] {
+  private findRoutesWithDepots(from: string, to: string, request: RouteOptimizationRequest): RouteResult[] {
     const depots = vietnamLocations.filter(loc => 
       loc.type === 'depot' && 
       loc.truckAccess40ft &&
@@ -209,7 +219,7 @@ export class VietnamRouteOptimizer {
   /**
    * Find direct route between two locations
    */
-  private findDirectRoute(from: string, to: string, request: RouteOptimizationRequest): any | null {
+  private findDirectRoute(from: string, to: string, request: RouteOptimizationRequest): { distance: number, duration: number, cost: number } | null {
     const route = vietnamRoutes.find(r => r.from === from && r.to === to)
     if (!route || !this.isRouteValid(route, request)) return null
 
@@ -249,7 +259,7 @@ export class VietnamRouteOptimizer {
    * Calculate route cost based on distance, fuel, tolls, and cargo weight
    */
   private calculateRouteCost(route: VietnamRoute, request: RouteOptimizationRequest): number {
-    let baseCost = route.fuelCost + route.tollCost
+    const baseCost = route.fuelCost + route.tollCost
 
     // Weight factor (heavier cargo = more fuel)
     const weightFactor = 1 + (request.cargoWeight / 30) * 0.2 // Max 20% increase for 30-ton cargo
@@ -264,7 +274,7 @@ export class VietnamRouteOptimizer {
   /**
    * Calculate route score based on priority
    */
-  private calculateRouteScore(route: any, request: RouteOptimizationRequest): number {
+  private calculateRouteScore(route: RouteResult, request: RouteOptimizationRequest): number {
     const normalizedDistance = route.totalDistance / 2000 // Normalize to 0-1 (max 2000km)
     const normalizedDuration = route.totalDuration / 1440 // Normalize to 0-1 (max 24 hours)
     const normalizedCost = route.totalCost / 5000000 // Normalize to 0-1 (max 5M VND)
@@ -285,7 +295,7 @@ export class VietnamRouteOptimizer {
   /**
    * Generate waypoints with timing and services
    */
-  private async generateWaypoints(route: any, request: RouteOptimizationRequest): Promise<RouteWaypoint[]> {
+  private async generateWaypoints(route: RouteResult, request: RouteOptimizationRequest): Promise<RouteWaypoint[]> {
     const waypoints: RouteWaypoint[] = []
     const departureTime = request.departureTime || new Date()
 
@@ -372,7 +382,7 @@ export class VietnamRouteOptimizer {
   /**
    * Calculate confidence score for route
    */
-  private calculateConfidence(route: any, request: RouteOptimizationRequest): number {
+  private calculateConfidence(route: RouteResult, request: RouteOptimizationRequest): number {
     let confidence = 0.8 // Base confidence
     
     // Reduce confidence for longer routes
@@ -391,7 +401,7 @@ export class VietnamRouteOptimizer {
   /**
    * Generate warnings for route
    */
-  private generateWarnings(route: any, request: RouteOptimizationRequest): string[] {
+  private generateWarnings(route: RouteResult, request: RouteOptimizationRequest): string[] {
     const warnings: string[] = []
     
     if (route.totalDistance > 1500) {
@@ -416,7 +426,7 @@ export class VietnamRouteOptimizer {
   /**
    * Generate AI recommendations
    */
-  private generateRecommendations(route: any, request: RouteOptimizationRequest): string[] {
+  private generateRecommendations(route: RouteResult, request: RouteOptimizationRequest): string[] {
     const recommendations: string[] = []
     
     if (request.priority === 'cost' && route.tollCost > route.fuelCost * 0.5) {

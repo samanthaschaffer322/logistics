@@ -18,14 +18,19 @@ import {
   Search
 } from 'lucide-react'
 import { useTranslation } from '@/lib/i18n/useTranslation'
-import { FleetManagementSystem, Vehicle, Driver } from '@/lib/fleet-management/fleet-system'
+import { FleetManagementSystem, Vehicle, Driver, VehicleDocument } from '@/lib/fleet-management/fleet-system'
 
 export default function FleetManagementPage() {
   const { t, locale } = useTranslation()
   const [fleetSystem] = useState(() => new FleetManagementSystem())
   const [vehicles, setVehicles] = useState<Vehicle[]>([])
   const [drivers, setDrivers] = useState<Driver[]>([])
-  const [fleetStats, setFleetStats] = useState<any>(null)
+  const [fleetStats, setFleetStats] = useState<{
+    vehicles: { total: number; available: number };
+    drivers: { total: number; available: number };
+    performance: { averageOnTime: number; totalTrips: number };
+    maintenance: { upcomingServices: number; criticalIssues: number };
+  } | null>(null)
   const [selectedTab, setSelectedTab] = useState<'vehicles' | 'drivers' | 'maintenance'>('vehicles')
   const [loading, setLoading] = useState(true)
 
@@ -215,7 +220,17 @@ export default function FleetManagementPage() {
 }
 
 // Vehicles Tab Component
-function VehiclesTab({ vehicles, locale, getStatusColor, getStatusIcon }: any) {
+function VehiclesTab({ 
+  vehicles, 
+  locale, 
+  getStatusColor, 
+  getStatusIcon 
+}: {
+  vehicles: Vehicle[];
+  locale: string;
+  getStatusColor: (status: string) => string;
+  getStatusIcon: (status: string) => React.JSX.Element;
+}) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -304,7 +319,17 @@ function VehiclesTab({ vehicles, locale, getStatusColor, getStatusIcon }: any) {
 }
 
 // Drivers Tab Component  
-function DriversTab({ drivers, locale, getStatusColor, getStatusIcon }: any) {
+function DriversTab({ 
+  drivers, 
+  locale, 
+  getStatusColor, 
+  getStatusIcon 
+}: {
+  drivers: Driver[];
+  locale: string;
+  getStatusColor: (status: string) => string;
+  getStatusIcon: (status: string) => React.JSX.Element;
+}) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -377,7 +402,15 @@ function DriversTab({ drivers, locale, getStatusColor, getStatusIcon }: any) {
 }
 
 // Maintenance Tab Component
-function MaintenanceTab({ vehicles, locale, fleetSystem }: any) {
+function MaintenanceTab({ 
+  vehicles, 
+  locale, 
+  fleetSystem 
+}: {
+  vehicles: Vehicle[];
+  locale: string;
+  fleetSystem: FleetManagementSystem;
+}) {
   const maintenanceVehicles = fleetSystem.getVehiclesNeedingMaintenance()
   const expiringDocs = fleetSystem.getExpiringDocuments()
 
@@ -426,7 +459,7 @@ function MaintenanceTab({ vehicles, locale, fleetSystem }: any) {
           <CardContent>
             {expiringDocs.length > 0 ? (
               <div className="space-y-3">
-                {expiringDocs.slice(0, 5).map((item, index) => (
+                {expiringDocs.slice(0, 5).map((item: { entity: Vehicle | Driver, document: VehicleDocument, type: 'vehicle' | 'driver' }, index) => (
                   <div key={index} className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
                     <div>
                       <p className="font-medium text-gray-900">

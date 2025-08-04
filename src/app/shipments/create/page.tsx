@@ -230,7 +230,7 @@ export default function CreateDocketPage() {
           shipment_id: data.id,
           status: 'pending',
           notes: 'Docket created',
-          updated_by: user.id,
+          updated_by: user.email,
         }])
 
       // Show success message and redirect

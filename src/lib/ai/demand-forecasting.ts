@@ -112,7 +112,7 @@ export function linearRegressionForecasting(
  */
 export function aiHybridForecasting(
   historicalData: HistoricalData[],
-  options: ForecastOptions = {}
+  options: ForecastOptions = { method: 'ai_hybrid' }
 ): ForecastResult[] {
   const {
     periods = 6,

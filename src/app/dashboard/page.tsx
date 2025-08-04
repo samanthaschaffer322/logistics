@@ -160,7 +160,7 @@ export default function DashboardPage() {
             Welcome back, {user?.name || 'User'}!
           </h1>
           <p className="text-gray-600 mt-1">
-            Here's what's happening with your logistics operations today.
+            Here&apos;s what&apos;s happening with your logistics operations today.
           </p>
         </div>
         <div className="text-right">

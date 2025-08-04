@@ -363,7 +363,16 @@ export class SupplyChainAI {
     return recommendations.length > 0 ? recommendations : this.getMockRecommendations({} as SupplyChainContext)
   }
 
-  private parseRiskAnalysis(content: string): any {
+  private parseRiskAnalysis(content: string): {
+    riskLevel: 'low' | 'medium' | 'high' | 'critical';
+    risks: Array<{
+      category: string;
+      description: string;
+      probability: number;
+      impact: number;
+      mitigation: string[];
+    }>;
+  } {
     // Simplified risk analysis parsing
     return {
       riskLevel: 'medium' as const,
@@ -379,7 +388,7 @@ export class SupplyChainAI {
     }
   }
 
-  private parseForecast(content: string, periods: number): any[] {
+  private parseForecast(content: string, periods: number): Array<{ period: string; forecast: number; confidence: number }> {
     // Simplified forecast parsing
     const forecasts = []
     const baseDate = new Date()
@@ -459,7 +468,16 @@ export class SupplyChainAI {
     return responses[Math.floor(Math.random() * responses.length)]
   }
 
-  private getMockRiskAnalysis(context: SupplyChainContext): any {
+  private getMockRiskAnalysis(context: SupplyChainContext): {
+    riskLevel: 'low' | 'medium' | 'high' | 'critical';
+    risks: Array<{
+      category: string;
+      description: string;
+      probability: number;
+      impact: number;
+      mitigation: string[];
+    }>;
+  } {
     return {
       riskLevel: 'medium' as const,
       risks: [
@@ -488,7 +506,7 @@ export class SupplyChainAI {
     }
   }
 
-  private getMockForecast(historicalData: any[], periods: number): any[] {
+  private getMockForecast(historicalData: Array<{ date: string; demand: number }>, periods: number): Array<{ period: string; forecast: number; confidence: number }> {
     const forecasts = []
     const baseDate = new Date()
     const lastDemand = historicalData[historicalData.length - 1]?.demand || 100

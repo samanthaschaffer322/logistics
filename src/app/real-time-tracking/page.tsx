@@ -31,7 +31,13 @@ export default function RealTimeTrackingPage() {
   const [trackingSystem] = useState(() => new RealTimeTrackingSystem())
   const [activeVehicles, setActiveVehicles] = useState<Array<{ vehicleId: string, lastPoint: TrackingPoint }>>([])
   const [alerts, setAlerts] = useState<TrackingAlert[]>([])
-  const [trackingStats, setTrackingStats] = useState<any>(null)
+  const [trackingStats, setTrackingStats] = useState<{
+    activeVehicles: number;
+    unacknowledgedAlerts: number;
+    criticalAlerts: number;
+    averageSpeed: number;
+    averageFuelLevel: number;
+  } | null>(null)
   const [selectedVehicle, setSelectedVehicle] = useState<string | null>(null)
   const [isMapLoaded, setIsMapLoaded] = useState(false)
 
@@ -220,20 +226,19 @@ export default function RealTimeTrackingPage() {
             <CardContent className="h-full p-0">
               <div className="h-full rounded-lg overflow-hidden">
                 <MapContainer
-                  center={[16.0544, 108.2022]}
+                  center={[16.0544, 108.2022] as [number, number]}
                   zoom={6}
                   style={{ height: '100%', width: '100%' }}
                 >
                   <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                   />
                   
                   {/* Vehicle Markers */}
                   {activeVehicles.map(({ vehicleId, lastPoint }) => (
                     <Marker
                       key={vehicleId}
-                      position={[lastPoint.location.lat, lastPoint.location.lng]}
+                      position={[lastPoint.location.lat, lastPoint.location.lng] as [number, number]}
                       eventHandlers={{
                         click: () => setSelectedVehicle(vehicleId)
                       }}
@@ -266,7 +271,7 @@ export default function RealTimeTrackingPage() {
                     geofence.type === 'circular' && geofence.center && geofence.radius && (
                       <Circle
                         key={geofence.id}
-                        center={[geofence.center.lat, geofence.center.lng]}
+                        center={[geofence.center.lat, geofence.center.lng] as [number, number]}
                         radius={geofence.radius}
                         pathOptions={{
                           color: 'blue',

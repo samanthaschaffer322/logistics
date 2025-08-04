@@ -36,9 +36,9 @@ export interface Vehicle {
     issues: MaintenanceIssue[]
   }
   documents: {
-    registration: Document
-    insurance: Document
-    inspection: Document
+    registration: VehicleDocument
+    insurance: VehicleDocument
+    inspection: VehicleDocument
   }
   performance: {
     totalDistance: number
@@ -75,13 +75,13 @@ export interface Driver {
     punctualityScore: number
   }
   documents: {
-    license: Document
-    medicalCert: Document
-    trainingCert: Document
+    license: VehicleDocument
+    medicalCert: VehicleDocument
+    trainingCert: VehicleDocument
   }
 }
 
-export interface Document {
+export interface VehicleDocument {
   id: string
   type: string
   number: string
@@ -609,8 +609,8 @@ export class FleetManagementSystem {
   /**
    * Get expiring documents
    */
-  getExpiringDocuments(): Array<{ entity: Vehicle | Driver, document: Document, type: 'vehicle' | 'driver' }> {
-    const expiringDocs: Array<{ entity: Vehicle | Driver, document: Document, type: 'vehicle' | 'driver' }> = []
+  getExpiringDocuments(): Array<{ entity: Vehicle | Driver, document: VehicleDocument, type: 'vehicle' | 'driver' }> {
+    const expiringDocs: Array<{ entity: Vehicle | Driver, document: VehicleDocument, type: 'vehicle' | 'driver' }> = []
     const thirtyDaysFromNow = new Date()
     thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30)
 

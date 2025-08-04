@@ -74,7 +74,12 @@ export default function FileLearningPage() {
         processedData: {},
         insights: {
           summary: 'Processing...',
-          keyMetrics: {},
+          keyMetrics: {
+            overview: { totalShipments: 0 },
+            performance: { deliveryRate: 0 },
+            costs: { avgCostPerKg: 0 },
+            risks: {}
+          },
           recommendations: [],
           dataStructure: [],
           patterns: []

@@ -5,6 +5,76 @@
 
 import { LogisticsData, FileInsights, Pattern } from './file-processor'
 
+interface DataStructureAnalysis {
+  sheetName: string;
+  columns: string[];
+  rowCount: number;
+  dataTypes: { [key: string]: string };
+  completeness: number;
+  quality: string;
+}
+
+export interface KeyMetrics {
+  overview: {
+    totalShipments?: number;
+    totalWeight?: number;
+    totalValue?: number;
+    avgDeliveryTime?: number;
+  };
+  performance: {
+    onTimeDeliveries?: number;
+    pendingShipments?: number;
+    delayedShipments?: number;
+    deliveryRate?: number;
+    avgDeliveryTime?: number;
+  };
+  costs: {
+    avgCostPerKg?: number;
+    avgCostPerShipment?: number;
+    costEfficiency?: number;
+  };
+  inventory?: {
+    totalItems: number;
+    totalValue: number;
+    lowStockItems: number;
+    stockoutRisk: number;
+    avgStockLevel: number;
+  };
+  routes?: {
+    totalRoutes: number;
+    avgDistance: number;
+    avgEfficiency: number;
+    totalRouteCost: number;
+    costPerKm: number;
+  };
+  risks: {};
+}
+
+interface CostTrend {
+  direction: 'stable' | 'increasing' | 'decreasing';
+  significance: number;
+  change: number;
+}
+
+interface DeliveryPattern {
+  hasPattern: boolean;
+  variation?: number;
+  average?: number;
+  standardDeviation?: number;
+}
+
+interface RouteEfficiency {
+  correlation: number;
+  strength: 'strong' | 'moderate' | 'weak';
+}
+
+interface StockoutRisk {
+  highRiskItems: number;
+  criticalItems: number;
+  totalItems: number;
+  riskPercentage: number;
+}
+
 export class AIInsightsGenerator {
   private openaiApiKey: string
 
@@ -18,7 +88,7 @@ export class AIInsightsGenerator {
   async generateInsights(data: LogisticsData, fileName: string): Promise<FileInsights> {
     const insights: FileInsights = {
       summary: '',
-      keyMetrics: {},
+      keyMetrics: {} as KeyMetrics,
       recommendations: [],
       dataStructure: [],
       patterns: []
@@ -45,7 +115,7 @@ export class AIInsightsGenerator {
   /**
    * Analyze data structure and quality
    */
-  private analyzeDataStructure(data: LogisticsData): any[] {
+  private analyzeDataStructure(data: LogisticsData): DataStructureAnalysis[] {
     const structures = []
 
     if (data.shipments?.length) {
@@ -110,7 +180,7 @@ export class AIInsightsGenerator {
   /**
    * Calculate comprehensive key metrics
    */
-  private calculateKeyMetrics(data: LogisticsData): any {
+  private calculateKeyMetrics(data: LogisticsData): KeyMetrics {
     const metrics: any = {
       overview: {},
       performance: {},
@@ -271,26 +341,26 @@ export class AIInsightsGenerator {
   /**
    * Generate actionable AI recommendations
    */
-  private async generateRecommendations(data: LogisticsData, metrics: any, patterns: Pattern[]): Promise<string[]> {
+  private async generateRecommendations(data: LogisticsData, metrics: KeyMetrics, patterns: Pattern[]): Promise<string[]> {
     const recommendations: string[] = []
 
     // Cost optimization recommendations
-    if (metrics.costs?.avgCostPerKg > 50) {
+    if (metrics.costs?.avgCostPerKg && metrics.costs.avgCostPerKg > 50) {
       recommendations.push('🔍 Cost Analysis: Average cost per kg is high. Consider negotiating better rates with carriers or optimizing packaging.')
     }
 
     // Delivery performance recommendations
-    if (metrics.performance?.deliveryRate < 90) {
+    if (metrics.performance?.deliveryRate && metrics.performance.deliveryRate < 90) {
       recommendations.push('⏰ Delivery Optimization: Delivery rate is below 90%. Implement route optimization and carrier performance monitoring.')
     }
 
     // Inventory recommendations
-    if (metrics.inventory?.stockoutRisk > 20) {
+    if (metrics.inventory?.stockoutRisk && metrics.inventory.stockoutRisk > 20) {
       recommendations.push('📦 Inventory Alert: High stockout risk detected. Review reorder levels and implement automated replenishment.')
     }
 
     // Route efficiency recommendations
-    if (metrics.routes?.avgEfficiency < 75) {
+    if (metrics.routes?.avgEfficiency && metrics.routes.avgEfficiency < 75) {
       recommendations.push('🚛 Route Optimization: Average route efficiency is low. Consider using AI-powered route planning to reduce costs.')
     }
 
@@ -324,12 +394,12 @@ export class AIInsightsGenerator {
     }
 
     // Procurement recommendations
-    if (metrics.costs?.costEfficiency < 0.7) {
+    if (metrics.costs?.costEfficiency && metrics.costs.costEfficiency < 0.7) {
       recommendations.push('💰 Procurement Strategy: Low cost efficiency detected. Consider bulk purchasing, supplier consolidation, and long-term contracts.')
     }
 
     // Distribution recommendations
-    if (metrics.performance?.avgDeliveryTime > 5) {
+    if (metrics.performance?.avgDeliveryTime && metrics.performance.avgDeliveryTime > 5) {
       recommendations.push('🚚 Distribution Enhancement: Average delivery time is high. Implement hub-and-spoke distribution model and cross-docking.')
     }
 
@@ -339,7 +409,7 @@ export class AIInsightsGenerator {
   // Helper methods for analysis
   private calculateCompleteness(data: any[]): number {
     if (!data.length) return 0
-    const totalFields = Object.keys(data[0]).length * data.length
+    const totalFields = data[0] ? Object.keys(data[0]).length * data.length : 0
     const filledFields = data.reduce((sum, item) => {
       return sum + Object.values(item).filter(value => value !== null && value !== undefined && value !== '').length
     }, 0)
@@ -354,7 +424,7 @@ export class AIInsightsGenerator {
     return 'Poor'
   }
 
-  private calculateCostEfficiency(shipments: any[]): number {
+  private calculateCostEfficiency(shipments: Array<{ weight?: number; cost?: number }>): number {
     // Calculate cost efficiency based on weight/distance ratio
     const efficiencyScores = shipments.map(s => {
       if (s.weight && s.cost) {
@@ -365,7 +435,7 @@ export class AIInsightsGenerator {
     return efficiencyScores.reduce((sum, score) => sum + score, 0) / efficiencyScores.length
   }
 
-  private analyzeCostTrend(costs: number[]): any {
+  private analyzeCostTrend(costs: number[]): CostTrend {
     if (costs.length < 3) return { direction: 'stable', significance: 0, change: 0 }
     
     const firstHalf = costs.slice(0, Math.floor(costs.length / 2))
@@ -384,7 +454,7 @@ export class AIInsightsGenerator {
     }
   }
 
-  private analyzeDeliveryPatterns(shipments: any[]): any {
+  private analyzeDeliveryPatterns(shipments: Array<{ deliveryTime: number }>): DeliveryPattern {
     const deliveryTimes = shipments.map(s => s.deliveryTime).filter(t => t > 0)
     if (deliveryTimes.length < 5) return { hasPattern: false }
     
@@ -401,10 +471,13 @@ export class AIInsightsGenerator {
     }
   }
 
-  private analyzeRouteEfficiency(shipments: any[]): any {
+  private analyzeRouteEfficiency(shipments: Array<{ cost: number; weight: number }>): RouteEfficiency {
     // Simplified correlation analysis
     const validShipments = shipments.filter(s => s.cost > 0 && s.weight > 0)
-    if (validShipments.length < 5) return { correlation: 0 }
+    if (validShipments.length < 5) return { 
+      correlation: 0,
+      strength: 'weak'
+    }
     
     // Calculate correlation between cost and weight (proxy for distance)
     const costs = validShipments.map(s => s.cost)
@@ -418,7 +491,7 @@ export class AIInsightsGenerator {
     }
   }
 
-  private analyzeStockoutRisk(inventory: any[]): any {
+  private analyzeStockoutRisk(inventory: Array<{ quantity: number; reorderLevel: number }>): StockoutRisk {
     const highRiskItems = inventory.filter(item => item.quantity <= item.reorderLevel * 1.2).length
     const criticalItems = inventory.filter(item => item.quantity <= item.reorderLevel).length
     

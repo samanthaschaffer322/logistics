@@ -3,8 +3,11 @@ import { NextRequest, NextResponse } from 'next/server'
 const OPENAI_API_KEY = 'sk-Is6s1p1BqoYf21xBywtG2w'
 
 export async function POST(request: NextRequest) {
+  let locale = 'en' // Default locale
+  
   try {
-    const { message, history, locale } = await request.json()
+    const { message, history, locale: requestLocale } = await request.json()
+    locale = requestLocale || 'en'
 
     if (!message) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 })
@@ -34,7 +37,7 @@ Provide professional, practical, and actionable advice. Use specific data and ex
     // Prepare conversation history
     const messages = [
       { role: 'system', content: systemPrompt },
-      ...history.slice(-5).map((msg: any) => ({
+      ...history.slice(-5).map((msg: { role: 'system' | 'user' | 'assistant', content: string }) => ({
         role: msg.role,
         content: msg.content
       })),

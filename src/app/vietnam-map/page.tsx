@@ -237,7 +237,7 @@ export default function VietnamMapPage() {
                 </label>
                 <select
                   value={routeForm.priority}
-                  onChange={(e) => setRouteForm(prev => ({ ...prev, priority: e.target.value as any }))}
+                  onChange={(e) => setRouteForm(prev => ({ ...prev, priority: e.target.value as 'cost' | 'time' | 'fuel' | 'balanced' }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="balanced">{locale === 'vi' ? 'Cân bằng' : 'Balanced'}</option>
@@ -394,20 +394,19 @@ export default function VietnamMapPage() {
             <CardContent className="h-full p-0">
               <div className="h-full rounded-lg overflow-hidden">
                 <MapContainer
-                  center={[16.0544, 108.2022]} // Center of Vietnam
+                  center={[16.0544, 108.2022] as [number, number]} // Center of Vietnam
                   zoom={6}
                   style={{ height: '100%', width: '100%' }}
                 >
                   <TileLayer
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                   />
                   
                   {/* Location Markers */}
                   {vietnamLocations.map(location => (
                     <Marker
                       key={location.id}
-                      position={[location.lat, location.lng]}
+                      position={[location.lat, location.lng] as [number, number]}
                       eventHandlers={{
                         click: () => setSelectedLocation(location)
                       }}
@@ -447,10 +446,12 @@ export default function VietnamMapPage() {
                   {/* Route Visualization */}
                   {optimizedRoute && optimizedRoute.waypoints.length > 1 && (
                     <Polyline
-                      positions={optimizedRoute.waypoints.map(wp => [wp.location.lat, wp.location.lng])}
-                      color="blue"
-                      weight={4}
-                      opacity={0.7}
+                      positions={optimizedRoute.waypoints.map(wp => [wp.location.lat, wp.location.lng]) as [number, number][]}
+                      pathOptions={{
+                        color: "blue",
+                        weight: 4,
+                        opacity: 0.7
+                      }}
                     />
                   )}
                 </MapContainer>
