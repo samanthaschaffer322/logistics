@@ -22,6 +22,8 @@
   },
   "navigation": {
     "dashboard": "Dashboard",
+    "fleetManagement": "Fleet Management",
+    "realTimeTracking": "Real-Time Tracking",
     "shipments": "Shipments",
     "warehouse": "Warehouse",
     "transportation": "Transportation",

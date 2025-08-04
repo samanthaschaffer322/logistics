@@ -22,6 +22,8 @@
   },
   "navigation": {
     "dashboard": "Bảng điều khiển",
+    "fleetManagement": "Quản lý Đội xe",
+    "realTimeTracking": "Theo dõi Thời gian Thực",
     "shipments": "Vận chuyển",
     "warehouse": "Kho hàng",
     "transportation": "Giao thông",

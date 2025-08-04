@@ -31,6 +31,18 @@ const navigationItems = [
     translationKey: 'navigation.dashboard'
   },
   { 
+    key: 'fleet-management', 
+    href: '/fleet-management', 
+    icon: Truck,
+    translationKey: 'navigation.fleetManagement'
+  },
+  { 
+    key: 'real-time-tracking', 
+    href: '/real-time-tracking', 
+    icon: MapPin,
+    translationKey: 'navigation.realTimeTracking'
+  },
+  { 
     key: 'shipments', 
     href: '/shipments', 
     icon: Send,
