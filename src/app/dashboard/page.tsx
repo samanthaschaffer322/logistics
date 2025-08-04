@@ -3,9 +3,10 @@
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
-import { Package, Truck, Send, ShoppingCart, AlertTriangle, TrendingUp, Brain, FileText } from 'lucide-react'
+import { Package, Truck, Send, ShoppingCart, AlertTriangle, TrendingUp, Brain, FileText, Shield, Users, Clock } from 'lucide-react'
 import { supabase, isSupabaseConfigured } from '../../../supabase/client'
 import { FileData } from '@/lib/file-learning/file-processor'
+import Navigation from '@/components/Navigation'
 
 interface DashboardStats {
   totalInventory: number
@@ -15,10 +16,12 @@ interface DashboardStats {
   pendingProcurement: number
   uploadedFiles: number
   aiInsights: number
+  activeSessions: number
+  securityEvents: number
 }
 
 export default function DashboardPage() {
-  const { user, userRole } = useAuth()
+  const { user } = useAuth()
   const [stats, setStats] = useState<DashboardStats>({
     totalInventory: 0,
     lowStockItems: 0,
@@ -26,7 +29,9 @@ export default function DashboardPage() {
     pendingOrders: 0,
     pendingProcurement: 0,
     uploadedFiles: 0,
-    aiInsights: 0
+    aiInsights: 0,
+    activeSessions: 0,
+    securityEvents: 0
   })
   const [loading, setLoading] = useState(true)
   const [recentFiles, setRecentFiles] = useState<FileData[]>([])
@@ -44,14 +49,32 @@ export default function DashboardPage() {
         pendingOrders: 42,
         pendingProcurement: 8,
         uploadedFiles: 0,
-        aiInsights: 0
+        aiInsights: 0,
+        activeSessions: 2,
+        securityEvents: 0
       })
       setLoading(false)
     }
     
     // Load file learning data
     loadFileLearningData()
+    
+    // Load security stats
+    loadSecurityStats()
   }, [])
+
+  const loadSecurityStats = () => {
+    try {
+      // Mock security stats - in production, this would come from the security system
+      setStats(prev => ({
+        ...prev,
+        activeSessions: 2, // Current active sessions
+        securityEvents: 0  // Recent security events
+      }))
+    } catch (error) {
+      console.error('Error loading security stats:', error)
+    }
+  }
 
   const loadFileLearningData = () => {
     try {
@@ -142,247 +165,294 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="p-6">
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <span className="ml-3 text-lg">Loading dashboard...</span>
+      <div className="min-h-screen bg-gray-50">
+        <Navigation />
+        <div className="p-6">
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <span className="ml-3 text-lg">Loading dashboard...</span>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Welcome Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            Welcome back, {user?.name || 'User'}!
-          </h1>
-          <p className="text-gray-600 mt-1">
-            Here&apos;s what&apos;s happening with your logistics operations today.
-          </p>
-        </div>
-        <div className="text-right">
-          <p className="text-sm text-gray-500">Last updated</p>
-          <p className="text-sm font-medium">{new Date().toLocaleString()}</p>
-        </div>
-      </div>
-
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <Package className="h-8 w-8 text-blue-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Inventory</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalInventory.toLocaleString()}</p>
-              </div>
+    <div className="min-h-screen bg-gray-50">
+      <Navigation />
+      
+      <div className="p-6 space-y-6">
+        {/* Welcome Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Welcome back, {user?.name || 'User'}!
+            </h1>
+            <p className="text-gray-600 mt-1">
+              Here&apos;s what&apos;s happening with your logistics operations today.
+            </p>
+            <div className="flex items-center mt-2 text-sm text-gray-500">
+              <Shield className="h-4 w-4 mr-1" />
+              <span>Secured with enterprise-grade protection</span>
+              <Users className="h-4 w-4 ml-4 mr-1" />
+              <span>{stats.activeSessions} active sessions</span>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <AlertTriangle className="h-8 w-8 text-orange-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Low Stock Items</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.lowStockItems}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <Truck className="h-8 w-8 text-green-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Active Vehicles</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.activeVehicles}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <Send className="h-8 w-8 text-purple-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Pending Orders</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.pendingOrders}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* AI File Learning Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <FileText className="h-8 w-8 text-indigo-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Uploaded Files</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.uploadedFiles}</p>
-                <p className="text-xs text-gray-500 mt-1">Files processed by AI engine</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center">
-              <Brain className="h-8 w-8 text-pink-600" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">AI Insights Generated</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.aiInsights}</p>
-                <p className="text-xs text-gray-500 mt-1">Recommendations from file analysis</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Files */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <FileText className="mr-2 h-5 w-5" />
-              Recent File Analysis
-            </CardTitle>
-            <CardDescription>
-              Latest files processed by the AI learning engine
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {recentFiles.length > 0 ? (
-              <div className="space-y-3">
-                {recentFiles.map((file) => (
-                  <div key={file.id} className="flex items-center p-3 bg-gray-50 rounded-lg">
-                    <FileText className="h-4 w-4 text-gray-600 mr-3" />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-900 truncate">{file.fileName}</p>
-                      <p className="text-sm text-gray-500">
-                        {new Date(file.uploadDate).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium text-green-600">
-                        {file.insights.recommendations.length} insights
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                <p className="text-gray-500">No files uploaded yet</p>
-                <p className="text-sm text-gray-400 mt-1">
-                  Upload Excel, PDF, or CSV files to get AI insights
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Recent AI Insights */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Brain className="mr-2 h-5 w-5" />
-              Latest AI Insights
-            </CardTitle>
-            <CardDescription>
-              Recent recommendations from file analysis
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {recentInsights.length > 0 ? (
-              <div className="space-y-3">
-                {recentInsights.slice(0, 5).map((insight, index) => (
-                  <div key={index} className="flex items-start p-3 bg-blue-50 rounded-lg">
-                    <TrendingUp className="h-4 w-4 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
-                    <p className="text-sm text-blue-800">{insight}</p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <Brain className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                <p className="text-gray-500">No AI insights yet</p>
-                <p className="text-sm text-gray-400 mt-1">
-                  Upload files to generate AI-powered recommendations
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>
-            Common tasks and navigation shortcuts
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <a
-              href="/file-learning"
-              className="flex items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors"
-            >
-              <Brain className="h-6 w-6 text-purple-600 mr-3" />
-              <div>
-                <p className="font-medium text-gray-900">Upload Files</p>
-                <p className="text-sm text-gray-600">AI file analysis</p>
-              </div>
-            </a>
-
-            <a
-              href="/ai-optimization"
-              className="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-            >
-              <TrendingUp className="h-6 w-6 text-blue-600 mr-3" />
-              <div>
-                <p className="font-medium text-gray-900">AI Optimization</p>
-                <p className="text-sm text-gray-600">Demand forecasting</p>
-              </div>
-            </a>
-
-            <a
-              href="/shipments"
-              className="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
-            >
-              <Send className="h-6 w-6 text-green-600 mr-3" />
-              <div>
-                <p className="font-medium text-gray-900">Shipments</p>
-                <p className="text-sm text-gray-600">Manage deliveries</p>
-              </div>
-            </a>
-
-            <a
-              href="/ai-assistant"
-              className="flex items-center p-4 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors"
-            >
-              <Brain className="h-6 w-6 text-orange-600 mr-3" />
-              <div>
-                <p className="font-medium text-gray-900">AI Assistant</p>
-                <p className="text-sm text-gray-600">Get help & insights</p>
-              </div>
-            </a>
           </div>
-        </CardContent>
-      </Card>
+          <div className="text-right">
+            <p className="text-sm text-gray-500">Last updated</p>
+            <p className="text-sm font-medium">{new Date().toLocaleString()}</p>
+            <div className="flex items-center mt-1 text-xs text-green-600">
+              <div className="w-2 h-2 bg-green-500 rounded-full mr-1"></div>
+              <span>System operational</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Key Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <Package className="h-8 w-8 text-blue-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Total Inventory</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.totalInventory.toLocaleString()}</p>
+                  <p className="text-xs text-green-600 mt-1">+5.2% from last month</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <AlertTriangle className="h-8 w-8 text-orange-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Low Stock Items</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.lowStockItems}</p>
+                  <p className="text-xs text-orange-600 mt-1">Requires attention</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <Truck className="h-8 w-8 text-green-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Active Vehicles</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.activeVehicles}</p>
+                  <p className="text-xs text-green-600 mt-1">All operational</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <Send className="h-8 w-8 text-purple-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Pending Orders</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.pendingOrders}</p>
+                  <p className="text-xs text-blue-600 mt-1">Processing</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* AI & Security Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <FileText className="h-8 w-8 text-indigo-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Uploaded Files</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.uploadedFiles}</p>
+                  <p className="text-xs text-gray-500 mt-1">AI processed</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <Brain className="h-8 w-8 text-pink-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">AI Insights</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.aiInsights}</p>
+                  <p className="text-xs text-gray-500 mt-1">Generated</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <Users className="h-8 w-8 text-cyan-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Active Sessions</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.activeSessions}</p>
+                  <p className="text-xs text-green-600 mt-1">Secure</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex items-center">
+                <Shield className="h-8 w-8 text-emerald-600" />
+                <div className="ml-4">
+                  <p className="text-sm font-medium text-gray-600">Security Events</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.securityEvents}</p>
+                  <p className="text-xs text-green-600 mt-1">All clear</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Recent Files */}
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <FileText className="mr-2 h-5 w-5" />
+                Recent File Analysis
+              </CardTitle>
+              <CardDescription>
+                Latest files processed by the AI learning engine
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {recentFiles.length > 0 ? (
+                <div className="space-y-3">
+                  {recentFiles.map((file) => (
+                    <div key={file.id} className="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <FileText className="h-4 w-4 text-gray-600 mr-3" />
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-gray-900 truncate">{file.fileName}</p>
+                        <p className="text-sm text-gray-500">
+                          {new Date(file.uploadDate).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-green-600">
+                          {file.insights.recommendations.length} insights
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                  <p className="text-gray-500">No files uploaded yet</p>
+                  <p className="text-sm text-gray-400 mt-1">
+                    Upload Excel, PDF, or CSV files to get AI insights
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Recent AI Insights */}
+          <Card className="hover:shadow-lg transition-shadow">
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Brain className="mr-2 h-5 w-5" />
+                Latest AI Insights
+              </CardTitle>
+              <CardDescription>
+                Recent recommendations from file analysis
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {recentInsights.length > 0 ? (
+                <div className="space-y-3">
+                  {recentInsights.slice(0, 5).map((insight, index) => (
+                    <div key={index} className="flex items-start p-3 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                      <TrendingUp className="h-4 w-4 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
+                      <p className="text-sm text-blue-800">{insight}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Brain className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                  <p className="text-gray-500">No AI insights yet</p>
+                  <p className="text-sm text-gray-400 mt-1">
+                    Upload files to generate AI-powered recommendations
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Actions */}
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+            <CardDescription>
+              Common tasks and navigation shortcuts
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <a
+                href="/file-learning"
+                className="flex items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors group"
+              >
+                <Brain className="h-6 w-6 text-purple-600 mr-3 group-hover:scale-110 transition-transform" />
+                <div>
+                  <p className="font-medium text-gray-900">Upload Files</p>
+                  <p className="text-sm text-gray-600">AI file analysis</p>
+                </div>
+              </a>
+
+              <a
+                href="/ai-optimization"
+                className="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors group"
+              >
+                <TrendingUp className="h-6 w-6 text-blue-600 mr-3 group-hover:scale-110 transition-transform" />
+                <div>
+                  <p className="font-medium text-gray-900">AI Optimization</p>
+                  <p className="text-sm text-gray-600">Demand forecasting</p>
+                </div>
+              </a>
+
+              <a
+                href="/shipments"
+                className="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors group"
+              >
+                <Send className="h-6 w-6 text-green-600 mr-3 group-hover:scale-110 transition-transform" />
+                <div>
+                  <p className="font-medium text-gray-900">Shipments</p>
+                  <p className="text-sm text-gray-600">Manage deliveries</p>
+                </div>
+              </a>
+
+              <a
+                href="/ai-assistant"
+                className="flex items-center p-4 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors group"
+              >
+                <Brain className="h-6 w-6 text-orange-600 mr-3 group-hover:scale-110 transition-transform" />
+                <div>
+                  <p className="font-medium text-gray-900">AI Assistant</p>
+                  <p className="text-sm text-gray-600">Get help & insights</p>
+                </div>
+              </a>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

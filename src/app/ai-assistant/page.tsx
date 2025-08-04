@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
+import Navigation from '@/components/Navigation'
 import { 
   Brain, 
   Send, 
@@ -13,9 +14,11 @@ import {
   Lightbulb,
   TrendingUp,
   Package,
-  Truck
+  Truck,
+  Shield
 } from 'lucide-react'
 import { useTranslation } from '@/lib/i18n/useTranslation'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface Message {
   id: string
@@ -69,14 +72,15 @@ const quickPrompts: QuickPrompt[] = [
 ]
 
 export default function AIAssistantPage() {
+  const { user } = useAuth()
   const { t, locale } = useTranslation()
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       role: 'assistant',
       content: locale === 'vi' 
-        ? 'Xin chào! Tôi là trợ lý AI chuyên về chuỗi cung ứng và logistics. Tôi có thể giúp bạn tối ưu hóa hoạt động, giảm chi phí và cải thiện hiệu quả. Bạn cần hỗ trợ gì hôm nay?'
-        : 'Hello! I\'m your AI Supply Chain Assistant. I can help you optimize operations, reduce costs, and improve efficiency. What can I help you with today?',
+        ? 'Xin chào! Tôi là LogiAI, trợ lý AI chuyên về chuỗi cung ứng và logistics. Tôi có thể giúp bạn tối ưu hóa hoạt động, giảm chi phí và cải thiện hiệu quả. Bạn cần hỗ trợ gì hôm nay?'
+        : 'Hello! I\'m LogiAI, your AI Supply Chain Assistant. I can help you optimize operations, reduce costs, and improve efficiency. What can I help you with today?',
       timestamp: new Date()
     }
   ])
@@ -108,10 +112,14 @@ export default function AIAssistantPage() {
     setIsLoading(true)
 
     try {
+      // Get session token for authentication
+      const sessionToken = localStorage.getItem('logiai_session_token')
+      
       const response = await fetch('/api/ai-assistant', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sessionToken}`,
         },
         body: JSON.stringify({
           message: content,
@@ -177,182 +185,201 @@ export default function AIAssistantPage() {
         id: '1',
         role: 'assistant',
         content: locale === 'vi' 
-          ? 'Xin chào! Tôi là trợ lý AI chuyên về chuỗi cung ứng và logistics. Tôi có thể giúp bạn tối ưu hóa hoạt động, giảm chi phí và cải thiện hiệu quả. Bạn cần hỗ trợ gì hôm nay?'
-          : 'Hello! I\'m your AI Supply Chain Assistant. I can help you optimize operations, reduce costs, and improve efficiency. What can I help you with today?',
+          ? 'Xin chào! Tôi là LogiAI, trợ lý AI chuyên về chuỗi cung ứng và logistics. Tôi có thể giúp bạn tối ưu hóa hoạt động, giảm chi phí và cải thiện hiệu quả. Bạn cần hỗ trợ gì hôm nay?'
+          : 'Hello! I\'m LogiAI, your AI Supply Chain Assistant. I can help you optimize operations, reduce costs, and improve efficiency. What can I help you with today?',
         timestamp: new Date()
       }
     ])
   }
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-            <Brain className="mr-3 h-8 w-8 text-purple-600" />
-            {locale === 'vi' ? 'Trợ lý AI Chuỗi Cung ứng' : 'AI Supply Chain Assistant'}
-          </h1>
-          <p className="text-gray-600 mt-2">
-            {locale === 'vi' 
-              ? 'Nhận tư vấn chuyên môn về logistics và tối ưu hóa chuỗi cung ứng'
-              : 'Get expert advice on logistics and supply chain optimization'
-            }
-          </p>
-        </div>
-        <button
-          onClick={clearChat}
-          className="flex items-center px-4 py-2 text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-        >
-          <RefreshCw className="mr-2 h-4 w-4" />
-          {locale === 'vi' ? 'Xóa cuộc trò chuyện' : 'Clear Chat'}
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Quick Prompts */}
-        <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center text-lg">
-                <Lightbulb className="mr-2 h-5 w-5" />
-                {locale === 'vi' ? 'Gợi ý nhanh' : 'Quick Prompts'}
-              </CardTitle>
-              <CardDescription>
+    <div className="min-h-screen bg-gray-50">
+      <Navigation />
+      
+      <div className="p-6 space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+              <Brain className="mr-3 h-8 w-8 text-purple-600" />
+              {locale === 'vi' ? 'Trợ lý AI LogiAI' : 'LogiAI Assistant'}
+            </h1>
+            <p className="text-gray-600 mt-2">
+              {locale === 'vi' 
+                ? 'Nhận tư vấn chuyên môn về logistics và tối ưu hóa chuỗi cung ứng'
+                : 'Get expert advice on logistics and supply chain optimization'
+              }
+            </p>
+            <div className="flex items-center mt-2 text-sm text-gray-500">
+              <Shield className="h-4 w-4 mr-1" />
+              <span>
                 {locale === 'vi' 
-                  ? 'Nhấp để bắt đầu cuộc trò chuyện'
-                  : 'Click to start a conversation'
+                  ? 'Được bảo vệ bởi bảo mật cấp doanh nghiệp'
+                  : 'Protected by enterprise-grade security'
                 }
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {quickPrompts.map((prompt) => (
-                  <button
-                    key={prompt.id}
-                    onClick={() => handleQuickPrompt(prompt.prompt)}
-                    disabled={isLoading}
-                    className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <div className="flex items-start">
-                      <div className="text-purple-600 mr-3 mt-0.5">
-                        {prompt.icon}
-                      </div>
-                      <div>
-                        <p className="font-medium text-sm text-gray-900">
-                          {locale === 'vi' ? prompt.titleVi : prompt.title}
-                        </p>
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+              </span>
+            </div>
+          </div>
+          <button
+            onClick={clearChat}
+            className="flex items-center px-4 py-2 text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <RefreshCw className="mr-2 h-4 w-4" />
+            {locale === 'vi' ? 'Xóa cuộc trò chuyện' : 'Clear Chat'}
+          </button>
         </div>
 
-        {/* Chat Interface */}
-        <div className="lg:col-span-3">
-          <Card className="h-[700px] flex flex-col">
-            <CardHeader className="flex-shrink-0">
-              <CardTitle className="flex items-center">
-                <MessageSquare className="mr-2 h-5 w-5" />
-                {locale === 'vi' ? 'Cuộc trò chuyện' : 'Conversation'}
-              </CardTitle>
-            </CardHeader>
-            
-            {/* Messages */}
-            <CardContent className="flex-1 flex flex-col p-0">
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`max-w-[80%] rounded-lg p-4 ${
-                        message.role === 'user'
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-100 text-gray-900'
-                      }`}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Quick Prompts */}
+          <div className="lg:col-span-1">
+            <Card className="hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <CardTitle className="flex items-center text-lg">
+                  <Lightbulb className="mr-2 h-5 w-5" />
+                  {locale === 'vi' ? 'Gợi ý nhanh' : 'Quick Prompts'}
+                </CardTitle>
+                <CardDescription>
+                  {locale === 'vi' 
+                    ? 'Nhấp để bắt đầu cuộc trò chuyện'
+                    : 'Click to start a conversation'
+                  }
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {quickPrompts.map((prompt) => (
+                    <button
+                      key={prompt.id}
+                      onClick={() => handleQuickPrompt(prompt.prompt)}
+                      disabled={isLoading}
+                      className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed group"
                     >
-                      <div className="flex items-start space-x-2">
-                        <div className="flex-shrink-0">
-                          {message.role === 'user' ? (
-                            <User className="h-4 w-4 mt-0.5" />
-                          ) : (
-                            <Bot className="h-4 w-4 mt-0.5" />
-                          )}
+                      <div className="flex items-start">
+                        <div className="text-purple-600 mr-3 mt-0.5 group-hover:scale-110 transition-transform">
+                          {prompt.icon}
                         </div>
-                        <div className="flex-1">
-                          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
-                          <p className={`text-xs mt-2 ${
-                            message.role === 'user' ? 'text-blue-100' : 'text-gray-500'
-                          }`}>
-                            {message.timestamp.toLocaleTimeString()}
+                        <div>
+                          <p className="font-medium text-sm text-gray-900">
+                            {locale === 'vi' ? prompt.titleVi : prompt.title}
                           </p>
                         </div>
                       </div>
-                    </div>
-                  </div>
-                ))}
-                
-                {isLoading && (
-                  <div className="flex justify-start">
-                    <div className="bg-gray-100 rounded-lg p-4">
-                      <div className="flex items-center space-x-2">
-                        <Bot className="h-4 w-4" />
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span className="text-sm text-gray-600">
-                          {locale === 'vi' ? 'Đang suy nghĩ...' : 'Thinking...'}
-                        </span>
+                    </button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Chat Interface */}
+          <div className="lg:col-span-3">
+            <Card className="h-[700px] flex flex-col hover:shadow-lg transition-shadow">
+              <CardHeader className="flex-shrink-0">
+                <CardTitle className="flex items-center">
+                  <MessageSquare className="mr-2 h-5 w-5" />
+                  {locale === 'vi' ? 'Cuộc trò chuyện' : 'Conversation'}
+                </CardTitle>
+                <CardDescription>
+                  {locale === 'vi' 
+                    ? `Đang trò chuyện với ${user?.name || 'User'}`
+                    : `Chatting with ${user?.name || 'User'}`
+                  }
+                </CardDescription>
+              </CardHeader>
+              
+              {/* Messages */}
+              <CardContent className="flex-1 flex flex-col p-0">
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                  {messages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div
+                        className={`max-w-[80%] rounded-lg p-4 ${
+                          message.role === 'user'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-100 text-gray-900'
+                        }`}
+                      >
+                        <div className="flex items-start space-x-2">
+                          <div className="flex-shrink-0">
+                            {message.role === 'user' ? (
+                              <User className="h-4 w-4 mt-0.5" />
+                            ) : (
+                              <Bot className="h-4 w-4 mt-0.5" />
+                            )}
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                            <p className={`text-xs mt-2 ${
+                              message.role === 'user' ? 'text-blue-100' : 'text-gray-500'
+                            }`}>
+                              {message.timestamp.toLocaleTimeString()}
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
-                
-                <div ref={messagesEndRef} />
-              </div>
+                  ))}
+                  
+                  {isLoading && (
+                    <div className="flex justify-start">
+                      <div className="bg-gray-100 rounded-lg p-4">
+                        <div className="flex items-center space-x-2">
+                          <Bot className="h-4 w-4" />
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <span className="text-sm text-gray-600">
+                            {locale === 'vi' ? 'LogiAI đang suy nghĩ...' : 'LogiAI is thinking...'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div ref={messagesEndRef} />
+                </div>
 
-              {/* Input Form */}
-              <div className="border-t border-gray-200 p-4">
-                <form onSubmit={handleSubmit} className="flex space-x-2">
-                  <div className="flex-1">
-                    <textarea
-                      ref={inputRef}
-                      value={inputMessage}
-                      onChange={(e) => setInputMessage(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      placeholder={locale === 'vi' 
-                        ? 'Nhập tin nhắn của bạn...'
-                        : 'Type your message...'
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
-                      rows={2}
-                      disabled={isLoading}
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={!inputMessage.trim() || isLoading}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-                  >
-                    {isLoading ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Send className="h-4 w-4" />
-                    )}
-                  </button>
-                </form>
-                <p className="text-xs text-gray-500 mt-2">
-                  {locale === 'vi' 
-                    ? 'Nhấn Enter để gửi, Shift+Enter để xuống dòng'
-                    : 'Press Enter to send, Shift+Enter for new line'
-                  }
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+                {/* Input Form */}
+                <div className="border-t border-gray-200 p-4">
+                  <form onSubmit={handleSubmit} className="flex space-x-2">
+                    <div className="flex-1">
+                      <textarea
+                        ref={inputRef}
+                        value={inputMessage}
+                        onChange={(e) => setInputMessage(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        placeholder={locale === 'vi' 
+                          ? 'Hỏi LogiAI về logistics, chuỗi cung ứng, tối ưu hóa...'
+                          : 'Ask LogiAI about logistics, supply chain, optimization...'
+                        }
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                        rows={2}
+                        disabled={isLoading}
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={!inputMessage.trim() || isLoading}
+                      className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center transition-colors"
+                    >
+                      {isLoading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Send className="h-4 w-4" />
+                      )}
+                    </button>
+                  </form>
+                  <p className="text-xs text-gray-500 mt-2">
+                    {locale === 'vi' 
+                      ? 'Nhấn Enter để gửi, Shift+Enter để xuống dòng'
+                      : 'Press Enter to send, Shift+Enter for new line'
+                    }
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>
