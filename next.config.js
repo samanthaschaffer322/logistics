@@ -1,9 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Image optimization - disabled for Cloudflare Pages
+  // Enable static export for Cloudflare Pages
+  output: 'export',
+  
+  // Disable features not supported in static export
   images: {
     unoptimized: true,
   },
+  
+  // Disable server-side features for static export
+  trailingSlash: true,
   
   // Experimental features for faster builds
   experimental: {
@@ -35,43 +41,15 @@ const nextConfig = {
     NEXT_PUBLIC_OPENAI_API_KEY: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
   },
   
-  // Security headers
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
-          },
-        ],
-      },
-    ];
-  },
+  // Disable server-side redirects for static export
+  // async redirects() {
+  //   return [];
+  // },
   
-  // Redirects
-  async redirects() {
-    return [
-      {
-        source: '/',
-        destination: '/login',
-        permanent: false,
-      },
-    ];
-  },
+  // Disable server-side headers for static export
+  // async headers() {
+  //   return [];
+  // },
   
   // Webpack optimizations for faster builds
   webpack: (config, { dev, isServer }) => {
