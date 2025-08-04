@@ -19,7 +19,8 @@ import {
   LogOut, 
   Menu, 
   X,
-  User
+  User,
+  ShoppingCart
 } from 'lucide-react'
 
 const navigationItems = [
@@ -46,6 +47,18 @@ const navigationItems = [
     href: '/transportation', 
     icon: Truck,
     translationKey: 'navigation.transportation'
+  },
+  { 
+    key: 'procurement', 
+    href: '/procurement', 
+    icon: ShoppingCart,
+    translationKey: 'navigation.procurement'
+  },
+  { 
+    key: 'distribution', 
+    href: '/distribution', 
+    icon: Send,
+    translationKey: 'navigation.distribution'
   },
   { 
     key: 'vietnam-map', 

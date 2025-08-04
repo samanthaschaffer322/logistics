@@ -410,39 +410,30 @@ export class FileProcessor {
   /**
    * Generate insights from processed Excel data
    */
-  private generateExcelInsights(data: any): FileInsights {
-    const insights: FileInsights = {
-      summary: '',
-      keyMetrics: {},
-      recommendations: [],
-      dataStructure: [],
-      patterns: []
+  private async generateExcelInsights(data: any): Promise<FileInsights> {
+    const aiGenerator = new (await import('./ai-insights-generator')).AIInsightsGenerator()
+    
+    // Convert processed data to LogisticsData format
+    const logisticsData: LogisticsData = {
+      shipments: [],
+      inventory: [],
+      routes: [],
+      costs: [],
+      performance: []
     }
 
-    // Analyze each sheet
+    // Aggregate data from all sheets
     Object.keys(data).forEach(sheetName => {
       const sheetData = data[sheetName] as LogisticsData
-      
-      // Generate data structure info
-      insights.dataStructure.push({
-        sheetName,
-        columns: this.getDataColumns(sheetData),
-        rowCount: this.getDataRowCount(sheetData),
-        dataTypes: this.getDataTypes(sheetData)
-      })
-
-      // Generate key metrics
-      insights.keyMetrics[sheetName] = this.calculateSheetMetrics(sheetData)
-
-      // Detect patterns
-      insights.patterns.push(...this.detectPatterns(sheetData, sheetName))
+      if (sheetData.shipments) logisticsData.shipments?.push(...sheetData.shipments)
+      if (sheetData.inventory) logisticsData.inventory?.push(...sheetData.inventory)
+      if (sheetData.routes) logisticsData.routes?.push(...sheetData.routes)
+      if (sheetData.costs) logisticsData.costs?.push(...sheetData.costs)
+      if (sheetData.performance) logisticsData.performance?.push(...sheetData.performance)
     })
 
-    // Generate summary and recommendations
-    insights.summary = this.generateSummary(insights)
-    insights.recommendations = this.generateRecommendations(insights)
-
-    return insights
+    // Generate comprehensive insights using AI
+    return await aiGenerator.generateInsights(logisticsData, 'Excel File')
   }
 
   private getDataColumns(data: LogisticsData): string[] {

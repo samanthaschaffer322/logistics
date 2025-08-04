@@ -25,6 +25,8 @@
     "shipments": "Shipments",
     "warehouse": "Warehouse",
     "transportation": "Transportation",
+    "procurement": "Procurement",
+    "distribution": "Distribution",
     "aiOptimization": "AI Optimization",
     "aiAssistant": "AI Assistant",
     "fileLearning": "File Learning",

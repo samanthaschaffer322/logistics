@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Locale, defaultLocale } from './config'
 import enTranslations from './translations/en.json'
 import viTranslations from './translations/vi.json'
@@ -23,6 +23,7 @@ export function useTranslation() {
       const browserLang = navigator.language.toLowerCase()
       if (browserLang.startsWith('vi')) {
         setLocale('vi')
+        localStorage.setItem('logiai_locale', 'vi')
       }
     }
   }, [])
@@ -30,6 +31,8 @@ export function useTranslation() {
   const changeLocale = (newLocale: Locale) => {
     setLocale(newLocale)
     localStorage.setItem('logiai_locale', newLocale)
+    // Trigger a re-render by updating state
+    window.dispatchEvent(new Event('languageChanged'))
   }
 
   const t = (key: string): string => {
@@ -61,4 +64,9 @@ export function useTranslation() {
     changeLocale,
     t
   }
+}
+
+// Simple provider component for compatibility
+export function TranslationProvider({ children }: { children: React.ReactNode }) {
+  return React.createElement(React.Fragment, null, children)
 }
