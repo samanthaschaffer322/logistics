@@ -1,94 +1,171 @@
 'use client'
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { validateCredentials, getUserRole, type AuthCredentials } from '@/lib/auth/credentials'
+import { validateSecureCredentials, validateSession, invalidateSession, type AuthSession } from '@/lib/auth/secure-credentials'
+import { securityLogger } from '@/lib/security/middleware'
 
 interface AuthContextType {
-  user: AuthCredentials | null
-  userRole: string | null
+  user: AuthSession | null
   loading: boolean
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>
-  signUp: (email: string, password: string, role: string) => Promise<{ error: Error | null }>
   signOut: () => Promise<void>
+  refreshSession: () => Promise<boolean>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<AuthCredentials | null>(null)
-  const [userRole, setUserRole] = useState<string | null>(null)
+  const [user, setUser] = useState<AuthSession | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Check for existing session
-    const checkSession = () => {
-      try {
-        const storedUser = localStorage.getItem('logiai_user')
-        if (storedUser) {
-          const userData = JSON.parse(storedUser)
-          setUser(userData)
-          setUserRole(userData.role)
-        }
-      } catch (error) {
-        console.error('Error checking session:', error)
-        localStorage.removeItem('logiai_user')
-      } finally {
-        setLoading(false)
-      }
-    }
-
     checkSession()
   }, [])
 
-  const signIn = async (email: string, password: string) => {
+  const checkSession = async () => {
     try {
-      const validatedUser = validateCredentials(email, password)
-      
-      if (validatedUser) {
-        const userData = {
-          email: validatedUser.email,
-          role: validatedUser.role,
-          name: validatedUser.name,
-          loginTime: new Date().toISOString()
+      const sessionToken = localStorage.getItem('logiai_session_token')
+      if (sessionToken) {
+        const session = validateSession(sessionToken)
+        if (session) {
+          setUser(session)
+          securityLogger.log({
+            type: 'auth_attempt',
+            identifier: session.email,
+            details: 'Session restored from storage',
+            severity: 'low'
+          })
+        } else {
+          // Invalid or expired session
+          localStorage.removeItem('logiai_session_token')
+          localStorage.removeItem('logiai_user')
+          securityLogger.log({
+            type: 'auth_attempt',
+            identifier: 'unknown',
+            details: 'Invalid session token removed',
+            severity: 'medium'
+          })
         }
-        
-        // Store session
-        localStorage.setItem('logiai_user', JSON.stringify(userData))
-        
-        setUser(validatedUser)
-        setUserRole(validatedUser.role)
-        
-        return { error: null }
-      } else {
-        return { error: new Error('Invalid credentials. Access denied.') }
       }
     } catch (error) {
-      return { error: error as Error }
+      console.error('Error checking session:', error)
+      localStorage.removeItem('logiai_session_token')
+      localStorage.removeItem('logiai_user')
+    } finally {
+      setLoading(false)
     }
   }
 
-  const signUp = async (email: string, password: string, role: string) => {
-    // Sign up is disabled - only authorized users can access
-    return { error: new Error('Registration is not available. This platform is restricted to authorized personnel only.') }
+  const signIn = async (email: string, password: string) => {
+    try {
+      setLoading(true)
+      
+      // Get client IP (in a real app, this would come from the server)
+      const clientIP = 'client_browser'
+      
+      const result = await validateSecureCredentials(email, password, clientIP)
+      
+      if (result.success && result.session) {
+        // Store session securely
+        localStorage.setItem('logiai_session_token', result.session.sessionToken)
+        localStorage.setItem('logiai_user', JSON.stringify({
+          email: result.session.email,
+          role: result.session.role,
+          name: result.session.name,
+          loginTime: new Date().toISOString()
+        }))
+        
+        setUser(result.session)
+        
+        securityLogger.log({
+          type: 'auth_attempt',
+          identifier: email,
+          details: 'Successful login from client',
+          severity: 'low'
+        })
+        
+        return { error: null }
+      } else {
+        securityLogger.log({
+          type: 'auth_attempt',
+          identifier: email,
+          details: `Failed login attempt: ${result.error}`,
+          severity: 'medium'
+        })
+        
+        return { error: new Error(result.error || 'Authentication failed') }
+      }
+    } catch (error) {
+      securityLogger.log({
+        type: 'auth_attempt',
+        identifier: email,
+        details: `Login error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        severity: 'high'
+      })
+      
+      return { error: error as Error }
+    } finally {
+      setLoading(false)
+    }
   }
 
   const signOut = async () => {
     try {
+      const sessionToken = localStorage.getItem('logiai_session_token')
+      if (sessionToken) {
+        invalidateSession(sessionToken)
+      }
+      
+      localStorage.removeItem('logiai_session_token')
       localStorage.removeItem('logiai_user')
       setUser(null)
-      setUserRole(null)
+      
+      securityLogger.log({
+        type: 'auth_attempt',
+        identifier: user?.email || 'unknown',
+        details: 'User logged out',
+        severity: 'low'
+      })
     } catch (error) {
       console.error('Error signing out:', error)
     }
   }
 
+  const refreshSession = async (): Promise<boolean> => {
+    try {
+      const sessionToken = localStorage.getItem('logiai_session_token')
+      if (!sessionToken) return false
+
+      const session = validateSession(sessionToken)
+      if (session) {
+        setUser(session)
+        return true
+      } else {
+        // Session expired or invalid
+        await signOut()
+        return false
+      }
+    } catch (error) {
+      console.error('Error refreshing session:', error)
+      await signOut()
+      return false
+    }
+  }
+
+  // Auto-refresh session every 5 minutes
+  useEffect(() => {
+    if (user) {
+      const interval = setInterval(refreshSession, 5 * 60 * 1000)
+      return () => clearInterval(interval)
+    }
+  }, [user])
+
   const value = {
     user,
-    userRole,
     loading,
     signIn,
-    signUp,
     signOut,
+    refreshSession,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
