@@ -1,6 +1,6 @@
 {
   "build": {
-    "command": "./build.sh",
+    "command": "npm run build",
     "cwd": "/",
     "outputDirectory": "out",
     "env": {
