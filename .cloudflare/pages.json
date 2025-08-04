@@ -1,0 +1,14 @@
+{
+  "build": {
+    "command": "npm run build",
+    "cwd": "/",
+    "watchPaths": ["src/**/*", "public/**/*", "package.json", "next.config.js"]
+  },
+  "preview": {
+    "command": "npm run build && npm run start"
+  },
+  "env": {
+    "NODE_VERSION": "18",
+    "NPM_VERSION": "8"
+  }
+}
