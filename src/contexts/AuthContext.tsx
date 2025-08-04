@@ -1,11 +1,10 @@
 'use client'
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { User } from '@supabase/supabase-js'
-import { supabase, isSupabaseConfigured } from '../../supabase/client'
+import { validateCredentials, getUserRole, type AuthCredentials } from '@/lib/auth/credentials'
 
 interface AuthContextType {
-  user: User | null
+  user: AuthCredentials | null
   userRole: string | null
   loading: boolean
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>
@@ -16,125 +15,68 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
+  const [user, setUser] = useState<AuthCredentials | null>(null)
   const [userRole, setUserRole] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Only initialize auth if Supabase is properly configured
-    if (!isSupabaseConfigured()) {
-      setLoading(false)
-      return
+    // Check for existing session
+    const checkSession = () => {
+      try {
+        const storedUser = localStorage.getItem('logiai_user')
+        if (storedUser) {
+          const userData = JSON.parse(storedUser)
+          setUser(userData)
+          setUserRole(userData.role)
+        }
+      } catch (error) {
+        console.error('Error checking session:', error)
+        localStorage.removeItem('logiai_user')
+      } finally {
+        setLoading(false)
+      }
     }
 
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        fetchUserRole(session.user.id)
-      }
-      setLoading(false)
-    }).catch((error) => {
-      console.error('Error getting initial session:', error)
-      setLoading(false)
-    })
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        await fetchUserRole(session.user.id)
-      } else {
-        setUserRole(null)
-      }
-      setLoading(false)
-    })
-
-    return () => subscription.unsubscribe()
+    checkSession()
   }, [])
 
-  const fetchUserRole = async (userId: string) => {
-    if (!isSupabaseConfigured()) {
-      return
-    }
-
-    try {
-      const { data, error } = await supabase
-        .from('users')
-        .select('role')
-        .eq('id', userId)
-        .single()
-
-      if (error) {
-        console.error('Error fetching user role:', error)
-        return
-      }
-
-      setUserRole(data?.role || null)
-    } catch (error) {
-      console.error('Error fetching user role:', error)
-    }
-  }
-
   const signIn = async (email: string, password: string) => {
-    if (!isSupabaseConfigured()) {
-      return { error: new Error('Supabase not configured') }
-    }
-
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-      return { error }
+      const validatedUser = validateCredentials(email, password)
+      
+      if (validatedUser) {
+        const userData = {
+          email: validatedUser.email,
+          role: validatedUser.role,
+          name: validatedUser.name,
+          loginTime: new Date().toISOString()
+        }
+        
+        // Store session
+        localStorage.setItem('logiai_user', JSON.stringify(userData))
+        
+        setUser(validatedUser)
+        setUserRole(validatedUser.role)
+        
+        return { error: null }
+      } else {
+        return { error: new Error('Invalid credentials. Access denied.') }
+      }
     } catch (error) {
       return { error: error as Error }
     }
   }
 
   const signUp = async (email: string, password: string, role: string) => {
-    if (!isSupabaseConfigured()) {
-      return { error: new Error('Supabase not configured') }
-    }
-
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-      })
-
-      if (!error && data.user) {
-        // Insert user role into users table
-        const { error: insertError } = await supabase
-          .from('users')
-          .insert([
-            {
-              id: data.user.id,
-              email: data.user.email!,
-              role: role as any,
-            },
-          ])
-
-        if (insertError) {
-          console.error('Error inserting user role:', insertError)
-        }
-      }
-
-      return { error }
-    } catch (error) {
-      return { error: error as Error }
-    }
+    // Sign up is disabled - only authorized users can access
+    return { error: new Error('Registration is not available. This platform is restricted to authorized personnel only.') }
   }
 
   const signOut = async () => {
-    if (!isSupabaseConfigured()) {
-      return
-    }
-
     try {
-      await supabase.auth.signOut()
+      localStorage.removeItem('logiai_user')
+      setUser(null)
+      setUserRole(null)
     } catch (error) {
       console.error('Error signing out:', error)
     }

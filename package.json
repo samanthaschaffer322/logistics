@@ -3,7 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "description": "AI-Powered Logistics Management Platform with Advanced AI Optimization",
-  "keywords": ["logistics", "ai", "optimization", "supply-chain", "forecasting", "openai"],
+  "keywords": [
+    "logistics",
+    "ai",
+    "optimization",
+    "supply-chain",
+    "forecasting",
+    "openai"
+  ],
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
@@ -21,13 +28,16 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "lucide-react": "^0.536.0",
+    "multer": "^2.0.2",
     "next": "15.4.5",
     "openai": "^4.67.3",
+    "pdf-parse": "^1.1.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "recharts": "^3.1.0",
     "tailwind-merge": "^3.3.1",
-    "uuid": "^10.0.0"
+    "uuid": "^10.0.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
