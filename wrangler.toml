@@ -1,0 +1,16 @@
+name = "logiai-logistics"
+compatibility_date = "2024-08-04"
+
+[env.production]
+name = "logiai-logistics"
+
+[env.preview]
+name = "logiai-logistics-preview"
+
+# Pages configuration
+pages_build_output_dir = ".next"
+
+# Environment variables (set these in Cloudflare dashboard)
+# NEXT_PUBLIC_SUPABASE_URL
+# NEXT_PUBLIC_SUPABASE_ANON_KEY
+# NEXT_PUBLIC_APP_URL

@@ -1,0 +1,12 @@
+# Redirects for Cloudflare Pages
+# Handle client-side routing for Next.js
+/*    /index.html   200
+
+# API routes
+/api/*  /api/:splat  200
+
+# Redirect root to login if not authenticated
+/  /login  302
+
+# Handle 404s
+/404  /404.html  404

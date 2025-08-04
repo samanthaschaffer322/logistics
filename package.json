@@ -1,12 +1,17 @@
 {
-  "name": "logistics",
-  "version": "0.1.0",
+  "name": "logiai-logistics",
+  "version": "1.0.0",
   "private": true,
+  "description": "AI-Powered Logistics Management Platform",
+  "keywords": ["logistics", "ai", "shipment", "tracking", "management"],
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "build:cloudflare": "next build && next export",
+    "deploy": "wrangler pages deploy .next",
+    "preview": "wrangler pages dev .next"
   },
   "dependencies": {
     "@supabase/ssr": "^0.6.1",
@@ -29,6 +34,11 @@
     "eslint": "^9",
     "eslint-config-next": "15.4.5",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wrangler": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   }
 }
