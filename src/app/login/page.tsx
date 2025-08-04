@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { LogIn, Eye, EyeOff, Shield, Truck } from 'lucide-react'
 import { validateCredentials } from '@/lib/auth/credentials'
+import { useTranslation } from '@/lib/i18n/useTranslation'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -13,6 +15,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
+  const { t, locale } = useTranslation()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -35,11 +38,11 @@ export default function LoginPage() {
         // Redirect to dashboard
         router.push('/dashboard')
       } else {
-        setError('Invalid credentials. Access denied.')
+        setError(t('auth.invalidCredentials'))
       }
     } catch (error) {
       console.error('Login error:', error)
-      setError('Authentication failed. Please try again.')
+      setError(t('auth.authFailed'))
     } finally {
       setIsLoading(false)
     }
@@ -48,6 +51,11 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
+        {/* Language Switcher */}
+        <div className="flex justify-end mb-4">
+          <LanguageSwitcher />
+        </div>
+
         {/* Logo and Title */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center mb-4">
@@ -56,7 +64,12 @@ export default function LoginPage() {
             </div>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">LogiAI</h1>
-          <p className="text-gray-600">AI-Powered Logistics Management Platform</p>
+          <p className="text-gray-600">
+            {locale === 'vi' 
+              ? 'Nền tảng Quản lý Logistics được hỗ trợ bởi AI'
+              : 'AI-Powered Logistics Management Platform'
+            }
+          </p>
         </div>
 
         {/* Login Card */}
@@ -64,10 +77,10 @@ export default function LoginPage() {
           <CardHeader className="space-y-1 pb-6">
             <CardTitle className="text-2xl font-bold text-center flex items-center justify-center">
               <Shield className="mr-2 h-5 w-5 text-blue-600" />
-              Secure Access
+              {t('auth.secureAccess')}
             </CardTitle>
             <CardDescription className="text-center">
-              Enter your authorized credentials to access the platform
+              {t('auth.enterCredentials')}
             </CardDescription>
           </CardHeader>
           
@@ -76,7 +89,7 @@ export default function LoginPage() {
               {/* Email Field */}
               <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-medium text-gray-700">
-                  Email Address
+                  {t('auth.email')}
                 </label>
                 <input
                   id="email"
@@ -84,7 +97,7 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Enter your authorized email"
+                  placeholder={locale === 'vi' ? 'Nhập email được ủy quyền' : 'Enter your authorized email'}
                   required
                 />
               </div>
@@ -92,7 +105,7 @@ export default function LoginPage() {
               {/* Password Field */}
               <div className="space-y-2">
                 <label htmlFor="password" className="text-sm font-medium text-gray-700">
-                  Password
+                  {t('auth.password')}
                 </label>
                 <div className="relative">
                   <input
@@ -101,7 +114,7 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter your password"
+                    placeholder={locale === 'vi' ? 'Nhập mật khẩu' : 'Enter your password'}
                     required
                   />
                   <button
@@ -136,7 +149,7 @@ export default function LoginPage() {
                 ) : (
                   <>
                     <LogIn className="mr-2 h-4 w-4" />
-                    Sign In
+                    {t('auth.signIn')}
                   </>
                 )}
               </button>
@@ -148,8 +161,7 @@ export default function LoginPage() {
                 <Shield className="h-5 w-5 text-gray-400 mt-0.5 mr-2" />
                 <div>
                   <p className="text-xs text-gray-600">
-                    <strong>Security Notice:</strong> This platform is restricted to authorized personnel only. 
-                    All access attempts are logged and monitored.
+                    <strong>{t('auth.securityNotice')}:</strong> {t('auth.restrictedAccess')}
                   </p>
                 </div>
               </div>
@@ -160,7 +172,10 @@ export default function LoginPage() {
         {/* Footer */}
         <div className="text-center mt-8">
           <p className="text-sm text-gray-500">
-            © 2024 LogiAI. Advanced AI-Powered Logistics Management Platform.
+            © 2024 LogiAI. {locale === 'vi' 
+              ? 'Nền tảng Quản lý Logistics Nâng cao được hỗ trợ bởi AI.'
+              : 'Advanced AI-Powered Logistics Management Platform.'
+            }
           </p>
         </div>
       </div>
