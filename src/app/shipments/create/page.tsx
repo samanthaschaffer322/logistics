@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '../../../../supabase/client'
+import { supabase, isSupabaseConfigured } from '../../../../supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
@@ -83,7 +83,12 @@ export default function CreateDocketPage() {
   })
 
   useEffect(() => {
-    fetchData()
+    if (isSupabaseConfigured()) {
+      fetchData()
+    } else {
+      setCustomers([])
+      setVehicles([])
+    }
   }, [])
 
   useEffect(() => {
@@ -97,6 +102,12 @@ export default function CreateDocketPage() {
   ])
 
   const fetchData = async () => {
+    if (!isSupabaseConfigured()) {
+      setCustomers([])
+      setVehicles([])
+      return
+    }
+
     try {
       // Fetch customers
       const { data: customerData, error: customerError } = await supabase

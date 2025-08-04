@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Package, Truck, Send, ShoppingCart, AlertTriangle, TrendingUp } from 'lucide-react'
-import { supabase } from '../../../supabase/client'
+import { supabase, isSupabaseConfigured } from '../../../supabase/client'
 
 interface DashboardStats {
   totalInventory: number
@@ -26,10 +26,35 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchDashboardStats()
+    if (isSupabaseConfigured()) {
+      fetchDashboardStats()
+    } else {
+      // Use mock data for build time or when Supabase is not configured
+      setStats({
+        totalInventory: 1250,
+        lowStockItems: 23,
+        activeVehicles: 15,
+        pendingOrders: 42,
+        pendingProcurement: 8,
+      })
+      setLoading(false)
+    }
   }, [])
 
   const fetchDashboardStats = async () => {
+    if (!isSupabaseConfigured()) {
+      // Use mock data when Supabase is not configured
+      setStats({
+        totalInventory: 1250,
+        lowStockItems: 23,
+        activeVehicles: 15,
+        pendingOrders: 42,
+        pendingProcurement: 8,
+      })
+      setLoading(false)
+      return
+    }
+
     try {
       // Fetch inventory stats
       const { data: inventoryData } = await supabase

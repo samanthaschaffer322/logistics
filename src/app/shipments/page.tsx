@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { supabase } from '../../../supabase/client'
+import { supabase, isSupabaseConfigured } from '../../../supabase/client'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
@@ -67,10 +67,24 @@ export default function ShipmentsPage() {
   const [priorityFilter, setPriorityFilter] = useState<string>('all')
 
   useEffect(() => {
-    fetchData()
+    if (isSupabaseConfigured()) {
+      fetchData()
+    } else {
+      // Use mock data for build time
+      setShipments([])
+      setCustomers([])
+      setLoading(false)
+    }
   }, [])
 
   const fetchData = async () => {
+    if (!isSupabaseConfigured()) {
+      setShipments([])
+      setCustomers([])
+      setLoading(false)
+      return
+    }
+
     try {
       // Fetch shipments
       const { data: shipmentData, error: shipmentError } = await supabase

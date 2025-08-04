@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { User } from '@supabase/supabase-js'
-import { supabase } from '../../supabase/client'
+import { supabase, isSupabaseConfigured } from '../../supabase/client'
 
 interface AuthContextType {
   user: User | null
@@ -21,12 +21,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Only initialize auth if Supabase is properly configured
+    if (!isSupabaseConfigured()) {
+      setLoading(false)
+      return
+    }
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
       if (session?.user) {
         fetchUserRole(session.user.id)
       }
+      setLoading(false)
+    }).catch((error) => {
+      console.error('Error getting initial session:', error)
       setLoading(false)
     })
 
@@ -47,6 +56,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const fetchUserRole = async (userId: string) => {
+    if (!isSupabaseConfigured()) {
+      return
+    }
+
     try {
       const { data, error } = await supabase
         .from('users')
@@ -66,41 +79,65 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-    return { error }
+    if (!isSupabaseConfigured()) {
+      return { error: new Error('Supabase not configured') }
+    }
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+      return { error }
+    } catch (error) {
+      return { error: error as Error }
+    }
   }
 
   const signUp = async (email: string, password: string, role: string) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    })
-
-    if (!error && data.user) {
-      // Insert user role into users table
-      const { error: insertError } = await supabase
-        .from('users')
-        .insert([
-          {
-            id: data.user.id,
-            email: data.user.email!,
-            role: role as any,
-          },
-        ])
-
-      if (insertError) {
-        console.error('Error inserting user role:', insertError)
-      }
+    if (!isSupabaseConfigured()) {
+      return { error: new Error('Supabase not configured') }
     }
 
-    return { error }
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      })
+
+      if (!error && data.user) {
+        // Insert user role into users table
+        const { error: insertError } = await supabase
+          .from('users')
+          .insert([
+            {
+              id: data.user.id,
+              email: data.user.email!,
+              role: role as any,
+            },
+          ])
+
+        if (insertError) {
+          console.error('Error inserting user role:', insertError)
+        }
+      }
+
+      return { error }
+    } catch (error) {
+      return { error: error as Error }
+    }
   }
 
   const signOut = async () => {
-    await supabase.auth.signOut()
+    if (!isSupabaseConfigured()) {
+      return
+    }
+
+    try {
+      await supabase.auth.signOut()
+    } catch (error) {
+      console.error('Error signing out:', error)
+    }
   }
 
   const value = {
