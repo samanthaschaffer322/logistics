@@ -371,3 +371,288 @@ CREATE TRIGGER update_leads_updated_at BEFORE UPDATE ON leads FOR EACH ROW EXECU
 CREATE TRIGGER update_quotes_updated_at BEFORE UPDATE ON quotes FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_expenses_updated_at BEFORE UPDATE ON expenses FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_customers_updated_at BEFORE UPDATE ON customers FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- =====================================================
+-- VIETNAMESE IMPORT/EXPORT DOCUMENT AUTOMATION SCHEMA
+-- =====================================================
+
+-- Vietnamese Import/Export Document Types
+CREATE TABLE document_types (
+  id SERIAL PRIMARY KEY,
+  code TEXT UNIQUE NOT NULL,
+  name_vi TEXT NOT NULL,
+  name_en TEXT NOT NULL,
+  purpose TEXT,
+  sequence_order INTEGER,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Insert standard Vietnamese import/export document types
+INSERT INTO document_types (code, name_vi, name_en, purpose, sequence_order) VALUES
+('sales_contract', 'Hợp đồng ngoại thương', 'Sales Contract', 'Thỏa thuận mua bán quốc tế giữa buyer và seller', 1),
+('commercial_invoice', 'Hóa đơn thương mại', 'Commercial Invoice', 'Căn cứ khai giá trị hải quan và thanh toán quốc tế', 2),
+('packing_list', 'Phiếu đóng gói', 'Packing List', 'Chi tiết đóng gói để kiểm hàng tại cảng và hải quan', 3),
+('bill_of_lading', 'Vận đơn', 'Bill of Lading', 'Chứng từ vận tải xác nhận hàng đã lên tàu', 4),
+('customs_declaration', 'Tờ khai hải quan', 'Customs Declaration', 'Khai báo thông tin hàng hoá để làm thủ tục thông quan', 5),
+('letter_of_credit', 'Thư tín dụng', 'Letter of Credit', 'Thanh toán quốc tế qua ngân hàng đảm bảo', 6),
+('certificate_of_origin', 'Chứng nhận xuất xứ', 'Certificate of Origin', 'Chứng minh xuất xứ để hưởng ưu đãi thuế', 7),
+('quality_certificate', 'Giấy chứng nhận chất lượng', 'Quality Certificate', 'Xác nhận chất lượng phù hợp theo tiêu chuẩn hợp đồng', 8),
+('insurance_certificate', 'Chứng nhận bảo hiểm', 'Insurance Certificate', 'Bảo hiểm hàng hóa trong vận chuyển quốc tế', 9),
+('daily_plan', 'Kế hoạch ngày', 'Daily Plan', 'Kế hoạch vận tải và logistics hàng ngày', 10);
+
+-- Required fields per document type
+CREATE TABLE document_fields (
+  id SERIAL PRIMARY KEY,
+  document_type_code TEXT REFERENCES document_types(code),
+  field_name TEXT NOT NULL,
+  display_label_vi TEXT,
+  display_label_en TEXT,
+  field_type TEXT CHECK (field_type IN ('text', 'number', 'date', 'select', 'file', 'textarea')),
+  required BOOLEAN DEFAULT TRUE,
+  validation_rules JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Insert standard fields for each document type
+INSERT INTO document_fields (document_type_code, field_name, display_label_vi, display_label_en, field_type, required) VALUES
+-- Sales Contract fields
+('sales_contract', 'contract_number', 'Số hợp đồng', 'Contract Number', 'text', true),
+('sales_contract', 'buyer_name', 'Tên người mua', 'Buyer Name', 'text', true),
+('sales_contract', 'seller_name', 'Tên người bán', 'Seller Name', 'text', true),
+('sales_contract', 'goods_description', 'Mô tả hàng hóa', 'Goods Description', 'textarea', true),
+('sales_contract', 'price_terms', 'Điều kiện giá', 'Price Terms', 'text', true),
+
+-- Commercial Invoice fields
+('commercial_invoice', 'invoice_number', 'Số hóa đơn', 'Invoice Number', 'text', true),
+('commercial_invoice', 'issue_date', 'Ngày phát hành', 'Issue Date', 'date', true),
+('commercial_invoice', 'exporter', 'Người xuất khẩu', 'Exporter', 'text', true),
+('commercial_invoice', 'importer', 'Người nhập khẩu', 'Importer', 'text', true),
+('commercial_invoice', 'goods_details', 'Chi tiết hàng hóa', 'Goods Details', 'textarea', true),
+('commercial_invoice', 'total_amount', 'Tổng giá trị', 'Total Amount', 'number', true),
+
+-- Packing List fields
+('packing_list', 'package_number', 'Số kiện', 'Package Number', 'text', true),
+('packing_list', 'description', 'Mô tả', 'Description', 'textarea', true),
+('packing_list', 'net_weight', 'Trọng lượng tịnh', 'Net Weight', 'number', true),
+('packing_list', 'gross_weight', 'Trọng lượng thô', 'Gross Weight', 'number', true),
+('packing_list', 'volume', 'Thể tích', 'Volume', 'number', true),
+
+-- Daily Plan fields
+('daily_plan', 'plan_date', 'Ngày kế hoạch', 'Plan Date', 'date', true),
+('daily_plan', 'route', 'Tuyến đường', 'Route', 'text', true),
+('daily_plan', 'vehicle', 'Phương tiện', 'Vehicle', 'text', true),
+('daily_plan', 'driver', 'Tài xế', 'Driver', 'text', true),
+('daily_plan', 'cargo', 'Hàng hóa', 'Cargo', 'text', true),
+('daily_plan', 'destination', 'Điểm đến', 'Destination', 'text', true),
+('daily_plan', 'distance', 'Quãng đường (km)', 'Distance (km)', 'number', false),
+('daily_plan', 'fuel_cost', 'Chi phí nhiên liệu (VND)', 'Fuel Cost (VND)', 'number', false);
+
+-- Uploaded documents
+CREATE TABLE documents_uploaded (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id),
+  document_type_code TEXT REFERENCES document_types(code),
+  file_name TEXT NOT NULL,
+  file_url TEXT,
+  file_size BIGINT,
+  extracted_data JSONB,
+  processing_status TEXT CHECK (processing_status IN ('pending', 'processing', 'completed', 'failed')) DEFAULT 'pending',
+  uploaded_at TIMESTAMPTZ DEFAULT NOW(),
+  processed_at TIMESTAMPTZ
+);
+
+-- Generated documents
+CREATE TABLE documents_generated (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id),
+  document_type_code TEXT REFERENCES document_types(code),
+  template_data JSONB,
+  generated_content TEXT,
+  file_url TEXT,
+  status TEXT CHECK (status IN ('draft', 'generated', 'signed', 'submitted')) DEFAULT 'draft',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- =====================================================
+-- ROUTE OPTIMIZATION SCHEMA
+-- =====================================================
+
+-- Depots for route optimization
+CREATE TABLE depots (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  address TEXT NOT NULL,
+  location GEOGRAPHY(POINT, 4326),
+  depot_type TEXT CHECK (depot_type IN ('main', 'pickup', 'delivery', 'empty_return')),
+  capacity_limit INTEGER,
+  operating_hours JSONB,
+  contact_info JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Insert sample depots for Vietnam
+INSERT INTO depots (name, address, depot_type, capacity_limit, operating_hours) VALUES
+('Depot Hồ Chí Minh', 'Quận 7, TP. Hồ Chí Minh', 'main', 1000, '{"open": "06:00", "close": "22:00"}'),
+('Depot Hà Nội', 'Quận Long Biên, Hà Nội', 'main', 800, '{"open": "06:00", "close": "22:00"}'),
+('Depot Đà Nẵng', 'Quận Hải Châu, Đà Nẵng', 'pickup', 500, '{"open": "07:00", "close": "21:00"}'),
+('Depot Cần Thơ', 'Quận Ninh Kiều, Cần Thơ', 'delivery', 400, '{"open": "07:00", "close": "20:00"}'),
+('Depot Hải Phòng', 'Quận Lê Chân, Hải Phòng', 'empty_return', 300, '{"open": "08:00", "close": "18:00"}');
+
+-- Enhanced vehicles table for route optimization
+CREATE TABLE vehicles_enhanced (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  vehicle_code TEXT UNIQUE NOT NULL,
+  vehicle_type TEXT,
+  capacity_weight DECIMAL(10,2),
+  capacity_volume DECIMAL(10,2),
+  fuel_efficiency DECIMAL(8,2), -- km per liter
+  current_location GEOGRAPHY(POINT, 4326),
+  status TEXT CHECK (status IN ('available', 'in_transit', 'maintenance', 'unavailable')) DEFAULT 'available',
+  driver_id UUID,
+  depot_id UUID REFERENCES depots(id),
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Insert sample vehicles
+INSERT INTO vehicles_enhanced (vehicle_code, vehicle_type, capacity_weight, capacity_volume, fuel_efficiency, status) VALUES
+('VN-001', 'Truck 5T', 5000.00, 25.00, 8.5, 'available'),
+('VN-002', 'Truck 10T', 10000.00, 45.00, 7.2, 'available'),
+('VN-003', 'Van 2T', 2000.00, 12.00, 12.0, 'available'),
+('VN-004', 'Container 20ft', 25000.00, 33.00, 6.5, 'available'),
+('VN-005', 'Truck 3T', 3000.00, 18.00, 10.0, 'available');
+
+-- Daily transportation plans
+CREATE TABLE transportation_plans (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id),
+  plan_date DATE NOT NULL,
+  vehicle_id UUID REFERENCES vehicles_enhanced(id),
+  driver_name TEXT,
+  route_data JSONB, -- stores route waypoints and optimization data
+  total_distance DECIMAL(10,2),
+  estimated_fuel_cost DECIMAL(12,2),
+  estimated_duration INTEGER, -- minutes
+  status TEXT CHECK (status IN ('draft', 'optimized', 'approved', 'in_progress', 'completed')) DEFAULT 'draft',
+  optimization_score DECIMAL(5,2), -- efficiency score 0-100
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Route optimization results
+CREATE TABLE route_optimizations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  transportation_plan_id UUID REFERENCES transportation_plans(id),
+  original_route JSONB,
+  optimized_route JSONB,
+  fuel_savings DECIMAL(12,2),
+  time_savings INTEGER, -- minutes
+  distance_reduction DECIMAL(10,2),
+  optimization_algorithm TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Learning data from uploaded files
+CREATE TABLE file_learning_data (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id),
+  file_name TEXT NOT NULL,
+  file_type TEXT,
+  extracted_patterns JSONB,
+  insights JSONB,
+  automation_suggestions JSONB,
+  learning_status TEXT CHECK (learning_status IN ('processing', 'completed', 'failed')) DEFAULT 'processing',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- =====================================================
+-- INDEXES FOR PERFORMANCE
+-- =====================================================
+
+-- Document-related indexes
+CREATE INDEX idx_documents_uploaded_user_id ON documents_uploaded(user_id);
+CREATE INDEX idx_documents_uploaded_type ON documents_uploaded(document_type_code);
+CREATE INDEX idx_documents_generated_user_id ON documents_generated(user_id);
+CREATE INDEX idx_documents_generated_type ON documents_generated(document_type_code);
+
+-- Route optimization indexes
+CREATE INDEX idx_transportation_plans_user_id ON transportation_plans(user_id);
+CREATE INDEX idx_transportation_plans_date ON transportation_plans(plan_date);
+CREATE INDEX idx_transportation_plans_vehicle ON transportation_plans(vehicle_id);
+CREATE INDEX idx_route_optimizations_plan_id ON route_optimizations(transportation_plan_id);
+
+-- Learning data indexes
+CREATE INDEX idx_file_learning_data_user_id ON file_learning_data(user_id);
+CREATE INDEX idx_file_learning_data_status ON file_learning_data(learning_status);
+
+-- Spatial indexes for location-based queries
+CREATE INDEX idx_depots_location ON depots USING GIST(location);
+CREATE INDEX idx_vehicles_location ON vehicles_enhanced USING GIST(current_location);
+
+-- =====================================================
+-- ROW LEVEL SECURITY POLICIES
+-- =====================================================
+
+-- Enable RLS on new tables
+ALTER TABLE documents_uploaded ENABLE ROW LEVEL SECURITY;
+ALTER TABLE documents_generated ENABLE ROW LEVEL SECURITY;
+ALTER TABLE transportation_plans ENABLE ROW LEVEL SECURITY;
+ALTER TABLE file_learning_data ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policies for documents_uploaded
+CREATE POLICY "Users can view own uploaded documents" ON documents_uploaded
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own uploaded documents" ON documents_uploaded
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own uploaded documents" ON documents_uploaded
+  FOR UPDATE USING (auth.uid() = user_id);
+
+-- RLS Policies for documents_generated
+CREATE POLICY "Users can view own generated documents" ON documents_generated
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own generated documents" ON documents_generated
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own generated documents" ON documents_generated
+  FOR UPDATE USING (auth.uid() = user_id);
+
+-- RLS Policies for transportation_plans
+CREATE POLICY "Users can view own transportation plans" ON transportation_plans
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own transportation plans" ON transportation_plans
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own transportation plans" ON transportation_plans
+  FOR UPDATE USING (auth.uid() = user_id);
+
+-- RLS Policies for file_learning_data
+CREATE POLICY "Users can view own learning data" ON file_learning_data
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own learning data" ON file_learning_data
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own learning data" ON file_learning_data
+  FOR UPDATE USING (auth.uid() = user_id);
+
+-- Public read access for reference tables
+ALTER TABLE document_types ENABLE ROW LEVEL SECURITY;
+ALTER TABLE document_fields ENABLE ROW LEVEL SECURITY;
+ALTER TABLE depots ENABLE ROW LEVEL SECURITY;
+ALTER TABLE vehicles_enhanced ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public read access to document types" ON document_types
+  FOR SELECT USING (true);
+
+CREATE POLICY "Public read access to document fields" ON document_fields
+  FOR SELECT USING (true);
+
+CREATE POLICY "Public read access to depots" ON depots
+  FOR SELECT USING (true);
+
+CREATE POLICY "Public read access to vehicles" ON vehicles_enhanced
+  FOR SELECT USING (true);

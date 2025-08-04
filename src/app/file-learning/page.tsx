@@ -24,7 +24,7 @@ import {
   MapPin
 } from 'lucide-react'
 import { useTranslation } from '@/lib/i18n/useTranslation'
-import { EnhancedFileProcessor, type FileData } from '@/lib/file-learning/enhanced-processor'
+import { VietnameseLogisticsProcessor, type FileData } from '@/lib/file-learning/vietnamese-logistics-processor'
 
 export default function FileLearningPage() {
   const { t, locale } = useTranslation()
@@ -116,7 +116,7 @@ export default function FileLearningPage() {
 
       // Process file
       try {
-        const processedFile = await EnhancedFileProcessor.processFile(file)
+        const processedFile = await VietnameseLogisticsProcessor.processFile(file)
         setFiles(prev => prev.map(f => f.id === initialFileData.id ? processedFile : f))
       } catch (error) {
         console.error('Error processing file:', error)
@@ -504,6 +504,161 @@ export default function FileLearningPage() {
                       </Card>
                     )}
 
+                    {/* Route Optimization Insights */}
+                    {selectedFile.insights.routeOptimization && (
+                      <Card className="shadow-xl border-0">
+                        <CardHeader>
+                          <CardTitle className="flex items-center">
+                            <MapPin className="mr-2 h-5 w-5 text-blue-600" />
+                            Tối ưu hóa tuyến đường
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                            <div className="bg-blue-50 p-4 rounded-lg text-center">
+                              <div className="text-2xl font-bold text-blue-600">
+                                {selectedFile.insights.routeOptimization.currentEfficiency.toFixed(1)}%
+                              </div>
+                              <div className="text-sm text-blue-700">Hiệu quả hiện tại</div>
+                            </div>
+                            <div className="bg-green-50 p-4 rounded-lg text-center">
+                              <div className="text-2xl font-bold text-green-600">
+                                {selectedFile.insights.routeOptimization.optimizationPotential.toFixed(1)}%
+                              </div>
+                              <div className="text-sm text-green-700">Tiềm năng cải thiện</div>
+                            </div>
+                            <div className="bg-orange-50 p-4 rounded-lg text-center">
+                              <div className="text-2xl font-bold text-orange-600">
+                                {selectedFile.insights.routeOptimization.fuelSavingsEstimate.toLocaleString()}
+                              </div>
+                              <div className="text-sm text-orange-700">VND tiết kiệm/ngày</div>
+                            </div>
+                            <div className="bg-purple-50 p-4 rounded-lg text-center">
+                              <div className="text-2xl font-bold text-purple-600">
+                                {selectedFile.insights.routeOptimization.timeSavingsEstimate}
+                              </div>
+                              <div className="text-sm text-purple-700">Phút tiết kiệm/ngày</div>
+                            </div>
+                          </div>
+
+                          {/* Recommended Depots */}
+                          {selectedFile.insights.routeOptimization.recommendedDepots.length > 0 && (
+                            <div className="mb-6">
+                              <h4 className="font-semibold text-gray-800 mb-3">Depot được đề xuất</h4>
+                              <div className="space-y-3">
+                                {selectedFile.insights.routeOptimization.recommendedDepots.map((depot, index) => (
+                                  <div key={index} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                                    <div>
+                                      <span className="font-medium text-blue-800">{depot.depotName}</span>
+                                      <p className="text-sm text-blue-600">{depot.reason}</p>
+                                    </div>
+                                    <div className="text-right">
+                                      <div className="text-sm font-medium text-blue-800">
+                                        -{depot.distanceReduction}km
+                                      </div>
+                                      <div className="text-xs text-blue-600">
+                                        {depot.costSavings.toLocaleString()} VND
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Route Improvements */}
+                          {selectedFile.insights.routeOptimization.routeImprovements.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold text-gray-800 mb-3">Cải thiện tuyến đường</h4>
+                              <div className="space-y-3">
+                                {selectedFile.insights.routeOptimization.routeImprovements.map((improvement, index) => (
+                                  <div key={index} className="p-3 bg-green-50 rounded-lg border-l-4 border-green-400">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <span className="font-medium text-green-800">{improvement.currentRoute}</span>
+                                      <span className="text-sm bg-green-100 text-green-700 px-2 py-1 rounded">
+                                        -{improvement.savings.toLocaleString()} VND
+                                      </span>
+                                    </div>
+                                    <p className="text-sm text-green-700">{improvement.improvement}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {/* Document Generation Suggestions */}
+                    {selectedFile.insights.documentGeneration && (
+                      <Card className="shadow-xl border-0">
+                        <CardHeader>
+                          <CardTitle className="flex items-center">
+                            <FileText className="mr-2 h-5 w-5 text-indigo-600" />
+                            Tự động tạo tài liệu
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="mb-4">
+                            <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                              selectedFile.insights.documentGeneration.canAutoGenerate
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-yellow-100 text-yellow-800'
+                            }`}>
+                              {selectedFile.insights.documentGeneration.canAutoGenerate ? (
+                                <>
+                                  <CheckCircle className="h-4 w-4 mr-1" />
+                                  Có thể tự động tạo
+                                </>
+                              ) : (
+                                <>
+                                  <AlertCircle className="h-4 w-4 mr-1" />
+                                  Cần bổ sung thông tin
+                                </>
+                              )}
+                            </div>
+                          </div>
+
+                          {selectedFile.insights.documentGeneration.suggestedDocuments.length > 0 && (
+                            <div className="mb-4">
+                              <h4 className="font-semibold text-gray-800 mb-3">Tài liệu có thể tạo</h4>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                {selectedFile.insights.documentGeneration.suggestedDocuments.map((doc, index) => (
+                                  <div key={index} className="flex items-center p-2 bg-indigo-50 rounded">
+                                    <FileText className="h-4 w-4 text-indigo-600 mr-2" />
+                                    <span className="text-sm text-indigo-800">{doc}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {selectedFile.insights.documentGeneration.templates.length > 0 && (
+                            <div>
+                              <h4 className="font-semibold text-gray-800 mb-3">Templates sẵn sàng</h4>
+                              <div className="space-y-2">
+                                {selectedFile.insights.documentGeneration.templates.map((template, index) => (
+                                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div>
+                                      <span className="font-medium text-gray-800">{template.templateName}</span>
+                                      <p className="text-sm text-gray-600">{template.documentType}</p>
+                                    </div>
+                                    <div className={`px-2 py-1 rounded text-xs font-medium ${
+                                      template.automationLevel === 'full' ? 'bg-green-100 text-green-800' :
+                                      template.automationLevel === 'partial' ? 'bg-yellow-100 text-yellow-800' :
+                                      'bg-gray-100 text-gray-800'
+                                    }`}>
+                                      {template.automationLevel === 'full' ? 'Tự động hoàn toàn' :
+                                       template.automationLevel === 'partial' ? 'Bán tự động' : 'Thủ công'}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    )}
                     {/* Automation Suggestions */}
                     {selectedFile.insights.automationSuggestions.length > 0 && (
                       <Card className="shadow-xl border-0">
@@ -531,14 +686,16 @@ export default function FileLearningPage() {
                                 <div className="text-sm text-orange-600 mb-2">
                                   <strong>Estimated Savings:</strong> {suggestion.estimatedSavings}
                                 </div>
-                                <div className="text-xs text-orange-600">
-                                  <strong>Implementation:</strong>
-                                  <ul className="list-disc list-inside mt-1">
-                                    {suggestion.implementation.map((step, stepIndex) => (
-                                      <li key={stepIndex}>{step}</li>
-                                    ))}
-                                  </ul>
-                                </div>
+                                {suggestion.implementation && (
+                                  <div className="text-xs text-orange-600">
+                                    <strong>Implementation:</strong>
+                                    <ul className="list-disc list-inside mt-1">
+                                      {suggestion.implementation.map((step, stepIndex) => (
+                                        <li key={stepIndex}>{step}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
                               </div>
                             ))}
                           </div>
