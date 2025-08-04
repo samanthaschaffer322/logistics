@@ -1,14 +1,17 @@
 {
   "build": {
-    "command": "npm run build",
+    "command": "npm ci && npm run build",
     "cwd": "/",
-    "watchPaths": ["src/**/*", "public/**/*", "package.json", "next.config.js"]
+    "watchPaths": ["src/**/*", "public/**/*", "package.json", "next.config.js"],
+    "env": {
+      "NODE_VERSION": "18",
+      "NPM_VERSION": "8",
+      "SKIP_ENV_VALIDATION": "1"
+    }
   },
   "preview": {
     "command": "npm run build && npm run start"
   },
-  "env": {
-    "NODE_VERSION": "18",
-    "NPM_VERSION": "8"
-  }
+  "compatibility_flags": ["nodejs_compat"],
+  "build_image_major_version": 2
 }

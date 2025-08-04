@@ -14,6 +14,7 @@ import {
   FileText,
   LogOut,
   Brain,
+  MessageSquare,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -49,9 +50,15 @@ const navigationItems = [
     roles: ['admin', 'procurement'],
   },
   {
+    name: 'AI Optimization',
+    href: '/ai-optimization',
+    icon: Brain,
+    roles: ['admin', 'warehouse', 'transport', 'distribution', 'procurement'],
+  },
+  {
     name: 'AI Assistant',
     href: '/ai-assistant',
-    icon: Brain,
+    icon: MessageSquare,
     roles: ['admin', 'warehouse', 'transport', 'distribution', 'procurement'],
   },
   {
