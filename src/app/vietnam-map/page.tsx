@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Layout from '@/components/Layout'
 import { 
   Card, 
@@ -10,12 +10,7 @@ import {
   CardTitle,
   Button,
   Input,
-  Badge,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
+  Badge
 } from '@/components/ui-components'
 import { 
   Map, 
@@ -29,88 +24,115 @@ import {
   CheckCircle,
   Truck,
   Calculator,
-  Zap
+  Zap,
+  Search,
+  Warehouse,
+  TrendingUp,
+  Target
 } from 'lucide-react'
-
-interface RouteData {
-  distance: number
-  duration: string
-  fuelCost: number
-  tollCost: number
-  totalCost: number
-  riskLevel: 'low' | 'medium' | 'high'
-  recommendations: string[]
-}
+import { RouteOptimizer, Location, OptimizedRoute, RouteOptimizationRequest } from '@/lib/routeOptimizer'
 
 const VietnamMapPage = () => {
   const [departure, setDeparture] = useState('')
   const [destination, setDestination] = useState('')
-  const [vehicleType, setVehicleType] = useState('truck')
-  const [routeData, setRouteData] = useState<RouteData | null>(null)
+  const [vehicleType, setVehicleType] = useState<'truck' | 'van' | 'car'>('truck')
+  const [optimizedRoute, setOptimizedRoute] = useState<OptimizedRoute | null>(null)
   const [isCalculating, setIsCalculating] = useState(false)
-  const [mapCenter, setMapCenter] = useState({ lat: 16.0583, lng: 108.2772 }) // Vietnam center
+  const [departureResults, setDepartureResults] = useState<Location[]>([])
+  const [destinationResults, setDestinationResults] = useState<Location[]>([])
+  const [showDepartureResults, setShowDepartureResults] = useState(false)
+  const [showDestinationResults, setShowDestinationResults] = useState(false)
+  const [selectedDeparture, setSelectedDeparture] = useState<Location | null>(null)
+  const [selectedDestination, setSelectedDestination] = useState<Location | null>(null)
+  const [availableDepots, setAvailableDepots] = useState<Location[]>([])
+  const [popularRoutes, setPopularRoutes] = useState<Array<{departure: string, destination: string, frequency: number}>>([])
 
-  // Major Vietnamese cities for suggestions
-  const majorCities = [
-    'Ho Chi Minh City', 'Hanoi', 'Da Nang', 'Hai Phong', 'Can Tho',
-    'Bien Hoa', 'Hue', 'Nha Trang', 'Buon Ma Thuot', 'Quy Nhon',
-    'Vung Tau', 'Nam Dinh', 'Phan Thiet', 'Long Xuyen', 'Thai Nguyen',
-    'Thanh Hoa', 'Rach Gia', 'Cam Ranh', 'Vinh Long', 'My Tho'
-  ]
+  const departureInputRef = useRef<HTMLInputElement>(null)
+  const destinationInputRef = useRef<HTMLInputElement>(null)
 
-  const calculateRoute = async () => {
-    if (!departure.trim() || !destination.trim()) {
-      alert('Please enter both departure and destination locations')
+  useEffect(() => {
+    setAvailableDepots(RouteOptimizer.getAvailableDepots())
+    setPopularRoutes(RouteOptimizer.getPopularRoutes())
+  }, [])
+
+  const handleDepartureSearch = (query: string) => {
+    setDeparture(query)
+    if (query.length > 1) {
+      const results = RouteOptimizer.searchLocations(query)
+      setDepartureResults(results)
+      setShowDepartureResults(true)
+    } else {
+      setShowDepartureResults(false)
+    }
+  }
+
+  const handleDestinationSearch = (query: string) => {
+    setDestination(query)
+    if (query.length > 1) {
+      const results = RouteOptimizer.searchLocations(query)
+      setDestinationResults(results)
+      setShowDestinationResults(true)
+    } else {
+      setShowDestinationResults(false)
+    }
+  }
+
+  const selectDeparture = (location: Location) => {
+    setSelectedDeparture(location)
+    setDeparture(location.name)
+    setShowDepartureResults(false)
+  }
+
+  const selectDestination = (location: Location) => {
+    setSelectedDestination(location)
+    setDestination(location.name)
+    setShowDestinationResults(false)
+  }
+
+  const calculateOptimalRoute = async () => {
+    if (!selectedDeparture || !selectedDestination) {
+      alert('Vui lòng chọn điểm đi và điểm đến')
       return
     }
 
     setIsCalculating(true)
     
-    // Simulate route calculation with realistic Vietnamese logistics data
-    setTimeout(() => {
-      const distance = Math.floor(Math.random() * 1500) + 100 // 100-1600 km
-      const baseSpeed = vehicleType === 'truck' ? 45 : 60 // km/h
-      const duration = Math.ceil(distance / baseSpeed)
-      
-      const fuelConsumption = vehicleType === 'truck' ? 0.25 : 0.15 // L/km
-      const fuelPrice = 24000 // VND per liter
-      const fuelCost = distance * fuelConsumption * fuelPrice
-      
-      const tollCost = distance * (vehicleType === 'truck' ? 800 : 500) // VND per km
-      const totalCost = fuelCost + tollCost
-      
-      // Determine risk level based on distance and route
-      let riskLevel: 'low' | 'medium' | 'high' = 'low'
-      if (distance > 800) riskLevel = 'medium'
-      if (distance > 1200) riskLevel = 'high'
-      
-      const recommendations = [
-        `Optimal departure time: 5:00-7:00 AM to avoid traffic`,
-        `Estimated fuel stops: ${Math.ceil(distance / 400)} stops needed`,
-        `Weather check recommended for ${destination}`,
-        `Alternative route via Highway ${Math.floor(Math.random() * 20) + 1} available`
-      ]
+    try {
+      const request: RouteOptimizationRequest = {
+        departure: selectedDeparture,
+        destination: selectedDestination,
+        depots: availableDepots,
+        vehicleType: vehicleType
+      }
 
-      setRouteData({
-        distance,
-        duration: `${duration} hours`,
-        fuelCost: Math.round(fuelCost),
-        tollCost: Math.round(tollCost),
-        totalCost: Math.round(totalCost),
-        riskLevel,
-        recommendations
-      })
-      
-      setIsCalculating(false)
-    }, 2000)
+      const route = await RouteOptimizer.optimizeRoute(request)
+      setOptimizedRoute(route)
+    } catch (error) {
+      console.error('Error calculating route:', error)
+      alert('Có lỗi xảy ra khi tính toán tuyến đường')
+    }
+    
+    setIsCalculating(false)
+  }
+
+  const setQuickRoute = (dep: string, dest: string) => {
+    const depLocation = RouteOptimizer.searchLocations(dep)[0]
+    const destLocation = RouteOptimizer.searchLocations(dest)[0]
+    
+    if (depLocation && destLocation) {
+      setSelectedDeparture(depLocation)
+      setSelectedDestination(destLocation)
+      setDeparture(depLocation.name)
+      setDestination(destLocation.name)
+    }
   }
 
   const getRiskColor = (level: string) => {
     switch (level) {
-      case 'low': return 'bg-green-100 text-green-800'
-      case 'medium': return 'bg-yellow-100 text-yellow-800'
-      case 'high': return 'bg-red-100 text-red-800'
-      default: return 'bg-gray-100 text-gray-800'
+      case 'low': return 'badge-success'
+      case 'medium': return 'badge-warning'
+      case 'high': return 'badge-error'
+      default: return 'badge-info'
     }
   }
 
@@ -121,21 +143,29 @@ const VietnamMapPage = () => {
     }).format(amount)
   }
 
+  const getVehicleIcon = (type: string) => {
+    switch (type) {
+      case 'truck': return <Truck className="w-4 h-4" />
+      case 'van': return <Truck className="w-4 h-4" />
+      default: return <Truck className="w-4 h-4" />
+    }
+  }
+
   return (
     <Layout>
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-              <Map className="w-8 h-8 text-blue-600" />
+            <h1 className="text-3xl font-bold gradient-text flex items-center gap-3">
+              <Map className="w-8 h-8 text-indigo-400" />
               Vietnam Map & Route Optimization
             </h1>
-            <p className="text-gray-600 mt-1">
-              Smart route planning with real-time optimization for Vietnamese logistics
+            <p className="text-slate-400 mt-1">
+              Tối ưu hóa tuyến đường thông minh với AI cho logistics Việt Nam
             </p>
           </div>
-          <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+          <Badge className="badge-info">
             AI-Powered Routing
           </Badge>
         </div>
@@ -143,169 +173,211 @@ const VietnamMapPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Route Planning Panel */}
           <div className="lg:col-span-1 space-y-4">
-            <Card>
+            <Card className="dark-card">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Navigation className="w-5 h-5 text-blue-600" />
-                  Route Planning
+                <CardTitle className="flex items-center gap-2 text-white">
+                  <Navigation className="w-5 h-5 text-indigo-400" />
+                  Lập kế hoạch tuyến đường
                 </CardTitle>
-                <CardDescription>
-                  Enter departure and destination for optimal route calculation
+                <CardDescription className="text-slate-400">
+                  Nhập điểm đi và điểm đến để tính toán tuyến đường tối ưu
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Departure Location
+                <div className="relative">
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Điểm khởi hành
                   </label>
-                  <Input
-                    value={departure}
-                    onChange={(e) => setDeparture(e.target.value)}
-                    placeholder="Enter departure city (e.g., Ho Chi Minh City)"
-                    className="w-full"
-                    list="cities-list"
-                  />
-                  <datalist id="cities-list">
-                    {majorCities.map(city => (
-                      <option key={city} value={city} />
-                    ))}
-                  </datalist>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Input
+                      ref={departureInputRef}
+                      value={departure}
+                      onChange={(e) => handleDepartureSearch(e.target.value)}
+                      placeholder="Nhập tên thành phố (VD: TP. Hồ Chí Minh)"
+                      className="dark-input pl-10"
+                    />
+                  </div>
+                  {showDepartureResults && departureResults.length > 0 && (
+                    <div className="absolute z-10 w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl shadow-xl max-h-60 overflow-y-auto">
+                      {departureResults.map((location, index) => (
+                        <button
+                          key={index}
+                          onClick={() => selectDeparture(location)}
+                          className="w-full text-left px-4 py-3 hover:bg-slate-700 flex items-center gap-3 transition-colors"
+                        >
+                          <MapPin className="w-4 h-4 text-indigo-400" />
+                          <div>
+                            <div className="font-medium text-white">{location.name}</div>
+                            <div className="text-sm text-slate-400">{location.address}</div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="relative">
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Điểm đến
+                  </label>
+                  <div className="relative">
+                    <Target className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Input
+                      ref={destinationInputRef}
+                      value={destination}
+                      onChange={(e) => handleDestinationSearch(e.target.value)}
+                      placeholder="Nhập điểm đến (VD: Hà Nội)"
+                      className="dark-input pl-10"
+                    />
+                  </div>
+                  {showDestinationResults && destinationResults.length > 0 && (
+                    <div className="absolute z-10 w-full mt-1 bg-slate-800 border border-slate-700 rounded-xl shadow-xl max-h-60 overflow-y-auto">
+                      {destinationResults.map((location, index) => (
+                        <button
+                          key={index}
+                          onClick={() => selectDestination(location)}
+                          className="w-full text-left px-4 py-3 hover:bg-slate-700 flex items-center gap-3 transition-colors"
+                        >
+                          <MapPin className="w-4 h-4 text-red-400" />
+                          <div>
+                            <div className="font-medium text-white">{location.name}</div>
+                            <div className="text-sm text-slate-400">{location.address}</div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Destination Location
+                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                    Loại phương tiện
                   </label>
-                  <Input
-                    value={destination}
-                    onChange={(e) => setDestination(e.target.value)}
-                    placeholder="Enter destination city (e.g., Hanoi)"
-                    className="w-full"
-                    list="cities-list"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Vehicle Type
-                  </label>
-                  <Select value={vehicleType} onValueChange={setVehicleType}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="truck">Truck (Heavy)</SelectItem>
-                      <SelectItem value="van">Van (Medium)</SelectItem>
-                      <SelectItem value="car">Car (Light)</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select
+                    value={vehicleType}
+                    onChange={(e) => setVehicleType(e.target.value as 'truck' | 'van' | 'car')}
+                    className="dark-input w-full"
+                  >
+                    <option value="truck">Xe tải (Nặng)</option>
+                    <option value="van">Xe van (Trung bình)</option>
+                    <option value="car">Xe con (Nhẹ)</option>
+                  </select>
                 </div>
 
                 <Button
-                  onClick={calculateRoute}
-                  disabled={isCalculating || !departure.trim() || !destination.trim()}
-                  className="w-full bg-blue-600 hover:bg-blue-700"
+                  onClick={calculateOptimalRoute}
+                  disabled={isCalculating || !selectedDeparture || !selectedDestination}
+                  className="gradient-button w-full"
                 >
                   {isCalculating ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      Calculating Route...
+                      Đang tính toán...
                     </>
                   ) : (
                     <>
                       <Route className="w-4 h-4 mr-2" />
-                      Calculate Optimal Route
+                      Tính toán tuyến đường tối ưu
                     </>
                   )}
                 </Button>
 
-                {/* Quick Route Buttons */}
+                {/* Popular Routes */}
                 <div className="space-y-2">
-                  <p className="text-sm font-medium text-gray-700">Quick Routes:</p>
+                  <p className="text-sm font-medium text-slate-300">Tuyến đường phổ biến:</p>
                   <div className="grid grid-cols-1 gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setDeparture('Ho Chi Minh City')
-                        setDestination('Hanoi')
-                      }}
-                      className="text-left justify-start"
-                    >
-                      HCMC → Hanoi
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setDeparture('Da Nang')
-                        setDestination('Ho Chi Minh City')
-                      }}
-                      className="text-left justify-start"
-                    >
-                      Da Nang → HCMC
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setDeparture('Hanoi')
-                        setDestination('Hai Phong')
-                      }}
-                      className="text-left justify-start"
-                    >
-                      Hanoi → Hai Phong
-                    </Button>
+                    {popularRoutes.slice(0, 4).map((route, index) => (
+                      <Button
+                        key={index}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setQuickRoute(route.departure, route.destination)}
+                        className="dark-button text-left justify-start"
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <span className="text-sm">{route.departure} → {route.destination}</span>
+                          <Badge className="badge-info text-xs">
+                            {route.frequency}%
+                          </Badge>
+                        </div>
+                      </Button>
+                    ))}
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             {/* Route Results */}
-            {routeData && (
-              <Card>
+            {optimizedRoute && (
+              <Card className="dark-card">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calculator className="w-5 h-5 text-green-600" />
-                    Route Analysis
+                  <CardTitle className="flex items-center gap-2 text-white">
+                    <Calculator className="w-5 h-5 text-emerald-400" />
+                    Kết quả phân tích
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center p-3 bg-blue-50 rounded-lg">
-                      <MapPin className="w-5 h-5 text-blue-600 mx-auto mb-1" />
-                      <p className="text-sm text-gray-600">Distance</p>
-                      <p className="font-bold text-blue-600">{routeData.distance} km</p>
+                    <div className="text-center p-3 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
+                      <MapPin className="w-5 h-5 text-indigo-400 mx-auto mb-1" />
+                      <p className="text-sm text-slate-400">Khoảng cách</p>
+                      <p className="font-bold text-indigo-400">{optimizedRoute.distance} km</p>
                     </div>
-                    <div className="text-center p-3 bg-green-50 rounded-lg">
-                      <Clock className="w-5 h-5 text-green-600 mx-auto mb-1" />
-                      <p className="text-sm text-gray-600">Duration</p>
-                      <p className="font-bold text-green-600">{routeData.duration}</p>
+                    <div className="text-center p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
+                      <Clock className="w-5 h-5 text-emerald-400 mx-auto mb-1" />
+                      <p className="text-sm text-slate-400">Thời gian</p>
+                      <p className="font-bold text-emerald-400">{optimizedRoute.duration} giờ</p>
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Fuel Cost:</span>
-                      <span className="font-medium">{formatCurrency(routeData.fuelCost)}</span>
+                      <span className="text-sm text-slate-400">Chi phí xăng:</span>
+                      <span className="font-medium text-white">{formatCurrency(optimizedRoute.cost.fuel)}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Toll Cost:</span>
-                      <span className="font-medium">{formatCurrency(routeData.tollCost)}</span>
+                      <span className="text-sm text-slate-400">Phí cầu đường:</span>
+                      <span className="font-medium text-white">{formatCurrency(optimizedRoute.cost.tolls)}</span>
                     </div>
-                    <div className="flex justify-between items-center border-t pt-2">
-                      <span className="font-medium">Total Cost:</span>
-                      <span className="font-bold text-lg text-blue-600">
-                        {formatCurrency(routeData.totalCost)}
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-slate-400">Chi phí lái xe:</span>
+                      <span className="font-medium text-white">{formatCurrency(optimizedRoute.cost.driver)}</span>
+                    </div>
+                    <div className="flex justify-between items-center border-t border-slate-700 pt-2">
+                      <span className="font-medium text-white">Tổng chi phí:</span>
+                      <span className="font-bold text-lg gradient-text">
+                        {formatCurrency(optimizedRoute.cost.total)}
                       </span>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Risk Level:</span>
-                    <Badge className={getRiskColor(routeData.riskLevel)}>
-                      {routeData.riskLevel.toUpperCase()}
+                    <span className="text-sm text-slate-400">Mức độ rủi ro:</span>
+                    <Badge className={getRiskColor(optimizedRoute.riskLevel)}>
+                      {optimizedRoute.riskLevel === 'low' ? 'Thấp' : 
+                       optimizedRoute.riskLevel === 'medium' ? 'Trung bình' : 'Cao'}
                     </Badge>
+                  </div>
+
+                  {/* Waypoints */}
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-slate-300">Điểm dừng:</p>
+                    {optimizedRoute.waypoints.map((waypoint, index) => (
+                      <div key={index} className="flex items-center gap-2 text-sm">
+                        {index === 0 ? (
+                          <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
+                        ) : index === optimizedRoute.waypoints.length - 1 ? (
+                          <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                        ) : (
+                          <Warehouse className="w-3 h-3 text-amber-400" />
+                        )}
+                        <span className="text-slate-300">{waypoint.name}</span>
+                        {waypoint.type === 'depot' && (
+                          <Badge className="badge-warning text-xs">Kho</Badge>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
@@ -314,80 +386,113 @@ const VietnamMapPage = () => {
 
           {/* Map Display */}
           <div className="lg:col-span-2">
-            <Card className="h-[600px]">
+            <Card className="dark-card h-[600px]">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Map className="w-5 h-5 text-blue-600" />
-                  Interactive Vietnam Map
+                <CardTitle className="flex items-center gap-2 text-white">
+                  <Map className="w-5 h-5 text-indigo-400" />
+                  Bản đồ Việt Nam tương tác
                 </CardTitle>
-                <CardDescription>
-                  Visual route display with real-time traffic and logistics data
+                <CardDescription className="text-slate-400">
+                  Hiển thị tuyến đường trực quan với dữ liệu logistics thời gian thực
                 </CardDescription>
               </CardHeader>
               <CardContent className="h-full p-0">
-                <div className="w-full h-full bg-gradient-to-br from-blue-50 to-green-50 rounded-b-lg flex items-center justify-center relative overflow-hidden">
-                  {/* Simplified Vietnam Map Representation */}
+                <div className="w-full h-full bg-gradient-to-br from-slate-900 to-slate-800 rounded-b-xl flex items-center justify-center relative overflow-hidden">
+                  {/* Enhanced Vietnam Map Representation */}
                   <div className="relative w-full h-full flex items-center justify-center">
                     <div className="text-center space-y-4">
-                      <div className="w-64 h-96 bg-green-200 rounded-lg relative mx-auto shadow-lg">
-                        {/* Vietnam shape approximation */}
-                        <div className="absolute inset-0 bg-gradient-to-b from-green-300 to-green-400 rounded-lg">
-                          {/* Major cities markers */}
-                          <div className="absolute top-8 left-1/2 transform -translate-x-1/2">
-                            <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                            <span className="text-xs font-medium text-gray-700 absolute -bottom-5 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
-                              Hanoi
+                      <div className="w-80 h-[480px] bg-gradient-to-b from-slate-700 to-slate-800 rounded-2xl relative mx-auto shadow-2xl border border-slate-600">
+                        {/* Vietnam shape with enhanced styling */}
+                        <div className="absolute inset-0 bg-gradient-to-b from-slate-600 to-slate-700 rounded-2xl overflow-hidden">
+                          {/* Major cities markers with enhanced styling */}
+                          <div className="absolute top-12 left-1/2 transform -translate-x-1/2">
+                            <div className={`w-4 h-4 rounded-full shadow-lg ${selectedDeparture?.name === 'Hà Nội' || selectedDestination?.name === 'Hà Nội' ? 'bg-gradient-to-r from-indigo-500 to-purple-500 animate-pulse-glow' : 'bg-red-500'}`}></div>
+                            <span className="text-xs font-medium text-white absolute -bottom-6 left-1/2 transform -translate-x-1/2 whitespace-nowrap bg-slate-800 px-2 py-1 rounded">
+                              Hà Nội
                             </span>
                           </div>
-                          <div className="absolute bottom-8 right-8">
-                            <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                            <span className="text-xs font-medium text-gray-700 absolute -bottom-5 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
-                              HCMC
+                          <div className="absolute bottom-12 right-12">
+                            <div className={`w-4 h-4 rounded-full shadow-lg ${selectedDeparture?.name === 'TP. Hồ Chí Minh' || selectedDestination?.name === 'TP. Hồ Chí Minh' ? 'bg-gradient-to-r from-indigo-500 to-purple-500 animate-pulse-glow' : 'bg-red-500'}`}></div>
+                            <span className="text-xs font-medium text-white absolute -bottom-6 left-1/2 transform -translate-x-1/2 whitespace-nowrap bg-slate-800 px-2 py-1 rounded">
+                              TP.HCM
                             </span>
                           </div>
-                          <div className="absolute top-1/2 right-4 transform -translate-y-1/2">
-                            <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                            <span className="text-xs font-medium text-gray-700 absolute -bottom-5 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
-                              Da Nang
+                          <div className="absolute top-1/2 right-6 transform -translate-y-1/2">
+                            <div className={`w-4 h-4 rounded-full shadow-lg ${selectedDeparture?.name === 'Đà Nẵng' || selectedDestination?.name === 'Đà Nẵng' ? 'bg-gradient-to-r from-indigo-500 to-purple-500 animate-pulse-glow' : 'bg-red-500'}`}></div>
+                            <span className="text-xs font-medium text-white absolute -bottom-6 left-1/2 transform -translate-x-1/2 whitespace-nowrap bg-slate-800 px-2 py-1 rounded">
+                              Đà Nẵng
                             </span>
                           </div>
                           
+                          {/* Depot markers */}
+                          {availableDepots.slice(0, 3).map((depot, index) => (
+                            <div key={index} className={`absolute w-3 h-3 bg-amber-400 rounded-full shadow-lg ${optimizedRoute?.waypoints.some(wp => wp.name === depot.name) ? 'animate-pulse-glow' : ''}`} 
+                                 style={{ 
+                                   top: `${20 + index * 15}%`, 
+                                   left: `${30 + index * 20}%` 
+                                 }}>
+                              <span className="text-xs font-medium text-white absolute -bottom-6 left-1/2 transform -translate-x-1/2 whitespace-nowrap bg-slate-800 px-2 py-1 rounded">
+                                {depot.name}
+                              </span>
+                            </div>
+                          ))}
+                          
                           {/* Route line if both locations are set */}
-                          {departure && destination && routeData && (
+                          {selectedDeparture && selectedDestination && optimizedRoute && (
                             <div className="absolute inset-0">
                               <svg className="w-full h-full">
+                                <defs>
+                                  <linearGradient id="routeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stopColor="#6366f1" />
+                                    <stop offset="100%" stopColor="#8b5cf6" />
+                                  </linearGradient>
+                                </defs>
                                 <path
-                                  d="M 128 60 Q 140 200 180 320"
-                                  stroke="#3B82F6"
-                                  strokeWidth="3"
+                                  d="M 160 80 Q 200 200 240 360"
+                                  stroke="url(#routeGradient)"
+                                  strokeWidth="4"
                                   fill="none"
-                                  strokeDasharray="5,5"
+                                  strokeDasharray="8,4"
                                   className="animate-pulse"
                                 />
+                                {/* Waypoint indicators */}
+                                {optimizedRoute.waypoints.length > 2 && (
+                                  <circle cx="200" cy="200" r="6" fill="#f59e0b" className="animate-pulse" />
+                                )}
                               </svg>
                             </div>
                           )}
                         </div>
                       </div>
                       
-                      {!departure || !destination ? (
-                        <div className="text-gray-500">
+                      {!selectedDeparture || !selectedDestination ? (
+                        <div className="text-slate-400">
                           <MapPin className="w-8 h-8 mx-auto mb-2" />
-                          <p className="font-medium">Enter departure and destination</p>
-                          <p className="text-sm">to see route visualization</p>
+                          <p className="font-medium">Chọn điểm đi và điểm đến</p>
+                          <p className="text-sm">để xem trực quan hóa tuyến đường</p>
                         </div>
-                      ) : routeData ? (
-                        <div className="bg-white rounded-lg p-4 shadow-lg max-w-sm mx-auto">
+                      ) : optimizedRoute ? (
+                        <div className="glass-effect rounded-xl p-4 shadow-xl max-w-sm mx-auto">
                           <div className="flex items-center gap-2 mb-2">
-                            <CheckCircle className="w-5 h-5 text-green-600" />
-                            <span className="font-medium">Route Calculated</span>
+                            <CheckCircle className="w-5 h-5 text-emerald-400" />
+                            <span className="font-medium text-white">Tuyến đường đã tính toán</span>
                           </div>
-                          <p className="text-sm text-gray-600">
-                            {departure} → {destination}
+                          <p className="text-sm text-slate-300">
+                            {selectedDeparture.name} → {selectedDestination.name}
                           </p>
-                          <p className="text-lg font-bold text-blue-600">
-                            {routeData.distance} km • {routeData.duration}
-                          </p>
+                          <div className="flex items-center gap-4 mt-2">
+                            <p className="text-lg font-bold gradient-text">
+                              {optimizedRoute.distance} km
+                            </p>
+                            <p className="text-lg font-bold text-emerald-400">
+                              {optimizedRoute.duration} giờ
+                            </p>
+                          </div>
+                          {optimizedRoute.waypoints.length > 2 && (
+                            <p className="text-xs text-amber-400 mt-1">
+                              Qua {optimizedRoute.waypoints.length - 2} kho trung chuyển
+                            </p>
+                          )}
                         </div>
                       ) : null}
                     </div>
@@ -399,29 +504,58 @@ const VietnamMapPage = () => {
         </div>
 
         {/* AI Recommendations */}
-        {routeData && (
-          <Card>
+        {optimizedRoute && (
+          <Card className="dark-card">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Zap className="w-5 h-5 text-yellow-500" />
-                AI-Powered Recommendations
+              <CardTitle className="flex items-center gap-2 text-white">
+                <Zap className="w-5 h-5 text-yellow-400" />
+                Đề xuất tối ưu hóa AI
               </CardTitle>
-              <CardDescription>
-                Smart insights and optimization suggestions for your route
+              <CardDescription className="text-slate-400">
+                Thông tin chi tiết thông minh và đề xuất tối ưu hóa cho tuyến đường của bạn
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {routeData.recommendations.map((rec, index) => (
-                  <div key={index} className="flex items-start gap-3 p-3 bg-yellow-50 rounded-lg">
-                    <Zap className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
-                    <p className="text-sm text-gray-700">{rec}</p>
+                {optimizedRoute.recommendations.map((rec, index) => (
+                  <div key={index} className="flex items-start gap-3 p-4 bg-gradient-to-r from-yellow-500/10 to-amber-500/10 rounded-xl border border-yellow-500/20">
+                    <Zap className="w-5 h-5 text-yellow-400 mt-0.5 flex-shrink-0" />
+                    <p className="text-sm text-slate-300">{rec}</p>
                   </div>
                 ))}
               </div>
             </CardContent>
           </Card>
         )}
+
+        {/* Available Depots */}
+        <Card className="dark-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-white">
+              <Warehouse className="w-5 h-5 text-amber-400" />
+              Kho và trung tâm logistics có sẵn
+            </CardTitle>
+            <CardDescription className="text-slate-400">
+              Mạng lưới kho bãi và trung tâm phân phối trên toàn quốc
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {availableDepots.map((depot, index) => (
+                <div key={index} className="p-4 bg-slate-800/30 rounded-xl border border-slate-700/50 hover:border-amber-500/30 transition-colors">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Warehouse className="w-4 h-4 text-amber-400" />
+                    <h4 className="font-medium text-white">{depot.name}</h4>
+                  </div>
+                  <p className="text-sm text-slate-400">{depot.address}</p>
+                  <Badge className="badge-warning mt-2 text-xs">
+                    Kho trung chuyển
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </Layout>
   )
