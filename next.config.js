@@ -1,110 +1,24 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Disable static export to allow API routes
-  // ...(process.env.NODE_ENV === 'production' && {
-  //   output: 'export',
-  //   trailingSlash: true,
-  // }),
-  
-  // Image optimization
-  images: {
-    unoptimized: true,
-  },
-  
-  // Experimental features for faster builds
   experimental: {
-    // Optimize bundle splitting - compatible with both Webpack and Turbopack
-    optimizePackageImports: ['lucide-react', 'recharts', 'openai', 'leaflet', 'react-leaflet'],
+    optimizePackageImports: ['@/components/ui']
   },
-  
-  // Compiler optimizations
-  compiler: {
-    removeConsole: process.env.NODE_ENV === 'production' ? {
-      exclude: ['error', 'warn'],
-    } : false,
-  },
-  
-  // Build optimizations for speed
-  typescript: {
-    ignoreBuildErrors: true, // Disable TypeScript checking for production
-  },
-  
-  eslint: {
-    ignoreDuringBuilds: true, // Disable ESLint for production
-  },
-  
-  // Environment variables
-  env: {
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
-    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
-    NEXT_PUBLIC_OPENAI_API_KEY: process.env.NEXT_PUBLIC_OPENAI_API_KEY || '',
-  },
-  
-  // Webpack optimizations for faster builds and better compatibility
-  webpack: (config, { dev, isServer }) => {
-    // Development optimizations
-    if (dev) {
-      config.watchOptions = {
-        poll: 1000,
-        aggregateTimeout: 300,
-      };
+  webpack: (config, { isServer }) => {
+    // Ensure proper module resolution for UI components
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@/components/ui/card': require.resolve('./src/components/ui/card.tsx'),
+      '@/components/ui/button': require.resolve('./src/components/ui/button.tsx'),
+      '@/components/ui/input': require.resolve('./src/components/ui/input.tsx'),
+      '@/components/ui/label': require.resolve('./src/components/ui/label.tsx'),
+      '@/components/ui/select': require.resolve('./src/components/ui/select.tsx'),
+      '@/components/ui/tabs': require.resolve('./src/components/ui/tabs.tsx'),
+      '@/components/ui/badge': require.resolve('./src/components/ui/badge.tsx'),
+      '@/components/ui/progress': require.resolve('./src/components/ui/progress.tsx'),
+      '@/components/ui/alert': require.resolve('./src/components/ui/alert.tsx'),
     }
-    
-    // Production optimizations
-    if (!dev && !isServer) {
-      config.optimization.splitChunks = {
-        chunks: 'all',
-        cacheGroups: {
-          vendor: {
-            name: 'vendor',
-            chunks: 'all',
-            test: /node_modules/,
-            priority: 10,
-            reuseExistingChunk: true,
-          },
-          common: {
-            name: 'common',
-            chunks: 'all',
-            minChunks: 2,
-            priority: 5,
-            reuseExistingChunk: true,
-          },
-        },
-      };
-    }
-    
-    // Remove custom CSS loader - let Next.js handle CSS natively
-    // This fixes the CSS loader warning
-    
-    return config;
-  },
-  
-  // Performance optimizations
-  poweredByHeader: false,
-  
-  // Security headers for production
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin',
-          },
-        ],
-      },
-    ];
-  },
-};
+    return config
+  }
+}
 
-module.exports = nextConfig;
+module.exports = nextConfig

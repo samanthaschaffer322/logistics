@@ -36,6 +36,20 @@ const navigationItems = [
     color: 'blue'
   },
   { 
+    key: 'ai-assistant', 
+    href: '/ai-assistant', 
+    icon: Brain,
+    translationKey: 'navigation.aiAssistant',
+    color: 'purple'
+  },
+  { 
+    key: 'enhanced-ai', 
+    href: '/enhanced-ai', 
+    icon: Zap,
+    translationKey: 'navigation.enhancedAI',
+    color: 'indigo'
+  },
+  { 
     key: 'fleet-management', 
     href: '/fleet-management', 
     icon: Truck,
