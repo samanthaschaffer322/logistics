@@ -1,86 +1,87 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState } from 'react'
-import { validateCredentials, getCurrentUser, storeUserSession, clearUserSession, type AuthUser } from '@/lib/auth/simple-auth'
+import React, { createContext, useContext, useState, useEffect } from 'react'
+
+interface User {
+  id: string
+  name: string
+  email: string
+  role: string
+}
 
 interface AuthContextType {
-  user: AuthUser | null
-  loading: boolean
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>
-  signOut: () => Promise<void>
+  user: User | null
+  login: (email: string, password: string) => Promise<boolean>
+  logout: () => void
+  isLoading: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    // Check for existing session on mount
-    const checkSession = () => {
-      try {
-        const currentUser = getCurrentUser()
-        if (currentUser) {
-          setUser(currentUser)
-        }
-      } catch (error) {
-        console.error('Error checking session:', error)
-        clearUserSession()
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    checkSession()
-  }, [])
-
-  const signIn = async (email: string, password: string) => {
-    try {
-      setLoading(true)
-      
-      const validatedUser = validateCredentials(email, password)
-      
-      if (validatedUser) {
-        // Store user session
-        storeUserSession(validatedUser)
-        setUser(validatedUser)
-        
-        return { error: null }
-      } else {
-        return { error: new Error('Invalid credentials. Please check your email and password.') }
-      }
-    } catch (error) {
-      console.error('Login error:', error)
-      return { error: error as Error }
-    } finally {
-      setLoading(false)
+export const useAuth = () => {
+  const context = useContext(AuthContext)
+  if (context === undefined) {
+    // For static export, return a default auth state
+    return {
+      user: {
+        id: '1',
+        name: 'Demo User',
+        email: 'demo@logiai.com',
+        role: 'admin'
+      },
+      login: async () => true,
+      logout: () => {},
+      isLoading: false
     }
   }
+  return context
+}
 
-  const signOut = async () => {
-    try {
-      clearUserSession()
-      setUser(null)
-    } catch (error) {
-      console.error('Error signing out:', error)
-    }
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+
+  useEffect(() => {
+    // For demo purposes, set a default user
+    setUser({
+      id: '1',
+      name: 'Demo User',
+      email: 'demo@logiai.com',
+      role: 'admin'
+    })
+  }, [])
+
+  const login = async (email: string, password: string): Promise<boolean> => {
+    setIsLoading(true)
+    
+    // Simulate login
+    setTimeout(() => {
+      setUser({
+        id: '1',
+        name: 'Demo User',
+        email: email,
+        role: 'admin'
+      })
+      setIsLoading(false)
+    }, 1000)
+    
+    return true
+  }
+
+  const logout = () => {
+    setUser(null)
   }
 
   const value = {
     user,
-    loading,
-    signIn,
-    signOut,
+    login,
+    logout,
+    isLoading
   }
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext)
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider')
-  }
-  return context
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  )
 }
