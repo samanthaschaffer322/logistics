@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import Navigation from '@/components/Navigation'
 import EnhancedRouteOptimizer from '@/components/EnhancedRouteOptimizer'
 import { 
