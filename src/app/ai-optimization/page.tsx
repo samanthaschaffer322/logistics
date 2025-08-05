@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui'
 import { Brain, TrendingUp, AlertTriangle, Target, Zap, BarChart3 } from 'lucide-react'
 import { 
   aiHybridForecasting, 
