@@ -2,9 +2,9 @@
 
 import React, { useEffect, useState } from 'react'
 import { supabase } from '../../../supabase/client'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
-import Button from '@/components/ui/Button'
-import Input from '@/components/ui/Input'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { Package, Plus, AlertTriangle, Search, Edit, Trash2 } from 'lucide-react'
 import { generateSKU, calculateReorderSuggestion } from '@/lib/utils'
 

@@ -1,3 +1,6 @@
+export const dynamic = 'force-static';
+export const revalidate = false;
+
 import { NextRequest } from 'next/server'
 import { withSecurity, createSecureResponse } from '@/lib/security/api-security'
 import { fileUploadRateLimiter, securityLogger } from '@/lib/security/middleware'

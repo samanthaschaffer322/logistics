@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Package, Truck, Send, ShoppingCart, AlertTriangle, TrendingUp, Brain, FileText, Shield, Users, Clock, CheckCircle } from 'lucide-react'
 import Navigation from '@/components/Navigation'
 

@@ -1,3 +1,6 @@
+export const dynamic = 'force-static';
+export const revalidate = false;
+
 import { NextRequest, NextResponse } from 'next/server';
 import { LogisticsAI } from '@/lib/ai-learning/logistics-ai';
 import * as XLSX from 'xlsx';

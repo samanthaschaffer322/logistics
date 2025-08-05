@@ -1,3 +1,6 @@
+export const dynamic = 'force-static';
+export const revalidate = false;
+
 import { NextRequest, NextResponse } from 'next/server';
 import { AdvancedRouteOptimizer, RouteOptimizationRequest } from '@/lib/route-optimization/advanced-optimizer';
 
