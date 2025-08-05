@@ -5,47 +5,32 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatDate(date: string | Date) {
-  return new Intl.DateTimeFormat('en-US', {
+export function formatDate(date: string | Date): string {
+  const d = new Date(date)
+  return d.toLocaleDateString('vi-VN', {
     year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  }).format(new Date(date))
+    month: '2-digit',
+    day: '2-digit'
+  })
 }
 
-export function formatDateTime(date: string | Date) {
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(date))
+export function generateSKU(): string {
+  const timestamp = Date.now().toString(36)
+  const random = Math.random().toString(36).substr(2, 5)
+  return `SKU-${timestamp}-${random}`.toUpperCase()
 }
 
-export function generateSKU(itemName: string): string {
-  const prefix = itemName.substring(0, 3).toUpperCase()
-  const timestamp = Date.now().toString().slice(-6)
-  return `${prefix}-${timestamp}`
-}
-
-export function calculateReorderSuggestion(
-  currentStock: number,
-  reorderLevel: number,
-  averageDailyUsage: number = 5
-): {
+export function calculateReorderSuggestion(currentStock: number, minStock: number, avgUsage: number): {
   shouldReorder: boolean
   suggestedQuantity: number
   urgency: 'low' | 'medium' | 'high'
 } {
-  const shouldReorder = currentStock <= reorderLevel
-  const daysUntilEmpty = currentStock / averageDailyUsage
+  const shouldReorder = currentStock <= minStock
+  const suggestedQuantity = Math.max(0, (avgUsage * 30) - currentStock) // 30 days supply
   
   let urgency: 'low' | 'medium' | 'high' = 'low'
-  if (daysUntilEmpty <= 3) urgency = 'high'
-  else if (daysUntilEmpty <= 7) urgency = 'medium'
-  
-  const suggestedQuantity = Math.max(reorderLevel * 2, 50)
+  if (currentStock <= minStock * 0.5) urgency = 'high'
+  else if (currentStock <= minStock * 0.8) urgency = 'medium'
   
   return {
     shouldReorder,

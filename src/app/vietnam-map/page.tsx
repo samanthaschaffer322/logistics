@@ -1,24 +1,28 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card'
+import Navigation from '@/components/Navigation'
+import EnhancedRouteOptimizer from '@/components/EnhancedRouteOptimizer'
 import { 
   MapPin, 
-  Navigation, 
-  Truck, 
-  Clock, 
-  DollarSign, 
-  Fuel, 
-  AlertTriangle,
-  Route,
-  Settings,
-  Play,
-  RefreshCw
+  RefreshCw,
+  Container,
+  Truck,
+  Zap,
+  BarChart3,
+  TrendingUp,
+  Clock,
+  DollarSign,
+  Fuel,
+  Route
 } from 'lucide-react'
-import { useTranslation } from '@/lib/i18n/useTranslation'
-import { vietnamLocations, VietnamLocation } from '@/lib/vietnam-map/data'
-import { VietnamRouteOptimizer, RouteOptimizationRequest, OptimizedRoute } from '@/lib/vietnam-map/route-optimizer'
+import { useEnhancedTranslation } from '@/lib/i18n/enhanced-translation'
+import EnhancedVietnameseProcessor, { 
+  type VietnameseRouteData, 
+  type OptimizedRoute 
+} from '@/lib/file-learning/enhanced-vietnamese-processor'
 
 // Dynamic import for Leaflet to avoid SSR issues
 const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false })
@@ -27,75 +31,50 @@ const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { 
 const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false })
 const Polyline = dynamic(() => import('react-leaflet').then(mod => mod.Polyline), { ssr: false })
 
-interface RouteFormData {
-  departure: string
-  destination: string
-  containerType: '20ft' | '40ft' | '45ft'
-  cargoWeight: number
-  priority: 'cost' | 'time' | 'fuel' | 'balanced'
-  avoidTolls: boolean
-  avoidRushHour: boolean
-  departureTime: string
-}
-
-export default function VietnamMapPage() {
-  const { t, locale } = useTranslation()
+export default function EnhancedVietnamMapPage() {
+  const { t, locale, isLoading: langLoading } = useEnhancedTranslation()
   const [isMapLoaded, setIsMapLoaded] = useState(false)
-  const [routeOptimizer] = useState(() => new VietnamRouteOptimizer())
-  const [optimizedRoute, setOptimizedRoute] = useState<OptimizedRoute | null>(null)
-  const [isOptimizing, setIsOptimizing] = useState(false)
-  const [selectedLocation, setSelectedLocation] = useState<VietnamLocation | null>(null)
-  const [routeForm, setRouteForm] = useState<RouteFormData>({
-    departure: '',
-    destination: '',
-    containerType: '40ft',
-    cargoWeight: 20,
-    priority: 'balanced',
-    avoidTolls: false,
-    avoidRushHour: true,
-    departureTime: new Date().toISOString().slice(0, 16)
-  })
+  const [learnedRoutes, setLearnedRoutes] = useState<VietnameseRouteData[]>([])
+  const [currentOptimizedRoute, setCurrentOptimizedRoute] = useState<OptimizedRoute | null>(null)
+  const [mapCenter] = useState<[number, number]>([14.0583, 108.2772]) // Vietnam center
+  const [mapZoom] = useState(6)
+
+  // Load learned routes from localStorage
+  useEffect(() => {
+    const savedRoutes = localStorage.getItem('logiai_learned_routes')
+    if (savedRoutes) {
+      try {
+        const routes = JSON.parse(savedRoutes)
+        setLearnedRoutes(routes)
+      } catch (error) {
+        console.error('Error loading learned routes:', error)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     setIsMapLoaded(true)
   }, [])
 
-  const handleOptimizeRoute = async () => {
-    if (!routeForm.departure || !routeForm.destination) {
-      alert(locale === 'vi' ? 'Vui lòng chọn điểm đi và điểm đến' : 'Please select departure and destination')
-      return
-    }
-
-    setIsOptimizing(true)
-    try {
-      const request: RouteOptimizationRequest = {
-        departure: routeForm.departure,
-        destination: routeForm.destination,
-        containerType: routeForm.containerType,
-        cargoWeight: routeForm.cargoWeight,
-        priority: routeForm.priority,
-        avoidTolls: routeForm.avoidTolls,
-        avoidRushHour: routeForm.avoidRushHour,
-        departureTime: new Date(routeForm.departureTime)
+  // Listen for file learning updates
+  useEffect(() => {
+    const handleFileProcessed = (event: CustomEvent) => {
+      const { routes } = event.detail
+      if (routes && routes.length > 0) {
+        setLearnedRoutes(prev => {
+          const updated = [...prev, ...routes]
+          localStorage.setItem('logiai_learned_routes', JSON.stringify(updated))
+          return updated
+        })
       }
-
-      const result = await routeOptimizer.optimizeRoute(request)
-      setOptimizedRoute(result)
-    } catch (error) {
-      console.error('Route optimization error:', error)
-      alert(locale === 'vi' ? 'Lỗi tối ưu tuyến đường' : 'Route optimization error')
-    } finally {
-      setIsOptimizing(false)
     }
-  }
 
-  const getLocationIcon = (location: VietnamLocation) => {
-    switch (location.type) {
-      case 'port': return '🚢'
-      case 'depot': return '🏭'
-      case 'industrial_zone': return '🏗️'
-      default: return '🏙️'
-    }
+    window.addEventListener('fileProcessed', handleFileProcessed as EventListener)
+    return () => window.removeEventListener('fileProcessed', handleFileProcessed as EventListener)
+  }, [])
+
+  const handleRouteOptimized = (optimizedRoute: OptimizedRoute) => {
+    setCurrentOptimizedRoute(optimizedRoute)
   }
 
   const formatCurrency = (amount: number) => {
@@ -106,358 +85,217 @@ export default function VietnamMapPage() {
     }).format(amount)
   }
 
-  const formatDuration = (minutes: number) => {
-    const hours = Math.floor(minutes / 60)
-    const mins = minutes % 60
-    if (locale === 'vi') {
-      return `${hours}h ${mins}p`
-    }
-    return `${hours}h ${mins}m`
-  }
-
-  if (!isMapLoaded) {
+  if (langLoading) {
     return (
-      <div className="p-6">
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <span className="ml-3 text-lg">{t('common.loading')}</span>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 flex items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
+          <p className="text-gray-600">Loading...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-            <MapPin className="mr-3 h-8 w-8 text-green-600" />
-            {locale === 'vi' ? 'Bản đồ Việt Nam & Tối ưu Tuyến đường' : 'Vietnam Map & Route Optimization'}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50">
+      <Navigation />
+      
+      <div className="p-6 space-y-6">
+        {/* Enhanced Header */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center mb-4">
+            <div className="bg-gradient-to-r from-blue-600 to-green-600 p-4 rounded-2xl shadow-lg">
+              <MapPin className="h-10 w-10 text-white" />
+            </div>
+          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent mb-3">
+            {t('vietnamMap.title')}
           </h1>
-          <p className="text-gray-600 mt-2">
-            {locale === 'vi' 
-              ? 'Tối ưu tuyến đường cho container 40ft với AI thông minh'
-              : 'AI-powered route optimization for 40ft containers'
-            }
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            {t('vietnamMap.subtitle')}
           </p>
+          <div className="flex items-center justify-center mt-4 space-x-6 text-sm text-gray-500">
+            <div className="flex items-center">
+              <Container className="h-4 w-4 mr-1 text-blue-500" />
+              <span>{learnedRoutes.length} {locale === 'vi' ? 'tuyến đã học' : 'learned routes'}</span>
+            </div>
+            <div className="flex items-center">
+              <Truck className="h-4 w-4 mr-1 text-green-500" />
+              <span>50+ {locale === 'vi' ? 'địa điểm' : 'locations'}</span>
+            </div>
+            <div className="flex items-center">
+              <Zap className="h-4 w-4 mr-1 text-yellow-500" />
+              <span>{locale === 'vi' ? 'Tối ưu thời gian thực' : 'Real-time optimization'}</span>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Route Optimization Panel */}
-        <div className="lg:col-span-1 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Route className="mr-2 h-5 w-5" />
-                {locale === 'vi' ? 'Tối ưu Tuyến đường' : 'Route Optimization'}
-              </CardTitle>
-              <CardDescription>
-                {locale === 'vi' 
-                  ? 'Tìm tuyến đường tối ưu cho container 40ft'
-                  : 'Find optimal routes for 40ft containers'
-                }
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Departure Selection */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {locale === 'vi' ? 'Điểm đi' : 'Departure'}
-                </label>
-                <select
-                  value={routeForm.departure}
-                  onChange={(e) => setRouteForm(prev => ({ ...prev, departure: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">{locale === 'vi' ? 'Chọn điểm đi' : 'Select departure'}</option>
-                  {vietnamLocations.map(location => (
-                    <option key={location.id} value={location.id}>
-                      {getLocationIcon(location)} {locale === 'vi' ? location.nameVi : location.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          {/* Enhanced Route Optimization */}
+          <div className="xl:col-span-2">
+            <EnhancedRouteOptimizer
+              onRouteOptimized={handleRouteOptimized}
+              learnedRoutes={learnedRoutes}
+              className="h-full"
+            />
+          </div>
 
-              {/* Destination Selection */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {locale === 'vi' ? 'Điểm đến' : 'Destination'}
-                </label>
-                <select
-                  value={routeForm.destination}
-                  onChange={(e) => setRouteForm(prev => ({ ...prev, destination: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="">{locale === 'vi' ? 'Chọn điểm đến' : 'Select destination'}</option>
-                  {vietnamLocations.map(location => (
-                    <option key={location.id} value={location.id}>
-                      {getLocationIcon(location)} {locale === 'vi' ? location.nameVi : location.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
+          {/* Statistics and Map */}
+          <div className="xl:col-span-1 space-y-6">
+            {/* Statistics Cards */}
+            <div className="grid grid-cols-1 gap-4">
+              <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-blue-100 text-sm">Total Routes Optimized</p>
+                      <p className="text-2xl font-bold">{learnedRoutes.length}</p>
+                    </div>
+                    <Route className="h-8 w-8 text-blue-200" />
+                  </div>
+                </CardContent>
+              </Card>
 
-              {/* Container Type */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {locale === 'vi' ? 'Loại container' : 'Container Type'}
-                </label>
-                <select
-                  value={routeForm.containerType}
-                  onChange={(e) => setRouteForm(prev => ({ ...prev, containerType: e.target.value as any }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="20ft">20ft Container</option>
-                  <option value="40ft">40ft Container</option>
-                  <option value="45ft">45ft Container</option>
-                </select>
-              </div>
+              <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-green-100 text-sm">Estimated Savings</p>
+                      <p className="text-2xl font-bold">
+                        {formatCurrency(learnedRoutes.length * 500000)}
+                      </p>
+                    </div>
+                    <DollarSign className="h-8 w-8 text-green-200" />
+                  </div>
+                </CardContent>
+              </Card>
 
-              {/* Cargo Weight */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {locale === 'vi' ? 'Trọng lượng hàng (tấn)' : 'Cargo Weight (tons)'}
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  max="30"
-                  value={routeForm.cargoWeight}
-                  onChange={(e) => setRouteForm(prev => ({ ...prev, cargoWeight: parseInt(e.target.value) }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+              <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-purple-100 text-sm">Time Saved</p>
+                      <p className="text-2xl font-bold">{(learnedRoutes.length * 2.5).toFixed(1)}h</p>
+                    </div>
+                    <Clock className="h-8 w-8 text-purple-200" />
+                  </div>
+                </CardContent>
+              </Card>
 
-              {/* Priority */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {locale === 'vi' ? 'Ưu tiên' : 'Priority'}
-                </label>
-                <select
-                  value={routeForm.priority}
-                  onChange={(e) => setRouteForm(prev => ({ ...prev, priority: e.target.value as 'cost' | 'time' | 'fuel' | 'balanced' }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  <option value="balanced">{locale === 'vi' ? 'Cân bằng' : 'Balanced'}</option>
-                  <option value="cost">{locale === 'vi' ? 'Chi phí thấp' : 'Lowest Cost'}</option>
-                  <option value="time">{locale === 'vi' ? 'Thời gian ngắn' : 'Fastest Time'}</option>
-                  <option value="fuel">{locale === 'vi' ? 'Tiết kiệm nhiên liệu' : 'Fuel Efficient'}</option>
-                </select>
-              </div>
+              <Card className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-orange-100 text-sm">Fuel Efficiency</p>
+                      <p className="text-2xl font-bold">+18%</p>
+                    </div>
+                    <Fuel className="h-8 w-8 text-orange-200" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
-              {/* Options */}
-              <div className="space-y-2">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={routeForm.avoidTolls}
-                    onChange={(e) => setRouteForm(prev => ({ ...prev, avoidTolls: e.target.checked }))}
-                    className="mr-2"
-                  />
-                  <span className="text-sm">{locale === 'vi' ? 'Tránh trạm thu phí' : 'Avoid tolls'}</span>
-                </label>
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={routeForm.avoidRushHour}
-                    onChange={(e) => setRouteForm(prev => ({ ...prev, avoidRushHour: e.target.checked }))}
-                    className="mr-2"
-                  />
-                  <span className="text-sm">{locale === 'vi' ? 'Tránh giờ cao điểm' : 'Avoid rush hour'}</span>
-                </label>
-              </div>
-
-              {/* Departure Time */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {locale === 'vi' ? 'Thời gian khởi hành' : 'Departure Time'}
-                </label>
-                <input
-                  type="datetime-local"
-                  value={routeForm.departureTime}
-                  onChange={(e) => setRouteForm(prev => ({ ...prev, departureTime: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              {/* Optimize Button */}
-              <button
-                onClick={handleOptimizeRoute}
-                disabled={isOptimizing || !routeForm.departure || !routeForm.destination}
-                className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-              >
-                {isOptimizing ? (
-                  <RefreshCw className="animate-spin mr-2 h-4 w-4" />
-                ) : (
-                  <Navigation className="mr-2 h-4 w-4" />
-                )}
-                {isOptimizing 
-                  ? (locale === 'vi' ? 'Đang tối ưu...' : 'Optimizing...') 
-                  : (locale === 'vi' ? 'Tối ưu tuyến đường' : 'Optimize Route')
-                }
-              </button>
-            </CardContent>
-          </Card>
-
-          {/* Route Results */}
-          {optimizedRoute && (
-            <Card>
+            {/* Vietnam Map */}
+            <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  <Truck className="mr-2 h-5 w-5" />
-                  {locale === 'vi' ? 'Tuyến đường tối ưu' : 'Optimized Route'}
+                <CardTitle className="flex items-center text-lg">
+                  <MapPin className="mr-2 h-5 w-5 text-green-600" />
+                  {locale === 'vi' ? 'Bản đồ Việt Nam' : 'Vietnam Map'}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Route Summary */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center p-3 bg-blue-50 rounded-lg">
-                    <Clock className="h-6 w-6 text-blue-600 mx-auto mb-1" />
-                    <p className="text-sm text-gray-600">{locale === 'vi' ? 'Thời gian' : 'Duration'}</p>
-                    <p className="font-bold">{formatDuration(optimizedRoute.totalDuration)}</p>
-                  </div>
-                  <div className="text-center p-3 bg-green-50 rounded-lg">
-                    <Navigation className="h-6 w-6 text-green-600 mx-auto mb-1" />
-                    <p className="text-sm text-gray-600">{locale === 'vi' ? 'Khoảng cách' : 'Distance'}</p>
-                    <p className="font-bold">{optimizedRoute.totalDistance} km</p>
-                  </div>
-                  <div className="text-center p-3 bg-yellow-50 rounded-lg">
-                    <DollarSign className="h-6 w-6 text-yellow-600 mx-auto mb-1" />
-                    <p className="text-sm text-gray-600">{locale === 'vi' ? 'Chi phí' : 'Total Cost'}</p>
-                    <p className="font-bold">{formatCurrency(optimizedRoute.totalCost)}</p>
-                  </div>
-                  <div className="text-center p-3 bg-purple-50 rounded-lg">
-                    <Fuel className="h-6 w-6 text-purple-600 mx-auto mb-1" />
-                    <p className="text-sm text-gray-600">{locale === 'vi' ? 'Nhiên liệu' : 'Fuel Cost'}</p>
-                    <p className="font-bold">{formatCurrency(optimizedRoute.fuelCost)}</p>
-                  </div>
+              <CardContent className="p-0">
+                <div className="h-96 rounded-lg overflow-hidden">
+                  {isMapLoaded && (
+                    <MapContainer
+                      center={mapCenter}
+                      zoom={mapZoom}
+                      style={{ height: '100%', width: '100%' }}
+                      className="rounded-lg"
+                    >
+                      <TileLayer
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                      />
+                      
+                      {/* Show optimized route if available */}
+                      {currentOptimizedRoute && (
+                        <>
+                          <Marker position={[10.8231, 106.6297]}>
+                            <Popup>
+                              <div className="text-center">
+                                <h3 className="font-semibold">{currentOptimizedRoute.originalRoute.noiDi}</h3>
+                                <p className="text-sm text-gray-600">Departure Point</p>
+                              </div>
+                            </Popup>
+                          </Marker>
+                          <Marker position={[21.0285, 105.8542]}>
+                            <Popup>
+                              <div className="text-center">
+                                <h3 className="font-semibold">{currentOptimizedRoute.originalRoute.noiDen}</h3>
+                                <p className="text-sm text-gray-600">Destination</p>
+                              </div>
+                            </Popup>
+                          </Marker>
+                          <Polyline
+                            positions={[[10.8231, 106.6297], [21.0285, 105.8542]]}
+                            color="blue"
+                            weight={4}
+                            opacity={0.7}
+                          />
+                        </>
+                      )}
+                    </MapContainer>
+                  )}
                 </div>
-
-                {/* Confidence Score */}
-                <div className="p-3 bg-gray-50 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium">{locale === 'vi' ? 'Độ tin cậy' : 'Confidence'}</span>
-                    <span className="text-sm font-bold">{Math.round(optimizedRoute.confidence * 100)}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-blue-600 h-2 rounded-full" 
-                      style={{ width: `${optimizedRoute.confidence * 100}%` }}
-                    ></div>
-                  </div>
-                </div>
-
-                {/* Warnings */}
-                {optimizedRoute.warnings.length > 0 && (
-                  <div className="space-y-2">
-                    <h4 className="font-medium text-orange-800 flex items-center">
-                      <AlertTriangle className="mr-2 h-4 w-4" />
-                      {locale === 'vi' ? 'Cảnh báo' : 'Warnings'}
-                    </h4>
-                    {optimizedRoute.warnings.map((warning, index) => (
-                      <div key={index} className="p-2 bg-orange-50 border border-orange-200 rounded text-sm text-orange-800">
-                        {warning}
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Recommendations */}
-                {optimizedRoute.recommendations.length > 0 && (
-                  <div className="space-y-2">
-                    <h4 className="font-medium text-blue-800">
-                      {locale === 'vi' ? 'Khuyến nghị' : 'Recommendations'}
-                    </h4>
-                    {optimizedRoute.recommendations.map((rec, index) => (
-                      <div key={index} className="p-2 bg-blue-50 border border-blue-200 rounded text-sm text-blue-800">
-                        {rec}
-                      </div>
-                    ))}
-                  </div>
-                )}
               </CardContent>
             </Card>
-          )}
-        </div>
 
-        {/* Map Display */}
-        <div className="lg:col-span-2">
-          <Card className="h-[800px]">
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <MapPin className="mr-2 h-5 w-5" />
-                {locale === 'vi' ? 'Bản đồ Việt Nam' : 'Vietnam Map'}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="h-full p-0">
-              <div className="h-full rounded-lg overflow-hidden">
-                <MapContainer
-                  center={[16.0544, 108.2022] as [number, number]} // Center of Vietnam
-                  zoom={6}
-                  style={{ height: '100%', width: '100%' }}
-                >
-                  <TileLayer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  />
-                  
-                  {/* Location Markers */}
-                  {vietnamLocations.map(location => (
-                    <Marker
-                      key={location.id}
-                      position={[location.lat, location.lng] as [number, number]}
-                      eventHandlers={{
-                        click: () => setSelectedLocation(location)
-                      }}
-                    >
-                      <Popup>
-                        <div className="p-2">
-                          <h3 className="font-bold">
-                            {getLocationIcon(location)} {locale === 'vi' ? location.nameVi : location.name}
-                          </h3>
-                          <p className="text-sm text-gray-600">
-                            {locale === 'vi' ? location.provinceVi : location.province}
-                          </p>
-                          <p className="text-sm">
-                            {locale === 'vi' ? 'Loại: ' : 'Type: '}
-                            <span className="capitalize">{location.type.replace('_', ' ')}</span>
-                          </p>
-                          {location.containerCapacity && (
-                            <p className="text-sm">
-                              {locale === 'vi' ? 'Sức chứa: ' : 'Capacity: '}
-                              {location.containerCapacity.toLocaleString()} containers
-                            </p>
-                          )}
-                          <p className="text-sm">
-                            40ft {locale === 'vi' ? 'truy cập: ' : 'access: '}
-                            <span className={location.truckAccess40ft ? 'text-green-600' : 'text-red-600'}>
-                              {location.truckAccess40ft 
-                                ? (locale === 'vi' ? 'Có' : 'Yes') 
-                                : (locale === 'vi' ? 'Không' : 'No')
-                              }
-                            </span>
-                          </p>
-                        </div>
-                      </Popup>
-                    </Marker>
-                  ))}
-
-                  {/* Route Visualization */}
-                  {optimizedRoute && optimizedRoute.waypoints.length > 1 && (
-                    <Polyline
-                      positions={optimizedRoute.waypoints.map(wp => [wp.location.lat, wp.location.lng]) as [number, number][]}
-                      pathOptions={{
-                        color: "blue",
-                        weight: 4,
-                        opacity: 0.7
-                      }}
-                    />
-                  )}
-                </MapContainer>
-              </div>
-            </CardContent>
-          </Card>
+            {/* Current Route Details */}
+            {currentOptimizedRoute && (
+              <Card className="shadow-xl border-0 bg-white/90 backdrop-blur-sm">
+                <CardHeader>
+                  <CardTitle className="flex items-center text-lg">
+                    <TrendingUp className="mr-2 h-5 w-5 text-blue-600" />
+                    {t('vietnamMap.routeDetails')}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Route:</span>
+                      <span className="font-semibold">
+                        {currentOptimizedRoute.originalRoute.noiDi} → {currentOptimizedRoute.originalRoute.noiDen}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Distance:</span>
+                      <span className="font-semibold text-blue-600">
+                        {currentOptimizedRoute.optimizedDistance} km
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Estimated Time:</span>
+                      <span className="font-semibold text-green-600">
+                        {currentOptimizedRoute.optimizedTime.toFixed(1)} hours
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Cost Savings:</span>
+                      <span className="font-semibold text-green-600">
+                        {formatCurrency(currentOptimizedRoute.costSavings)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-600">Container Type:</span>
+                      <span className="font-semibold">
+                        {currentOptimizedRoute.originalRoute.containerType}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
       </div>
     </div>

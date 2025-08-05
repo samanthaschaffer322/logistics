@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
-import { useTranslation } from '@/lib/i18n/useTranslation'
+import { useEnhancedTranslation } from '@/lib/i18n/enhanced-translation'
 import LanguageSwitcher from './LanguageSwitcher'
 import { 
   LayoutDashboard, 
@@ -22,7 +22,9 @@ import {
   ShoppingCart,
   Shield,
   ChevronDown,
-  Zap
+  Zap,
+  Globe,
+  RefreshCw
 } from 'lucide-react'
 
 const navigationItems = [
@@ -50,23 +52,23 @@ const navigationItems = [
   { 
     key: 'shipments', 
     href: '/shipments', 
-    icon: Send,
+    icon: Package,
     translationKey: 'navigation.shipments',
     color: 'orange'
   },
   { 
     key: 'warehouse', 
     href: '/warehouse', 
-    icon: Package,
+    icon: Shield,
     translationKey: 'navigation.warehouse',
-    color: 'cyan'
+    color: 'indigo'
   },
   { 
     key: 'transportation', 
     href: '/transportation', 
-    icon: Truck,
+    icon: Send,
     translationKey: 'navigation.transportation',
-    color: 'indigo'
+    color: 'red'
   },
   { 
     key: 'procurement', 
@@ -78,247 +80,218 @@ const navigationItems = [
   { 
     key: 'distribution', 
     href: '/distribution', 
-    icon: Send,
+    icon: TrendingUp,
     translationKey: 'navigation.distribution',
-    color: 'emerald'
+    color: 'teal'
   },
   { 
     key: 'vietnam-map', 
     href: '/vietnam-map', 
     icon: MapPin,
     translationKey: 'navigation.vietnamMap',
-    color: 'red'
+    color: 'emerald'
   },
   { 
     key: 'ai-optimization', 
     href: '/ai-optimization', 
-    icon: TrendingUp,
+    icon: Zap,
     translationKey: 'navigation.aiOptimization',
-    color: 'violet'
+    color: 'yellow'
   },
   { 
     key: 'ai-assistant', 
     href: '/ai-assistant', 
     icon: Brain,
     translationKey: 'navigation.aiAssistant',
-    color: 'rose'
+    color: 'violet'
   },
   { 
     key: 'file-learning', 
     href: '/file-learning', 
     icon: FileText,
     translationKey: 'navigation.fileLearning',
-    color: 'amber'
+    color: 'cyan'
   }
 ]
 
 export default function Navigation() {
   const pathname = usePathname()
   const { user, signOut } = useAuth()
-  const { t, locale } = useTranslation()
+  const { t, locale, isLoading } = useEnhancedTranslation()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isMoreDropdownOpen, setIsMoreDropdownOpen] = useState(false)
+  const [showMoreItems, setShowMoreItems] = useState(false)
 
-  const handleSignOut = async () => {
-    await signOut()
-    window.location.href = '/login'
+  const getColorClasses = (color: string, isActive: boolean) => {
+    const colorMap: { [key: string]: { active: string; inactive: string } } = {
+      blue: { active: 'bg-blue-100 text-blue-700 border-blue-300', inactive: 'text-gray-600 hover:text-blue-600 hover:bg-blue-50' },
+      green: { active: 'bg-green-100 text-green-700 border-green-300', inactive: 'text-gray-600 hover:text-green-600 hover:bg-green-50' },
+      purple: { active: 'bg-purple-100 text-purple-700 border-purple-300', inactive: 'text-gray-600 hover:text-purple-600 hover:bg-purple-50' },
+      orange: { active: 'bg-orange-100 text-orange-700 border-orange-300', inactive: 'text-gray-600 hover:text-orange-600 hover:bg-orange-50' },
+      indigo: { active: 'bg-indigo-100 text-indigo-700 border-indigo-300', inactive: 'text-gray-600 hover:text-indigo-600 hover:bg-indigo-50' },
+      red: { active: 'bg-red-100 text-red-700 border-red-300', inactive: 'text-gray-600 hover:text-red-600 hover:bg-red-50' },
+      pink: { active: 'bg-pink-100 text-pink-700 border-pink-300', inactive: 'text-gray-600 hover:text-pink-600 hover:bg-pink-50' },
+      teal: { active: 'bg-teal-100 text-teal-700 border-teal-300', inactive: 'text-gray-600 hover:text-teal-600 hover:bg-teal-50' },
+      emerald: { active: 'bg-emerald-100 text-emerald-700 border-emerald-300', inactive: 'text-gray-600 hover:text-emerald-600 hover:bg-emerald-50' },
+      yellow: { active: 'bg-yellow-100 text-yellow-700 border-yellow-300', inactive: 'text-gray-600 hover:text-yellow-600 hover:bg-yellow-50' },
+      violet: { active: 'bg-violet-100 text-violet-700 border-violet-300', inactive: 'text-gray-600 hover:text-violet-600 hover:bg-violet-50' },
+      cyan: { active: 'bg-cyan-100 text-cyan-700 border-cyan-300', inactive: 'text-gray-600 hover:text-cyan-600 hover:bg-cyan-50' }
+    }
+    return isActive ? colorMap[color]?.active || colorMap.blue.active : colorMap[color]?.inactive || colorMap.blue.inactive
   }
 
-  const primaryItems = navigationItems.slice(0, 6)
-  const moreItems = navigationItems.slice(6)
+  const visibleItems = navigationItems.slice(0, 8)
+  const moreItems = navigationItems.slice(8)
+
+  if (isLoading) {
+    return (
+      <nav className="bg-white shadow-lg border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between h-16">
+            <div className="flex items-center">
+              <RefreshCw className="h-6 w-6 animate-spin text-blue-600" />
+              <span className="ml-2 text-gray-600">Loading...</span>
+            </div>
+          </div>
+        </div>
+      </nav>
+    )
+  }
 
   return (
-    <nav className="bg-white/95 backdrop-blur-md shadow-lg border-b border-gray-200/50 sticky top-0 z-50">
+    <nav className="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo and Brand */}
           <div className="flex items-center">
-            <Link href="/dashboard" className="flex items-center group">
-              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+            <Link href="/dashboard" className="flex items-center space-x-2">
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
                 <Truck className="h-6 w-6 text-white" />
               </div>
-              <div className="ml-3">
-                <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  LogiAI
-                </span>
-                <div className="flex items-center text-xs text-gray-500 mt-0.5">
-                  <Zap className="h-3 w-3 mr-1" />
-                  <span>{locale === 'vi' ? 'Logistics AI' : 'AI Logistics'}</span>
-                </div>
-              </div>
+              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                LogiAI
+              </span>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center space-x-1">
-            {primaryItems.map((item) => {
-              const Icon = item.icon
+            {visibleItems.map((item) => {
               const isActive = pathname === item.href
-              
+              const Icon = item.icon
               return (
                 <Link
                   key={item.key}
                   href={item.href}
-                  className={`group flex items-center px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                    isActive
-                      ? `bg-gradient-to-r from-${item.color}-100 to-${item.color}-50 text-${item.color}-700 shadow-md`
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                  }`}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 border ${getColorClasses(item.color, isActive)}`}
                 >
-                  <Icon className={`h-4 w-4 mr-2 transition-transform duration-200 group-hover:scale-110 ${
-                    isActive ? `text-${item.color}-600` : ''
-                  }`} />
-                  <span className="whitespace-nowrap">{t(item.translationKey)}</span>
+                  <div className="flex items-center space-x-2">
+                    <Icon className="h-4 w-4" />
+                    <span className="hidden xl:block">{t(item.translationKey)}</span>
+                  </div>
                 </Link>
               )
             })}
-            
-            {/* More dropdown */}
-            <div className="relative">
-              <button
-                onClick={() => setIsMoreDropdownOpen(!isMoreDropdownOpen)}
-                className="flex items-center px-3 py-2 rounded-xl text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all duration-200"
-              >
-                {t('navigation.more')}
-                <ChevronDown className={`ml-1 h-4 w-4 transition-transform duration-200 ${
-                  isMoreDropdownOpen ? 'rotate-180' : ''
-                }`} />
-              </button>
-              
-              {isMoreDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl ring-1 ring-black ring-opacity-5 border border-gray-100 overflow-hidden">
-                  <div className="py-2">
+
+            {/* More Items Dropdown */}
+            {moreItems.length > 0 && (
+              <div className="relative">
+                <button
+                  onClick={() => setShowMoreItems(!showMoreItems)}
+                  className="px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 text-gray-600 hover:text-gray-800 hover:bg-gray-50 flex items-center space-x-1"
+                >
+                  <span>{t('navigation.more')}</span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${showMoreItems ? 'rotate-180' : ''}`} />
+                </button>
+
+                {showMoreItems && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
                     {moreItems.map((item) => {
-                      const Icon = item.icon
                       const isActive = pathname === item.href
-                      
+                      const Icon = item.icon
                       return (
                         <Link
                           key={item.key}
                           href={item.href}
-                          onClick={() => setIsMoreDropdownOpen(false)}
-                          className={`group flex items-center px-4 py-3 text-sm transition-all duration-200 ${
-                            isActive
-                              ? `bg-gradient-to-r from-${item.color}-50 to-${item.color}-25 text-${item.color}-700 border-r-2 border-${item.color}-500`
+                          className={`flex items-center space-x-3 px-4 py-2 text-sm transition-colors ${
+                            isActive 
+                              ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-500' 
                               : 'text-gray-700 hover:bg-gray-50'
                           }`}
+                          onClick={() => setShowMoreItems(false)}
                         >
-                          <Icon className={`h-4 w-4 mr-3 transition-transform duration-200 group-hover:scale-110 ${
-                            isActive ? `text-${item.color}-600` : `text-gray-400 group-hover:text-${item.color}-500`
-                          }`} />
+                          <Icon className="h-4 w-4" />
                           <span>{t(item.translationKey)}</span>
                         </Link>
                       )
                     })}
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
 
-          {/* User Menu and Language Switcher */}
+          {/* Right Side - Language Switcher and User Menu */}
           <div className="flex items-center space-x-4">
-            {/* Language Switcher */}
-            <LanguageSwitcher />
+            {/* Enhanced Language Switcher */}
+            <LanguageSwitcher variant="compact" showLabel={false} />
 
-            {/* User Info */}
-            <div className="hidden md:flex items-center space-x-3">
-              <div className="flex items-center bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl px-3 py-2">
-                <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-2 rounded-lg">
+            {/* User Menu */}
+            <div className="flex items-center space-x-3">
+              <div className="hidden md:block text-right">
+                <p className="text-sm font-medium text-gray-900">{user?.email}</p>
+                <p className="text-xs text-gray-500">{locale === 'vi' ? 'Quản trị viên' : 'Administrator'}</p>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-2 rounded-full">
                   <User className="h-4 w-4 text-white" />
                 </div>
-                <div className="ml-3">
-                  <p className="text-sm font-semibold text-gray-800">
-                    {user?.name || 'User'}
-                  </p>
-                  <div className="flex items-center text-xs text-gray-500">
-                    <Shield className="h-3 w-3 mr-1" />
-                    <span>{user?.role || 'Admin'}</span>
-                  </div>
-                </div>
-              </div>
-              
-              <button
-                onClick={handleSignOut}
-                className="flex items-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 group"
-              >
-                <LogOut className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
-                {t('navigation.logout')}
-              </button>
-            </div>
-
-            {/* Mobile menu button */}
-            <div className="lg:hidden">
-              <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="inline-flex items-center justify-center p-2 rounded-xl text-gray-600 hover:text-gray-900 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 transition-all duration-200"
-              >
-                {isMobileMenuOpen ? (
-                  <X className="h-6 w-6" />
-                ) : (
-                  <Menu className="h-6 w-6" />
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Navigation Menu */}
-      {isMobileMenuOpen && (
-        <div className="lg:hidden border-t border-gray-200">
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-gradient-to-b from-white to-gray-50 max-h-96 overflow-y-auto">
-            {navigationItems.map((item) => {
-              const Icon = item.icon
-              const isActive = pathname === item.href
-              
-              return (
-                <Link
-                  key={item.key}
-                  href={item.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`group flex items-center px-4 py-3 rounded-xl text-base font-medium transition-all duration-200 ${
-                    isActive
-                      ? `bg-gradient-to-r from-${item.color}-100 to-${item.color}-50 text-${item.color}-700 shadow-md`
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                  }`}
+                <button
+                  onClick={signOut}
+                  className="text-gray-500 hover:text-red-600 transition-colors"
+                  title={t('navigation.logout')}
                 >
-                  <Icon className={`h-5 w-5 mr-3 transition-transform duration-200 group-hover:scale-110 ${
-                    isActive ? `text-${item.color}-600` : ''
-                  }`} />
-                  <span>{t(item.translationKey)}</span>
-                </Link>
-              )
-            })}
-            
-            {/* Mobile User Actions */}
-            <div className="border-t border-gray-200 pt-4 mt-4">
-              <div className="flex items-center px-4 py-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl mb-3">
-                <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-2 rounded-lg">
-                  <User className="h-5 w-5 text-white" />
-                </div>
-                <div className="ml-3">
-                  <p className="text-base font-semibold text-gray-800">
-                    {user?.name || 'User'}
-                  </p>
-                  <div className="flex items-center text-sm text-gray-500">
-                    <Shield className="h-3 w-3 mr-1" />
-                    <span>{user?.role || 'Admin'}</span>
-                  </div>
-                </div>
+                  <LogOut className="h-5 w-5" />
+                </button>
               </div>
-              
-              <button
-                onClick={handleSignOut}
-                className="flex items-center w-full px-4 py-3 text-base font-medium text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 group"
-              >
-                <LogOut className="h-5 w-5 mr-3 group-hover:scale-110 transition-transform duration-200" />
-                {t('navigation.logout')}
-              </button>
             </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="lg:hidden p-2 rounded-lg text-gray-600 hover:text-gray-800 hover:bg-gray-100"
+            >
+              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
           </div>
         </div>
-      )}
+
+        {/* Mobile Navigation */}
+        {isMobileMenuOpen && (
+          <div className="lg:hidden border-t border-gray-200 py-4">
+            <div className="space-y-2">
+              {navigationItems.map((item) => {
+                const isActive = pathname === item.href
+                const Icon = item.icon
+                return (
+                  <Link
+                    key={item.key}
+                    href={item.href}
+                    className={`flex items-center space-x-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
+                      isActive 
+                        ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-500' 
+                        : 'text-gray-700 hover:bg-gray-50'
+                    }`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    <Icon className="h-5 w-5" />
+                    <span>{t(item.translationKey)}</span>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        )}
+      </div>
     </nav>
   )
 }

@@ -1,20 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Enable static export for Cloudflare Pages
-  output: 'export',
+  // Only enable static export for production builds
+  ...(process.env.NODE_ENV === 'production' && {
+    output: 'export',
+    trailingSlash: true,
+  }),
   
-  // Disable features not supported in static export
+  // Image optimization
   images: {
     unoptimized: true,
   },
   
-  // Disable server-side features for static export
-  trailingSlash: true,
-  
   // Experimental features for faster builds
   experimental: {
-    // Optimize bundle splitting
-    optimizePackageImports: ['lucide-react', 'recharts', 'openai'],
+    // Optimize bundle splitting - compatible with both Webpack and Turbopack
+    optimizePackageImports: ['lucide-react', 'recharts', 'openai', 'leaflet', 'react-leaflet'],
   },
   
   // Compiler optimizations
@@ -26,24 +26,32 @@ const nextConfig = {
   
   // Build optimizations for speed
   typescript: {
-    ignoreBuildErrors: true, // Speed up builds
+    ignoreBuildErrors: false, // Enable type checking in development
   },
   
   eslint: {
-    ignoreDuringBuilds: true, // Speed up builds
+    ignoreDuringBuilds: false, // Enable linting in development
   },
   
   // Environment variables
   env: {
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || '',
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
-    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || '',
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
     NEXT_PUBLIC_OPENAI_API_KEY: process.env.NEXT_PUBLIC_OPENAI_API_KEY || '',
   },
   
-  // Webpack optimizations for faster builds
+  // Webpack optimizations for faster builds and better compatibility
   webpack: (config, { dev, isServer }) => {
-    // Optimize for faster builds
+    // Development optimizations
+    if (dev) {
+      config.watchOptions = {
+        poll: 1000,
+        aggregateTimeout: 300,
+      };
+    }
+    
+    // Production optimizations
     if (!dev && !isServer) {
       config.optimization.splitChunks = {
         chunks: 'all',
@@ -66,7 +74,36 @@ const nextConfig = {
       };
     }
     
+    // Remove custom CSS loader - let Next.js handle CSS natively
+    // This fixes the CSS loader warning
+    
     return config;
+  },
+  
+  // Performance optimizations
+  poweredByHeader: false,
+  
+  // Security headers for production
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'origin-when-cross-origin',
+          },
+        ],
+      },
+    ];
   },
 };
 

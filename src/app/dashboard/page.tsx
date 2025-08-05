@@ -281,6 +281,7 @@ export default function DashboardPage() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
+                { href: '/advanced-optimization', icon: Brain, title: 'Advanced Route Optimization', desc: 'AI-powered route planning', color: 'purple', featured: true },
                 { href: '/ai-assistant', icon: Brain, title: 'AI Assistant', desc: 'Get logistics insights', color: 'purple' },
                 { href: '/file-learning', icon: FileText, title: 'File Learning', desc: 'Upload & analyze files', color: 'indigo' },
                 { href: '/fleet-management', icon: Truck, title: 'Fleet Management', desc: 'Manage vehicles', color: 'green' },
@@ -295,12 +296,17 @@ export default function DashboardPage() {
                   <a
                     key={index}
                     href={action.href}
-                    className={`flex items-center p-4 bg-${action.color}-50 rounded-lg hover:bg-${action.color}-100 transition-colors group`}
+                    className={`flex items-center p-4 ${action.featured ? 'bg-gradient-to-r from-purple-100 to-blue-100 border-2 border-purple-200' : `bg-${action.color}-50`} rounded-lg hover:${action.featured ? 'from-purple-200 to-blue-200' : `bg-${action.color}-100`} transition-colors group relative`}
                   >
-                    <Icon className={`h-6 w-6 text-${action.color}-600 mr-3 group-hover:scale-110 transition-transform`} />
+                    {action.featured && (
+                      <div className="absolute -top-2 -right-2 bg-purple-600 text-white text-xs px-2 py-1 rounded-full">
+                        NEW
+                      </div>
+                    )}
+                    <Icon className={`h-6 w-6 ${action.featured ? 'text-purple-700' : `text-${action.color}-600`} mr-3 group-hover:scale-110 transition-transform`} />
                     <div>
-                      <p className="font-medium text-gray-900">{action.title}</p>
-                      <p className="text-sm text-gray-600">{action.desc}</p>
+                      <p className={`font-medium ${action.featured ? 'text-purple-900' : 'text-gray-900'}`}>{action.title}</p>
+                      <p className={`text-sm ${action.featured ? 'text-purple-700' : 'text-gray-600'}`}>{action.desc}</p>
                     </div>
                   </a>
                 )
