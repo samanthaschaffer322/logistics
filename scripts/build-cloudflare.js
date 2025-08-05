@@ -47,45 +47,30 @@ function formatBytes(bytes) {
 function cleanupLargeFiles() {
   console.log('🧹 Cleaning up large files for Cloudflare Pages...');
   
-  const nextDir = '.next';
-  const cacheDir = path.join(nextDir, 'cache');
+  // For static export, the output is in 'out' directory
+  const outDir = 'out';
   
-  // Remove webpack cache (usually the largest)
-  removeDir(path.join(cacheDir, 'webpack'));
+  // Remove any cache directories that might exist
+  removeDir('.next/cache/webpack');
+  removeDir('.next/cache/swc');
+  removeDir('.next/cache/images');
   
-  // Remove other cache directories that might be large
-  removeDir(path.join(cacheDir, 'swc'));
-  removeDir(path.join(cacheDir, 'images'));
-  
-  // Remove source maps (not needed in production)
-  const staticDir = path.join(nextDir, 'static');
-  if (fs.existsSync(staticDir)) {
-    const removeSourceMaps = (dir) => {
-      const files = fs.readdirSync(dir);
-      for (const file of files) {
-        const filePath = path.join(dir, file);
-        const stats = fs.statSync(filePath);
-        
-        if (stats.isDirectory()) {
-          removeSourceMaps(filePath);
-        } else if (file.endsWith('.map')) {
-          fs.unlinkSync(filePath);
-          console.log(`✅ Removed source map: ${filePath}`);
-        }
-      }
-    };
-    removeSourceMaps(staticDir);
-  }
-  
-  // Check final size
-  if (fs.existsSync(nextDir)) {
-    const finalSize = getDirSize(nextDir);
-    console.log(`📊 Final .next directory size: ${formatBytes(finalSize)}`);
+  // Check final size of output directory
+  if (fs.existsSync(outDir)) {
+    const finalSize = getDirSize(outDir);
+    console.log(`📊 Final output directory size: ${formatBytes(finalSize)}`);
     
     if (finalSize > 100 * 1024 * 1024) { // 100MB
       console.warn('⚠️  Warning: Build output is still quite large. Consider further optimization.');
     } else {
       console.log('✅ Build output size is optimized for Cloudflare Pages!');
+    }
+  } else {
+    console.log('📁 Output directory not found - checking .next directory...');
+    const nextDir = '.next';
+    if (fs.existsSync(nextDir)) {
+      const finalSize = getDirSize(nextDir);
+      console.log(`📊 Final .next directory size: ${formatBytes(finalSize)}`);
     }
   }
 }

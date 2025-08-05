@@ -7,6 +7,8 @@ const nextConfig = {
   images: {
     unoptimized: true
   },
+  // Add trailing slash for better static hosting compatibility
+  trailingSlash: true,
   // Disable webpack cache for Cloudflare Pages (file size limits)
   webpack: (config, { dev, isServer }) => {
     if (!dev) {
