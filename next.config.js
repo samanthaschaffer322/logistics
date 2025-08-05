@@ -7,6 +7,14 @@ const nextConfig = {
   images: {
     unoptimized: true
   },
+  // Disable webpack cache for Cloudflare Pages (file size limits)
+  webpack: (config, { dev, isServer }) => {
+    if (!dev) {
+      // Disable webpack cache in production to avoid large cache files
+      config.cache = false;
+    }
+    return config;
+  },
   // Disable ESLint and TypeScript checking during builds to avoid blocking deployment
   eslint: {
     ignoreDuringBuilds: true,

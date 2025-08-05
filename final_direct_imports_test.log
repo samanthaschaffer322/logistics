@@ -1,0 +1,36 @@
+
+> logiai-logistics@1.0.0 dev
+> NEXT_SKIP_TURBOPACK=1 next dev
+
+   ▲ Next.js 15.4.5
+   - Local:        http://localhost:3000
+   - Network:      http://127.0.2.2:3000
+   - Environments: .env.local
+   - Experiments (use with caution):
+     · optimizePackageImports
+
+ ✓ Starting...
+ ✓ Ready in 1403ms
+ ○ Compiling / ...
+ ✓ Compiled / in 2.5s (573 modules)
+ GET / 200 in 2694ms
+ ○ Compiling /enhanced-ai ...
+ ✓ Compiled /enhanced-ai in 754ms (873 modules)
+ GET /enhanced-ai 200 in 1009ms
+ ✓ Compiled /ai-assistant in 164ms (872 modules)
+ GET /ai-assistant 200 in 301ms
+ ○ Compiling /advanced-optimization ...
+ ✓ Compiled /advanced-optimization in 919ms (1144 modules)
+ GET /advanced-optimization 200 in 1117ms
+ ✓ Compiled /file-learning in 243ms (1161 modules)
+ GET /file-learning 200 in 368ms
+ ○ Compiling /vietnam-map ...
+ ✓ Compiled /vietnam-map in 514ms (1282 modules)
+ GET /vietnam-map 200 in 734ms
+ ✓ Compiled /dashboard in 199ms (1291 modules)
+ GET /dashboard 200 in 317ms
+ ✓ Compiled /fleet-management in 209ms (1312 modules)
+ GET /fleet-management 200 in 272ms
+ ✓ Compiled /real-time-tracking in 266ms (1327 modules)
+ GET /real-time-tracking 200 in 335ms
+[?25h

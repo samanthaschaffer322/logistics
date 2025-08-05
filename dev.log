@@ -1,0 +1,308 @@
+
+> logiai-logistics@1.0.0 dev
+> NEXT_SKIP_TURBOPACK=1 next dev
+
+   ▲ Next.js 15.4.5
+   - Local:        http://localhost:3000
+   - Network:      http://127.0.2.2:3000
+   - Environments: .env.local
+   - Experiments (use with caution):
+     · optimizePackageImports
+
+ ✓ Starting...
+ ✓ Ready in 1610ms
+ ○ Compiling / ...
+ ✓ Compiled / in 2.5s (573 modules)
+ HEAD / 200 in 2764ms
+ GET / 200 in 40ms
+ ○ Compiling /advanced-optimization ...
+ ✓ Compiled /advanced-optimization in 1597ms (950 modules)
+ ⨯ ReferenceError: window is not defined
+    at eval (../src/core/Util.js:217:23)
+    at (ssr)/./node_modules/leaflet/dist/leaflet-src.js (.next/server/vendor-chunks/leaflet.js:19:1)
+    at (ssr)/__barrel_optimize__?names=Map!=!./node_modules/leaflet/dist/leaflet-src.js (.next/server/app/advanced-optimization/page.js:392:138)
+    at (ssr)/./node_modules/react-leaflet/lib/MapContainer.js (.next/server/vendor-chunks/react-leaflet.js:20:1)
+    at eval (webpack-internal:///(ssr)/./src/components/route-optimization/AdvancedRouteOptimizer.tsx:9:140)
+    at (ssr)/./src/components/route-optimization/AdvancedRouteOptimizer.tsx (.next/server/app/advanced-optimization/page.js:219:1)
+    at eval (webpack-internal:///(ssr)/./src/app/advanced-optimization/page.tsx:9:111)
+    at (ssr)/./src/app/advanced-optimization/page.tsx (.next/server/app/advanced-optimization/page.js:208:1)
+  215 | }
+  216 |
+> 217 | export var requestFn = window.requestAnimationFrame || getPrefixed('RequestAnimationFrame') || timeoutDefer;
+      |                       ^
+  218 | export var cancelFn = window.cancelAnimationFrame || getPrefixed('CancelAnimationFrame') ||
+  219 | 		getPrefixed('CancelRequestAnimationFrame') || function (id) { window.clearTimeout(id); };
+  220 | {
+  digest: '2045591470'
+}
+ GET /advanced-optimization 500 in 2027ms
+ ✓ Compiled in 257ms (386 modules)
+ ✓ Compiled in 29ms (386 modules)
+ ✓ Compiled in 516ms (400 modules)
+ ✓ Compiled in 477ms (400 modules)
+ ✓ Compiled in 750ms (890 modules)
+ ✓ Compiled in 792ms (429 modules)
+ ✓ Compiled /advanced-optimization in 149ms (553 modules)
+ ⨯ ReferenceError: window is not defined
+    at eval (../src/core/Util.js:217:23)
+    at (ssr)/./node_modules/leaflet/dist/leaflet-src.js (.next/server/vendor-chunks/leaflet.js:19:1)
+    at (ssr)/__barrel_optimize__?names=Icon!=!./node_modules/leaflet/dist/leaflet-src.js (.next/server/app/advanced-optimization/page.js:385:138)
+    at eval (webpack-internal:///(ssr)/./src/components/route-optimization/AdvancedRouteOptimizer.tsx:9:93)
+    at (ssr)/./src/components/route-optimization/AdvancedRouteOptimizer.tsx (.next/server/app/advanced-optimization/page.js:219:1)
+    at eval (webpack-internal:///(ssr)/./src/app/advanced-optimization/page.tsx:9:111)
+    at (ssr)/./src/app/advanced-optimization/page.tsx (.next/server/app/advanced-optimization/page.js:208:1)
+  215 | }
+  216 |
+> 217 | export var requestFn = window.requestAnimationFrame || getPrefixed('RequestAnimationFrame') || timeoutDefer;
+      |                       ^
+  218 | export var cancelFn = window.cancelAnimationFrame || getPrefixed('CancelAnimationFrame') ||
+  219 | 		getPrefixed('CancelRequestAnimationFrame') || function (id) { window.clearTimeout(id); };
+  220 | {
+  digest: '2045591470'
+}
+ GET /advanced-optimization 500 in 571ms
+ ✓ Compiled in 514ms (412 modules)
+ ✓ Compiled in 400ms (515 modules)
+ ✓ Compiled in 423ms (371 modules)
+ ✓ Compiled in 317ms
+ ✓ Compiled in 537ms (374 modules)
+ ✓ Compiled /advanced-optimization in 252ms (518 modules)
+ ⨯ ReferenceError: Icon is not defined
+    at createCustomIcon (src/components/route-optimization/AdvancedRouteOptimizer.tsx:40:58)
+    at eval (src/components/route-optimization/AdvancedRouteOptimizer.tsx:52:18)
+    at (ssr)/./src/components/route-optimization/AdvancedRouteOptimizer.tsx (.next/server/app/advanced-optimization/page.js:219:1)
+    at eval (webpack-internal:///(ssr)/./src/app/advanced-optimization/page.tsx:9:111)
+    at (ssr)/./src/app/advanced-optimization/page.tsx (.next/server/app/advanced-optimization/page.js:208:1)
+  38 |
+  39 | // Custom icons for different location types
+> 40 | const createCustomIcon = (color: string, type: string) => new Icon({
+     |                                                          ^
+  41 |   iconUrl: `data:image/svg+xml;base64,${btoa(`
+  42 |     <svg width="25" height="25" viewBox="0 0 25 25" xmlns="http://www.w3.org/2000/svg">
+  43 |       <circle cx="12.5" cy="12.5" r="10" fill="${color}" stroke="white" stroke-width="2"/> {
+  digest: '3105497833'
+}
+ GET /advanced-optimization 500 in 684ms
+ ✓ Compiled in 585ms (892 modules)
+ ✓ Compiled in 630ms (892 modules)
+ GET /advanced-optimization 200 in 278ms
+ ○ Compiling /dashboard ...
+ ⚠ ./src/components/ui/Card.tsx
+There are multiple modules with names that only differ in casing.
+This can lead to unexpected behavior when compiling on a filesystem with other case-semantic.
+Use equal casing. Compare these module identifiers:
+* javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/compiled/@next/react-refresh-utils/dist/loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[16].oneOf[6].use[1]!/Users/aelitapham/Development/logistics/src/components/ui/Card.tsx|app-pages-browser
+    Used by 1 module(s), i. e.
+    javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/compiled/@next/react-refresh-utils/dist/loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[16].oneOf[6].use[1]!/Users/aelitapham/Development/logistics/src/app/dashboard/page.tsx|app-pages-browser
+* javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/compiled/@next/react-refresh-utils/dist/loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[16].oneOf[6].use[1]!/Users/aelitapham/Development/logistics/src/components/ui/card.tsx|app-pages-browser
+    Used by 1 module(s), i. e.
+    javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/compiled/@next/react-refresh-utils/dist/loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[16].oneOf[6].use[1]!/Users/aelitapham/Development/logistics/src/components/route-optimization/AdvancedRouteOptimizer.tsx|app-pages-browser
+
+Import trace for requested module:
+./src/components/ui/Card.tsx
+./src/app/dashboard/page.tsx
+
+./src/components/ui/Card.tsx
+There are multiple modules with names that only differ in casing.
+This can lead to unexpected behavior when compiling on a filesystem with other case-semantic.
+Use equal casing. Compare these module identifiers:
+* javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[15].oneOf[7].use[1]!/Users/aelitapham/Development/logistics/src/components/ui/Card.tsx|ssr
+    Used by 1 module(s), i. e.
+    javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[15].oneOf[7].use[1]!/Users/aelitapham/Development/logistics/src/app/dashboard/page.tsx|ssr
+* javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[15].oneOf[7].use[1]!/Users/aelitapham/Development/logistics/src/components/ui/card.tsx|ssr
+    Used by 1 module(s), i. e.
+    javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[15].oneOf[7].use[1]!/Users/aelitapham/Development/logistics/src/components/route-optimization/AdvancedRouteOptimizer.tsx|ssr
+
+Import trace for requested module:
+./src/components/ui/Card.tsx
+./src/app/dashboard/page.tsx
+ GET /dashboard 200 in 1004ms
+ ⚠ ./src/components/ui/Card.tsx
+There are multiple modules with names that only differ in casing.
+This can lead to unexpected behavior when compiling on a filesystem with other case-semantic.
+Use equal casing. Compare these module identifiers:
+* javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/compiled/@next/react-refresh-utils/dist/loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[16].oneOf[6].use[1]!/Users/aelitapham/Development/logistics/src/components/ui/Card.tsx|app-pages-browser
+    Used by 1 module(s), i. e.
+    javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/compiled/@next/react-refresh-utils/dist/loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[16].oneOf[6].use[1]!/Users/aelitapham/Development/logistics/src/app/dashboard/page.tsx|app-pages-browser
+* javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/compiled/@next/react-refresh-utils/dist/loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[16].oneOf[6].use[1]!/Users/aelitapham/Development/logistics/src/components/ui/card.tsx|app-pages-browser
+    Used by 1 module(s), i. e.
+    javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/compiled/@next/react-refresh-utils/dist/loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[16].oneOf[6].use[1]!/Users/aelitapham/Development/logistics/src/components/route-optimization/AdvancedRouteOptimizer.tsx|app-pages-browser
+
+Import trace for requested module:
+./src/components/ui/Card.tsx
+./src/app/dashboard/page.tsx
+
+./src/components/ui/Card.tsx
+There are multiple modules with names that only differ in casing.
+This can lead to unexpected behavior when compiling on a filesystem with other case-semantic.
+Use equal casing. Compare these module identifiers:
+* javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[15].oneOf[7].use[1]!/Users/aelitapham/Development/logistics/src/components/ui/Card.tsx|ssr
+    Used by 1 module(s), i. e.
+    javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[15].oneOf[7].use[1]!/Users/aelitapham/Development/logistics/src/app/dashboard/page.tsx|ssr
+* javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[15].oneOf[7].use[1]!/Users/aelitapham/Development/logistics/src/components/ui/card.tsx|ssr
+    Used by 1 module(s), i. e.
+    javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[15].oneOf[7].use[1]!/Users/aelitapham/Development/logistics/src/components/route-optimization/AdvancedRouteOptimizer.tsx|ssr
+
+Import trace for requested module:
+./src/components/ui/Card.tsx
+./src/app/dashboard/page.tsx
+ ⚠ ./src/components/ui/Card.tsx
+There are multiple modules with names that only differ in casing.
+This can lead to unexpected behavior when compiling on a filesystem with other case-semantic.
+Use equal casing. Compare these module identifiers:
+* javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/compiled/@next/react-refresh-utils/dist/loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[16].oneOf[6].use[1]!/Users/aelitapham/Development/logistics/src/components/ui/Card.tsx|app-pages-browser
+    Used by 2 module(s), i. e.
+    javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/compiled/@next/react-refresh-utils/dist/loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[16].oneOf[6].use[1]!/Users/aelitapham/Development/logistics/src/app/dashboard/page.tsx|app-pages-browser
+* javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/compiled/@next/react-refresh-utils/dist/loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[16].oneOf[6].use[1]!/Users/aelitapham/Development/logistics/src/components/ui/card.tsx|app-pages-browser
+    Used by 1 module(s), i. e.
+    javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/compiled/@next/react-refresh-utils/dist/loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[16].oneOf[6].use[1]!/Users/aelitapham/Development/logistics/src/components/route-optimization/AdvancedRouteOptimizer.tsx|app-pages-browser
+
+Import trace for requested module:
+./src/components/ui/Card.tsx
+./src/app/dashboard/page.tsx
+
+./src/components/ui/Card.tsx
+There are multiple modules with names that only differ in casing.
+This can lead to unexpected behavior when compiling on a filesystem with other case-semantic.
+Use equal casing. Compare these module identifiers:
+* javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[15].oneOf[7].use[1]!/Users/aelitapham/Development/logistics/src/components/ui/Card.tsx|ssr
+    Used by 2 module(s), i. e.
+    javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[15].oneOf[7].use[1]!/Users/aelitapham/Development/logistics/src/app/dashboard/page.tsx|ssr
+* javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[15].oneOf[7].use[1]!/Users/aelitapham/Development/logistics/src/components/ui/card.tsx|ssr
+    Used by 1 module(s), i. e.
+    javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[15].oneOf[7].use[1]!/Users/aelitapham/Development/logistics/src/components/route-optimization/AdvancedRouteOptimizer.tsx|ssr
+
+Import trace for requested module:
+./src/components/ui/Card.tsx
+./src/app/dashboard/page.tsx
+ ⨯ Error: useTranslation must be used within a TranslationProvider
+    at useTranslation (src/lib/i18n/useTranslation.ts:72:10)
+    at AIAssistantPage (src/app/ai-assistant/page.tsx:76:38)
+  70 |   const context = useContext(TranslationContext)
+  71 |   if (context === undefined) {
+> 72 |     throw new Error('useTranslation must be used within a TranslationProvider')
+     |          ^
+  73 |   }
+  74 |   return context
+  75 | } {
+  digest: '3258892618'
+}
+ GET /ai-assistant 500 in 513ms
+ ⚠ ./src/components/ui/Card.tsx
+There are multiple modules with names that only differ in casing.
+This can lead to unexpected behavior when compiling on a filesystem with other case-semantic.
+Use equal casing. Compare these module identifiers:
+* javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/compiled/@next/react-refresh-utils/dist/loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[16].oneOf[6].use[1]!/Users/aelitapham/Development/logistics/src/components/ui/Card.tsx|app-pages-browser
+    Used by 2 module(s), i. e.
+    javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/compiled/@next/react-refresh-utils/dist/loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[16].oneOf[6].use[1]!/Users/aelitapham/Development/logistics/src/app/dashboard/page.tsx|app-pages-browser
+* javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/compiled/@next/react-refresh-utils/dist/loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[16].oneOf[6].use[1]!/Users/aelitapham/Development/logistics/src/components/ui/card.tsx|app-pages-browser
+    Used by 1 module(s), i. e.
+    javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/compiled/@next/react-refresh-utils/dist/loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[16].oneOf[6].use[1]!/Users/aelitapham/Development/logistics/src/components/route-optimization/AdvancedRouteOptimizer.tsx|app-pages-browser
+
+Import trace for requested module:
+./src/components/ui/Card.tsx
+./src/app/dashboard/page.tsx
+
+./src/components/ui/Card.tsx
+There are multiple modules with names that only differ in casing.
+This can lead to unexpected behavior when compiling on a filesystem with other case-semantic.
+Use equal casing. Compare these module identifiers:
+* javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[15].oneOf[7].use[1]!/Users/aelitapham/Development/logistics/src/components/ui/Card.tsx|ssr
+    Used by 2 module(s), i. e.
+    javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[15].oneOf[7].use[1]!/Users/aelitapham/Development/logistics/src/app/dashboard/page.tsx|ssr
+* javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[15].oneOf[7].use[1]!/Users/aelitapham/Development/logistics/src/components/ui/card.tsx|ssr
+    Used by 1 module(s), i. e.
+    javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[15].oneOf[7].use[1]!/Users/aelitapham/Development/logistics/src/components/route-optimization/AdvancedRouteOptimizer.tsx|ssr
+
+Import trace for requested module:
+./src/components/ui/Card.tsx
+./src/app/dashboard/page.tsx
+ ⚠ ./src/components/ui/Card.tsx
+There are multiple modules with names that only differ in casing.
+This can lead to unexpected behavior when compiling on a filesystem with other case-semantic.
+Use equal casing. Compare these module identifiers:
+* javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/compiled/@next/react-refresh-utils/dist/loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[16].oneOf[6].use[1]!/Users/aelitapham/Development/logistics/src/components/ui/Card.tsx|app-pages-browser
+    Used by 3 module(s), i. e.
+    javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/compiled/@next/react-refresh-utils/dist/loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[16].oneOf[6].use[1]!/Users/aelitapham/Development/logistics/src/app/dashboard/page.tsx|app-pages-browser
+* javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/compiled/@next/react-refresh-utils/dist/loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[16].oneOf[6].use[1]!/Users/aelitapham/Development/logistics/src/components/ui/card.tsx|app-pages-browser
+    Used by 1 module(s), i. e.
+    javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/compiled/@next/react-refresh-utils/dist/loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[16].oneOf[6].use[1]!/Users/aelitapham/Development/logistics/src/components/route-optimization/AdvancedRouteOptimizer.tsx|app-pages-browser
+
+Import trace for requested module:
+./src/components/ui/Card.tsx
+./src/app/dashboard/page.tsx
+
+./src/components/ui/Card.tsx
+There are multiple modules with names that only differ in casing.
+This can lead to unexpected behavior when compiling on a filesystem with other case-semantic.
+Use equal casing. Compare these module identifiers:
+* javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[15].oneOf[7].use[1]!/Users/aelitapham/Development/logistics/src/components/ui/Card.tsx|ssr
+    Used by 3 module(s), i. e.
+    javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[15].oneOf[7].use[1]!/Users/aelitapham/Development/logistics/src/app/dashboard/page.tsx|ssr
+* javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[15].oneOf[7].use[1]!/Users/aelitapham/Development/logistics/src/components/ui/card.tsx|ssr
+    Used by 1 module(s), i. e.
+    javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[15].oneOf[7].use[1]!/Users/aelitapham/Development/logistics/src/components/route-optimization/AdvancedRouteOptimizer.tsx|ssr
+
+Import trace for requested module:
+./src/components/ui/Card.tsx
+./src/app/dashboard/page.tsx
+ GET /file-learning 200 in 497ms
+ ⚠ ./src/components/ui/Card.tsx
+There are multiple modules with names that only differ in casing.
+This can lead to unexpected behavior when compiling on a filesystem with other case-semantic.
+Use equal casing. Compare these module identifiers:
+* javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/compiled/@next/react-refresh-utils/dist/loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[16].oneOf[6].use[1]!/Users/aelitapham/Development/logistics/src/components/ui/Card.tsx|app-pages-browser
+    Used by 3 module(s), i. e.
+    javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/compiled/@next/react-refresh-utils/dist/loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[16].oneOf[6].use[1]!/Users/aelitapham/Development/logistics/src/app/dashboard/page.tsx|app-pages-browser
+* javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/compiled/@next/react-refresh-utils/dist/loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[16].oneOf[6].use[1]!/Users/aelitapham/Development/logistics/src/components/ui/card.tsx|app-pages-browser
+    Used by 1 module(s), i. e.
+    javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/compiled/@next/react-refresh-utils/dist/loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[16].oneOf[6].use[1]!/Users/aelitapham/Development/logistics/src/components/route-optimization/AdvancedRouteOptimizer.tsx|app-pages-browser
+
+Import trace for requested module:
+./src/components/ui/Card.tsx
+./src/app/dashboard/page.tsx
+
+./src/components/ui/Card.tsx
+There are multiple modules with names that only differ in casing.
+This can lead to unexpected behavior when compiling on a filesystem with other case-semantic.
+Use equal casing. Compare these module identifiers:
+* javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[15].oneOf[7].use[1]!/Users/aelitapham/Development/logistics/src/components/ui/Card.tsx|ssr
+    Used by 3 module(s), i. e.
+    javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[15].oneOf[7].use[1]!/Users/aelitapham/Development/logistics/src/app/dashboard/page.tsx|ssr
+* javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[15].oneOf[7].use[1]!/Users/aelitapham/Development/logistics/src/components/ui/card.tsx|ssr
+    Used by 1 module(s), i. e.
+    javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[15].oneOf[7].use[1]!/Users/aelitapham/Development/logistics/src/components/route-optimization/AdvancedRouteOptimizer.tsx|ssr
+
+Import trace for requested module:
+./src/components/ui/Card.tsx
+./src/app/dashboard/page.tsx
+ ⚠ ./src/components/ui/Card.tsx
+There are multiple modules with names that only differ in casing.
+This can lead to unexpected behavior when compiling on a filesystem with other case-semantic.
+Use equal casing. Compare these module identifiers:
+* javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/compiled/@next/react-refresh-utils/dist/loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[16].oneOf[6].use[1]!/Users/aelitapham/Development/logistics/src/components/ui/Card.tsx|app-pages-browser
+    Used by 3 module(s), i. e.
+    javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/compiled/@next/react-refresh-utils/dist/loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[16].oneOf[6].use[1]!/Users/aelitapham/Development/logistics/src/app/dashboard/page.tsx|app-pages-browser
+* javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/compiled/@next/react-refresh-utils/dist/loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[16].oneOf[6].use[1]!/Users/aelitapham/Development/logistics/src/components/ui/card.tsx|app-pages-browser
+    Used by 1 module(s), i. e.
+    javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/compiled/@next/react-refresh-utils/dist/loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[16].oneOf[6].use[1]!/Users/aelitapham/Development/logistics/src/components/route-optimization/AdvancedRouteOptimizer.tsx|app-pages-browser
+
+Import trace for requested module:
+./src/components/ui/Card.tsx
+./src/app/dashboard/page.tsx
+
+./src/components/ui/Card.tsx
+There are multiple modules with names that only differ in casing.
+This can lead to unexpected behavior when compiling on a filesystem with other case-semantic.
+Use equal casing. Compare these module identifiers:
+* javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[15].oneOf[7].use[1]!/Users/aelitapham/Development/logistics/src/components/ui/Card.tsx|ssr
+    Used by 3 module(s), i. e.
+    javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[15].oneOf[7].use[1]!/Users/aelitapham/Development/logistics/src/app/dashboard/page.tsx|ssr
+* javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[15].oneOf[7].use[1]!/Users/aelitapham/Development/logistics/src/components/ui/card.tsx|ssr
+    Used by 1 module(s), i. e.
+    javascript/auto|/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-flight-client-module-loader.js!/Users/aelitapham/Development/logistics/node_modules/next/dist/build/webpack/loaders/next-swc-loader.js??ruleSet[1].rules[15].oneOf[7].use[1]!/Users/aelitapham/Development/logistics/src/components/route-optimization/AdvancedRouteOptimizer.tsx|ssr
+
+Import trace for requested module:
+./src/components/ui/Card.tsx
+./src/app/dashboard/page.tsx
+[?25h

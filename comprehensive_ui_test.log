@@ -1,0 +1,23 @@
+
+> logiai-logistics@1.0.0 dev
+> NEXT_SKIP_TURBOPACK=1 next dev
+
+   ▲ Next.js 15.4.5
+   - Local:        http://localhost:3000
+   - Network:      http://127.0.2.2:3000
+   - Environments: .env.local
+   - Experiments (use with caution):
+     · optimizePackageImports
+
+ ✓ Starting...
+ ✓ Ready in 1564ms
+ ○ Compiling / ...
+ ✓ Compiled / in 2.5s (573 modules)
+ GET / 200 in 2810ms
+ ✓ Compiled /enhanced-ai in 450ms (731 modules)
+ GET /enhanced-ai 200 in 684ms
+ ✓ Compiled /ai-assistant in 186ms (730 modules)
+ GET /ai-assistant 200 in 324ms
+ ✓ Compiled /dashboard in 177ms (741 modules)
+ GET /dashboard 200 in 303ms
+[?25h

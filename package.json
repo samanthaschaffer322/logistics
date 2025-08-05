@@ -13,7 +13,8 @@
   ],
   "scripts": {
     "dev": "NEXT_SKIP_TURBOPACK=1 next dev",
-    "build": "next build",
+    "build": "next build && node scripts/build-cloudflare.js",
+    "build:cloudflare": "next build && node scripts/build-cloudflare.js",
     "start": "node serve.js",
     "serve": "node serve.js",
     "export": "next build && next export",
