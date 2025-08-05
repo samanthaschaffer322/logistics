@@ -5,15 +5,15 @@ export { Input } from './input'
 export { Label } from './label'
 export { Badge, badgeVariants } from './badge'
 export { Progress } from './progress'
-export { Alert, AlertDescription } from './alert'
+export { Alert, AlertTitle, AlertDescription } from './alert'
 export { 
   Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue,
   SelectGroup,
+  SelectValue,
+  SelectTrigger,
+  SelectContent,
   SelectLabel,
+  SelectItem,
   SelectSeparator
 } from './select'
 export { 
