@@ -2,9 +2,9 @@
 
 import React, { useEffect, useState } from 'react'
 import { supabase } from '../../../supabase/client'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui-components'
+import { Button } from '@/components/ui-components'
+import { Input } from '@/components/ui-components'
 import { Truck, Plus, MapPin, User, AlertCircle } from 'lucide-react'
 
 interface Vehicle {

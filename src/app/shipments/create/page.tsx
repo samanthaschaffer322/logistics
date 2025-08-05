@@ -3,9 +3,9 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase, isSupabaseConfigured } from '../../../../supabase/client'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui-components'
+import { Button } from '@/components/ui-components'
+import { Input } from '@/components/ui-components'
 import { ArrowLeft, Save, Calculator, MapPin, Package, User, Truck, DollarSign } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 

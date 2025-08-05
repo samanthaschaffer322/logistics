@@ -1,13 +1,13 @@
 'use client'
 
 import React, { useState, useRef, useEffect, useCallback } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui-components'
+import { Button } from '@/components/ui-components'
+import { Input } from '@/components/ui-components'
+import { Badge } from '@/components/ui-components'
+import { Progress } from '@/components/ui-components'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui-components'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui-components'
 import Navigation from '@/components/Navigation'
 import { 
   Brain, 

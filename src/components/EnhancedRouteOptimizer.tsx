@@ -27,7 +27,7 @@ import {
   BarChart3,
   Layers
 } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui-components'
 import EnhancedVietnameseProcessor, { 
   type VietnameseRouteData, 
   type DepotLocation, 

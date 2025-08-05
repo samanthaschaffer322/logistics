@@ -5,9 +5,11 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatDate(date: string | Date): string {
-  const d = new Date(date)
-  return d.toLocaleDateString('vi-VN', {
+export function formatDate(date: Date | string): string {
+  if (typeof date === 'string') {
+    date = new Date(date)
+  }
+  return date.toLocaleDateString('vi-VN', {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit'
@@ -26,11 +28,14 @@ export function calculateReorderSuggestion(currentStock: number, minStock: numbe
   urgency: 'low' | 'medium' | 'high'
 } {
   const shouldReorder = currentStock <= minStock
-  const suggestedQuantity = Math.max(0, (avgUsage * 30) - currentStock) // 30 days supply
+  const suggestedQuantity = shouldReorder ? Math.max(avgUsage * 30, minStock * 2) : 0
   
   let urgency: 'low' | 'medium' | 'high' = 'low'
-  if (currentStock <= minStock * 0.5) urgency = 'high'
-  else if (currentStock <= minStock * 0.8) urgency = 'medium'
+  if (currentStock <= minStock * 0.5) {
+    urgency = 'high'
+  } else if (currentStock <= minStock * 0.8) {
+    urgency = 'medium'
+  }
   
   return {
     shouldReorder,
