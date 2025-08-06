@@ -32,7 +32,7 @@ import {
   Zap,
   X
 } from 'lucide-react'
-import { fileProcessor, LogisticsRecord, AIInsight, ProcessingResult } from '@/lib/fileProcessor'
+import { enhancedFileProcessor, LogisticsRecord, AIInsight, ProcessingResult } from '@/lib/enhancedFileProcessor'
 
 const FilelearningPage = () => {
   const { t } = useLanguage()
@@ -114,7 +114,8 @@ const FilelearningPage = () => {
         setProcessingProgress(prev => Math.min(prev + 10, 90))
       }, 300)
       
-      const result = await fileProcessor.processMultipleFiles(uploadedFiles)
+      // Use enhanced file processor with Vietnamese logistics knowledge
+      const result = await enhancedFileProcessor.processFiles(uploadedFiles)
       
       clearInterval(progressInterval)
       setProcessingProgress(100)
@@ -122,7 +123,7 @@ const FilelearningPage = () => {
       setProcessingResult(result)
     } catch (error) {
       console.error('File processing error:', error)
-      setError('Failed to process files. Please check file format and try again.')
+      setError('Lỗi xử lý file. Vui lòng kiểm tra định dạng file và thử lại.')
     } finally {
       setIsProcessing(false)
       setTimeout(() => setProcessingProgress(0), 1000)
@@ -219,24 +220,47 @@ const FilelearningPage = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center hover:border-indigo-400 transition-colors">
-                  <FileSpreadsheet className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+                <div 
+                  className={`border-2 border-dashed rounded-lg p-8 text-center transition-all duration-300 ${
+                    isDragOver 
+                      ? 'border-indigo-500 bg-indigo-50 scale-105' 
+                      : 'border-slate-300 hover:border-indigo-400'
+                  }`}
+                  onDragEnter={handleDragEnter}
+                  onDragLeave={handleDragLeave}
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                >
+                  <FileSpreadsheet className={`w-12 h-12 mx-auto mb-4 transition-colors ${
+                    isDragOver ? 'text-indigo-600' : 'text-slate-400'
+                  }`} />
                   <Label htmlFor="file-upload" className="cursor-pointer">
-                    <span className="text-lg font-medium text-slate-700 hover:text-indigo-600">
-                      Kéo thả files hoặc click để chọn
+                    <span className={`text-lg font-medium transition-colors ${
+                      isDragOver 
+                        ? 'text-indigo-700' 
+                        : 'text-slate-700 hover:text-indigo-600'
+                    }`}>
+                      {isDragOver ? 'Thả files vào đây' : 'Kéo thả files hoặc click để chọn'}
                     </span>
                     <Input
                       id="file-upload"
                       type="file"
                       multiple
-                      accept=".xlsx,.xls,.csv"
+                      accept=".xlsx,.xls,.csv,.pdf"
                       onChange={handleFileUpload}
                       className="hidden"
                     />
                   </Label>
-                  <p className="text-sm text-slate-500 mt-2">
-                    Hỗ trợ: Excel (.xlsx, .xls), CSV • Tối đa 10MB mỗi file
+                  <p className={`text-sm mt-2 transition-colors ${
+                    isDragOver ? 'text-indigo-600' : 'text-slate-500'
+                  }`}>
+                    Hỗ trợ: Excel (.xlsx, .xls), CSV, PDF • Tối đa 10MB mỗi file
                   </p>
+                  {isDragOver && (
+                    <div className="mt-4 text-indigo-600 font-medium animate-pulse">
+                      📁 Sẵn sàng nhận files logistics...
+                    </div>
+                  )}
                 </div>
 
                 {uploadedFiles.length > 0 && (
@@ -573,6 +597,68 @@ const FilelearningPage = () => {
                           </div>
                         </div>
                       ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* AI Generated Future Schedule */}
+              {processingResult.futureSchedule && processingResult.futureSchedule.length > 0 && (
+                <Card className="mt-6">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Calendar className="w-5 h-5" />
+                      Kế hoạch tương lai (AI Generated)
+                    </CardTitle>
+                    <CardDescription>
+                      AI đã phân tích dữ liệu lịch sử và đề xuất lịch trình cho 7 ngày tới
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {processingResult.futureSchedule.map((schedule) => (
+                        <div key={schedule.id} className="p-4 border rounded-lg bg-blue-50">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="font-medium">{schedule.date}</div>
+                            <Badge className="bg-blue-100 text-blue-800">
+                              AI Suggestion
+                            </Badge>
+                          </div>
+                          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                            <div>
+                              <div className="font-medium text-slate-700">Tuyến đường</div>
+                              <div className="text-slate-600">{schedule.route}</div>
+                            </div>
+                            <div>
+                              <div className="font-medium text-slate-700">Hàng hóa</div>
+                              <div className="text-slate-600">{schedule.cargo}</div>
+                            </div>
+                            <div>
+                              <div className="font-medium text-slate-700">Trọng lượng</div>
+                              <div className="text-slate-600">{schedule.weight.toLocaleString()} kg</div>
+                            </div>
+                            <div>
+                              <div className="font-medium text-slate-700">Chi phí dự kiến</div>
+                              <div className="text-slate-600">{schedule.cost.toLocaleString()} VND</div>
+                            </div>
+                          </div>
+                          {schedule.notes && (
+                            <div className="mt-2 text-xs text-blue-600 italic">
+                              {schedule.notes}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                      <div className="flex items-start gap-2">
+                        <Brain className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                        <div className="text-sm text-amber-800">
+                          <div className="font-medium">AI Recommendation:</div>
+                          <div>Các kế hoạch này được tạo dựa trên phân tích dữ liệu lịch sử. 
+                          Vui lòng xem xét và điều chỉnh theo tình hình thực tế.</div>
+                        </div>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

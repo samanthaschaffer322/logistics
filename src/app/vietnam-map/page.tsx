@@ -11,7 +11,8 @@ import {
   CardTitle,
   Button,
   Input,
-  Label
+  Label,
+  Badge
 } from '@/components/ui-components'
 import { 
   Map, 
@@ -29,748 +30,527 @@ import {
   Navigation2,
   Fuel,
   Calculator,
-  Zap
+  Zap,
+  Anchor,
+  Warehouse,
+  Factory,
+  DollarSign
 } from 'lucide-react'
-
-interface Province {
-  id: string
-  name: string
-  nameEn: string
-  region: 'north' | 'central' | 'south'
-  population: number
-  area: number
-  economicZones: number
-  ports: number
-  airports: number
-  coordinates: { lat: number; lng: number }
-  logistics: {
-    warehouses: number
-    distributionCenters: number
-    activeRoutes: number
-    monthlyVolume: number
-  }
-  depots: Array<{
-    id: string
-    name: string
-    nameEn: string
-    coordinates: { lat: number; lng: number }
-    capacity: number
-    operatingHours: string
-  }>
-}
-
-interface RouteCalculation {
-  departure: Province
-  destination: Province
-  distance: number
-  estimatedTime: number
-  fuelCost: number
-  nearestDepot: Province['depots'][0]
-  operationFees: number
-  totalCost: number
-  truckingHours: {
-    allowed: string[]
-    restricted: string[]
-  }
-  routeDetails: {
-    highways: string[]
-    tollFees: number
-    restStops: number
-  }
-}
+import {
+  VIETNAM_LOCATIONS,
+  ENHANCED_PROVINCES,
+  COMMON_ROUTES,
+  searchLocations,
+  getLocationsByType,
+  calculateDetailedRoute,
+  DetailedLocation,
+  EnhancedProvince
+} from '@/lib/vietnamLocations'
 
 const VietnamMapPage = () => {
   const { t } = useLanguage()
-  const [selectedProvince, setSelectedProvince] = useState<Province | null>(null)
+  const [selectedLocation, setSelectedLocation] = useState<DetailedLocation | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [selectedType, setSelectedType] = useState<string>('all')
   const [selectedRegion, setSelectedRegion] = useState<string>('all')
-  const [departure, setDeparture] = useState<Province | null>(null)
-  const [destination, setDestination] = useState<Province | null>(null)
-  const [routeCalculation, setRouteCalculation] = useState<RouteCalculation | null>(null)
+  const [departure, setDeparture] = useState<DetailedLocation | null>(null)
+  const [destination, setDestination] = useState<DetailedLocation | null>(null)
+  const [routeCalculation, setRouteCalculation] = useState<any>(null)
   const [isCalculating, setIsCalculating] = useState(false)
+  const [filteredLocations, setFilteredLocations] = useState<DetailedLocation[]>(VIETNAM_LOCATIONS)
 
-  // Enhanced Vietnam provinces data with depots
-  const provinces: Province[] = [
-    {
-      id: 'hcm',
-      name: 'TP. Hồ Chí Minh',
-      nameEn: 'Ho Chi Minh City',
-      region: 'south',
-      population: 9000000,
-      area: 2095,
-      economicZones: 15,
-      ports: 3,
-      airports: 2,
-      coordinates: { lat: 10.8231, lng: 106.6297 },
-      logistics: {
-        warehouses: 450,
-        distributionCenters: 85,
-        activeRoutes: 1200,
-        monthlyVolume: 2500000
-      },
-      depots: [
-        {
-          id: 'hcm_depot_1',
-          name: 'Kho Tân Thuận',
-          nameEn: 'Tan Thuan Depot',
-          coordinates: { lat: 10.7378, lng: 106.7230 },
-          capacity: 50000,
-          operatingHours: '06:00-22:00'
-        },
-        {
-          id: 'hcm_depot_2',
-          name: 'Kho Cát Lái',
-          nameEn: 'Cat Lai Depot',
-          coordinates: { lat: 10.7950, lng: 106.7767 },
-          capacity: 75000,
-          operatingHours: '24/7'
-        }
-      ]
-    },
-    {
-      id: 'hanoi',
-      name: 'Hà Nội',
-      nameEn: 'Hanoi',
-      region: 'north',
-      population: 8000000,
-      area: 3359,
-      economicZones: 12,
-      ports: 0,
-      airports: 1,
-      coordinates: { lat: 21.0285, lng: 105.8542 },
-      logistics: {
-        warehouses: 380,
-        distributionCenters: 65,
-        activeRoutes: 950,
-        monthlyVolume: 1800000
-      },
-      depots: [
-        {
-          id: 'hanoi_depot_1',
-          name: 'Kho Gia Lâm',
-          nameEn: 'Gia Lam Depot',
-          coordinates: { lat: 21.0411, lng: 105.8660 },
-          capacity: 40000,
-          operatingHours: '06:00-22:00'
-        }
-      ]
-    },
-    {
-      id: 'danang',
-      name: 'Đà Nẵng',
-      nameEn: 'Da Nang',
-      region: 'central',
-      population: 1200000,
-      area: 1285,
-      economicZones: 8,
-      ports: 1,
-      airports: 1,
-      coordinates: { lat: 16.0544, lng: 108.2022 },
-      logistics: {
-        warehouses: 120,
-        distributionCenters: 25,
-        activeRoutes: 350,
-        monthlyVolume: 450000
-      },
-      depots: [
-        {
-          id: 'danang_depot_1',
-          name: 'Kho Liên Chiểu',
-          nameEn: 'Lien Chieu Depot',
-          coordinates: { lat: 16.0755, lng: 108.1509 },
-          capacity: 25000,
-          operatingHours: '06:00-20:00'
-        }
-      ]
-    },
-    {
-      id: 'haiphong',
-      name: 'Hải Phòng',
-      nameEn: 'Hai Phong',
-      region: 'north',
-      population: 2000000,
-      area: 1523,
-      economicZones: 6,
-      ports: 2,
-      airports: 1,
-      coordinates: { lat: 20.8449, lng: 106.6881 },
-      logistics: {
-        warehouses: 180,
-        distributionCenters: 35,
-        activeRoutes: 480,
-        monthlyVolume: 850000
-      },
-      depots: [
-        {
-          id: 'haiphong_depot_1',
-          name: 'Kho Đình Vũ',
-          nameEn: 'Dinh Vu Depot',
-          coordinates: { lat: 20.8058, lng: 106.7581 },
-          capacity: 60000,
-          operatingHours: '24/7'
-        }
-      ]
-    },
-    {
-      id: 'cantho',
-      name: 'Cần Thơ',
-      nameEn: 'Can Tho',
-      region: 'south',
-      population: 1200000,
-      area: 1409,
-      economicZones: 4,
-      ports: 1,
-      airports: 1,
-      coordinates: { lat: 10.0452, lng: 105.7469 },
-      logistics: {
-        warehouses: 95,
-        distributionCenters: 18,
-        activeRoutes: 280,
-        monthlyVolume: 320000
-      },
-      depots: [
-        {
-          id: 'cantho_depot_1',
-          name: 'Kho Trà Nóc',
-          nameEn: 'Tra Noc Depot',
-          coordinates: { lat: 10.0621, lng: 105.7851 },
-          capacity: 30000,
-          operatingHours: '06:00-20:00'
-        }
-      ]
-    },
-    {
-      id: 'binhduong',
-      name: 'Bình Dương',
-      nameEn: 'Binh Duong',
-      region: 'south',
-      population: 2500000,
-      area: 2695,
-      economicZones: 10,
-      ports: 0,
-      airports: 0,
-      coordinates: { lat: 11.3254, lng: 106.4770 },
-      logistics: {
-        warehouses: 220,
-        distributionCenters: 42,
-        activeRoutes: 650,
-        monthlyVolume: 980000
-      },
-      depots: [
-        {
-          id: 'binhduong_depot_1',
-          name: 'Kho Mỹ Phước',
-          nameEn: 'My Phuoc Depot',
-          coordinates: { lat: 11.2845, lng: 106.4234 },
-          capacity: 45000,
-          operatingHours: '06:00-22:00'
-        }
-      ]
+  // Filter locations based on search and filters
+  useEffect(() => {
+    let filtered = searchLocations(searchTerm)
+    
+    if (selectedType !== 'all') {
+      filtered = filtered.filter(loc => loc.type === selectedType)
     }
-  ]
+    
+    if (selectedRegion !== 'all') {
+      filtered = filtered.filter(loc => loc.region === selectedRegion)
+    }
+    
+    setFilteredLocations(filtered)
+  }, [searchTerm, selectedType, selectedRegion])
 
-  // Calculate distance between two coordinates using Haversine formula
-  const calculateDistance = (coord1: { lat: number; lng: number }, coord2: { lat: number; lng: number }): number => {
-    const R = 6371 // Earth's radius in km
-    const dLat = (coord2.lat - coord1.lat) * Math.PI / 180
-    const dLng = (coord2.lng - coord1.lng) * Math.PI / 180
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(coord1.lat * Math.PI / 180) * Math.cos(coord2.lat * Math.PI / 180) *
-              Math.sin(dLng/2) * Math.sin(dLng/2)
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
-    return R * c
-  }
-
-  // Find nearest depot to destination
-  const findNearestDepot = (destination: Province): Province['depots'][0] => {
-    let nearestDepot = destination.depots[0]
-    let minDistance = Infinity
-
-    destination.depots.forEach(depot => {
-      const distance = calculateDistance(destination.coordinates, depot.coordinates)
-      if (distance < minDistance) {
-        minDistance = distance
-        nearestDepot = depot
-      }
-    })
-
-    return nearestDepot
-  }
-
-  // Calculate optimal route for 40ft container
   const calculateRoute = async () => {
     if (!departure || !destination) return
-
+    
     setIsCalculating(true)
-
-    // Simulate AI calculation
-    setTimeout(() => {
-      const distance = calculateDistance(departure.coordinates, destination.coordinates)
-      const nearestDepot = findNearestDepot(destination)
+    try {
+      // Simulate calculation time
+      await new Promise(resolve => setTimeout(resolve, 1500))
       
-      // Calculate costs for 40ft container
-      const fuelConsumption = 0.35 // liters per km for 40ft container
-      const fuelPrice = 25000 // VND per liter
-      const fuelCost = distance * fuelConsumption * fuelPrice
-      
-      // Calculate estimated time considering truck restrictions
-      const avgSpeed = 65 // km/h on highways
-      const citySpeed = 25 // km/h in cities
-      const estimatedTime = (distance * 0.7 / avgSpeed) + (distance * 0.3 / citySpeed) // 70% highway, 30% city
-      
-      // Operation fees
-      const baseFee = 500000 // Base operation fee
-      const distanceFee = distance * 8000 // Per km fee
-      const depotFee = nearestDepot.capacity > 50000 ? 200000 : 100000 // Depot handling fee
-      const operationFees = baseFee + distanceFee + depotFee
-      
-      const totalCost = fuelCost + operationFees
-
-      const routeCalc: RouteCalculation = {
-        departure,
-        destination,
-        distance: Math.round(distance),
-        estimatedTime: Math.round(estimatedTime * 60), // in minutes
-        fuelCost: Math.round(fuelCost),
-        nearestDepot,
-        operationFees: Math.round(operationFees),
-        totalCost: Math.round(totalCost),
-        truckingHours: {
-          allowed: ['06:00-22:00', 'Weekdays', 'Avoid rush hours: 07:00-09:00, 17:00-19:00'],
-          restricted: ['22:00-06:00', 'City center restrictions', 'Weekend limitations']
-        },
-        routeDetails: {
-          highways: ['AH1', 'CT.01', 'QL1A'],
-          tollFees: Math.round(distance * 1200), // VND per km
-          restStops: Math.floor(distance / 200) // Every 200km
-        }
-      }
-
-      setRouteCalculation(routeCalc)
+      const result = calculateDetailedRoute(departure, destination, '40ft')
+      setRouteCalculation(result)
+    } catch (error) {
+      console.error('Route calculation error:', error)
+    } finally {
       setIsCalculating(false)
-    }, 2000)
-  }
-
-  const filteredProvinces = provinces.filter(province => {
-    const matchesSearch = province.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         province.nameEn.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesRegion = selectedRegion === 'all' || province.region === selectedRegion
-    return matchesSearch && matchesRegion
-  })
-
-  const getRegionColor = (region: string) => {
-    switch (region) {
-      case 'north': return 'bg-blue-100 text-blue-800 border-blue-200'
-      case 'central': return 'bg-green-100 text-green-800 border-green-200'
-      case 'south': return 'bg-orange-100 text-orange-800 border-orange-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200'
     }
   }
 
-  const getRegionName = (region: string) => {
-    switch (region) {
-      case 'north': return t('map.north')
-      case 'central': return t('map.central')
-      case 'south': return t('map.south')
-      default: return region
+  const getLocationIcon = (type: string) => {
+    switch (type) {
+      case 'port': return <Anchor className="w-4 h-4" />
+      case 'depot': return <Truck className="w-4 h-4" />
+      case 'warehouse': return <Warehouse className="w-4 h-4" />
+      case 'industrial_zone': return <Factory className="w-4 h-4" />
+      case 'logistics_hub': return <Package className="w-4 h-4" />
+      default: return <MapPin className="w-4 h-4" />
     }
   }
 
-  const totalStats = provinces.reduce((acc, province) => ({
-    warehouses: acc.warehouses + province.logistics.warehouses,
-    distributionCenters: acc.distributionCenters + province.logistics.distributionCenters,
-    activeRoutes: acc.activeRoutes + province.logistics.activeRoutes,
-    monthlyVolume: acc.monthlyVolume + province.logistics.monthlyVolume
-  }), { warehouses: 0, distributionCenters: 0, activeRoutes: 0, monthlyVolume: 0 })
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'port': return 'bg-blue-100 text-blue-800'
+      case 'depot': return 'bg-green-100 text-green-800'
+      case 'warehouse': return 'bg-purple-100 text-purple-800'
+      case 'industrial_zone': return 'bg-orange-100 text-orange-800'
+      case 'logistics_hub': return 'bg-indigo-100 text-indigo-800'
+      default: return 'bg-gray-100 text-gray-800'
+    }
+  }
 
   return (
     <AuthGuard>
       <div className="min-h-screen bg-slate-900 p-6">
         <div className="max-w-7xl mx-auto">
+          {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">{t('map.title')}</h1>
+            <h1 className="text-4xl font-bold gradient-text mb-2">
+              Enhanced Vietnam Logistics Map
+            </h1>
             <p className="text-slate-400">
-              {t('map.subtitle')}
+              Detailed logistics network with ports, depots, and industrial zones
             </p>
           </div>
 
-          {/* Overview Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <Building className="w-8 h-8 text-blue-600" />
-                  <div>
-                    <p className="text-2xl font-bold">{totalStats.warehouses.toLocaleString()}</p>
-                    <p className="text-sm text-slate-600">{t('map.warehouses')}</p>
-                  </div>
+          {/* Search and Filters */}
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Search className="w-5 h-5" />
+                Search & Filter Locations
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <Label htmlFor="search">Search</Label>
+                  <Input
+                    id="search"
+                    placeholder="Search locations, ports, depots..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="mt-1"
+                  />
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <Truck className="w-8 h-8 text-green-600" />
-                  <div>
-                    <p className="text-2xl font-bold">{totalStats.distributionCenters.toLocaleString()}</p>
-                    <p className="text-sm text-slate-600">{t('map.distributionCenters')}</p>
-                  </div>
+                
+                <div>
+                  <Label htmlFor="type">Type</Label>
+                  <select 
+                    id="type"
+                    value={selectedType} 
+                    onChange={(e) => setSelectedType(e.target.value)}
+                    className="mt-1 w-full p-2 border border-gray-300 rounded-md bg-white"
+                  >
+                    <option value="all">All types</option>
+                    <option value="port">Ports</option>
+                    <option value="depot">Depots</option>
+                    <option value="warehouse">Warehouses</option>
+                    <option value="industrial_zone">Industrial Zones</option>
+                    <option value="logistics_hub">Logistics Hubs</option>
+                  </select>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <Navigation className="w-8 h-8 text-purple-600" />
-                  <div>
-                    <p className="text-2xl font-bold">{totalStats.activeRoutes.toLocaleString()}</p>
-                    <p className="text-sm text-slate-600">{t('map.routes')}</p>
-                  </div>
+                
+                <div>
+                  <Label htmlFor="region">Region</Label>
+                  <select 
+                    id="region"
+                    value={selectedRegion} 
+                    onChange={(e) => setSelectedRegion(e.target.value)}
+                    className="mt-1 w-full p-2 border border-gray-300 rounded-md bg-white"
+                  >
+                    <option value="all">All regions</option>
+                    <option value="north">Northern Vietnam</option>
+                    <option value="central">Central Vietnam</option>
+                    <option value="south">Southern Vietnam</option>
+                  </select>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <Package className="w-8 h-8 text-orange-600" />
-                  <div>
-                    <p className="text-2xl font-bold">
-                      {(totalStats.monthlyVolume / 1000000).toFixed(1)}M
-                    </p>
-                    <p className="text-sm text-slate-600">{t('map.monthlyVolume')} ({t('common.tons')})</p>
-                  </div>
+                
+                <div className="flex items-end">
+                  <Button 
+                    onClick={() => {
+                      setSearchTerm('')
+                      setSelectedType('all')
+                      setSelectedRegion('all')
+                    }}
+                    variant="outline"
+                    className="w-full"
+                  >
+                    Clear Filters
+                  </Button>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Column - Search and Route Calculator */}
-            <div className="lg:col-span-1 space-y-6">
-              {/* Search and Filter */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Search className="w-5 h-5" />
-                    {t('map.search')}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="search">{t('map.searchProvince')}</Label>
-                    <Input
-                      id="search"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      placeholder={t('map.searchPlaceholder')}
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="region">{t('map.region')}</Label>
-                    <select
-                      id="region"
-                      value={selectedRegion}
-                      onChange={(e) => setSelectedRegion(e.target.value)}
-                      className="w-full p-2 border rounded-md"
-                    >
-                      <option value="all">{t('map.allRegions')}</option>
-                      <option value="north">{t('map.north')}</option>
-                      <option value="central">{t('map.central')}</option>
-                      <option value="south">{t('map.south')}</option>
-                    </select>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Route Calculator for 40ft Container */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calculator className="w-5 h-5" />
-                    40ft Container Route Calculator
-                  </CardTitle>
-                  <CardDescription>
-                    Calculate optimal route with depot selection and operation costs
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>{t('map.departure')}</Label>
-                    <select
-                      value={departure?.id || ''}
-                      onChange={(e) => {
-                        const selected = provinces.find(p => p.id === e.target.value)
-                        setDeparture(selected || null)
-                      }}
-                      className="w-full p-2 border rounded-md"
-                    >
-                      <option value="">{t('map.selectDeparture')}</option>
-                      {provinces.map(province => (
-                        <option key={province.id} value={province.id}>
-                          {province.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>{t('map.destination')}</Label>
-                    <select
-                      value={destination?.id || ''}
-                      onChange={(e) => {
-                        const selected = provinces.find(p => p.id === e.target.value)
-                        setDestination(selected || null)
-                      }}
-                      className="w-full p-2 border rounded-md"
-                    >
-                      <option value="">{t('map.selectDestination')}</option>
-                      {provinces.map(province => (
-                        <option key={province.id} value={province.id}>
-                          {province.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <Button
+          {/* Route Calculator */}
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Navigation className="w-5 h-5" />
+                Route Calculator (40ft Container)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="departure">Departure</Label>
+                  <select 
+                    id="departure"
+                    value={departure?.id || ''} 
+                    onChange={(e) => {
+                      const location = VIETNAM_LOCATIONS.find(loc => loc.id === e.target.value)
+                      setDeparture(location || null)
+                    }}
+                    className="mt-1 w-full p-2 border border-gray-300 rounded-md bg-white"
+                  >
+                    <option value="">Select departure</option>
+                    {VIETNAM_LOCATIONS.map((location) => (
+                      <option key={location.id} value={location.id}>
+                        {location.name} ({location.type})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <Label htmlFor="destination">Destination</Label>
+                  <select 
+                    id="destination"
+                    value={destination?.id || ''} 
+                    onChange={(e) => {
+                      const location = VIETNAM_LOCATIONS.find(loc => loc.id === e.target.value)
+                      setDestination(location || null)
+                    }}
+                    className="mt-1 w-full p-2 border border-gray-300 rounded-md bg-white"
+                  >
+                    <option value="">Select destination</option>
+                    {VIETNAM_LOCATIONS.map((location) => (
+                      <option key={location.id} value={location.id}>
+                        {location.name} ({location.type})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div className="flex items-end">
+                  <Button 
                     onClick={calculateRoute}
                     disabled={!departure || !destination || isCalculating}
-                    className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
                   >
                     {isCalculating ? (
                       <>
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        {t('map.calculating')}
+                        Calculating...
                       </>
                     ) : (
                       <>
-                        <Navigation2 className="w-4 h-4 mr-2" />
-                        {t('map.calculateRoute')}
+                        <Calculator className="w-4 h-4 mr-2" />
+                        Calculate Route
                       </>
                     )}
                   </Button>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-              {/* Route Calculation Results */}
-              {routeCalculation && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Zap className="w-5 h-5 text-green-600" />
-                      {t('map.routeResults')}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center p-3 bg-blue-50 rounded-lg">
-                        <p className="text-2xl font-bold text-blue-600">{routeCalculation.distance} {t('common.km')}</p>
-                        <p className="text-xs text-slate-600">{t('map.distance')}</p>
-                      </div>
-                      <div className="text-center p-3 bg-green-50 rounded-lg">
-                        <p className="text-2xl font-bold text-green-600">
-                          {Math.floor(routeCalculation.estimatedTime / 60)}h {routeCalculation.estimatedTime % 60}m
-                        </p>
-                        <p className="text-xs text-slate-600">{t('map.estimatedTime')}</p>
-                      </div>
+          {/* Route Results */}
+          {routeCalculation && (
+            <Card className="mb-6">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Navigation2 className="w-5 h-5" />
+                  Route Calculation Results
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <div className="text-2xl font-bold text-blue-600">{routeCalculation.distance} km</div>
+                    <div className="text-sm text-slate-600">Distance</div>
+                  </div>
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <div className="text-2xl font-bold text-green-600">{routeCalculation.estimatedTime}h</div>
+                    <div className="text-sm text-slate-600">Estimated Time</div>
+                  </div>
+                  <div className="text-center p-4 bg-purple-50 rounded-lg">
+                    <div className="text-2xl font-bold text-purple-600">
+                      {(routeCalculation.fuelCost / 1000).toFixed(0)}K
                     </div>
-
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center p-2 bg-slate-50 rounded">
-                        <span className="text-sm">{t('map.fuelCost')}:</span>
-                        <span className="font-semibold">{routeCalculation.fuelCost.toLocaleString()} {t('common.vnd')}</span>
-                      </div>
-                      <div className="flex justify-between items-center p-2 bg-slate-50 rounded">
-                        <span className="text-sm">{t('map.operationFees')}:</span>
-                        <span className="font-semibold">{routeCalculation.operationFees.toLocaleString()} {t('common.vnd')}</span>
-                      </div>
-                      <div className="flex justify-between items-center p-2 bg-indigo-50 rounded border border-indigo-200">
-                        <span className="text-sm font-semibold">{t('map.totalCost')}:</span>
-                        <span className="font-bold text-indigo-600">{routeCalculation.totalCost.toLocaleString()} {t('common.vnd')}</span>
-                      </div>
+                    <div className="text-sm text-slate-600">Fuel Cost (VND)</div>
+                  </div>
+                  <div className="text-center p-4 bg-orange-50 rounded-lg">
+                    <div className="text-2xl font-bold text-orange-600">
+                      {(routeCalculation.totalCost / 1000000).toFixed(1)}M
                     </div>
+                    <div className="text-sm text-slate-600">Total Cost (VND)</div>
+                  </div>
+                </div>
 
-                    <div className="p-3 bg-green-50 rounded-lg border border-green-200">
-                      <h4 className="font-semibold text-green-800 mb-2">{t('map.nearestDepot')}</h4>
-                      <p className="text-sm text-green-700">{routeCalculation.nearestDepot.name}</p>
-                      <p className="text-xs text-green-600">{t('map.operatingHours')}: {routeCalculation.nearestDepot.operatingHours}</p>
+                {/* Recommendations */}
+                {routeCalculation.recommendations.length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="font-medium mb-2">AI Recommendations:</h4>
+                    <div className="space-y-2">
+                      {routeCalculation.recommendations.map((rec: string, index: number) => (
+                        <div key={index} className="flex items-start gap-2 p-2 bg-amber-50 rounded">
+                          <Zap className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                          <span className="text-sm text-amber-800">{rec}</span>
+                        </div>
+                      ))}
                     </div>
+                  </div>
+                )}
 
-                    <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                      <h4 className="font-semibold text-yellow-800 mb-2">40ft Container Restrictions</h4>
-                      <div className="text-xs text-yellow-700 space-y-1">
-                        <p>• Allowed hours: {routeCalculation.truckingHours.allowed.join(', ')}</p>
-                        <p>• Toll fees: {routeCalculation.routeDetails.tollFees.toLocaleString()} {t('common.vnd')}</p>
-                        <p>• Rest stops: {routeCalculation.routeDetails.restStops}</p>
-                      </div>
+                {/* Nearest Depots */}
+                {routeCalculation.nearestDepots.length > 0 && (
+                  <div>
+                    <h4 className="font-medium mb-2">Nearest Depots:</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      {routeCalculation.nearestDepots.map((depot: DetailedLocation) => (
+                        <div key={depot.id} className="p-3 border rounded-lg bg-slate-50">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Truck className="w-4 h-4 text-green-600" />
+                            <span className="font-medium text-sm">{depot.name}</span>
+                          </div>
+                          <div className="text-xs text-slate-600">{depot.operatingHours}</div>
+                        </div>
+                      ))}
                     </div>
-                  </CardContent>
-                </Card>
-              )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
-              {/* Province List */}
+          {/* Locations Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Locations List */}
+            <div className="lg:col-span-2">
               <Card>
                 <CardHeader>
-                  <CardTitle>Danh sách tỉnh/thành ({filteredProvinces.length})</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <MapPin className="w-5 h-5" />
+                    Logistics Locations ({filteredLocations.length})
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-2 max-h-96 overflow-y-auto">
-                    {filteredProvinces.map((province) => (
-                      <div
-                        key={province.id}
-                        onClick={() => setSelectedProvince(province)}
-                        className={`p-3 rounded-lg cursor-pointer transition-colors ${
-                          selectedProvince?.id === province.id
-                            ? 'bg-indigo-100 border-indigo-300 border'
-                            : 'bg-slate-50 hover:bg-slate-100'
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {filteredLocations.map((location) => (
+                      <div 
+                        key={location.id}
+                        className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                          selectedLocation?.id === location.id ? 'bg-blue-50 border-blue-200' : 'hover:bg-slate-50'
                         }`}
+                        onClick={() => setSelectedLocation(location)}
                       >
                         <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-medium">{province.name}</h4>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getRegionColor(province.region)}`}>
-                            {getRegionName(province.region)}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            {getLocationIcon(location.type)}
+                            <span className="font-medium">{location.name}</span>
+                          </div>
+                          <Badge className={getTypeColor(location.type)}>
+                            {location.type.replace('_', ' ').toUpperCase()}
+                          </Badge>
                         </div>
-                        <div className="grid grid-cols-2 gap-2 text-xs text-slate-600">
-                          <div>{t('map.population')}: {(province.population / 1000000).toFixed(1)}M</div>
-                          <div>{t('map.warehouses')}: {province.logistics.warehouses}</div>
+                        
+                        <div className="text-sm text-slate-600 space-y-1">
+                          <div>{location.nameEn}</div>
+                          <div className="flex items-center gap-4">
+                            <span>{location.province}</span>
+                            <span className="capitalize">{location.region}</span>
+                            <span>{location.operatingHours}</span>
+                          </div>
+                          {location.specialties && (
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {location.specialties.slice(0, 3).map((specialty, index) => (
+                                <Badge key={index} variant="outline" className="text-xs">
+                                  {specialty.replace('_', ' ')}
+                                </Badge>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </div>
                     ))}
+                    
+                    {filteredLocations.length === 0 && (
+                      <div className="text-center py-8 text-slate-500">
+                        <MapPin className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                        <p>No locations found matching your criteria</p>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Province Details */}
-            <div className="lg:col-span-2 space-y-6">
-              {selectedProvince ? (
-                <>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <MapPin className="w-5 h-5" />
-                        {selectedProvince.name}
-                      </CardTitle>
-                      <CardDescription>
-                        Thông tin chi tiết về hạ tầng logistics
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                        <div className="text-center p-3 bg-blue-50 rounded-lg">
-                          <Users className="w-6 h-6 text-blue-600 mx-auto mb-1" />
-                          <p className="text-lg font-bold text-blue-600">
-                            {(selectedProvince.population / 1000000).toFixed(1)}M
-                          </p>
-                          <p className="text-xs text-slate-600">{t('map.population')}</p>
-                        </div>
-                        
-                        <div className="text-center p-3 bg-green-50 rounded-lg">
-                          <Map className="w-6 h-6 text-green-600 mx-auto mb-1" />
-                          <p className="text-lg font-bold text-green-600">
-                            {selectedProvince.area.toLocaleString()} km²
-                          </p>
-                          <p className="text-xs text-slate-600">{t('map.area')}</p>
-                        </div>
-                        
-                        <div className="text-center p-3 bg-purple-50 rounded-lg">
-                          <Building className="w-6 h-6 text-purple-600 mx-auto mb-1" />
-                          <p className="text-lg font-bold text-purple-600">
-                            {selectedProvince.economicZones}
-                          </p>
-                          <p className="text-xs text-slate-600">{t('map.economicZones')}</p>
-                        </div>
-                        
-                        <div className="text-center p-3 bg-orange-50 rounded-lg">
-                          <TrendingUp className="w-6 h-6 text-orange-600 mx-auto mb-1" />
-                          <p className="text-lg font-bold text-orange-600">
-                            {(selectedProvince.logistics.monthlyVolume / 1000).toLocaleString()}K
-                          </p>
-                          <p className="text-xs text-slate-600">{t('map.monthlyVolume')}</p>
+            {/* Location Details */}
+            <div>
+              {selectedLocation ? (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      {getLocationIcon(selectedLocation.type)}
+                      {selectedLocation.name}
+                    </CardTitle>
+                    <CardDescription>{selectedLocation.nameEn}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div>
+                        <Badge className={getTypeColor(selectedLocation.type)}>
+                          {selectedLocation.type.replace('_', ' ').toUpperCase()}
+                        </Badge>
+                      </div>
+                      
+                      <div>
+                        <h4 className="font-medium mb-2">Location Details</h4>
+                        <div className="text-sm space-y-1">
+                          <div><span className="font-medium">Province:</span> {selectedLocation.province}</div>
+                          <div><span className="font-medium">Region:</span> {selectedLocation.region}</div>
+                          <div><span className="font-medium">Operating Hours:</span> {selectedLocation.operatingHours}</div>
+                          {selectedLocation.capacity && (
+                            <div><span className="font-medium">Capacity:</span> {selectedLocation.capacity.toLocaleString()} TEU</div>
+                          )}
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="p-3 border rounded-lg">
-                          <p className="text-2xl font-bold text-slate-800">
-                            {selectedProvince.logistics.warehouses}
-                          </p>
-                          <p className="text-sm text-slate-600">{t('map.warehouses')}</p>
-                        </div>
-                        
-                        <div className="p-3 border rounded-lg">
-                          <p className="text-2xl font-bold text-slate-800">
-                            {selectedProvince.logistics.distributionCenters}
-                          </p>
-                          <p className="text-sm text-slate-600">{t('map.distributionCenters')}</p>
-                        </div>
-                        
-                        <div className="p-3 border rounded-lg">
-                          <p className="text-2xl font-bold text-slate-800">
-                            {selectedProvince.logistics.activeRoutes}
-                          </p>
-                          <p className="text-sm text-slate-600">{t('map.routes')}</p>
-                        </div>
-                        
-                        <div className="p-3 border rounded-lg">
-                          <p className="text-2xl font-bold text-slate-800">
-                            {selectedProvince.ports + selectedProvince.airports}
-                          </p>
-                          <p className="text-sm text-slate-600">{t('map.ports')}/{t('map.airports')}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>Logistics Depots</CardTitle>
-                      <CardDescription>
-                        Các kho logistics chính tại {selectedProvince.name}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        {selectedProvince.depots.map((depot) => (
-                          <div key={depot.id} className="flex items-center gap-3 p-3 border rounded-lg">
-                            <div className="p-2 rounded-full bg-blue-100 text-blue-600">
-                              <Building className="w-4 h-4" />
-                            </div>
-                            <div className="flex-1">
-                              <h4 className="font-medium">{depot.name}</h4>
-                              <p className="text-sm text-slate-600">
-                                Capacity: {depot.capacity.toLocaleString()} tons
-                              </p>
-                              <p className="text-xs text-slate-500">
-                                Hours: {depot.operatingHours}
-                              </p>
-                            </div>
+                      {selectedLocation.services.length > 0 && (
+                        <div>
+                          <h4 className="font-medium mb-2">Services</h4>
+                          <div className="flex flex-wrap gap-1">
+                            {selectedLocation.services.map((service, index) => (
+                              <Badge key={index} variant="outline" className="text-xs">
+                                {service.replace('_', ' ')}
+                              </Badge>
+                            ))}
                           </div>
-                        ))}
+                        </div>
+                      )}
+
+                      {selectedLocation.specialties && selectedLocation.specialties.length > 0 && (
+                        <div>
+                          <h4 className="font-medium mb-2">Specialties</h4>
+                          <div className="flex flex-wrap gap-1">
+                            {selectedLocation.specialties.map((specialty, index) => (
+                              <Badge key={index} variant="outline" className="text-xs bg-blue-50">
+                                {specialty.replace('_', ' ')}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {selectedLocation.equipment && selectedLocation.equipment.length > 0 && (
+                        <div>
+                          <h4 className="font-medium mb-2">Equipment</h4>
+                          <div className="text-sm space-y-1">
+                            {selectedLocation.equipment.map((equipment, index) => (
+                              <div key={index}>• {equipment.replace('_', ' ')}</div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {selectedLocation.contactInfo && (
+                        <div>
+                          <h4 className="font-medium mb-2">Contact Information</h4>
+                          <div className="text-sm space-y-1">
+                            <div>{selectedLocation.contactInfo.address}</div>
+                            {selectedLocation.contactInfo.phone && (
+                              <div><span className="font-medium">Phone:</span> {selectedLocation.contactInfo.phone}</div>
+                            )}
+                            {selectedLocation.contactInfo.email && (
+                              <div><span className="font-medium">Email:</span> {selectedLocation.contactInfo.email}</div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="pt-4 border-t">
+                        <div className="grid grid-cols-2 gap-2">
+                          <Button
+                            onClick={() => setDeparture(selectedLocation)}
+                            variant="outline"
+                            size="sm"
+                          >
+                            Set as Departure
+                          </Button>
+                          <Button
+                            onClick={() => setDestination(selectedLocation)}
+                            variant="outline"
+                            size="sm"
+                          >
+                            Set as Destination
+                          </Button>
+                        </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                </>
+                    </div>
+                  </CardContent>
+                </Card>
               ) : (
                 <Card>
-                  <CardContent className="p-12 text-center">
-                    <Map className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-                    <h3 className="text-xl font-medium text-slate-600 mb-2">
-                      {t('map.selectProvince')}
-                    </h3>
-                    <p className="text-slate-500">
-                      {t('map.selectProvinceDesc')}
-                    </p>
+                  <CardContent className="p-8 text-center">
+                    <MapPin className="w-16 h-16 mx-auto mb-4 opacity-50 text-slate-400" />
+                    <p className="text-slate-500">Select a location to view details</p>
                   </CardContent>
                 </Card>
               )}
             </div>
           </div>
+
+          {/* Common Routes */}
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Navigation className="w-5 h-5" />
+                Common Logistics Routes
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {COMMON_ROUTES.map((route) => (
+                  <div key={route.id} className="p-4 border rounded-lg bg-slate-50">
+                    <div className="font-medium mb-2">{route.name}</div>
+                    <div className="text-sm text-slate-600 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <Navigation className="w-3 h-3" />
+                        {route.distance} km • {route.estimatedTime}h
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Fuel className="w-3 h-3" />
+                        Fuel: {(route.fuelCost / 1000).toFixed(0)}K VND
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <DollarSign className="w-3 h-3" />
+                        Toll: {(route.tollCost / 1000).toFixed(0)}K VND
+                      </div>
+                      <div className="text-xs text-slate-500 mt-2">
+                        Frequency: {route.frequency}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </AuthGuard>
