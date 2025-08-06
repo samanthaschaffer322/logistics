@@ -184,15 +184,15 @@ const LogisticsOperationsPage = () => {
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-3xl font-bold text-white mb-2">
-                  AI Logistics Operations Center
+                  {t('logistics.title')}
                 </h1>
                 <p className="text-slate-400">
-                  Trung tâm điều hành logistics thông minh - Thay thế nhân viên khai thác
+                  {t('logistics.subtitle')}
                 </p>
               </div>
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
-                  <Label htmlFor="auto-mode" className="text-white">Auto Mode</Label>
+                  <Label htmlFor="auto-mode" className="text-white">{t('logistics.autoMode')}</Label>
                   <Button
                     id="auto-mode"
                     variant={autoMode ? "default" : "outline"}
@@ -210,7 +210,7 @@ const LogisticsOperationsPage = () => {
                   size="sm"
                 >
                   <RefreshCw className="w-4 h-4 mr-2" />
-                  Refresh
+                  {t('logistics.refresh')}
                 </Button>
               </div>
             </div>

@@ -18,7 +18,8 @@ import {
   Zap,
   FileSpreadsheet,
   Route,
-  Map
+  Map,
+  Globe
 } from 'lucide-react'
 
 const DashboardPage = () => {
@@ -37,6 +38,7 @@ const DashboardPage = () => {
   ]
 
   const quickActions = [
+    { title: 'Import-Export Center', description: 'VNACCS document generation', icon: Globe, href: '/import-export', color: 'bg-gradient-to-r from-emerald-600 to-teal-600' },
     { title: 'Logistics Operations', description: 'AI-powered operations center', icon: Brain, href: '/logistics-operations', color: 'bg-gradient-to-r from-indigo-600 to-purple-600' },
     { title: 'Super AI Assistant', description: 'Get intelligent logistics insights', icon: Brain, href: '/super-ai', color: 'bg-gradient-to-r from-purple-600 to-pink-600' },
     { title: 'Route Optimization', description: 'Optimize delivery routes', icon: MapPin, href: '/vietnam-map', color: 'bg-gradient-to-r from-blue-600 to-cyan-600' },
