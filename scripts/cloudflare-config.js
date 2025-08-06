@@ -1,0 +1,36 @@
+#!/usr/bin/env node
+
+console.log('🚀 Cloudflare Pages Configuration Helper');
+console.log('=====================================');
+console.log('');
+console.log('✅ Your LogiAI platform is ready for deployment!');
+console.log('');
+console.log('📋 EXACT Cloudflare Pages Settings:');
+console.log('');
+console.log('Framework preset: Next.js');
+console.log('Build command: npx next build');
+console.log('Build output directory: .next');
+console.log('Root directory: / (leave empty)');
+console.log('Node.js version: 18 or 20');
+console.log('');
+console.log('🔑 Environment Variables:');
+console.log('NODE_ENV=production');
+console.log('OPENAI_API_KEY=sk-Is6s1p1BqoYf21xBywtG2w');
+console.log('');
+console.log('🔧 If you see "Output directory \'out\' not found":');
+console.log('1. Go to Cloudflare Pages project settings');
+console.log('2. Build & deployments section');
+console.log('3. Change Framework preset to: Next.js');
+console.log('4. Change Build output directory to: .next');
+console.log('5. Redeploy');
+console.log('');
+console.log('✨ Your platform features:');
+console.log('- Super AI Assistant with OpenAI integration');
+console.log('- Multi-model support (GPT-4 Omni, Mini, 3.5 Turbo)');
+console.log('- File processing (Excel/PDF) with Vietnamese expertise');
+console.log('- Route optimization with smart algorithms');
+console.log('- Real-time insights and cross-system integration');
+console.log('- Beautiful dark mode design');
+console.log('- Responsive UI for all devices');
+console.log('');
+console.log('🎉 Ready to revolutionize Vietnamese logistics!');

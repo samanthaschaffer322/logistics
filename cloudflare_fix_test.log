@@ -10,22 +10,22 @@
      · optimizePackageImports
 
  ✓ Starting...
- ✓ Ready in 1413ms
+ ✓ Ready in 1404ms
  ○ Compiling / ...
 [Error: Cannot apply unknown utility class `border-gray-700`. Are you using CSS modules or similar and missing `@reference`? https://tailwindcss.com/docs/functions-and-directives#reference-directive]
- ✓ Compiled / in 2.4s (566 modules)
- GET / 200 in 2578ms
- ✓ Compiled /dashboard in 355ms (680 modules)
- GET /dashboard 200 in 587ms
- ✓ Compiled /super-ai in 151ms (711 modules)
- GET /super-ai 200 in 294ms
- ✓ Compiled /vietnam-map in 159ms (730 modules)
- GET /vietnam-map 200 in 283ms
- ✓ Compiled /settings in 170ms (755 modules)
- GET /settings 200 in 274ms
- ✓ Compiled /file-learning in 168ms (768 modules)
- GET /file-learning 200 in 266ms
- ✓ Compiled /api/enhanced-ai-assistant in 350ms (924 modules)
+ ✓ Compiled / in 3.5s (566 modules)
+ GET / 200 in 3706ms
+ ✓ Compiled /dashboard in 366ms (680 modules)
+ GET /dashboard 200 in 599ms
+ ✓ Compiled /super-ai in 157ms (711 modules)
+ GET /super-ai 200 in 302ms
+ ✓ Compiled /vietnam-map in 161ms (730 modules)
+ GET /vietnam-map 200 in 286ms
+ ✓ Compiled /settings in 172ms (755 modules)
+ GET /settings 200 in 273ms
+ ✓ Compiled /file-learning in 159ms (768 modules)
+ GET /file-learning 200 in 255ms
+ ✓ Compiled /api/enhanced-ai-assistant in 371ms (924 modules)
 OpenAI API error: Error: 401 Incorrect API key provided: sk-Is6s1*************tG2w. You can find your API key at https://platform.openai.com/account/api-keys.
     at async POST (src/app/api/enhanced-ai-assistant/route.ts:94:23)
   92 |     }
@@ -37,7 +37,7 @@ OpenAI API error: Error: 401 Incorrect API key provided: sk-Is6s1*************tG
   97 |       max_tokens: 1500, {
   status: 401,
   headers: [Object],
-  request_id: 'req_ee1b942975c3908307277551bc1228a9',
+  request_id: 'req_18038cbbc24386cbd65b34f9662efe68',
   error: [Object],
   code: 'invalid_api_key',
   param: null,
@@ -52,5 +52,5 @@ ReferenceError: body is not defined
   130 |
   131 | **Vietnamese Logistics Analysis:**
   132 |
- POST /api/enhanced-ai-assistant 500 in 1940ms
+ POST /api/enhanced-ai-assistant 500 in 1069ms
 [?25h
