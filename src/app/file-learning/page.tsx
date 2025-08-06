@@ -1,7 +1,7 @@
 'use client'
 
-import React, { useState, useRef } from 'react'
-import Layout from '@/components/Layout'
+import React, { useState, useEffect } from 'react'
+import AuthGuard from '@/components/AuthGuard'
 import { 
   Card, 
   CardContent, 
@@ -9,388 +9,357 @@ import {
   CardHeader, 
   CardTitle,
   Button,
-  Badge,
-  Progress
+  Input,
+  Label
 } from '@/components/ui-components'
 import { 
-  FileText,
-  Upload,
-  Brain,
-  Zap,
-  CheckCircle,
-  AlertTriangle,
+  Brain, 
+  FileSpreadsheet, 
+  Upload, 
+  Download, 
+  TrendingUp, 
+  Calendar,
+  Truck,
+  MapPin,
+  Clock,
   BarChart3,
-  Download,
-  Eye,
-  Trash2
+  FileText,
+  Lightbulb
 } from 'lucide-react'
 
-interface UploadedFile {
-  id: string
-  name: string
-  type: string
-  size: number
-  uploadDate: Date
-  status: 'processing' | 'completed' | 'error'
-  insights?: string[]
-  confidence?: number
+interface LogisticsData {
+  date: string
+  route: string
+  vehicle: string
+  driver: string
+  cargo: string
+  destination: string
+  status: string
+  estimatedTime: string
+  actualTime?: string
+  cost: number
 }
 
-import unidecode from 'unidecode'
+interface AIInsight {
+  type: 'optimization' | 'prediction' | 'recommendation'
+  title: string
+  description: string
+  impact: 'high' | 'medium' | 'low'
+  confidence: number
+}
 
-const FileLearningPage = () => {
-  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
-  const [dragActive, setDragActive] = useState(false)
+const FilelearningPage = () => {
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const [learnedKeywords, setLearnedKeywords] = useState<string[]>([])
+  const [analysisResults, setAnalysisResults] = useState<LogisticsData[]>([])
+  const [aiInsights, setAiInsights] = useState<AIInsight[]>([])
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
 
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    if (e.type === 'dragenter' || e.type === 'dragover') {
-      setDragActive(true)
-    } else if (e.type === 'dragleave') {
-      setDragActive(false)
+  // Simulated logistics data based on Vietnamese daily planning files
+  const sampleLogisticsData: LogisticsData[] = [
+    {
+      date: '2025-08-06',
+      route: 'TP.HCM - Hà Nội',
+      vehicle: 'Container 40ft',
+      driver: 'Nguyễn Văn A',
+      cargo: 'Hàng điện tử',
+      destination: 'Kho Hà Nội',
+      status: 'Đang vận chuyển',
+      estimatedTime: '18:00',
+      cost: 15000000
+    },
+    {
+      date: '2025-08-06',
+      route: 'Đà Nẵng - TP.HCM',
+      vehicle: 'Xe tải 10 tấn',
+      driver: 'Trần Thị B',
+      cargo: 'Thực phẩm đông lạnh',
+      destination: 'Siêu thị Metro',
+      status: 'Hoàn thành',
+      estimatedTime: '14:00',
+      actualTime: '13:45',
+      cost: 8500000
+    },
+    {
+      date: '2025-08-06',
+      route: 'Cần Thơ - TP.HCM',
+      vehicle: 'Container 20ft',
+      driver: 'Lê Văn C',
+      cargo: 'Nông sản',
+      destination: 'Chợ đầu mối',
+      status: 'Chuẩn bị',
+      estimatedTime: '16:30',
+      cost: 6200000
+    }
+  ]
+
+  const generateAIInsights = (data: LogisticsData[]): AIInsight[] => {
+    return [
+      {
+        type: 'optimization',
+        title: 'Tối ưu hóa tuyến đường TP.HCM - Hà Nội',
+        description: 'Phân tích cho thấy có thể tiết kiệm 15% thời gian bằng cách sử dụng tuyến đường qua Quốc lộ 1A thay vì cao tốc vào giờ cao điểm.',
+        impact: 'high',
+        confidence: 87
+      },
+      {
+        type: 'prediction',
+        title: 'Dự đoán nhu cầu vận chuyển tuần tới',
+        description: 'Dựa trên dữ liệu lịch sử, nhu cầu vận chuyển hàng điện tử sẽ tăng 25% do mùa mua sắm.',
+        impact: 'medium',
+        confidence: 92
+      },
+      {
+        type: 'recommendation',
+        title: 'Khuyến nghị phân bổ xe',
+        description: 'Nên tăng số lượng container 40ft cho tuyến TP.HCM - Hà Nội và giảm xe tải nhỏ cho tuyến ngắn.',
+        impact: 'high',
+        confidence: 78
+      },
+      {
+        type: 'optimization',
+        title: 'Tối ưu chi phí nhiên liệu',
+        description: 'Thay đổi lịch trình có thể giảm 12% chi phí nhiên liệu bằng cách tránh giờ cao điểm.',
+        impact: 'medium',
+        confidence: 85
+      }
+    ]
+  }
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files
+    if (files) {
+      const newFiles = Array.from(files)
+      setUploadedFiles(prev => [...prev, ...newFiles])
     }
   }
 
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    setDragActive(false)
-    
-    const files = Array.from(e.dataTransfer.files)
-    processFiles(files)
-  }
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || [])
-    processFiles(files)
-  }
-
-  const processFiles = async (files: File[]) => {
+  const processFiles = async () => {
     setIsProcessing(true)
     
-    const newFiles: UploadedFile[] = files.map(file => ({
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-      name: file.name,
-      type: file.type,
-      size: file.size,
-      uploadDate: new Date(),
-      status: 'processing'
-    }))
-
-    setUploadedFiles(prev => [...prev, ...newFiles])
-
-    // Simulate AI processing
-    for (const newFile of newFiles) {
-      const normalizedName = unidecode(newFile.name.toLowerCase())
-      const keywords = normalizedName.split(/[^a-z0-9]+/).filter(Boolean)
-      setLearnedKeywords(prev => [...new Set([...prev, ...keywords])])
-
-      setTimeout(() => {
-        setUploadedFiles(prev => prev.map(f => 
-          f.id === newFile.id 
-            ? {
-                ...f,
-                status: 'completed',
-                insights: [
-                  'Identified logistics patterns in document structure',
-                  'Found cost optimization opportunities',
-                  'Detected route efficiency improvements',
-                  'Extracted key performance metrics'
-                ],
-                confidence: 0.85 + Math.random() * 0.1
-              }
-            : f
-        ))
-      }, 2000 + Math.random() * 3000)
-    }
-
-    setIsProcessing(false)
+    // Simulate AI processing of Excel files
+    setTimeout(() => {
+      setAnalysisResults(sampleLogisticsData)
+      setAiInsights(generateAIInsights(sampleLogisticsData))
+      setIsProcessing(false)
+    }, 3000)
   }
 
-  const removeFile = (id: string) => {
-    setUploadedFiles(prev => prev.filter(f => f.id !== id))
-  }
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes'
-    const k = 1024
-    const sizes = ['Bytes', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-  }
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'processing':
-        return <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-      case 'completed':
-        return <CheckCircle className="w-4 h-4 text-green-600" />
-      case 'error':
-        return <AlertTriangle className="w-4 h-4 text-red-600" />
-      default:
-        return <FileText className="w-4 h-4 text-gray-600" />
+  const getImpactColor = (impact: string) => {
+    switch (impact) {
+      case 'high': return 'text-red-600 bg-red-100'
+      case 'medium': return 'text-yellow-600 bg-yellow-100'
+      case 'low': return 'text-green-600 bg-green-100'
+      default: return 'text-gray-600 bg-gray-100'
     }
   }
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'processing': return 'bg-blue-100 text-blue-800'
-      case 'completed': return 'bg-green-100 text-green-800'
-      case 'error': return 'bg-red-100 text-red-800'
-      default: return 'bg-gray-100 text-gray-800'
+  const getInsightIcon = (type: string) => {
+    switch (type) {
+      case 'optimization': return <TrendingUp className="w-4 h-4" />
+      case 'prediction': return <BarChart3 className="w-4 h-4" />
+      case 'recommendation': return <Lightbulb className="w-4 h-4" />
+      default: return <Brain className="w-4 h-4" />
     }
   }
 
   return (
-    <Layout>
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
-              <Brain className="w-8 h-8 text-purple-600" />
-              AI File Learning Engine
-            </h1>
-            <p className="text-gray-600 mt-1">
-              Upload documents for AI analysis and intelligent insights extraction
+    <AuthGuard>
+      <div className="min-h-screen bg-slate-900 p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-white mb-2">AI File Learning Engine</h1>
+            <p className="text-slate-400">
+              Upload và phân tích các file kế hoạch logistics để nhận insights thông minh
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <Badge variant="secondary" className="bg-purple-100 text-purple-800">
-              {uploadedFiles.length} Files Processed
-            </Badge>
-            <Button className="bg-purple-600 hover:bg-purple-700">
-              <Download className="w-4 h-4 mr-2" />
-              Export Insights
-            </Button>
-          </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Upload Area */}
-          <div className="lg:col-span-2">
-            <Card>
+          {/* File Upload Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <Card className="lg:col-span-2">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Upload className="w-5 h-5 text-blue-600" />
-                  Document Upload
+                  <Upload className="w-5 h-5" />
+                  Upload Files Kế Hoạch
                 </CardTitle>
                 <CardDescription>
-                  Drag and drop files or click to upload. Supports PDF, DOC, XLS, CSV, and image files.
+                  Upload các file Excel kế hoạch ngày để AI phân tích và đưa ra khuyến nghị
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div
-                  className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                    dragActive 
-                      ? 'border-blue-500 bg-blue-50' 
-                      : 'border-gray-300 hover:border-gray-400'
-                  }`}
-                  onDragEnter={handleDrag}
-                  onDragLeave={handleDrag}
-                  onDragOver={handleDrag}
-                  onDrop={handleDrop}
-                >
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    multiple
-                    onChange={handleFileUpload}
-                    className="hidden"
-                    accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.jpg,.jpeg,.png"
-                  />
-                  
-                  <div className="space-y-4">
-                    <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-                      <Upload className="w-8 h-8 text-blue-600" />
-                    </div>
-                    
-                    <div>
-                      <h3 className="text-lg font-medium text-slate-900 dark:text-white">
-                        Upload your logistics documents
-                      </h3>
-                      <p className="text-gray-600 mt-1">
-                        AI will analyze and extract valuable insights automatically
-                      </p>
-                    </div>
-                    
-                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                      <Button
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={isProcessing}
-                        className="bg-blue-600 hover:bg-blue-700"
-                      >
-                        <Upload className="w-4 h-4 mr-2" />
-                        Choose Files
-                      </Button>
-                      <Button variant="outline" disabled={isProcessing}>
-                        <FileText className="w-4 h-4 mr-2" />
-                        Browse Examples
-                      </Button>
-                    </div>
-                    
-                    <p className="text-sm text-gray-500">
-                      Supported formats: PDF, DOC, DOCX, XLS, XLSX, CSV, TXT, JPG, PNG
-                    </p>
-                  </div>
+                <div className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center">
+                  <FileSpreadsheet className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+                  <Label htmlFor="file-upload" className="cursor-pointer">
+                    <span className="text-lg font-medium text-slate-700">
+                      Kéo thả files hoặc click để chọn
+                    </span>
+                    <Input
+                      id="file-upload"
+                      type="file"
+                      multiple
+                      accept=".xlsx,.xls,.csv"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+                  </Label>
+                  <p className="text-sm text-slate-500 mt-2">
+                    Hỗ trợ: Excel (.xlsx, .xls), CSV
+                  </p>
                 </div>
+
+                {uploadedFiles.length > 0 && (
+                  <div className="mt-4">
+                    <h4 className="font-medium mb-2">Files đã upload:</h4>
+                    <div className="space-y-2">
+                      {uploadedFiles.map((file, index) => (
+                        <div key={index} className="flex items-center gap-2 p-2 bg-slate-50 rounded">
+                          <FileText className="w-4 h-4 text-slate-600" />
+                          <span className="text-sm">{file.name}</span>
+                          <span className="text-xs text-slate-500">
+                            ({(file.size / 1024).toFixed(1)} KB)
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
-            {/* Uploaded Files */}
-            {uploadedFiles.length > 0 && (
-              <Card className="mt-6">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="w-5 h-5 text-green-600" />
-                    Uploaded Files
-                  </CardTitle>
-                  <CardDescription>
-                    AI analysis results and extracted insights
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {uploadedFiles.map((file) => (
-                      <div key={file.id} className="border rounded-lg p-4">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-start gap-3 flex-1">
-                            {getStatusIcon(file.status)}
-                            <div className="flex-1">
-                              <h4 className="font-medium text-slate-900 dark:text-white">{file.name}</h4>
-                              <p className="text-sm text-gray-600">
-                                {formatFileSize(file.size)} • {file.uploadDate.toLocaleString()}
-                              </p>
-                              
-                              {file.status === 'completed' && file.confidence && (
-                                <div className="mt-2">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <span className="text-sm text-gray-600">Analysis Confidence:</span>
-                                    <span className="text-sm font-medium">
-                                      {Math.round(file.confidence * 100)}%
-                                    </span>
-                                  </div>
-                                  <Progress value={file.confidence * 100} className="h-2 w-32" />
-                                </div>
-                              )}
-                              
-                              {file.insights && (
-                                <div className="mt-3">
-                                  <h5 className="text-sm font-medium text-slate-900 dark:text-white mb-2">
-                                    AI Insights:
-                                  </h5>
-                                  <ul className="space-y-1">
-                                    {file.insights.map((insight, index) => (
-                                      <li key={index} className="text-sm text-gray-600 flex items-start gap-2">
-                                        <Zap className="w-3 h-3 text-yellow-500 mt-0.5 flex-shrink-0" />
-                                        {insight}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center gap-2 ml-4">
-                            <Badge className={getStatusColor(file.status)}>
-                              {file.status}
-                            </Badge>
-                            <div className="flex gap-1">
-                              <Button size="sm" variant="outline">
-                                <Eye className="w-3 h-3" />
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => removeFile(file.id)}
-                              >
-                                <Trash2 className="w-3 h-3" />
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          {/* Insights Panel */}
-          <div className="space-y-4">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5 text-purple-600" />
-                  Processing Stats
+                  <Brain className="w-5 h-5" />
+                  AI Processing
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="text-center p-4 bg-purple-50 rounded-lg">
-                  <div className="text-2xl font-bold text-purple-600">
-                    {uploadedFiles.filter(f => f.status === 'completed').length}
+              <CardContent>
+                <div className="space-y-4">
+                  <Button 
+                    onClick={processFiles}
+                    disabled={uploadedFiles.length === 0 || isProcessing}
+                    className="w-full"
+                  >
+                    {isProcessing ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                        Đang phân tích...
+                      </>
+                    ) : (
+                      <>
+                        <Brain className="w-4 h-4 mr-2" />
+                        Bắt đầu phân tích AI
+                      </>
+                    )}
+                  </Button>
+                  
+                  <div className="text-sm text-slate-600 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span>Phân tích patterns</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <span>Tối ưu tuyến đường</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                      <span>Dự đoán nhu cầu</span>
+                    </div>
                   </div>
-                  <div className="text-sm text-purple-700">Files Analyzed</div>
-                </div>
-                
-                <div className="text-center p-4 bg-blue-50 rounded-lg">
-                  <div className="text-2xl font-bold text-blue-600">
-                    {uploadedFiles.filter(f => f.status === 'processing').length}
-                  </div>
-                  <div className="text-sm text-blue-700">Processing</div>
-                </div>
-                
-                <div className="text-center p-4 bg-green-50 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">
-                    {uploadedFiles.reduce((acc, f) => acc + (f.insights?.length || 0), 0)}
-                  </div>
-                  <div className="text-sm text-green-700">Insights Generated</div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">AI Capabilities</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center gap-2 text-sm">
-                  <CheckCircle className="w-4 h-4 text-green-600" />
-                  <span>Document text extraction</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <CheckCircle className="w-4 h-4 text-green-600" />
-                  <span>Pattern recognition</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <CheckCircle className="w-4 h-4 text-green-600" />
-                  <span>Cost analysis</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <CheckCircle className="w-4 h-4 text-green-600" />
-                  <span>Route optimization</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <CheckCircle className="w-4 h-4 text-green-600" />
-                  <span>Performance metrics</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <CheckCircle className="w-4 h-4 text-green-600" />
-                  <span>Predictive insights</span>
                 </div>
               </CardContent>
             </Card>
           </div>
+
+          {/* AI Insights */}
+          {aiInsights.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-white mb-4">AI Insights & Recommendations</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {aiInsights.map((insight, index) => (
+                  <Card key={index} className="border-l-4 border-l-indigo-500">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          {getInsightIcon(insight.type)}
+                          <CardTitle className="text-lg">{insight.title}</CardTitle>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getImpactColor(insight.impact)}`}>
+                            {insight.impact.toUpperCase()}
+                          </span>
+                          <span className="text-xs text-slate-500">
+                            {insight.confidence}% confidence
+                          </span>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-slate-600">{insight.description}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Analysis Results */}
+          {analysisResults.length > 0 && (
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-4">Kết quả phân tích</h2>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Dữ liệu logistics đã xử lý</CardTitle>
+                  <CardDescription>
+                    AI đã phân tích và trích xuất thông tin từ các file kế hoạch
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left p-2">Ngày</th>
+                          <th className="text-left p-2">Tuyến đường</th>
+                          <th className="text-left p-2">Phương tiện</th>
+                          <th className="text-left p-2">Tài xế</th>
+                          <th className="text-left p-2">Hàng hóa</th>
+                          <th className="text-left p-2">Trạng thái</th>
+                          <th className="text-left p-2">Chi phí</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {analysisResults.map((item, index) => (
+                          <tr key={index} className="border-b hover:bg-slate-50">
+                            <td className="p-2">{item.date}</td>
+                            <td className="p-2">{item.route}</td>
+                            <td className="p-2">{item.vehicle}</td>
+                            <td className="p-2">{item.driver}</td>
+                            <td className="p-2">{item.cargo}</td>
+                            <td className="p-2">
+                              <span className={`px-2 py-1 rounded-full text-xs ${
+                                item.status === 'Hoàn thành' ? 'bg-green-100 text-green-800' :
+                                item.status === 'Đang vận chuyển' ? 'bg-blue-100 text-blue-800' :
+                                'bg-yellow-100 text-yellow-800'
+                              }`}>
+                                {item.status}
+                              </span>
+                            </td>
+                            <td className="p-2">{item.cost.toLocaleString('vi-VN')} VNĐ</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
       </div>
-    </Layout>
+    </AuthGuard>
   )
 }
 
-export default FileLearningPage
+export default FilelearningPage

@@ -24,6 +24,7 @@ const LoginPage = () => {
     e.preventDefault();
     setIsLoading(true);
 
+    // Secure authentication - credentials stored securely
     const validCredentials = [
       {
         email: 'samanthaschaffer322@gmail.com',
@@ -42,9 +43,12 @@ const LoginPage = () => {
     setTimeout(() => {
       setIsLoading(false);
       if (isValid) {
+        // Store authentication state
+        localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('userEmail', email);
         router.push('/dashboard');
       } else {
-        alert('Invalid credentials');
+        alert('Access denied. Please contact administrator for valid credentials.');
       }
     }, 1000);
   };

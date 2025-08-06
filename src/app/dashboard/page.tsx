@@ -1,7 +1,9 @@
 'use client'
 
 import React from 'react'
+import AuthGuard from '@/components/AuthGuard'
 import Layout from '@/components/Layout'
+import Link from 'next/link'
 import { 
   Brain, 
   BarChart3, 
@@ -13,7 +15,10 @@ import {
   Clock,
   CheckCircle,
   AlertTriangle,
-  Zap
+  Zap,
+  FileSpreadsheet,
+  Route,
+  Map
 } from 'lucide-react'
 
 const DashboardPage = () => {
@@ -39,8 +44,9 @@ const DashboardPage = () => {
   ]
 
   return (
-    <Layout>
-      <div className="max-w-7xl mx-auto space-y-8">
+    <AuthGuard>
+      <Layout>
+        <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
@@ -187,6 +193,7 @@ const DashboardPage = () => {
         </div>
       </div>
     </Layout>
+    </AuthGuard>
   )
 }
 
