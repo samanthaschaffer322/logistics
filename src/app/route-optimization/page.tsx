@@ -3,6 +3,13 @@
 import React, { useState, useEffect } from 'react'
 import AuthGuard from '@/components/AuthGuard'
 import { 
+  advancedRouteOptimizer, 
+  RouteOptimizationRequest, 
+  OptimizedRoute, 
+  RoutePoint,
+  VIETNAM_TRUCK_SPECS 
+} from '@/lib/advancedRouteOptimizer'
+import { 
   Card, 
   CardContent, 
   CardDescription, 
@@ -27,7 +34,8 @@ import {
   Target,
   Zap,
   AlertTriangle,
-  Activity
+  Activity,
+  Lightbulb
 } from 'lucide-react'
 
 interface RoutePoint {
@@ -77,15 +85,11 @@ const RouteOptimizationPage = () => {
   const [destination, setDestination] = useState<RoutePoint | null>(null)
   const [truckType, setTruckType] = useState<'20ft' | '40ft' | 'container_truck'>('40ft')
   const [departureTime, setDepartureTime] = useState('')
-  const [showMap, setShowMap] = useState(true)
   const [customOrigin, setCustomOrigin] = useState({ name: '', address: '', lat: '', lng: '' })
   const [customDestination, setCustomDestination] = useState({ name: '', address: '', lat: '', lng: '' })
-  const [newPoint, setNewPoint] = useState({ 
-    name: '', 
-    address: '', 
-    type: 'pickup' as const,
-    priority: 1
-  })
+  const [optimizeFor, setOptimizeFor] = useState<'time' | 'distance' | 'cost' | 'fuel'>('cost')
+  const [avoidTolls, setAvoidTolls] = useState(false)
+  const [avoidHighways, setAvoidHighways] = useState(false)
 
   // Vietnam truck restrictions and specifications
   const vietnamTruckSpecs = {
@@ -268,63 +272,30 @@ const RouteOptimizationPage = () => {
     }, 200)
     
     try {
-      // Simulate route calculation
-      await new Promise(resolve => setTimeout(resolve, 2500))
-      
-      // Check restrictions
-      const restrictions = checkRouteRestrictions(departure, destination, departureTime || '08:00', truckType)
-      
-      // Calculate distance (simplified)
-      const distance = calculateDistance(departure, destination)
-      
-      // Calculate costs
-      const truckSpec = vietnamTruckSpecs[truckType]
-      const fuelConsumption = (distance * truckSpec.fuel) / 100
-      const fuelCost = fuelConsumption * 26500 // VND per liter
-      const tollCost = distance * 2500 // VND per km
-      const totalCost = fuelCost + tollCost
-      const co2Emission = fuelConsumption * 2.68 // kg CO2 per liter
-      
-      // Calculate time with traffic
-      const baseTime = (distance / 45) * 60 // minutes at 45 km/h
-      const trafficDelay = isRushHour(departureTime) ? baseTime * 0.6 : baseTime * 0.2
-      const totalTime = baseTime + trafficDelay
-      
-      // Traffic analysis
-      const trafficAnalysis = {
-        congestionLevel: isRushHour(departureTime) ? 'high' as const : 'medium' as const,
-        delayMinutes: Math.round(trafficDelay),
-        rushHourImpact: isRushHour(departureTime)
+      // Create optimization request
+      const request: RouteOptimizationRequest = {
+        origin: departure,
+        destination: destination,
+        truck_specs: VIETNAM_TRUCK_SPECS[truckType],
+        departure_time: departureTime ? 
+          new Date(`2025-08-07T${departureTime}:00`).toISOString() : 
+          new Date().toISOString(),
+        avoid_tolls: avoidTolls,
+        avoid_highways: avoidHighways,
+        optimize_for: optimizeFor
       }
-      
-      // Create optimized route
-      const optimized: OptimizedRoute = {
-        id: 'opt-' + Date.now(),
-        points: [departure, destination],
-        distance: Math.round(distance * 10) / 10,
-        estimatedTime: Math.round(totalTime),
-        fuelCost: Math.round(fuelCost),
-        tollCost: Math.round(tollCost),
-        totalCost: Math.round(totalCost),
-        co2Emission: Math.round(co2Emission * 100) / 100,
-        savings: {
-          distance: distance * 0.3,
-          time: Math.round(totalTime * 0.25),
-          fuel: Math.round(fuelCost * 0.2)
-        },
-        efficiency: 85,
-        restrictions,
-        trafficAnalysis
-      }
+
+      // Use advanced route optimizer
+      const routeResponse = await advancedRouteOptimizer.optimizeRoute(request)
       
       clearInterval(progressInterval)
       setOptimizationProgress(100)
-      setOptimizedRoute(optimized)
+      setOptimizedRoute(routeResponse)
       
       setTimeout(() => setOptimizationProgress(0), 1000)
     } catch (error) {
       console.error('Route optimization failed:', error)
-      alert('Route optimization failed. Please try again.')
+      alert(`Route optimization failed: ${error}`)
     } finally {
       setIsOptimizing(false)
     }

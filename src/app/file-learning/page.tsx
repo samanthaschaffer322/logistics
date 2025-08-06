@@ -33,6 +33,7 @@ import {
   X
 } from 'lucide-react'
 import { enhancedFileProcessor, LogisticsRecord, AIInsight, ProcessingResult } from '@/lib/enhancedFileProcessor'
+import { aiProcessingEngine } from '@/lib/aiProcessingEngine'
 
 const FilelearningPage = () => {
   const { t } = useLanguage()
@@ -109,21 +110,19 @@ const FilelearningPage = () => {
     setProcessingProgress(0)
     
     try {
-      // Simulate progress updates
-      const progressInterval = setInterval(() => {
-        setProcessingProgress(prev => Math.min(prev + 10, 90))
-      }, 300)
+      // Set up progress tracking
+      aiProcessingEngine.onProgress((progress, status) => {
+        setProcessingProgress(progress)
+        console.log(`Processing: ${progress}% - ${status}`)
+      })
       
-      // Use enhanced file processor with Vietnamese logistics knowledge
-      const result = await enhancedFileProcessor.processFiles(uploadedFiles)
-      
-      clearInterval(progressInterval)
-      setProcessingProgress(100)
+      // Use AI processing engine for comprehensive analysis
+      const result = await aiProcessingEngine.processFiles(uploadedFiles)
       
       setProcessingResult(result)
     } catch (error) {
       console.error('File processing error:', error)
-      setError('Lỗi xử lý file. Vui lòng kiểm tra định dạng file và thử lại.')
+      setError(`Processing failed: ${error}. Please check your Excel files and try again.`)
     } finally {
       setIsProcessing(false)
       setTimeout(() => setProcessingProgress(0), 1000)
