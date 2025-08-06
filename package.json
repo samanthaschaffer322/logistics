@@ -27,7 +27,8 @@
     "class-variance-authority": "0.7.0",
     "clsx": "2.0.0",
     "tailwind-merge": "1.14.0",
-    "serve": "^14.2.0"
+    "serve": "^14.2.0",
+    "unidecode": "^0.1.8"
   },
   "devDependencies": {
     "eslint": "8.57.1",

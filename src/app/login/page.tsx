@@ -21,15 +21,33 @@ const LoginPage = () => {
   const router = useRouter()
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    
-    // Simulate login
+    e.preventDefault();
+    setIsLoading(true);
+
+    const validCredentials = [
+      {
+        email: 'samanthaschaffer322@gmail.com',
+        password: 'admin@trucking.com',
+      },
+      {
+        email: 'dkim20263@gmail.com',
+        password: 'Dz300511#',
+      },
+    ];
+
+    const isValid = validCredentials.some(
+      (cred) => cred.email === email && cred.password === password
+    );
+
     setTimeout(() => {
-      setIsLoading(false)
-      router.push('/dashboard')
-    }, 1000)
-  }
+      setIsLoading(false);
+      if (isValid) {
+        router.push('/dashboard');
+      } else {
+        alert('Invalid credentials');
+      }
+    }, 1000);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
@@ -98,11 +116,7 @@ const LoginPage = () => {
             </Button>
           </form>
           
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              Demo credentials: any email/password combination
-            </p>
-          </div>
+          
         </CardContent>
       </Card>
     </div>

@@ -159,7 +159,7 @@ const AnalyticsPage = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
               <BarChart3 className="w-8 h-8 text-blue-600" />
               Analytics & Insights
             </h1>
@@ -195,7 +195,7 @@ const AnalyticsPage = () => {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-gray-600">{kpi.title}</p>
-                      <p className="text-2xl font-bold text-gray-900">{kpi.value}</p>
+                      <p className="text-2xl font-bold text-slate-900 dark:text-white">{kpi.value}</p>
                     </div>
                     <Icon className={`w-8 h-8 ${kpi.color}`} />
                   </div>
@@ -237,11 +237,11 @@ const AnalyticsPage = () => {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b">
-                        <th className="text-left py-3 px-4 font-medium text-gray-900">Route</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-900">Deliveries</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-900">On-Time %</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-900">Avg Cost</th>
-                        <th className="text-left py-3 px-4 font-medium text-gray-900">Performance</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-900 dark:text-white">Route</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-900 dark:text-white">Deliveries</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-900 dark:text-white">On-Time %</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-900 dark:text-white">Avg Cost</th>
+                        <th className="text-left py-3 px-4 font-medium text-slate-900 dark:text-white">Performance</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -282,7 +282,7 @@ const AnalyticsPage = () => {
                       {getInsightIcon(insight.type)}
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-2">
-                          <h3 className="font-medium text-gray-900">{insight.title}</h3>
+                          <h3 className="font-medium text-slate-900 dark:text-white">{insight.title}</h3>
                           <Badge className={getInsightColor(insight.status)}>
                             {insight.status}
                           </Badge>

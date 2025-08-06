@@ -36,11 +36,14 @@ interface UploadedFile {
   confidence?: number
 }
 
+import unidecode from 'unidecode'
+
 const FileLearningPage = () => {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [dragActive, setDragActive] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [learnedKeywords, setLearnedKeywords] = useState<string[]>([])
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault()
@@ -82,6 +85,10 @@ const FileLearningPage = () => {
 
     // Simulate AI processing
     for (const newFile of newFiles) {
+      const normalizedName = unidecode(newFile.name.toLowerCase())
+      const keywords = normalizedName.split(/[^a-z0-9]+/).filter(Boolean)
+      setLearnedKeywords(prev => [...new Set([...prev, ...keywords])])
+
       setTimeout(() => {
         setUploadedFiles(prev => prev.map(f => 
           f.id === newFile.id 
@@ -144,7 +151,7 @@ const FileLearningPage = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
               <Brain className="w-8 h-8 text-purple-600" />
               AI File Learning Engine
             </h1>
@@ -203,7 +210,7 @@ const FileLearningPage = () => {
                     </div>
                     
                     <div>
-                      <h3 className="text-lg font-medium text-gray-900">
+                      <h3 className="text-lg font-medium text-slate-900 dark:text-white">
                         Upload your logistics documents
                       </h3>
                       <p className="text-gray-600 mt-1">
@@ -254,7 +261,7 @@ const FileLearningPage = () => {
                           <div className="flex items-start gap-3 flex-1">
                             {getStatusIcon(file.status)}
                             <div className="flex-1">
-                              <h4 className="font-medium text-gray-900">{file.name}</h4>
+                              <h4 className="font-medium text-slate-900 dark:text-white">{file.name}</h4>
                               <p className="text-sm text-gray-600">
                                 {formatFileSize(file.size)} • {file.uploadDate.toLocaleString()}
                               </p>
@@ -273,7 +280,7 @@ const FileLearningPage = () => {
                               
                               {file.insights && (
                                 <div className="mt-3">
-                                  <h5 className="text-sm font-medium text-gray-900 mb-2">
+                                  <h5 className="text-sm font-medium text-slate-900 dark:text-white mb-2">
                                     AI Insights:
                                   </h5>
                                   <ul className="space-y-1">
