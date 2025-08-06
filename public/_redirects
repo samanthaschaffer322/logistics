@@ -1,10 +1,32 @@
 # Redirects for Cloudflare Pages with Next.js
 
-# API routes
+# Main redirect - root to dashboard
+/ /dashboard/ 302
+
+# API routes - preserve as-is
 /api/* /api/:splat 200
 
-# Next.js assets
+# Next.js static assets
 /_next/* /_next/:splat 200
 
-# Handle SPA routing
-/* /index.html 200
+# Static assets
+/favicon.ico /favicon.ico 200
+/robots.txt /robots.txt 200
+/sitemap.xml /sitemap.xml 200
+
+# App routes with trailing slashes
+/dashboard /dashboard/ 302
+/super-ai /super-ai/ 302
+/analytics /analytics/ 302
+/file-learning /file-learning/ 302
+/fleet-management /fleet-management/ 302
+/real-time-tracking /real-time-tracking/ 302
+/transportation /transportation/ 302
+/warehouse /warehouse/ 302
+/shipments /shipments/ 302
+/procurement /procurement/ 302
+/distribution /distribution/ 302
+/login /login/ 302
+
+# Catch-all for SPA routing - redirect to dashboard if page not found
+/* /dashboard/ 302

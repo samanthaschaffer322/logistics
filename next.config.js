@@ -4,15 +4,18 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['@/components/ui-components']
   },
+  
   // Configure for Cloudflare Pages compatibility
   images: {
     unoptimized: true
   },
-  // Ensure proper routing
-  trailingSlash: false,
-  // CRITICAL: Disable webpack cache for Cloudflare Pages (file size limits)
+  
+  // Enable trailing slash for better static hosting compatibility
+  trailingSlash: true,
+  
+  // Disable webpack cache to prevent large files
   webpack: (config, { dev, isServer }) => {
-    // Disable webpack cache in production to avoid large cache files
+    // Disable webpack cache in production
     if (!dev) {
       config.cache = false;
     }
@@ -28,6 +31,7 @@ const nextConfig = {
     }
     return config;
   },
+  
   // Build configuration
   eslint: {
     ignoreDuringBuilds: true,
@@ -35,14 +39,59 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  // Output configuration for Cloudflare Pages
+  
+  // Output configuration
   distDir: '.next',
-  // Ensure API routes work
+  
+  // Configure redirects for better routing
+  async redirects() {
+    return [
+      {
+        source: '/',
+        destination: '/dashboard',
+        permanent: false,
+      },
+    ];
+  },
+  
+  // Configure rewrites for API routes
   async rewrites() {
     return [
       {
         source: '/api/:path*',
         destination: '/api/:path*',
+      },
+    ];
+  },
+  
+  // Configure headers for better caching
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+        ],
+      },
+      {
+        source: '/api/:path*',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-cache, no-store, must-revalidate',
+          },
+        ],
       },
     ];
   },
