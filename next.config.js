@@ -10,8 +10,13 @@ const nextConfig = {
   },
   // Ensure proper routing
   trailingSlash: false,
-  // Webpack optimization for Cloudflare
+  // CRITICAL: Disable webpack cache for Cloudflare Pages (file size limits)
   webpack: (config, { dev, isServer }) => {
+    // Disable webpack cache in production to avoid large cache files
+    if (!dev) {
+      config.cache = false;
+    }
+    
     if (!dev && !isServer) {
       // Optimize for client-side bundle
       config.resolve.fallback = {
