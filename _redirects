@@ -1,9 +1,1 @@
-# Redirects for Cloudflare Pages
-# Handle client-side routing for Next.js
-/*    /index.html   200
-
-# API routes
-/api/*  /api/:splat  200
-
-# Handle 404s
-/404  /404.html  404
+/* /index.html 200
