@@ -3,13 +3,13 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['@/components/ui-components']
   },
-  // Use static export for Cloudflare Pages compatibility
-  output: 'export',
-  trailingSlash: true,
+  // Configure for Cloudflare Pages with full functionality
   images: {
     unoptimized: true
   },
-  // Disable webpack cache for Cloudflare Pages (file size limits)
+  // Enable client-side routing and interactivity
+  trailingSlash: false,
+  // Optimize for Cloudflare Pages
   webpack: (config, { dev, isServer }) => {
     if (!dev) {
       // Disable webpack cache in production to avoid large cache files

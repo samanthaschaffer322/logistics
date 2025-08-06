@@ -1,0 +1,30 @@
+
+> logiai-logistics@1.0.0 dev
+> NEXT_SKIP_TURBOPACK=1 next dev
+
+   ▲ Next.js 15.4.5
+   - Local:        http://localhost:3000
+   - Network:      http://127.0.2.2:3000
+   - Environments: .env.local
+   - Experiments (use with caution):
+     · optimizePackageImports
+
+ ✓ Starting...
+ ✓ Ready in 1507ms
+ ○ Compiling / ...
+[Error: Cannot apply unknown utility class `border-gray-700`. Are you using CSS modules or similar and missing `@reference`? https://tailwindcss.com/docs/functions-and-directives#reference-directive]
+ ✓ Compiled / in 3.4s (566 modules)
+ GET / 200 in 3635ms
+ ✓ Compiled /dashboard in 422ms (680 modules)
+ GET /dashboard 200 in 658ms
+ ✓ Compiled /super-ai in 153ms (711 modules)
+ GET /super-ai 200 in 298ms
+ ✓ Compiled /vietnam-map in 159ms (730 modules)
+ GET /vietnam-map 200 in 285ms
+ ✓ Compiled /settings in 170ms (755 modules)
+ GET /settings 200 in 273ms
+ ✓ Compiled /analytics in 165ms (772 modules)
+ GET /analytics 200 in 245ms
+ ✓ Compiled /api/enhanced-ai-assistant in 158ms (792 modules)
+ POST /api/enhanced-ai-assistant 200 in 721ms
+[?25h

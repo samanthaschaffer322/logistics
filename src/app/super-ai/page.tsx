@@ -19,7 +19,6 @@ import {
   User, 
   Upload, 
   FileText, 
-  Image as ImageIcon, 
   Zap, 
   MapPin,
   Truck,
@@ -32,13 +31,10 @@ import {
   CheckCircle,
   Loader2,
   X,
-  Eye,
-  Download,
-  Sparkles,
-  MessageSquare,
-  Settings,
   Copy,
-  RefreshCw
+  RefreshCw,
+  MessageSquare,
+  Sparkles
 } from 'lucide-react'
 import { FileProcessor, ProcessedFile, FileInsight } from '@/lib/fileProcessor'
 
@@ -53,30 +49,22 @@ interface Message {
   usage?: any
 }
 
-interface ChatState {
-  messages: Message[]
-  isLoading: boolean
-  selectedModel: string
-}
-
 const SuperAIPage = () => {
-  const [chatState, setChatState] = useState<ChatState>({
-    messages: [
-      {
-        id: '1',
-        type: 'ai',
-        content: '🚀 **Super AI Assistant Ready!** Tôi là hệ thống trí tuệ nhân tạo toàn diện cho logistics Việt Nam với khả năng Sparka-inspired.\n\n**Tính năng nâng cao:**\n• **Multi-model AI** - GPT-4 Omni, GPT-4 Mini, GPT-3.5 Turbo\n• **File Processing** - Excel, PDF, CSV analysis\n• **Route Optimization** - Vietnamese logistics expertise\n• **Real-time Insights** - Cross-system integration\n• **Document Learning** - Pattern recognition\n• **Cost Analysis** - Multi-variable optimization\n\n**Sparka Features:**\n• **Advanced Chat Interface** - Multi-turn conversations\n• **Artifact Generation** - Code, documents, charts\n• **Tool Integration** - Weather, maps, calculations\n• **Context Awareness** - Remembers conversation history\n\nHôm nay tôi có thể giúp gì cho bạn?',
-        timestamp: new Date(),
-        model: 'super-ai-v1'
-      }
-    ],
-    isLoading: false,
-    selectedModel: 'gpt-4o-mini'
-  })
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: '1',
+      type: 'ai',
+      content: '🚀 **Super AI Assistant Ready!** Tôi là hệ thống AI toàn diện cho logistics Việt Nam với tích hợp OpenAI.\n\n**Tính năng nâng cao:**\n• **Multi-model AI** - GPT-4 Omni, GPT-4 Mini, GPT-3.5 Turbo\n• **Vietnamese Expertise** - Chuyên môn logistics Việt Nam\n• **File Processing** - Phân tích Excel, PDF, CSV\n• **Route Optimization** - Tối ưu tuyến đường thông minh\n• **Real-time Insights** - Thông tin thời gian thực\n• **Cost Analysis** - Phân tích chi phí đa biến\n\n**OpenAI Integration:**\n• **Real AI Responses** - Kết nối trực tiếp với OpenAI API\n• **Context Awareness** - Nhớ lịch sử hội thoại\n• **Vietnamese Context** - Hiểu biết sâu về thị trường Việt Nam\n• **Interactive Features** - Giao diện tương tác hoàn chỉnh\n\nHôm nay tôi có thể giúp gì cho bạn?',
+      timestamp: new Date(),
+      model: 'super-ai-v2'
+    }
+  ])
   
   const [inputMessage, setInputMessage] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
   const [uploadedFiles, setUploadedFiles] = useState<ProcessedFile[]>([])
   const [insights, setInsights] = useState<FileInsight[]>([])
+  const [selectedModel, setSelectedModel] = useState('gpt-4o-mini')
   const [dragActive, setDragActive] = useState(false)
   const [isTyping, setIsTyping] = useState(false)
   
@@ -90,7 +78,7 @@ const SuperAIPage = () => {
 
   useEffect(() => {
     scrollToBottom()
-  }, [chatState.messages])
+  }, [messages])
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -112,10 +100,9 @@ const SuperAIPage = () => {
   }, [])
 
   const processFiles = async (files: File[]) => {
-    setChatState(prev => ({ ...prev, isLoading: true }))
+    setIsLoading(true)
     
     for (const file of files) {
-      // Add file to processing state
       const processingFile: ProcessedFile = {
         id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
         name: file.name,
@@ -127,34 +114,27 @@ const SuperAIPage = () => {
       
       setUploadedFiles(prev => [...prev, processingFile])
       
-      // Process file
       try {
         const processedFile = await FileProcessor.processFile(file)
         
-        // Update file status
         setUploadedFiles(prev => prev.map(f => 
           f.id === processingFile.id ? processedFile : f
         ))
         
-        // Add insights
         if (processedFile.insights) {
           setInsights(prev => [...prev, ...processedFile.insights!])
         }
         
-        // Generate AI response about the file
         const analysisMessage: Message = {
           id: Date.now().toString(),
           type: 'ai',
-          content: `📁 **File Analysis Complete!**\n\n**File:** ${file.name}\n**Size:** ${(file.size / 1024).toFixed(1)}KB\n**Type:** ${file.type}\n\n**AI Analysis Results:**\n${processedFile.insights?.map(insight => `• **${insight.title}** - ${insight.description} (${Math.round(insight.confidence * 100)}% confidence)`).join('\n')}\n\n**Optimization Suggestions:**\n${FileProcessor.generateOptimizationSuggestions(processedFile.routeData || []).map(s => `• ${s}`).join('\n')}\n\nWould you like me to analyze this data further or integrate it with route optimization?`,
+          content: `📁 **File Analysis Complete!**\n\n**File:** ${file.name}\n**Size:** ${(file.size / 1024).toFixed(1)}KB\n**Type:** ${file.type}\n\n**AI Analysis Results:**\n${processedFile.insights?.map(insight => `• **${insight.title}** - ${insight.description} (${Math.round(insight.confidence * 100)}% confidence)`).join('\n')}\n\n**Optimization Suggestions:**\n${FileProcessor.generateOptimizationSuggestions(processedFile.routeData || []).map(s => `• ${s}`).join('\n')}\n\nBạn có muốn tôi phân tích chi tiết hơn về dữ liệu này không?`,
           timestamp: new Date(),
           attachments: [processedFile],
           model: 'file-processor-ai'
         }
         
-        setChatState(prev => ({
-          ...prev,
-          messages: [...prev.messages, analysisMessage]
-        }))
+        setMessages(prev => [...prev, analysisMessage])
       } catch (error) {
         console.error('Error processing file:', error)
         setUploadedFiles(prev => prev.map(f => 
@@ -163,7 +143,7 @@ const SuperAIPage = () => {
       }
     }
     
-    setChatState(prev => ({ ...prev, isLoading: false }))
+    setIsLoading(false)
   }
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -181,13 +161,9 @@ const SuperAIPage = () => {
       timestamp: new Date()
     }
 
-    setChatState(prev => ({
-      ...prev,
-      messages: [...prev.messages, userMessage],
-      isLoading: true
-    }))
-    
+    setMessages(prev => [...prev, userMessage])
     setInputMessage('')
+    setIsLoading(true)
     setIsTyping(true)
 
     try {
@@ -196,9 +172,9 @@ const SuperAIPage = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: inputMessage,
-          model: chatState.selectedModel,
+          model: selectedModel,
           attachments: uploadedFiles.map(f => ({ name: f.name, type: f.type, size: f.size })),
-          chatHistory: chatState.messages.slice(-10),
+          chatHistory: messages.slice(-10),
           insights: insights.slice(-10)
         })
       })
@@ -208,20 +184,15 @@ const SuperAIPage = () => {
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'ai',
-        content: data.response || 'I apologize, but I encountered an issue processing your request. Please try again.',
+        content: data.response || 'Xin lỗi, tôi gặp sự cố khi xử lý yêu cầu của bạn. Vui lòng thử lại.',
         timestamp: new Date(),
         analysis: data.analysis,
         model: data.model,
         usage: data.usage
       }
 
-      setChatState(prev => ({
-        ...prev,
-        messages: [...prev.messages, aiMessage],
-        isLoading: false
-      }))
+      setMessages(prev => [...prev, aiMessage])
       
-      // Generate new insights based on AI response
       if (data.suggestions) {
         const newInsights: FileInsight[] = data.suggestions.map((suggestion: string, index: number) => ({
           type: ['route', 'cost', 'risk', 'optimization'][index % 4] as any,
@@ -238,17 +209,14 @@ const SuperAIPage = () => {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'ai',
-        content: '❌ I encountered an error processing your request. Please check your connection and try again.',
+        content: '❌ Tôi gặp lỗi khi xử lý yêu cầu của bạn. Vui lòng kiểm tra kết nối và thử lại.',
         timestamp: new Date(),
         model: 'error-handler'
       }
-      setChatState(prev => ({
-        ...prev,
-        messages: [...prev.messages, errorMessage],
-        isLoading: false
-      }))
+      setMessages(prev => [...prev, errorMessage])
     }
 
+    setIsLoading(false)
     setIsTyping(false)
   }
 
@@ -265,14 +233,12 @@ const SuperAIPage = () => {
 
   const copyMessage = (content: string) => {
     navigator.clipboard.writeText(content)
-    // You could add a toast notification here
   }
 
   const regenerateResponse = async (messageId: string) => {
-    // Find the user message before this AI message
-    const messageIndex = chatState.messages.findIndex(m => m.id === messageId)
+    const messageIndex = messages.findIndex(m => m.id === messageId)
     if (messageIndex > 0) {
-      const userMessage = chatState.messages[messageIndex - 1]
+      const userMessage = messages[messageIndex - 1]
       if (userMessage.type === 'user') {
         setInputMessage(userMessage.content)
         await sendMessage()
@@ -300,14 +266,6 @@ const SuperAIPage = () => {
     }
   }
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes'
-    const k = 1024
-    const sizes = ['Bytes', 'KB', 'MB', 'GB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
-  }
-
   return (
     <Layout>
       <div className="max-w-7xl mx-auto space-y-6">
@@ -317,16 +275,16 @@ const SuperAIPage = () => {
             <h1 className="text-3xl font-bold gradient-text flex items-center gap-3">
               <Brain className="w-8 h-8 text-indigo-400" />
               Super AI Assistant
-              <Badge className="badge-success text-xs">Sparka-Inspired</Badge>
+              <Badge className="badge-success text-xs">OpenAI Integrated</Badge>
             </h1>
             <p className="text-slate-400 mt-1">
-              Advanced AI system with multi-model support and Vietnamese logistics expertise
+              Advanced AI system with real OpenAI integration and Vietnamese logistics expertise
             </p>
           </div>
           <div className="flex items-center gap-3">
             <select
-              value={chatState.selectedModel}
-              onChange={(e) => setChatState(prev => ({ ...prev, selectedModel: e.target.value }))}
+              value={selectedModel}
+              onChange={(e) => setSelectedModel(e.target.value)}
               className="dark-input px-3 py-2 rounded-xl"
             >
               <option value="gpt-4o">GPT-4 Omni</option>
@@ -359,14 +317,14 @@ const SuperAIPage = () => {
                   )}
                 </CardTitle>
                 <CardDescription className="text-slate-400">
-                  Upload files, ask questions, get intelligent logistics insights with Sparka-inspired features
+                  Real OpenAI integration with Vietnamese logistics expertise - fully interactive
                 </CardDescription>
               </CardHeader>
               
               <CardContent className="flex-1 flex flex-col p-0">
                 {/* Messages */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                  {chatState.messages.map((message) => (
+                  {messages.map((message) => (
                     <div
                       key={message.id}
                       className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in group`}
@@ -406,6 +364,12 @@ const SuperAIPage = () => {
                                 <span>Model: {message.model}</span>
                                 <span>•</span>
                                 <span>Tokens: {message.usage.total_tokens}</span>
+                                {message.analysis?.openai_integration && (
+                                  <>
+                                    <span>•</span>
+                                    <span className="text-green-400">OpenAI ✓</span>
+                                  </>
+                                )}
                               </div>
                             )}
                           </div>
@@ -437,7 +401,7 @@ const SuperAIPage = () => {
                       </div>
                     </div>
                   ))}
-                  {chatState.isLoading && (
+                  {isLoading && (
                     <div className="flex justify-start">
                       <div className="dark-card rounded-2xl p-4 flex items-center gap-2">
                         <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />
@@ -500,13 +464,13 @@ const SuperAIPage = () => {
                         value={inputMessage}
                         onChange={(e) => setInputMessage(e.target.value)}
                         onKeyPress={handleKeyPress}
-                        placeholder="Ask about routes, costs, optimization, or upload files for analysis..."
+                        placeholder="Ask about Vietnamese logistics, routes, costs, or upload files for analysis..."
                         className="dark-input flex-1"
-                        disabled={chatState.isLoading}
+                        disabled={isLoading}
                       />
                       <Button
                         onClick={sendMessage}
-                        disabled={chatState.isLoading || !inputMessage.trim()}
+                        disabled={isLoading || !inputMessage.trim()}
                         className="gradient-button"
                       >
                         <Send className="w-4 h-4" />
@@ -574,7 +538,7 @@ const SuperAIPage = () => {
                   variant="outline"
                   size="sm"
                   className="dark-button w-full justify-start"
-                  onClick={() => setInputMessage('Optimize route from Ho Chi Minh City to Hanoi')}
+                  onClick={() => setInputMessage('Tối ưu tuyến đường từ TP.HCM đến Hà Nội')}
                 >
                   <Route className="w-4 h-4 mr-2" />
                   Route Optimization
@@ -583,7 +547,7 @@ const SuperAIPage = () => {
                   variant="outline"
                   size="sm"
                   className="dark-button w-full justify-start"
-                  onClick={() => setInputMessage('Analyze shipping costs for 40ft container')}
+                  onClick={() => setInputMessage('Phân tích chi phí vận chuyển container 40ft')}
                 >
                   <DollarSign className="w-4 h-4 mr-2" />
                   Cost Analysis
@@ -592,7 +556,7 @@ const SuperAIPage = () => {
                   variant="outline"
                   size="sm"
                   className="dark-button w-full justify-start"
-                  onClick={() => setInputMessage('Assess risks for monsoon season logistics')}
+                  onClick={() => setInputMessage('Đánh giá rủi ro logistics mùa mưa bão')}
                 >
                   <AlertTriangle className="w-4 h-4 mr-2" />
                   Risk Assessment
@@ -609,7 +573,7 @@ const SuperAIPage = () => {
               </CardContent>
             </Card>
 
-            {/* Chat Statistics */}
+            {/* Session Stats */}
             <Card className="dark-card">
               <CardHeader>
                 <CardTitle className="text-lg text-white">Session Stats</CardTitle>
@@ -617,7 +581,7 @@ const SuperAIPage = () => {
               <CardContent className="space-y-3">
                 <div className="text-center p-3 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
                   <div className="text-2xl font-bold text-indigo-400">
-                    {chatState.messages.filter(m => m.type === 'ai').length}
+                    {messages.filter(m => m.type === 'ai').length}
                   </div>
                   <div className="text-sm text-indigo-300">AI Responses</div>
                 </div>
