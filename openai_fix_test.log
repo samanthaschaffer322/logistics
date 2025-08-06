@@ -1,0 +1,26 @@
+
+> logiai-logistics@1.0.0 dev
+> next dev
+
+   ▲ Next.js 15.4.5
+   - Local:        http://localhost:3000
+   - Network:      http://127.0.2.2:3000
+   - Environments: .env.local
+   - Experiments (use with caution):
+     · optimizePackageImports
+
+ ✓ Starting...
+ ✓ Ready in 1457ms
+ ○ Compiling / ...
+ ✓ Compiled / in 1976ms (566 modules)
+ GET / 200 in 2208ms
+ ✓ Compiled in 110ms (231 modules)
+ ✓ Compiled /super-ai in 210ms (576 modules)
+ GET /super-ai 200 in 349ms
+ ✓ Compiled /file-learning in 204ms (643 modules)
+ GET /file-learning 200 in 277ms
+ ✓ Compiled /api/enhanced-ai-assistant in 159ms (663 modules)
+ POST /api/enhanced-ai-assistant 200 in 1503ms
+ ✓ Compiled /api/learn-from-excel in 188ms (665 modules)
+ POST /api/learn-from-excel 200 in 220ms
+[?25h
