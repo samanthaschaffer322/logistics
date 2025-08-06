@@ -5,8 +5,5 @@
 # API routes
 /api/*  /api/:splat  200
 
-# Redirect root to login if not authenticated
-/  /login  302
-
 # Handle 404s
 /404  /404.html  404
