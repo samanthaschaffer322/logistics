@@ -2,16 +2,8 @@
   "name": "logiai-logistics",
   "version": "1.0.0",
   "private": true,
-  "description": "AI-Powered Vietnamese Logistics Management Platform with Next.js and OpenAI",
-  "keywords": [
-    "nextjs",
-    "logistics",
-    "ai",
-    "vietnam",
-    "openai",
-    "supply-chain",
-    "optimization"
-  ],
+  "description": "AI-Powered Vietnamese Logistics Management Platform with Next.js",
+  "main": "next.config.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -20,51 +12,41 @@
     "export": "next build"
   },
   "dependencies": {
-    "@radix-ui/react-dialog": "^1.0.5",
-    "@radix-ui/react-dropdown-menu": "^2.0.6",
-    "@radix-ui/react-label": "^2.0.2",
-    "@radix-ui/react-popover": "^1.0.7",
-    "@radix-ui/react-progress": "^1.0.3",
-    "@radix-ui/react-select": "^1.2.2",
-    "@radix-ui/react-separator": "^1.0.3",
-    "@radix-ui/react-slot": "^1.0.2",
-    "@radix-ui/react-tabs": "^1.0.4",
-    "@radix-ui/react-toast": "^1.1.5",
-    "@radix-ui/react-tooltip": "^1.0.7",
-    "@supabase/supabase-js": "^2.39.0",
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "autoprefixer": "^10.0.1",
-    "class-variance-authority": "^0.7.0",
-    "clsx": "^2.0.0",
-    "leaflet": "^1.9.4",
-    "lucide-react": "^0.263.1",
-    "next": "^15.4.5",
-    "openai": "^4.104.0",
-    "postcss": "^8",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-leaflet": "^4.2.1",
-    "tailwind-merge": "^1.14.0",
-    "tailwindcss": "^3.4.1",
-    "typescript": "^5",
-    "xlsx": "^0.18.5"
+    "next": "15.4.5",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "typescript": "5.3.3",
+    "@types/node": "20.10.0",
+    "@types/react": "18.2.45",
+    "@types/react-dom": "18.2.18",
+    "tailwindcss": "3.4.1",
+    "autoprefixer": "10.4.16",
+    "postcss": "8.4.32",
+    "lucide-react": "0.263.1",
+    "openai": "4.104.0",
+    "class-variance-authority": "0.7.0",
+    "clsx": "2.0.0",
+    "tailwind-merge": "1.14.0"
   },
   "devDependencies": {
-    "@types/leaflet": "^1.9.8",
-    "eslint": "^8",
+    "eslint": "8.57.1",
     "eslint-config-next": "15.4.5"
   },
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=8.0.0"
   },
+  "keywords": [
+    "nextjs",
+    "react",
+    "logistics",
+    "ai",
+    "vietnam",
+    "openai"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/samanthaschaffer322/logistics.git"
   },
-  "homepage": "https://logistics-eik.pages.dev",
-  "author": "LogiAI Team",
-  "license": "MIT"
+  "homepage": "https://logistics-eik.pages.dev"
 }

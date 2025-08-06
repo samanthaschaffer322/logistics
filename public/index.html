@@ -63,51 +63,6 @@
             box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.3);
         }
         
-        .features {
-            text-align: left;
-            margin: 2rem 0;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1rem;
-        }
-        
-        .feature {
-            margin: 0.8rem 0;
-            color: #e2e8f0;
-            padding: 1rem;
-            background: rgba(51, 65, 85, 0.3);
-            border-radius: 10px;
-            border-left: 3px solid #6366f1;
-            transition: all 0.3s ease;
-        }
-        
-        .feature:hover {
-            background: rgba(51, 65, 85, 0.5);
-            transform: translateX(5px);
-        }
-        
-        .feature::before {
-            content: "✅ ";
-            margin-right: 0.8rem;
-            font-size: 1.1rem;
-        }
-        
-        .loading {
-            display: inline-block;
-            width: 24px;
-            height: 24px;
-            border: 3px solid rgba(102, 126, 234, 0.3);
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-right: 15px;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
         .btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -128,30 +83,20 @@
             box-shadow: 0 15px 35px -5px rgba(102, 126, 234, 0.5);
         }
         
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
-            margin: 2rem 0;
+        .loading {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(102, 126, 234, 0.3);
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 15px;
         }
         
-        .stat {
-            background: rgba(51, 65, 85, 0.4);
-            padding: 1.5rem;
-            border-radius: 12px;
-            border: 1px solid rgba(148, 163, 184, 0.1);
-        }
-        
-        .stat-number {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #34d399;
-            margin-bottom: 0.5rem;
-        }
-        
-        .stat-label {
-            color: #94a3b8;
-            font-size: 0.9rem;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
         .pulse {
@@ -162,21 +107,6 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.7; }
         }
-        
-        @media (max-width: 768px) {
-            .container {
-                padding: 2rem;
-                margin: 1rem;
-            }
-            
-            .logo {
-                font-size: 2.5rem;
-            }
-            
-            .features {
-                grid-template-columns: 1fr;
-            }
-        }
     </style>
 </head>
 <body>
@@ -186,126 +116,40 @@
         
         <div class="status">
             <div class="loading"></div>
-            <strong>Deployment Successful!</strong><br>
-            Your enhanced AI logistics platform is now live on Cloudflare Pages with comprehensive Vietnamese logistics expertise.
-        </div>
-
-        <div class="stats">
-            <div class="stat">
-                <div class="stat-number">24</div>
-                <div class="stat-label">Pages Generated</div>
-            </div>
-            <div class="stat">
-                <div class="stat-number">4</div>
-                <div class="stat-label">API Routes</div>
-            </div>
-            <div class="stat">
-                <div class="stat-number">99.7kB</div>
-                <div class="stat-label">Optimized JS</div>
-            </div>
-            <div class="stat">
-                <div class="stat-number">5s</div>
-                <div class="stat-label">Build Time</div>
-            </div>
-        </div>
-
-        <div class="features">
-            <div class="feature">Multi-model AI assistant (GPT-4 Omni, GPT-4 Mini, GPT-3.5 Turbo)</div>
-            <div class="feature">Vietnamese logistics optimization with local market expertise</div>
-            <div class="feature">Smart route planning with AI-powered insights and cost analysis</div>
-            <div class="feature">Document and image analysis capabilities (Excel, PDF processing)</div>
-            <div class="feature">Real-time tracking and fleet management with Vietnamese roads</div>
-            <div class="feature">Interactive Vietnam map with route visualization and depots</div>
-            <div class="feature">Warehouse and inventory management with local regulations</div>
-            <div class="feature">Performance analytics and intelligent reporting</div>
-            <div class="feature">Sparka-inspired chat interface with advanced AI features</div>
-            <div class="feature">Cross-system data integration and real-time insights</div>
-            <div class="feature">Dark mode design with elegant UI/UX</div>
-            <div class="feature">Responsive design for all devices and screen sizes</div>
+            <strong>Platform Loading...</strong><br>
+            Your enhanced AI logistics platform is initializing with comprehensive Vietnamese logistics expertise.
         </div>
 
         <div style="margin-top: 2.5rem;">
             <a href="/dashboard/" class="btn">🎯 Access Dashboard</a>
             <a href="/super-ai/" class="btn">🤖 Super AI Assistant</a>
-            <a href="/vietnam-map/" class="btn">🗺️ Vietnam Map & Routes</a>
         </div>
 
         <div style="margin-top: 2.5rem; color: #94a3b8; font-size: 0.95rem; line-height: 1.6;">
-            <p><strong>Build Status:</strong> ✅ Optimized for Cloudflare Pages</p>
+            <p><strong>Framework:</strong> ✅ Next.js with Static Export</p>
             <p><strong>AI Integration:</strong> ✅ OpenAI with Vietnamese logistics expertise</p>
-            <p><strong>Performance:</strong> ✅ CDN-optimized with global delivery</p>
             <p><strong>Features:</strong> ✅ All logistics management tools active</p>
-            <p><strong>Compatibility:</strong> ✅ Works on all devices and browsers</p>
+            <p><strong>Compatibility:</strong> ✅ Optimized for Cloudflare Pages</p>
         </div>
     </div>
 
     <script>
-        // Enhanced loading and redirect logic
-        let redirectAttempts = 0;
-        const maxAttempts = 3;
+        // Auto-redirect to dashboard after 3 seconds
+        setTimeout(function() {
+            window.location.href = '/dashboard/';
+        }, 3000);
         
-        function tryRedirect() {
-            redirectAttempts++;
-            
-            // Try to detect if Next.js app is available
-            fetch('/dashboard/')
-                .then(response => {
-                    if (response.ok) {
-                        // Next.js app is available, redirect
-                        window.location.href = '/dashboard/';
-                    } else if (redirectAttempts < maxAttempts) {
-                        // Try again after delay
-                        setTimeout(tryRedirect, 2000);
-                    }
-                })
-                .catch(() => {
-                    if (redirectAttempts < maxAttempts) {
-                        // Try again after delay
-                        setTimeout(tryRedirect, 2000);
-                    }
-                });
-        }
-        
-        // Start redirect attempts after page load
-        setTimeout(tryRedirect, 3000);
-        
-        // Add click handlers for navigation
-        document.addEventListener('DOMContentLoaded', function() {
-            const buttons = document.querySelectorAll('.btn');
-            buttons.forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const href = this.getAttribute('href');
-                    
-                    // Try direct navigation first
-                    fetch(href)
-                        .then(response => {
-                            if (response.ok) {
-                                window.location.href = href;
-                            } else {
-                                // Fallback: try without trailing slash
-                                const fallbackHref = href.replace(/\/$/, '');
-                                window.location.href = fallbackHref;
-                            }
-                        })
-                        .catch(() => {
-                            // Final fallback
-                            window.location.href = href;
-                        });
-                });
+        // Try to detect if Next.js app is available
+        fetch('/dashboard/')
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = '/dashboard/';
+                }
+            })
+            .catch(() => {
+                // Fallback: stay on this page
+                console.log('Next.js app not ready yet');
             });
-        });
-        
-        // Add some interactive effects
-        document.querySelectorAll('.feature').forEach(feature => {
-            feature.addEventListener('mouseenter', function() {
-                this.style.borderLeftColor = '#34d399';
-            });
-            
-            feature.addEventListener('mouseleave', function() {
-                this.style.borderLeftColor = '#6366f1';
-            });
-        });
     </script>
 </body>
 </html>

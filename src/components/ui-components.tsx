@@ -1,415 +1,240 @@
-// Comprehensive UI Components - All in one file for Cloudflare compatibility
-import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
-import { cva, type VariantProps } from "class-variance-authority"
-import { cn } from "@/lib/utils"
+import React from 'react'
 
-// Button Component
-const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-  {
-    variants: {
-      variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
-      },
-      size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
-        icon: "h-10 w-10",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
-  }
-)
+// Simple UI components without external dependencies
 
-export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
-  asChild?: boolean
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'default' | 'outline' | 'ghost'
+  size?: 'default' | 'sm' | 'lg'
 }
 
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button"
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className = '', variant = 'default', size = 'default', ...props }, ref) => {
+    const baseClasses = 'inline-flex items-center justify-center rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50'
+    const variantClasses = {
+      default: 'bg-indigo-600 text-white hover:bg-indigo-700',
+      outline: 'border border-slate-600 bg-transparent hover:bg-slate-800',
+      ghost: 'hover:bg-slate-800'
+    }
+    const sizeClasses = {
+      default: 'h-10 px-4 py-2',
+      sm: 'h-9 px-3',
+      lg: 'h-11 px-8'
+    }
+    
     return (
-      <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+      <button
+        className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
         ref={ref}
         {...props}
       />
     )
   }
 )
-Button.displayName = "Button"
+Button.displayName = 'Button'
 
-// Card Components
-const Card = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "rounded-lg border bg-card text-card-foreground shadow-sm",
-      className
-    )}
-    {...props}
-  />
-))
-Card.displayName = "Card"
+export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-const CardHeader = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("flex flex-col space-y-1.5 p-6", className)}
-    {...props}
-  />
-))
-CardHeader.displayName = "CardHeader"
+export const Card = React.forwardRef<HTMLDivElement, CardProps>(
+  ({ className = '', ...props }, ref) => (
+    <div
+      ref={ref}
+      className={`rounded-lg border border-slate-700 bg-slate-800/50 text-white shadow-sm ${className}`}
+      {...props}
+    />
+  )
+)
+Card.displayName = 'Card'
 
-const CardTitle = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLHeadingElement>
->(({ className, ...props }, ref) => (
-  <h3
-    ref={ref}
-    className={cn(
-      "text-2xl font-semibold leading-none tracking-tight",
-      className
-    )}
-    {...props}
-  />
-))
-CardTitle.displayName = "CardTitle"
+export const CardHeader = React.forwardRef<HTMLDivElement, CardProps>(
+  ({ className = '', ...props }, ref) => (
+    <div ref={ref} className={`flex flex-col space-y-1.5 p-6 ${className}`} {...props} />
+  )
+)
+CardHeader.displayName = 'CardHeader'
 
-const CardDescription = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLParagraphElement>
->(({ className, ...props }, ref) => (
-  <p
-    ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
-    {...props}
-  />
-))
-CardDescription.displayName = "CardDescription"
+export const CardTitle = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLHeadingElement>>(
+  ({ className = '', ...props }, ref) => (
+    <h3
+      ref={ref}
+      className={`text-2xl font-semibold leading-none tracking-tight ${className}`}
+      {...props}
+    />
+  )
+)
+CardTitle.displayName = 'CardTitle'
 
-const CardContent = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
-))
-CardContent.displayName = "CardContent"
+export const CardDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
+  ({ className = '', ...props }, ref) => (
+    <p ref={ref} className={`text-sm text-slate-400 ${className}`} {...props} />
+  )
+)
+CardDescription.displayName = 'CardDescription'
 
-const CardFooter = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("flex items-center p-6 pt-0", className)}
-    {...props}
-  />
-))
-CardFooter.displayName = "CardFooter"
+export const CardContent = React.forwardRef<HTMLDivElement, CardProps>(
+  ({ className = '', ...props }, ref) => (
+    <div ref={ref} className={`p-6 pt-0 ${className}`} {...props} />
+  )
+)
+CardContent.displayName = 'CardContent'
 
-// Input Component
-export interface InputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {}
+export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {}
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type, ...props }, ref) => {
+export const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className = '', type, ...props }, ref) => {
     return (
       <input
         type={type}
-        className={cn(
-          "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-          className
-        )}
+        className={`flex h-10 w-full rounded-md border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
         ref={ref}
         {...props}
       />
     )
   }
 )
-Input.displayName = "Input"
+Input.displayName = 'Input'
 
-// Label Component
-const Label = React.forwardRef<
-  React.ElementRef<"label">,
-  React.ComponentPropsWithoutRef<"label">
->(({ className, ...props }, ref) => (
-  <label
-    ref={ref}
-    className={cn(
-      "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70",
-      className
-    )}
-    {...props}
-  />
-))
-Label.displayName = "Label"
+export interface LabelProps extends React.LabelHTMLAttributes<HTMLLabelElement> {}
 
-// Badge Component
-const badgeVariants = cva(
-  "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-  {
-    variants: {
-      variant: {
-        default:
-          "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
-        secondary:
-          "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        destructive:
-          "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
-        outline: "text-foreground",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-    },
-  }
-)
-
-export interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof badgeVariants> {}
-
-function Badge({ className, variant, ...props }: BadgeProps) {
-  return (
-    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+export const Label = React.forwardRef<HTMLLabelElement, LabelProps>(
+  ({ className = '', ...props }, ref) => (
+    <label
+      ref={ref}
+      className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${className}`}
+      {...props}
+    />
   )
+)
+Label.displayName = 'Label'
+
+export interface ProgressProps extends React.HTMLAttributes<HTMLDivElement> {
+  value?: number
 }
 
-// Progress Component
-const Progress = React.forwardRef<
-  React.ElementRef<"div">,
-  React.ComponentPropsWithoutRef<"div"> & {
-    value?: number
-  }
->(({ className, value, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "relative h-4 w-full overflow-hidden rounded-full bg-secondary",
-      className
-    )}
-    {...props}
-  >
+export const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
+  ({ className = '', value = 0, ...props }, ref) => (
     <div
-      className="h-full w-full flex-1 bg-primary transition-all"
-      style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
-    />
-  </div>
-))
-Progress.displayName = "Progress"
+      ref={ref}
+      className={`relative h-4 w-full overflow-hidden rounded-full bg-slate-700 ${className}`}
+      {...props}
+    >
+      <div
+        className="h-full w-full flex-1 bg-indigo-600 transition-all"
+        style={{ transform: `translateX(-${100 - (value || 0)}%)` }}
+      />
+    </div>
+  )
+)
+Progress.displayName = 'Progress'
 
-// Alert Components
-const Alert = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    role="alert"
-    className={cn(
-      "relative w-full rounded-lg border p-4 [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground",
-      className
-    )}
-    {...props}
-  />
-))
-Alert.displayName = "Alert"
+// Badge component
+export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement> {
+  variant?: 'default' | 'secondary' | 'destructive' | 'outline'
+}
 
-const AlertTitle = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLHeadingElement>
->(({ className, ...props }, ref) => (
-  <h5
-    ref={ref}
-    className={cn("mb-1 font-medium leading-none tracking-tight", className)}
-    {...props}
-  />
-))
-AlertTitle.displayName = "AlertTitle"
+export const Badge = React.forwardRef<HTMLDivElement, BadgeProps>(
+  ({ className = '', variant = 'default', ...props }, ref) => {
+    const variantClasses = {
+      default: 'bg-indigo-600 text-white',
+      secondary: 'bg-slate-600 text-white',
+      destructive: 'bg-red-600 text-white',
+      outline: 'border border-slate-600 text-slate-300'
+    }
+    
+    return (
+      <div
+        ref={ref}
+        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors ${variantClasses[variant]} ${className}`}
+        {...props}
+      />
+    )
+  }
+)
+Badge.displayName = 'Badge'
 
-const AlertDescription = React.forwardRef<
-  HTMLParagraphElement,
-  React.HTMLAttributes<HTMLParagraphElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("text-sm [&_p]:leading-relaxed", className)}
-    {...props}
-  />
-))
-AlertDescription.displayName = "AlertDescription"
-
-// Simple Select Components (without Radix UI dependencies)
-const Select = ({ children, value, onValueChange, ...props }: {
-  children: React.ReactNode
+// Tabs components
+export interface TabsProps extends React.HTMLAttributes<HTMLDivElement> {
+  defaultValue?: string
   value?: string
   onValueChange?: (value: string) => void
-}) => {
-  return (
-    <div className="relative">
+}
+
+export const Tabs = React.forwardRef<HTMLDivElement, TabsProps>(
+  ({ className = '', children, defaultValue, value, onValueChange, ...props }, ref) => {
+    const [activeTab, setActiveTab] = React.useState(defaultValue || '')
+    
+    const handleTabChange = (newValue: string) => {
+      setActiveTab(newValue)
+      onValueChange?.(newValue)
+    }
+    
+    return (
+      <div ref={ref} className={className} {...props}>
+        {React.Children.map(children, child => 
+          React.isValidElement(child) 
+            ? React.cloneElement(child, { activeTab, onTabChange: handleTabChange } as any)
+            : child
+        )}
+      </div>
+    )
+  }
+)
+Tabs.displayName = 'Tabs'
+
+export const TabsList = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
+  ({ className = '', children, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={`inline-flex h-10 items-center justify-center rounded-md bg-slate-800 p-1 text-slate-400 ${className}`}
+      {...props}
+    >
       {children}
     </div>
   )
+)
+TabsList.displayName = 'TabsList'
+
+export interface TabsTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  value: string
+  activeTab?: string
+  onTabChange?: (value: string) => void
 }
 
-const SelectTrigger = React.forwardRef<
-  HTMLButtonElement,
-  React.ButtonHTMLAttributes<HTMLButtonElement>
->(({ className, children, ...props }, ref) => (
-  <button
-    ref={ref}
-    className={cn(
-      "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-      className
-    )}
-    {...props}
-  >
-    {children}
-  </button>
-))
-SelectTrigger.displayName = "SelectTrigger"
-
-const SelectValue = ({ placeholder }: { placeholder?: string }) => (
-  <span className="text-muted-foreground">{placeholder}</span>
+export const TabsTrigger = React.forwardRef<HTMLButtonElement, TabsTriggerProps>(
+  ({ className = '', value, activeTab, onTabChange, children, ...props }, ref) => (
+    <button
+      ref={ref}
+      className={`inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-slate-950 transition-all focus-visible:outline-none focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-50 ${
+        activeTab === value 
+          ? 'bg-slate-950 text-slate-50 shadow-sm' 
+          : 'hover:bg-slate-800 hover:text-slate-50'
+      } ${className}`}
+      onClick={() => onTabChange?.(value)}
+      {...props}
+    >
+      {children}
+    </button>
+  )
 )
+TabsTrigger.displayName = 'TabsTrigger'
 
-const SelectContent = ({ children }: { children: React.ReactNode }) => (
-  <div className="relative z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md">
-    {children}
-  </div>
-)
-
-const SelectItem = ({ children, value }: { children: React.ReactNode, value: string }) => (
-  <div className="relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground">
-    {children}
-  </div>
-)
-
-const SelectLabel = ({ children }: { children: React.ReactNode }) => (
-  <div className="py-1.5 pl-8 pr-2 text-sm font-semibold">
-    {children}
-  </div>
-)
-
-const SelectGroup = ({ children }: { children: React.ReactNode }) => (
-  <div>{children}</div>
-)
-
-const SelectSeparator = () => (
-  <div className="-mx-1 my-1 h-px bg-muted" />
-)
-
-const SelectScrollUpButton = () => null
-const SelectScrollDownButton = () => null
-
-// Simple Tabs Components
-const Tabs = ({ children, value, onValueChange, ...props }: {
-  children: React.ReactNode
-  value?: string
-  onValueChange?: (value: string) => void
-}) => {
-  return <div {...props}>{children}</div>
+export interface TabsContentProps extends React.HTMLAttributes<HTMLDivElement> {
+  value: string
+  activeTab?: string
 }
 
-const TabsList = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground",
-      className
-    )}
-    {...props}
-  />
-))
-TabsList.displayName = "TabsList"
-
-const TabsTrigger = React.forwardRef<
-  HTMLButtonElement,
-  React.ButtonHTMLAttributes<HTMLButtonElement>
->(({ className, ...props }, ref) => (
-  <button
-    ref={ref}
-    className={cn(
-      "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
-      className
-    )}
-    {...props}
-  />
-))
-TabsTrigger.displayName = "TabsTrigger"
-
-const TabsContent = React.forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn(
-      "mt-2 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-      className
-    )}
-    {...props}
-  />
-))
-TabsContent.displayName = "TabsContent"
-
-// Export all components
-export {
-  Button,
-  buttonVariants,
-  Card,
-  CardHeader,
-  CardFooter,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  Input,
-  Label,
-  Badge,
-  badgeVariants,
-  Progress,
-  Alert,
-  AlertTitle,
-  AlertDescription,
-  Select,
-  SelectGroup,
-  SelectValue,
-  SelectTrigger,
-  SelectContent,
-  SelectLabel,
-  SelectItem,
-  SelectSeparator,
-  SelectScrollUpButton,
-  SelectScrollDownButton,
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-}
-
-export type { ButtonProps, InputProps, BadgeProps }
+export const TabsContent = React.forwardRef<HTMLDivElement, TabsContentProps>(
+  ({ className = '', value, activeTab, children, ...props }, ref) => {
+    if (activeTab !== value) return null
+    
+    return (
+      <div
+        ref={ref}
+        className={`mt-2 ring-offset-slate-950 focus-visible:outline-none focus-visible:ring-2 ${className}`}
+        {...props}
+      >
+        {children}
+      </div>
+    )
+  }
+)
+TabsContent.displayName = 'TabsContent'
