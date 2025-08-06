@@ -261,7 +261,7 @@ const VietnamMapPage = () => {
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-white mb-2">Vietnam Logistics Map</h1>
             <p className="text-slate-400">
-              Khám phá mạng lưới logistics trên toàn quốc với dữ liệu thời gian thực
+              Khám phá mạng lưới logistics trên toàn quốc với dữ liệu thời gian thực và phân tích AI
             </p>
           </div>
 

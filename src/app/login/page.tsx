@@ -12,46 +12,46 @@ import {
   Input,
   Label
 } from '@/components/ui-components'
-import { Brain, Mail, Lock, LogIn } from 'lucide-react'
+import { Brain, Mail, Lock, LogIn, AlertCircle } from 'lucide-react'
+import { authenticateUser, encryptUserSession } from '@/lib/auth'
 
 const LoginPage = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
   const router = useRouter()
 
   const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+    e.preventDefault()
+    setIsLoading(true)
+    setError('')
 
-    // Secure authentication - credentials stored securely
-    const validCredentials = [
-      {
-        email: 'samanthaschaffer322@gmail.com',
-        password: 'admin@trucking.com',
-      },
-      {
-        email: 'dkim20263@gmail.com',
-        password: 'Dz300511#',
-      },
-    ];
-
-    const isValid = validCredentials.some(
-      (cred) => cred.email === email && cred.password === password
-    );
-
-    setTimeout(() => {
-      setIsLoading(false);
-      if (isValid) {
-        // Store authentication state
-        localStorage.setItem('isAuthenticated', 'true');
-        localStorage.setItem('userEmail', email);
-        router.push('/dashboard');
+    try {
+      // Authenticate user with secure credentials
+      const user = authenticateUser(email, password)
+      
+      if (user) {
+        // Create encrypted session
+        const encryptedSession = encryptUserSession(user)
+        
+        // Store encrypted session
+        localStorage.setItem('userSession', encryptedSession)
+        localStorage.setItem('isAuthenticated', 'true')
+        localStorage.setItem('userEmail', email)
+        localStorage.setItem('userRole', user.role)
+        
+        // Redirect to dashboard
+        router.push('/dashboard')
       } else {
-        alert('Access denied. Please contact administrator for valid credentials.');
+        setError('Invalid credentials. Access denied.')
       }
-    }, 1000);
-  };
+    } catch (error) {
+      setError('Authentication failed. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
@@ -69,6 +69,13 @@ const LoginPage = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
+            {error && (
+              <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-md text-red-700">
+                <AlertCircle className="w-4 h-4" />
+                <span className="text-sm">{error}</span>
+              </div>
+            )}
+            
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
@@ -120,7 +127,11 @@ const LoginPage = () => {
             </Button>
           </form>
           
-          
+          <div className="mt-6 p-4 bg-slate-50 rounded-lg">
+            <p className="text-xs text-slate-600 text-center">
+              Secure authentication system with encrypted sessions
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>
