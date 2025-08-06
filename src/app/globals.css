@@ -1,12 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import '../styles/dark-theme.css';
 
 /* Dark Mode Base Styles */
 @layer base {
   * {
-    @apply border-gray-700;
+    border-color: rgb(51 65 85);
   }
   
   body {
@@ -36,22 +35,15 @@
 @layer components {
   /* Dark Card Component */
   .dark-card {
-    @apply bg-slate-800/80 backdrop-blur-xl border border-slate-700/50 shadow-2xl;
+    @apply bg-slate-800/80 backdrop-blur-xl border border-slate-700/50 shadow-2xl rounded-xl;
     background: rgba(30, 41, 59, 0.8);
     backdrop-filter: blur(20px);
     border: 1px solid rgba(148, 163, 184, 0.1);
   }
   
   .dark-card:hover {
-    @apply border-slate-600/50 shadow-indigo-500/10;
+    @apply border-slate-600/50;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(99, 102, 241, 0.1);
-  }
-  
-  /* Glass Effect */
-  .glass-effect {
-    background: rgba(30, 41, 59, 0.7);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(148, 163, 184, 0.1);
   }
   
   /* Gradient Text */
@@ -72,19 +64,13 @@
   
   /* Dark Button */
   .dark-button {
-    @apply bg-slate-800/80 hover:bg-slate-700/80 text-white border border-slate-700/50 hover:border-slate-600/50 rounded-xl px-4 py-2 transition-all duration-300 backdrop-blur-xl;
-  }
-  
-  /* Sidebar Styles */
-  .dark-sidebar {
-    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-    border-right: 1px solid rgba(148, 163, 184, 0.1);
-    box-shadow: 20px 0 40px -12px rgba(0, 0, 0, 0.5);
+    @apply bg-slate-800/80 hover:bg-slate-700/80 text-white border border-slate-700/50 hover:border-slate-600/50 rounded-xl px-4 py-2 transition-all duration-300 flex items-center;
+    backdrop-filter: blur(10px);
   }
   
   /* Navigation Item */
   .nav-item {
-    @apply flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 group;
+    @apply flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300;
   }
   
   .nav-item:hover {
@@ -95,17 +81,6 @@
   .nav-item.active {
     @apply bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg;
     box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.3);
-  }
-  
-  /* Drag and Drop Zone */
-  .dropzone {
-    @apply border-2 border-dashed border-slate-700 bg-slate-800/30 rounded-2xl p-8 text-center transition-all duration-300;
-    backdrop-filter: blur(10px);
-  }
-  
-  .dropzone.active {
-    @apply border-indigo-500 bg-indigo-500/10;
-    box-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
   }
   
   /* Badge Styles */

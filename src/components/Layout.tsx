@@ -1,7 +1,6 @@
 'use client'
 
 import React from 'react'
-import Sidebar from './Sidebar'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -9,14 +8,9 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <div className="flex min-h-screen bg-slate-900">
-      <Sidebar />
-      <main className="flex-1 overflow-auto">
-        <div className="p-6 min-h-screen">
-          <div className="animate-fade-in">
-            {children}
-          </div>
-        </div>
+    <div className="min-h-screen bg-slate-900">
+      <main className="container mx-auto px-4 py-8">
+        {children}
       </main>
     </div>
   )

@@ -1,4 +1,4 @@
-# Cloudflare Pages redirects for Next.js
+# Redirects for Cloudflare Pages with Next.js
 
 # API routes
 /api/* /api/:splat 200
@@ -6,5 +6,5 @@
 # Next.js assets
 /_next/* /_next/:splat 200
 
-# Handle all other routes with Next.js
+# Handle SPA routing
 /* /index.html 200
