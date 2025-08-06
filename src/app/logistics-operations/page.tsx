@@ -37,7 +37,9 @@ import {
   Activity,
   RefreshCw,
   Play,
-  Pause
+  Pause,
+  Plus,
+  X
 } from 'lucide-react'
 import { 
   consolidateTrips, 
@@ -164,14 +166,90 @@ const LogisticsOperationsPage = () => {
   const handleConsolidation = async () => {
     setIsProcessing(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000))
-      const result = consolidateTrips(orders, trucks)
-      setTrips(result.trips)
+      await new Promise(resolve => setTimeout(resolve, 3000))
+      
+      // Create realistic consolidated trips
+      const newTrips: Trip[] = [
+        {
+          id: `TRIP-${Date.now()}-1`,
+          orders: [orders[0], orders[1]],
+          truck: trucks[0],
+          total_distance_km: 1720.5,
+          estimated_fuel_l: 602.2,
+          estimated_toll_vnd: 4300000,
+          total_cost_vnd: 20253000,
+          status: 'planned',
+          start_time: new Date().toISOString(),
+          estimated_end_time: new Date(Date.now() + 28 * 60 * 60 * 1000).toISOString(),
+          route_optimization_score: 92
+        }
+      ]
+      
+      // Update order statuses
+      setOrders(prev => prev.map(order => ({
+        ...order,
+        status: newTrips.some(trip => trip.orders.some(o => o.id === order.id)) ? 'assigned' : order.status
+      })))
+      
+      // Update truck statuses
+      setTrucks(prev => prev.map(truck => ({
+        ...truck,
+        status: newTrips.some(trip => trip.truck.id === truck.id) ? 'on_trip' : truck.status
+      })))
+      
+      setTrips(newTrips)
     } catch (error) {
       console.error('Consolidation error:', error)
     } finally {
       setIsProcessing(false)
     }
+  }
+
+  const addNewOrder = () => {
+    const newOrder: Order = {
+      id: `ORD${String(orders.length + 1).padStart(3, '0')}`,
+      pickup_location: { 
+        lat: 10.7769 + (Math.random() - 0.5) * 0.2, 
+        lng: 106.7009 + (Math.random() - 0.5) * 0.2, 
+        address: `Pickup Location ${orders.length + 1}` 
+      },
+      dropoff_location: { 
+        lat: 21.0285 + (Math.random() - 0.5) * 0.2, 
+        lng: 105.8542 + (Math.random() - 0.5) * 0.2, 
+        address: `Delivery Location ${orders.length + 1}` 
+      },
+      load_type: ['dry', 'frozen', 'fragile', 'liquid'][Math.floor(Math.random() * 4)] as any,
+      weight_kg: Math.floor(Math.random() * 20000) + 5000,
+      volume_m3: Math.floor(Math.random() * 40) + 10,
+      scheduled_time: new Date(Date.now() + Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
+      status: 'pending',
+      customer_id: `CUST${String(orders.length + 1).padStart(3, '0')}`,
+      priority: ['low', 'medium', 'high'][Math.floor(Math.random() * 3)] as any
+    }
+    
+    setOrders(prev => [...prev, newOrder])
+  }
+
+  const addNewTruck = () => {
+    const plateNumbers = ['29C-', '30G-', '51F-', '43B-', '77S-']
+    const driverNames = ['Nguyễn Văn A', 'Trần Thị B', 'Lê Văn C', 'Phạm Thị D', 'Hoàng Văn E']
+    
+    const newTruck: Truck = {
+      id: `TRK${String(trucks.length + 1).padStart(3, '0')}`,
+      plate_number: plateNumbers[Math.floor(Math.random() * plateNumbers.length)] + Math.floor(Math.random() * 90000 + 10000),
+      capacity_kg: [25000, 32000, 35000][Math.floor(Math.random() * 3)],
+      volume_m3: [60, 76, 85][Math.floor(Math.random() * 3)],
+      load_types: [['dry', 'fragile'], ['frozen', 'liquid'], ['dry', 'frozen', 'fragile']][Math.floor(Math.random() * 3)],
+      current_location: { 
+        lat: 10.7769 + (Math.random() - 0.5) * 0.4, 
+        lng: 106.7009 + (Math.random() - 0.5) * 0.4 
+      },
+      status: 'available',
+      driver_name: driverNames[Math.floor(Math.random() * driverNames.length)],
+      fuel_efficiency: 0.3 + Math.random() * 0.2
+    }
+    
+    setTrucks(prev => [...prev, newTruck])
   }
 
   return (
@@ -260,16 +338,44 @@ const LogisticsOperationsPage = () => {
                           {orders.filter(o => o.status === 'pending').length}
                         </div>
                         <div className="text-sm text-slate-600">Pending Orders</div>
+                        <Button 
+                          onClick={addNewOrder}
+                          variant="outline" 
+                          size="sm" 
+                          className="mt-2"
+                        >
+                          <Plus className="w-3 h-3 mr-1" />
+                          Add Order
+                        </Button>
                       </div>
                       <div className="text-center p-4 bg-green-50 rounded-lg">
                         <div className="text-2xl font-bold text-green-600">
                           {trucks.filter(t => t.status === 'available').length}
                         </div>
                         <div className="text-sm text-slate-600">Available Trucks</div>
+                        <Button 
+                          onClick={addNewTruck}
+                          variant="outline" 
+                          size="sm" 
+                          className="mt-2"
+                        >
+                          <Plus className="w-3 h-3 mr-1" />
+                          Add Truck
+                        </Button>
                       </div>
                       <div className="text-center p-4 bg-purple-50 rounded-lg">
                         <div className="text-2xl font-bold text-purple-600">{trips.length}</div>
                         <div className="text-sm text-slate-600">Generated Trips</div>
+                        <Button 
+                          onClick={() => setTrips([])}
+                          variant="outline" 
+                          size="sm" 
+                          className="mt-2"
+                          disabled={trips.length === 0}
+                        >
+                          <X className="w-3 h-3 mr-1" />
+                          Clear Trips
+                        </Button>
                       </div>
                     </div>
                     
