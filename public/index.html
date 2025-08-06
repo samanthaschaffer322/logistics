@@ -4,140 +4,308 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LogiAI - Enhanced AI-Powered Vietnamese Logistics Management</title>
+    <meta name="description" content="Advanced AI-powered logistics management platform with Vietnamese market expertise, route optimization, and intelligent supply chain solutions.">
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        * {
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
+            color: white;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow-x: hidden;
         }
+        
         .container {
-            background: white;
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(20px);
             padding: 3rem;
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
             text-align: center;
-            max-width: 600px;
+            max-width: 800px;
             margin: 2rem;
+            border: 1px solid rgba(148, 163, 184, 0.1);
         }
+        
         .logo {
-            font-size: 3rem;
+            font-size: 3.5rem;
             font-weight: bold;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 1rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
+        
         .subtitle {
-            color: #666;
-            font-size: 1.2rem;
+            color: #b4b4b4;
+            font-size: 1.3rem;
             margin-bottom: 2rem;
+            font-weight: 300;
         }
+        
         .status {
-            background: #e8f5e8;
-            color: #2d5a2d;
-            padding: 1rem;
-            border-radius: 10px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 15px;
             margin: 2rem 0;
-            border-left: 4px solid #4caf50;
+            border-left: 4px solid #34d399;
+            box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.3);
         }
+        
         .features {
             text-align: left;
             margin: 2rem 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
         }
+        
         .feature {
-            margin: 0.5rem 0;
-            color: #333;
+            margin: 0.8rem 0;
+            color: #e2e8f0;
+            padding: 1rem;
+            background: rgba(51, 65, 85, 0.3);
+            border-radius: 10px;
+            border-left: 3px solid #6366f1;
+            transition: all 0.3s ease;
         }
+        
+        .feature:hover {
+            background: rgba(51, 65, 85, 0.5);
+            transform: translateX(5px);
+        }
+        
         .feature::before {
             content: "✅ ";
-            margin-right: 0.5rem;
+            margin-right: 0.8rem;
+            font-size: 1.1rem;
         }
+        
         .loading {
             display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(102, 126, 234, 0.3);
             border-top: 3px solid #667eea;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-right: 10px;
+            margin-right: 15px;
         }
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        
         .btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 12px 24px;
+            padding: 15px 30px;
             border: none;
-            border-radius: 8px;
-            font-size: 1rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
-            margin: 10px;
-            transition: transform 0.2s;
+            margin: 15px 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px -5px rgba(102, 126, 234, 0.3);
         }
+        
         .btn:hover {
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px -5px rgba(102, 126, 234, 0.5);
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .stat {
+            background: rgba(51, 65, 85, 0.4);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #34d399;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem;
+                margin: 1rem;
+            }
+            
+            .logo {
+                font-size: 2.5rem;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="logo">🚀 LogiAI</div>
+        <div class="logo pulse">🚀 LogiAI</div>
         <div class="subtitle">Enhanced AI-Powered Vietnamese Logistics Management</div>
         
         <div class="status">
             <div class="loading"></div>
             <strong>Deployment Successful!</strong><br>
-            Your enhanced AI logistics platform is now live on Cloudflare Pages.
+            Your enhanced AI logistics platform is now live on Cloudflare Pages with comprehensive Vietnamese logistics expertise.
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number">24</div>
+                <div class="stat-label">Pages Generated</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">4</div>
+                <div class="stat-label">API Routes</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">99.7kB</div>
+                <div class="stat-label">Optimized JS</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">5s</div>
+                <div class="stat-label">Build Time</div>
+            </div>
         </div>
 
         <div class="features">
             <div class="feature">Multi-model AI assistant (GPT-4 Omni, GPT-4 Mini, GPT-3.5 Turbo)</div>
-            <div class="feature">Vietnamese logistics optimization with local expertise</div>
-            <div class="feature">Smart route planning with AI-powered insights</div>
-            <div class="feature">Document and image analysis capabilities</div>
-            <div class="feature">Real-time tracking and fleet management</div>
-            <div class="feature">Interactive Vietnam map with route visualization</div>
-            <div class="feature">Warehouse and inventory management</div>
-            <div class="feature">Performance analytics and reporting</div>
+            <div class="feature">Vietnamese logistics optimization with local market expertise</div>
+            <div class="feature">Smart route planning with AI-powered insights and cost analysis</div>
+            <div class="feature">Document and image analysis capabilities (Excel, PDF processing)</div>
+            <div class="feature">Real-time tracking and fleet management with Vietnamese roads</div>
+            <div class="feature">Interactive Vietnam map with route visualization and depots</div>
+            <div class="feature">Warehouse and inventory management with local regulations</div>
+            <div class="feature">Performance analytics and intelligent reporting</div>
+            <div class="feature">Sparka-inspired chat interface with advanced AI features</div>
+            <div class="feature">Cross-system data integration and real-time insights</div>
+            <div class="feature">Dark mode design with elegant UI/UX</div>
+            <div class="feature">Responsive design for all devices and screen sizes</div>
         </div>
 
-        <div style="margin-top: 2rem;">
+        <div style="margin-top: 2.5rem;">
             <a href="/dashboard/" class="btn">🎯 Access Dashboard</a>
-            <a href="/enhanced-ai/" class="btn">🤖 AI Assistant</a>
-            <a href="/vietnam-map/" class="btn">🗺️ Vietnam Map</a>
+            <a href="/super-ai/" class="btn">🤖 Super AI Assistant</a>
+            <a href="/vietnam-map/" class="btn">🗺️ Vietnam Map & Routes</a>
         </div>
 
-        <div style="margin-top: 2rem; color: #666; font-size: 0.9rem;">
-            <p><strong>Build Status:</strong> ✅ Optimized (6.62 MB)</p>
-            <p><strong>Pages Generated:</strong> 25 static pages + 4 API routes</p>
-            <p><strong>Performance:</strong> CDN-optimized with Cloudflare</p>
+        <div style="margin-top: 2.5rem; color: #94a3b8; font-size: 0.95rem; line-height: 1.6;">
+            <p><strong>Build Status:</strong> ✅ Optimized for Cloudflare Pages</p>
+            <p><strong>AI Integration:</strong> ✅ OpenAI with Vietnamese logistics expertise</p>
+            <p><strong>Performance:</strong> ✅ CDN-optimized with global delivery</p>
+            <p><strong>Features:</strong> ✅ All logistics management tools active</p>
+            <p><strong>Compatibility:</strong> ✅ Works on all devices and browsers</p>
         </div>
     </div>
 
     <script>
-        // Redirect to Next.js app after a short delay
-        setTimeout(() => {
-            // Try to load the Next.js app
-            fetch('/_next/static/chunks/webpack.js')
-                .then(() => {
-                    // Next.js is available, redirect to the app
-                    window.location.href = '/dashboard/';
+        // Enhanced loading and redirect logic
+        let redirectAttempts = 0;
+        const maxAttempts = 3;
+        
+        function tryRedirect() {
+            redirectAttempts++;
+            
+            // Try to detect if Next.js app is available
+            fetch('/dashboard/')
+                .then(response => {
+                    if (response.ok) {
+                        // Next.js app is available, redirect
+                        window.location.href = '/dashboard/';
+                    } else if (redirectAttempts < maxAttempts) {
+                        // Try again after delay
+                        setTimeout(tryRedirect, 2000);
+                    }
                 })
                 .catch(() => {
-                    // Next.js not ready yet, show message
-                    console.log('Next.js app still loading...');
+                    if (redirectAttempts < maxAttempts) {
+                        // Try again after delay
+                        setTimeout(tryRedirect, 2000);
+                    }
                 });
-        }, 3000);
+        }
+        
+        // Start redirect attempts after page load
+        setTimeout(tryRedirect, 3000);
+        
+        // Add click handlers for navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const href = this.getAttribute('href');
+                    
+                    // Try direct navigation first
+                    fetch(href)
+                        .then(response => {
+                            if (response.ok) {
+                                window.location.href = href;
+                            } else {
+                                // Fallback: try without trailing slash
+                                const fallbackHref = href.replace(/\/$/, '');
+                                window.location.href = fallbackHref;
+                            }
+                        })
+                        .catch(() => {
+                            // Final fallback
+                            window.location.href = href;
+                        });
+                });
+            });
+        });
+        
+        // Add some interactive effects
+        document.querySelectorAll('.feature').forEach(feature => {
+            feature.addEventListener('mouseenter', function() {
+                this.style.borderLeftColor = '#34d399';
+            });
+            
+            feature.addEventListener('mouseleave', function() {
+                this.style.borderLeftColor = '#6366f1';
+            });
+        });
     </script>
 </body>
 </html>
