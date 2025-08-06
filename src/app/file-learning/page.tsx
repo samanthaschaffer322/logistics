@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import AuthGuard from '@/components/AuthGuard'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { 
   Card, 
   CardContent, 
@@ -28,17 +29,60 @@ import {
   AlertTriangle,
   CheckCircle,
   Target,
-  Zap
+  Zap,
+  X
 } from 'lucide-react'
 import { fileProcessor, LogisticsRecord, AIInsight, ProcessingResult } from '@/lib/fileProcessor'
 
 const FilelearningPage = () => {
+  const { t } = useLanguage()
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
   const [processingResult, setProcessingResult] = useState<ProcessingResult | null>(null)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [processingProgress, setProcessingProgress] = useState(0)
   const [error, setError] = useState<string | null>(null)
+  const [isDragOver, setIsDragOver] = useState(false)
+
+  // Drag and drop handlers
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragOver(true)
+  }, [])
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragOver(false)
+  }, [])
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }, [])
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragOver(false)
+
+    const files = Array.from(e.dataTransfer.files)
+    const validFiles = files.filter(file => 
+      file.name.endsWith('.xlsx') || 
+      file.name.endsWith('.xls') || 
+      file.name.endsWith('.csv')
+    )
+
+    if (validFiles.length !== files.length) {
+      setError('Some files were skipped. Only Excel (.xlsx, .xls) and CSV files are supported.')
+    } else {
+      setError(null)
+    }
+
+    if (validFiles.length > 0) {
+      setUploadedFiles(prev => [...prev, ...validFiles])
+    }
+  }, [])
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files
