@@ -1,16 +1,13 @@
-name = "logiai-logistics"
-compatibility_date = "2024-08-04"
+# Cloudflare Pages Configuration
+name = "logistics-eik"
+compatibility_date = "2024-08-06"
 
-[env.production]
-name = "logiai-logistics"
+# Pages build configuration
+pages_build_output_dir = "out"
 
-[env.preview]
-name = "logiai-logistics-preview"
+[build]
+command = "npm run build"
+cwd = "."
 
-# Pages configuration
-pages_build_output_dir = ".next"
-
-# Environment variables (set these in Cloudflare dashboard)
-# NEXT_PUBLIC_SUPABASE_URL
-# NEXT_PUBLIC_SUPABASE_ANON_KEY
-# NEXT_PUBLIC_APP_URL
+[build.environment_variables]
+NODE_VERSION = "18"
