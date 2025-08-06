@@ -207,6 +207,60 @@ const ImportExportPage = () => {
                   <Plus className="w-4 h-4 mr-2" />
                   New Shipment
                 </Button>
+                <Button
+                  onClick={() => {
+                    // Add sample shipment for demo
+                    const newShipment: Shipment = {
+                      id: `SHP${String(shipments.length + 1).padStart(3, '0')}`,
+                      reference_number: `IMP-2025-${String(shipments.length + 1).padStart(3, '0')}`,
+                      type: 'import',
+                      status: 'preparing',
+                      company_info: {
+                        name: 'Vietnam Import Trading Co., Ltd',
+                        tax_code: '0301234568',
+                        address: '456 Le Loi St, District 1, Ho Chi Minh City',
+                        contact_person: 'Tran Van B',
+                        phone: '+84 28 8765 4321',
+                        email: 'import@vietnam-trading.com'
+                      },
+                      goods: [
+                        {
+                          id: 'G003',
+                          name: 'Electronic Components',
+                          hs_code: '8542.31.00',
+                          quantity: 1000,
+                          unit: 'PCS',
+                          unit_price: 50000,
+                          total_value: 50000000,
+                          origin_country: 'China',
+                          description: 'Integrated Circuits for Electronics'
+                        }
+                      ],
+                      container_info: {
+                        container_number: 'MSCU9876543',
+                        seal_number: 'SL123789',
+                        container_type: '40FT',
+                        gross_weight: 22000,
+                        net_weight: 2000
+                      },
+                      transport_info: {
+                        vessel_name: 'MSC OSCAR',
+                        voyage_number: 'MSC2025002',
+                        port_of_loading: 'Shanghai Port',
+                        port_of_discharge: 'Ho Chi Minh Port',
+                        estimated_arrival: '2025-08-15T14:00:00'
+                      },
+                      documents: [],
+                      created_at: new Date().toISOString(),
+                      updated_at: new Date().toISOString()
+                    }
+                    setShipments(prev => [...prev, newShipment])
+                  }}
+                  variant="outline"
+                >
+                  <Package className="w-4 h-4 mr-2" />
+                  Add Sample Import
+                </Button>
                 <Button 
                   onClick={() => window.location.reload()} 
                   variant="outline"

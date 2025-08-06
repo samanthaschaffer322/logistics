@@ -48,6 +48,14 @@ const translations = {
     'logistics.pendingOrders': 'Pending Orders',
     'logistics.availableTrucks': 'Available Trucks',
     'logistics.createdTrips': 'Created Trips',
+
+    // Import Export
+    'importExport.title': 'Import-Export Operations Center',
+    'importExport.subtitle': 'VNACCS integration and customs document management',
+    'importExport.shipments': 'Shipments',
+    'importExport.documents': 'Documents',
+    'importExport.vnaccs': 'VNACCS Integration',
+    'importExport.compliance': 'Compliance',
     'logistics.processing': 'Processing...',
     'logistics.consolidateNow': 'Consolidate Now',
     'logistics.aiEngine': 'AI Trip Consolidation Engine',
