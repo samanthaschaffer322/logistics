@@ -1,9 +1,0 @@
-name = "logiai-logistics"
-compatibility_date = "2025-08-06"
-
-[pages]
-[pages.build]
-command = "npm run build"
-
-[pages.upload]
-directory = "out"
