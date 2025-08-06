@@ -1,0 +1,13 @@
+name = "logiai-logistics"
+compatibility_date = "2025-08-06"
+
+[pages]
+main = "src/index.ts"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+NODE_VERSION = "18"
+
+[build]
+command = "npm run build"
+watch_dir = "src"
