@@ -163,6 +163,26 @@ const RouteOptimizationPage = () => {
   const sampleRoutes: RoutePoint[] = [
     {
       id: '1',
+      name: 'Sinovl Tan Van',
+      address: 'Khu công nghiệp Tân Vạn, Biên Hòa, Đồng Nai',
+      lat: 10.9447,
+      lng: 106.8197,
+      type: 'warehouse',
+      priority: 1,
+      timeWindow: { start: '06:00', end: '22:00' }
+    },
+    {
+      id: '2',
+      name: 'Port Cai Mep',
+      address: 'Cảng Cái Mép, Bà Rịa - Vũng Tàu',
+      lat: 10.5833,
+      lng: 107.0833,
+      type: 'delivery',
+      priority: 1,
+      timeWindow: { start: '06:00', end: '18:00' }
+    },
+    {
+      id: '3',
       name: 'Kho trung tâm TP.HCM',
       address: 'Khu Công nghệ cao, Quận 9, TP. Hồ Chí Minh',
       lat: 10.8505,
@@ -172,7 +192,7 @@ const RouteOptimizationPage = () => {
       timeWindow: { start: '06:00', end: '22:00' }
     },
     {
-      id: '2',
+      id: '4',
       name: 'Siêu thị Metro Thủ Đức',
       address: 'Đại lộ Phạm Văn Đồng, TP. Thủ Đức',
       lat: 10.8411,
@@ -182,7 +202,7 @@ const RouteOptimizationPage = () => {
       timeWindow: { start: '08:00', end: '20:00' }
     },
     {
-      id: '3',
+      id: '5',
       name: 'Chợ Bến Thành',
       address: 'Lê Lợi, Quận 1, TP. Hồ Chí Minh',
       lat: 10.7720,
@@ -192,7 +212,7 @@ const RouteOptimizationPage = () => {
       timeWindow: { start: '05:00', end: '18:00' }
     },
     {
-      id: '4',
+      id: '6',
       name: 'Cảng Cát Lái',
       address: 'Đường Đồng Văn Cống, Quận 2, TP. Hồ Chí Minh',
       lat: 10.7950,
@@ -202,7 +222,7 @@ const RouteOptimizationPage = () => {
       timeWindow: { start: '06:00', end: '17:00' }
     },
     {
-      id: '5',
+      id: '7',
       name: 'Khu công nghiệp Tân Thuận',
       address: 'Đường Huỳnh Tấn Phát, Quận 7, TP. Hồ Chí Minh',
       lat: 10.7378,
@@ -212,7 +232,7 @@ const RouteOptimizationPage = () => {
       timeWindow: { start: '07:00', end: '19:00' }
     },
     {
-      id: '6',
+      id: '8',
       name: 'Chợ đầu mối Hóc Môn',
       address: 'Quốc lộ 22, Huyện Hóc Môn, TP. Hồ Chí Minh',
       lat: 10.8833,

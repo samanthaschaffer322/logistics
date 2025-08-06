@@ -116,6 +116,8 @@ const ImportExportPage = () => {
   const [activeTab, setActiveTab] = useState('shipments')
   const [isGenerating, setIsGenerating] = useState(false)
   const [showNewShipmentForm, setShowNewShipmentForm] = useState(false)
+  const [uploadedDocuments, setUploadedDocuments] = useState<File[]>([])
+  const [documentProcessing, setDocumentProcessing] = useState(false)
 
   // Initialize sample data
   useEffect(() => {
@@ -182,6 +184,87 @@ const ImportExportPage = () => {
     ]
 
     setShipments(sampleShipments)
+  }
+
+  const addSampleImportShipment = () => {
+    const newShipment: Shipment = {
+      id: `SHP${String(shipments.length + 1).padStart(3, '0')}`,
+      reference_number: `IMP-2025-${String(shipments.length + 1).padStart(3, '0')}`,
+      type: 'import',
+      status: 'preparing',
+      company_info: {
+        name: 'Vietnam Import Trading Co., Ltd',
+        tax_code: '0301234568',
+        address: '456 Le Loi St, District 1, Ho Chi Minh City',
+        contact_person: 'Tran Van B',
+        phone: '+84 28 8765 4321',
+        email: 'import@vietnam-trading.com'
+      },
+      goods: [
+        {
+          id: 'G003',
+          name: 'Electronic Components',
+          hs_code: '8542.31.00',
+          quantity: 1000,
+          unit: 'PCS',
+          unit_price: 50000,
+          total_value: 50000000,
+          origin_country: 'China',
+          description: 'Integrated Circuits for Electronics'
+        }
+      ],
+      container_info: {
+        container_number: 'MSCU9876543',
+        seal_number: 'SL123789',
+        container_type: '40FT',
+        gross_weight: 22000,
+        net_weight: 2000
+      },
+      transport_info: {
+        vessel_name: 'MSC OSCAR',
+        voyage_number: 'MSC2025002',
+        port_of_loading: 'Shanghai Port',
+        port_of_discharge: 'Ho Chi Minh Port',
+        estimated_arrival: '2025-08-15T14:00:00'
+      },
+      documents: [],
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }
+    setShipments(prev => [...prev, newShipment])
+  }
+
+  const handleDocumentUpload = async (files: FileList) => {
+    const fileArray = Array.from(files)
+    setUploadedDocuments(prev => [...prev, ...fileArray])
+    
+    // Simulate document processing
+    setDocumentProcessing(true)
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    setDocumentProcessing(false)
+    
+    // Add processed documents to selected shipment
+    if (selectedShipment) {
+      const newDocuments = fileArray.map((file, index) => ({
+        id: `DOC_${Date.now()}_${index}`,
+        type: 'commercial_invoice' as const,
+        status: 'ready' as const,
+        shipment_id: selectedShipment.id,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        data: {
+          filename: file.name,
+          size: file.size,
+          processed: true
+        }
+      }))
+      
+      setShipments(prev => prev.map(shipment => 
+        shipment.id === selectedShipment.id 
+          ? { ...shipment, documents: [...shipment.documents, ...newDocuments] }
+          : shipment
+      ))
+    }
   }
 
   return (
