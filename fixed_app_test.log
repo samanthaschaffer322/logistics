@@ -1,0 +1,54 @@
+
+> logiai-logistics@1.0.0 dev
+> NEXT_SKIP_TURBOPACK=1 next dev
+
+   ▲ Next.js 15.4.5
+   - Local:        http://localhost:3000
+   - Network:      http://127.0.2.2:3000
+   - Environments: .env.local
+   - Experiments (use with caution):
+     · optimizePackageImports
+
+ ✓ Starting...
+ ✓ Ready in 1488ms
+ ○ Compiling / ...
+[Error: Cannot apply unknown utility class `border-gray-700`. Are you using CSS modules or similar and missing `@reference`? https://tailwindcss.com/docs/functions-and-directives#reference-directive]
+ ✓ Compiled / in 2.4s (566 modules)
+ GET / 200 in 2606ms
+ ✓ Compiled /dashboard in 361ms (680 modules)
+ GET /dashboard 200 in 587ms
+ ✓ Compiled /super-ai in 154ms (711 modules)
+ GET /super-ai 200 in 300ms
+ ✓ Compiled /vietnam-map in 169ms (730 modules)
+ GET /vietnam-map 200 in 301ms
+ ✓ Compiled /settings in 191ms (755 modules)
+ GET /settings 200 in 304ms
+ ✓ Compiled /api/enhanced-ai-assistant in 395ms (911 modules)
+OpenAI API error: Error: 401 Incorrect API key provided: sk-Is6s1*************tG2w. You can find your API key at https://platform.openai.com/account/api-keys.
+    at async POST (src/app/api/enhanced-ai-assistant/route.ts:94:23)
+  92 |     }
+  93 |
+> 94 |     const completion = await openai.chat.completions.create({
+     |                       ^
+  95 |       model: model,
+  96 |       messages: messages as any,
+  97 |       max_tokens: 1500, {
+  status: 401,
+  headers: [Object],
+  request_id: 'req_75e43d9150814188bf55128df0fc50fb',
+  error: [Object],
+  code: 'invalid_api_key',
+  param: null,
+  type: 'invalid_request_error'
+}
+ReferenceError: body is not defined
+    at POST (src/app/api/enhanced-ai-assistant/route.ts:129:19)
+  127 |     const fallbackResponse = `🤖 **AI Assistant Response** (Fallback Mode)
+  128 |
+> 129 | **Your Query:** "${body?.message || 'File upload'}"
+      |                   ^
+  130 |
+  131 | **Vietnamese Logistics Analysis:**
+  132 |
+ POST /api/enhanced-ai-assistant 500 in 1112ms
+[?25h

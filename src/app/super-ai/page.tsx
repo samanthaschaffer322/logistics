@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useRef, useCallback } from 'react'
+import React, { useState, useRef, useCallback, useEffect } from 'react'
 import Layout from '@/components/Layout'
 import { 
   Card, 
@@ -34,7 +34,11 @@ import {
   X,
   Eye,
   Download,
-  Sparkles
+  Sparkles,
+  MessageSquare,
+  Settings,
+  Copy,
+  RefreshCw
 } from 'lucide-react'
 import { FileProcessor, ProcessedFile, FileInsight } from '@/lib/fileProcessor'
 
@@ -45,31 +49,48 @@ interface Message {
   timestamp: Date
   attachments?: ProcessedFile[]
   analysis?: any
+  model?: string
+  usage?: any
+}
+
+interface ChatState {
+  messages: Message[]
+  isLoading: boolean
+  selectedModel: string
 }
 
 const SuperAIPage = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      type: 'ai',
-      content: '🚀 **Super AI Assistant Ready!** Tôi là hệ thống trí tuệ nhân tạo toàn diện cho logistics Việt Nam. Tôi có thể giúp bạn:\n\n• **Tối ưu hóa tuyến đường** - Lập kế hoạch đường đi thông minh với dữ liệu thời gian thực\n• **Phân tích tài liệu** - Upload và phân tích tài liệu logistics (Excel, PDF, v.v.)\n• **Tối ưu hóa chi phí** - Phân tích chi phí đa biến\n• **Đánh giá rủi ro** - Phân tích rủi ro dự đoán\n• **Học từ file** - Học hỏi từ dữ liệu bạn upload\n• **Thông tin thời gian thực** - Đề xuất trực tiếp trên tất cả hệ thống\n\nHôm nay tôi có thể tối ưu hóa hoạt động logistics nào cho bạn?',
-      timestamp: new Date()
-    }
-  ])
+  const [chatState, setChatState] = useState<ChatState>({
+    messages: [
+      {
+        id: '1',
+        type: 'ai',
+        content: '🚀 **Super AI Assistant Ready!** Tôi là hệ thống trí tuệ nhân tạo toàn diện cho logistics Việt Nam với khả năng Sparka-inspired.\n\n**Tính năng nâng cao:**\n• **Multi-model AI** - GPT-4 Omni, GPT-4 Mini, GPT-3.5 Turbo\n• **File Processing** - Excel, PDF, CSV analysis\n• **Route Optimization** - Vietnamese logistics expertise\n• **Real-time Insights** - Cross-system integration\n• **Document Learning** - Pattern recognition\n• **Cost Analysis** - Multi-variable optimization\n\n**Sparka Features:**\n• **Advanced Chat Interface** - Multi-turn conversations\n• **Artifact Generation** - Code, documents, charts\n• **Tool Integration** - Weather, maps, calculations\n• **Context Awareness** - Remembers conversation history\n\nHôm nay tôi có thể giúp gì cho bạn?',
+        timestamp: new Date(),
+        model: 'super-ai-v1'
+      }
+    ],
+    isLoading: false,
+    selectedModel: 'gpt-4o-mini'
+  })
   
   const [inputMessage, setInputMessage] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
   const [uploadedFiles, setUploadedFiles] = useState<ProcessedFile[]>([])
   const [insights, setInsights] = useState<FileInsight[]>([])
-  const [selectedModel, setSelectedModel] = useState('gpt-4o')
   const [dragActive, setDragActive] = useState(false)
+  const [isTyping, setIsTyping] = useState(false)
   
   const fileInputRef = useRef<HTMLInputElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [chatState.messages])
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -91,7 +112,7 @@ const SuperAIPage = () => {
   }, [])
 
   const processFiles = async (files: File[]) => {
-    setIsLoading(true)
+    setChatState(prev => ({ ...prev, isLoading: true }))
     
     for (const file of files) {
       // Add file to processing state
@@ -124,12 +145,16 @@ const SuperAIPage = () => {
         const analysisMessage: Message = {
           id: Date.now().toString(),
           type: 'ai',
-          content: `📁 **Phân tích file hoàn tất!**\n\n**File:** ${file.name}\n**Kích thước:** ${(file.size / 1024).toFixed(1)}KB\n**Loại:** ${file.type}\n\n**Kết quả phân tích:**\n${processedFile.insights?.map(insight => `• **${insight.title}** - ${insight.description} (${Math.round(insight.confidence * 100)}% tin cậy)`).join('\n')}\n\n**Đề xuất tối ưu hóa:**\n${FileProcessor.generateOptimizationSuggestions(processedFile.routeData || []).map(s => `• ${s}`).join('\n')}\n\nBạn có muốn tôi phân tích chi tiết hơn về file này không?`,
+          content: `📁 **File Analysis Complete!**\n\n**File:** ${file.name}\n**Size:** ${(file.size / 1024).toFixed(1)}KB\n**Type:** ${file.type}\n\n**AI Analysis Results:**\n${processedFile.insights?.map(insight => `• **${insight.title}** - ${insight.description} (${Math.round(insight.confidence * 100)}% confidence)`).join('\n')}\n\n**Optimization Suggestions:**\n${FileProcessor.generateOptimizationSuggestions(processedFile.routeData || []).map(s => `• ${s}`).join('\n')}\n\nWould you like me to analyze this data further or integrate it with route optimization?`,
           timestamp: new Date(),
-          attachments: [processedFile]
+          attachments: [processedFile],
+          model: 'file-processor-ai'
         }
         
-        setMessages(prev => [...prev, analysisMessage])
+        setChatState(prev => ({
+          ...prev,
+          messages: [...prev.messages, analysisMessage]
+        }))
       } catch (error) {
         console.error('Error processing file:', error)
         setUploadedFiles(prev => prev.map(f => 
@@ -138,8 +163,7 @@ const SuperAIPage = () => {
       }
     }
     
-    setIsLoading(false)
-    setTimeout(scrollToBottom, 100)
+    setChatState(prev => ({ ...prev, isLoading: false }))
   }
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -157,9 +181,14 @@ const SuperAIPage = () => {
       timestamp: new Date()
     }
 
-    setMessages(prev => [...prev, userMessage])
+    setChatState(prev => ({
+      ...prev,
+      messages: [...prev.messages, userMessage],
+      isLoading: true
+    }))
+    
     setInputMessage('')
-    setIsLoading(true)
+    setIsTyping(true)
 
     try {
       const response = await fetch('/api/enhanced-ai-assistant', {
@@ -167,9 +196,9 @@ const SuperAIPage = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: inputMessage,
-          model: selectedModel,
+          model: chatState.selectedModel,
           attachments: uploadedFiles.map(f => ({ name: f.name, type: f.type, size: f.size })),
-          chatHistory: messages.slice(-5),
+          chatHistory: chatState.messages.slice(-10),
           insights: insights.slice(-10)
         })
       })
@@ -179,18 +208,24 @@ const SuperAIPage = () => {
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'ai',
-        content: data.response || 'Xin lỗi, tôi gặp sự cố khi xử lý yêu cầu của bạn. Vui lòng thử lại.',
+        content: data.response || 'I apologize, but I encountered an issue processing your request. Please try again.',
         timestamp: new Date(),
-        analysis: data.analysis
+        analysis: data.analysis,
+        model: data.model,
+        usage: data.usage
       }
 
-      setMessages(prev => [...prev, aiMessage])
+      setChatState(prev => ({
+        ...prev,
+        messages: [...prev.messages, aiMessage],
+        isLoading: false
+      }))
       
       // Generate new insights based on AI response
       if (data.suggestions) {
         const newInsights: FileInsight[] = data.suggestions.map((suggestion: string, index: number) => ({
           type: ['route', 'cost', 'risk', 'optimization'][index % 4] as any,
-          title: `AI Đề xuất ${index + 1}`,
+          title: `AI Suggestion ${index + 1}`,
           description: suggestion,
           confidence: 0.8 + Math.random() * 0.15,
           actionable: true
@@ -203,14 +238,18 @@ const SuperAIPage = () => {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'ai',
-        content: '❌ Tôi gặp lỗi khi xử lý yêu cầu của bạn. Vui lòng kiểm tra kết nối và thử lại.',
-        timestamp: new Date()
+        content: '❌ I encountered an error processing your request. Please check your connection and try again.',
+        timestamp: new Date(),
+        model: 'error-handler'
       }
-      setMessages(prev => [...prev, errorMessage])
+      setChatState(prev => ({
+        ...prev,
+        messages: [...prev.messages, errorMessage],
+        isLoading: false
+      }))
     }
 
-    setIsLoading(false)
-    setTimeout(scrollToBottom, 100)
+    setIsTyping(false)
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -222,6 +261,23 @@ const SuperAIPage = () => {
 
   const removeFile = (id: string) => {
     setUploadedFiles(prev => prev.filter(f => f.id !== id))
+  }
+
+  const copyMessage = (content: string) => {
+    navigator.clipboard.writeText(content)
+    // You could add a toast notification here
+  }
+
+  const regenerateResponse = async (messageId: string) => {
+    // Find the user message before this AI message
+    const messageIndex = chatState.messages.findIndex(m => m.id === messageId)
+    if (messageIndex > 0) {
+      const userMessage = chatState.messages[messageIndex - 1]
+      if (userMessage.type === 'user') {
+        setInputMessage(userMessage.content)
+        await sendMessage()
+      }
+    }
   }
 
   const getInsightIcon = (type: string) => {
@@ -261,15 +317,16 @@ const SuperAIPage = () => {
             <h1 className="text-3xl font-bold gradient-text flex items-center gap-3">
               <Brain className="w-8 h-8 text-indigo-400" />
               Super AI Assistant
+              <Badge className="badge-success text-xs">Sparka-Inspired</Badge>
             </h1>
             <p className="text-slate-400 mt-1">
-              Hệ thống trí tuệ nhân tạo toàn diện cho logistics Việt Nam
+              Advanced AI system with multi-model support and Vietnamese logistics expertise
             </p>
           </div>
           <div className="flex items-center gap-3">
             <select
-              value={selectedModel}
-              onChange={(e) => setSelectedModel(e.target.value)}
+              value={chatState.selectedModel}
+              onChange={(e) => setChatState(prev => ({ ...prev, selectedModel: e.target.value }))}
               className="dark-input px-3 py-2 rounded-xl"
             >
               <option value="gpt-4o">GPT-4 Omni</option>
@@ -277,7 +334,10 @@ const SuperAIPage = () => {
               <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
             </select>
             <Badge className="badge-success">
-              {insights.length} Thông tin chi tiết
+              {insights.length} Insights
+            </Badge>
+            <Badge className="badge-info">
+              {uploadedFiles.length} Files
             </Badge>
           </div>
         </div>
@@ -285,27 +345,34 @@ const SuperAIPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Main Chat Interface */}
           <div className="lg:col-span-3">
-            <Card className="dark-card h-[600px] flex flex-col">
+            <Card className="dark-card h-[700px] flex flex-col">
               <CardHeader className="border-b border-slate-700/50">
                 <CardTitle className="flex items-center gap-2 text-white">
-                  <Brain className="w-5 h-5 text-indigo-400" />
+                  <MessageSquare className="w-5 h-5 text-indigo-400" />
                   AI Conversation
+                  {isTyping && (
+                    <div className="flex items-center gap-1 text-indigo-400">
+                      <div className="w-1 h-1 bg-indigo-400 rounded-full animate-pulse"></div>
+                      <div className="w-1 h-1 bg-indigo-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                      <div className="w-1 h-1 bg-indigo-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                    </div>
+                  )}
                 </CardTitle>
                 <CardDescription className="text-slate-400">
-                  Upload files, đặt câu hỏi, nhận thông tin chi tiết thông minh về logistics
+                  Upload files, ask questions, get intelligent logistics insights with Sparka-inspired features
                 </CardDescription>
               </CardHeader>
               
               <CardContent className="flex-1 flex flex-col p-0">
                 {/* Messages */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                  {messages.map((message) => (
+                  {chatState.messages.map((message) => (
                     <div
                       key={message.id}
-                      className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}
+                      className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in group`}
                     >
                       <div
-                        className={`max-w-[80%] rounded-2xl p-4 ${
+                        className={`max-w-[85%] rounded-2xl p-4 relative ${
                           message.type === 'user'
                             ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white'
                             : 'dark-card text-white'
@@ -334,19 +401,47 @@ const SuperAIPage = () => {
                                 ))}
                               </div>
                             )}
+                            {message.usage && (
+                              <div className="mt-2 text-xs text-slate-400 flex items-center gap-2">
+                                <span>Model: {message.model}</span>
+                                <span>•</span>
+                                <span>Tokens: {message.usage.total_tokens}</span>
+                              </div>
+                            )}
                           </div>
                         </div>
-                        <div className="text-xs opacity-75">
+                        
+                        {/* Message Actions */}
+                        {message.type === 'ai' && (
+                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                            <button
+                              onClick={() => copyMessage(message.content)}
+                              className="p-1 rounded bg-slate-700/50 hover:bg-slate-600/50 transition-colors"
+                              title="Copy message"
+                            >
+                              <Copy className="w-3 h-3" />
+                            </button>
+                            <button
+                              onClick={() => regenerateResponse(message.id)}
+                              className="p-1 rounded bg-slate-700/50 hover:bg-slate-600/50 transition-colors"
+                              title="Regenerate response"
+                            >
+                              <RefreshCw className="w-3 h-3" />
+                            </button>
+                          </div>
+                        )}
+                        
+                        <div className="text-xs opacity-75 mt-2">
                           {message.timestamp.toLocaleTimeString('vi-VN')}
                         </div>
                       </div>
                     </div>
                   ))}
-                  {isLoading && (
+                  {chatState.isLoading && (
                     <div className="flex justify-start">
                       <div className="dark-card rounded-2xl p-4 flex items-center gap-2">
                         <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />
-                        <span className="text-sm text-slate-300">AI đang suy nghĩ...</span>
+                        <span className="text-sm text-slate-300">AI is processing...</span>
                       </div>
                     </div>
                   )}
@@ -355,7 +450,7 @@ const SuperAIPage = () => {
 
                 {/* File Upload Area */}
                 <div
-                  className={`border-t border-slate-700/50 p-4 ${dragActive ? 'bg-indigo-500/10' : ''}`}
+                  className={`border-t border-slate-700/50 p-4 transition-colors ${dragActive ? 'bg-indigo-500/10 border-indigo-500/50' : ''}`}
                   onDragEnter={handleDrag}
                   onDragLeave={handleDrag}
                   onDragOver={handleDrag}
@@ -401,16 +496,17 @@ const SuperAIPage = () => {
                     </Button>
                     <div className="flex-1 flex gap-2">
                       <Input
+                        ref={inputRef}
                         value={inputMessage}
                         onChange={(e) => setInputMessage(e.target.value)}
                         onKeyPress={handleKeyPress}
-                        placeholder="Hỏi về tuyến đường, chi phí, tối ưu hóa, hoặc upload files để phân tích..."
+                        placeholder="Ask about routes, costs, optimization, or upload files for analysis..."
                         className="dark-input flex-1"
-                        disabled={isLoading}
+                        disabled={chatState.isLoading}
                       />
                       <Button
                         onClick={sendMessage}
-                        disabled={isLoading || !inputMessage.trim()}
+                        disabled={chatState.isLoading || !inputMessage.trim()}
                         className="gradient-button"
                       >
                         <Send className="w-4 h-4" />
@@ -428,13 +524,13 @@ const SuperAIPage = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg text-white">
                   <Zap className="w-5 h-5 text-yellow-400" />
-                  Thông tin trực tiếp
+                  Live Insights
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {insights.length === 0 ? (
                   <p className="text-sm text-slate-400 text-center py-4">
-                    Upload files hoặc đặt câu hỏi để tạo thông tin chi tiết
+                    Upload files or ask questions to generate insights
                   </p>
                 ) : (
                   insights.slice(-5).map((insight, index) => (
@@ -471,35 +567,35 @@ const SuperAIPage = () => {
             {/* Quick Actions */}
             <Card className="dark-card">
               <CardHeader>
-                <CardTitle className="text-lg text-white">Hành động nhanh</CardTitle>
+                <CardTitle className="text-lg text-white">Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 <Button
                   variant="outline"
                   size="sm"
                   className="dark-button w-full justify-start"
-                  onClick={() => setInputMessage('Tối ưu hóa tuyến đường từ TP.HCM đến Hà Nội')}
+                  onClick={() => setInputMessage('Optimize route from Ho Chi Minh City to Hanoi')}
                 >
                   <Route className="w-4 h-4 mr-2" />
-                  Tối ưu tuyến đường
+                  Route Optimization
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   className="dark-button w-full justify-start"
-                  onClick={() => setInputMessage('Phân tích chi phí vận chuyển container 40ft')}
+                  onClick={() => setInputMessage('Analyze shipping costs for 40ft container')}
                 >
                   <DollarSign className="w-4 h-4 mr-2" />
-                  Phân tích chi phí
+                  Cost Analysis
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   className="dark-button w-full justify-start"
-                  onClick={() => setInputMessage('Đánh giá rủi ro logistics mùa mưa bão')}
+                  onClick={() => setInputMessage('Assess risks for monsoon season logistics')}
                 >
                   <AlertTriangle className="w-4 h-4 mr-2" />
-                  Đánh giá rủi ro
+                  Risk Assessment
                 </Button>
                 <Button
                   variant="outline"
@@ -508,29 +604,36 @@ const SuperAIPage = () => {
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <Upload className="w-4 h-4 mr-2" />
-                  Upload tài liệu
+                  Upload Documents
                 </Button>
               </CardContent>
             </Card>
 
-            {/* File Processing Stats */}
+            {/* Chat Statistics */}
             <Card className="dark-card">
               <CardHeader>
-                <CardTitle className="text-lg text-white">Thống kê xử lý</CardTitle>
+                <CardTitle className="text-lg text-white">Session Stats</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="text-center p-3 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
                   <div className="text-2xl font-bold text-indigo-400">
-                    {uploadedFiles.filter(f => f.status === 'completed').length}
+                    {chatState.messages.filter(m => m.type === 'ai').length}
                   </div>
-                  <div className="text-sm text-indigo-300">Files đã phân tích</div>
+                  <div className="text-sm text-indigo-300">AI Responses</div>
                 </div>
                 
                 <div className="text-center p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
                   <div className="text-2xl font-bold text-emerald-400">
+                    {uploadedFiles.filter(f => f.status === 'completed').length}
+                  </div>
+                  <div className="text-sm text-emerald-300">Files Processed</div>
+                </div>
+
+                <div className="text-center p-3 bg-purple-500/10 rounded-xl border border-purple-500/20">
+                  <div className="text-2xl font-bold text-purple-400">
                     {insights.length}
                   </div>
-                  <div className="text-sm text-emerald-300">Thông tin tạo ra</div>
+                  <div className="text-sm text-purple-300">Insights Generated</div>
                 </div>
               </CardContent>
             </Card>
