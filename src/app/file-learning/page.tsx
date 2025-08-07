@@ -121,10 +121,35 @@ const FilelearningPage = () => {
       // Use AI processing engine for comprehensive analysis
       const result = await aiProcessingEngine.processFiles(uploadedFiles)
       
+      // Get additional AI insights from ChatGPT
+      if (result.success && result.records.length > 0) {
+        setProcessingProgress(95)
+        try {
+          const aiInsights = await chatGPTService.generateLogisticsInsights(result.records)
+          
+          // Add AI insights to the result
+          const enhancedInsights = aiInsights.map((insight, index) => ({
+            id: `ai_insight_${index}`,
+            type: 'recommendation' as const,
+            category: 'optimization' as const,
+            title: `AI Insight ${index + 1}`,
+            description: insight,
+            impact: 'medium' as const,
+            confidence: 85,
+            actionable: true,
+            suggestedActions: [`Implement: ${insight.substring(0, 50)}...`]
+          }))
+          
+          result.insights = [...result.insights, ...enhancedInsights]
+        } catch (aiError) {
+          console.log('AI insights generation failed, using base insights:', aiError)
+        }
+      }
+      
       setProcessingResult(result)
     } catch (error) {
       console.error('File processing error:', error)
-      setError(`Processing failed: ${error}. Please check your Excel files and try again.`)
+      setError(`Processing failed: ${error.message}. Please check your Excel files and try again.`)
     } finally {
       setIsProcessing(false)
       setTimeout(() => setProcessingProgress(0), 1000)
@@ -149,22 +174,26 @@ const FilelearningPage = () => {
       // Get additional AI insights from ChatGPT
       if (result.success && result.records.length > 0) {
         setProcessingProgress(95)
-        const aiInsights = await chatGPTService.generateLogisticsInsights(result.records)
-        
-        // Add AI insights to the result
-        const enhancedInsights = aiInsights.map((insight, index) => ({
-          id: `ai_insight_${index}`,
-          type: 'recommendation' as const,
-          category: 'optimization' as const,
-          title: `AI Insight ${index + 1}`,
-          description: insight,
-          impact: 'medium' as const,
-          confidence: 85,
-          actionable: true,
-          suggestedActions: [`Implement: ${insight.substring(0, 50)}...`]
-        }))
-        
-        result.insights = [...result.insights, ...enhancedInsights]
+        try {
+          const aiInsights = await chatGPTService.generateLogisticsInsights(result.records)
+          
+          // Add AI insights to the result
+          const enhancedInsights = aiInsights.map((insight, index) => ({
+            id: `ai_insight_${index}`,
+            type: 'recommendation' as const,
+            category: 'optimization' as const,
+            title: `AI Insight ${index + 1}`,
+            description: insight,
+            impact: 'medium' as const,
+            confidence: 85,
+            actionable: true,
+            suggestedActions: [`Implement: ${insight.substring(0, 50)}...`]
+          }))
+          
+          result.insights = [...result.insights, ...enhancedInsights]
+        } catch (aiError) {
+          console.log('AI insights generation failed, using base insights:', aiError)
+        }
       }
       
       setProcessingResult(result)

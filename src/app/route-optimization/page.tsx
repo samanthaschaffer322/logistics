@@ -1143,6 +1143,19 @@ const RouteOptimizationPage = () => {
 
                   {optimizedRoute && (
                     <div className="mt-6 space-y-4">
+                      {/* AI Optimization Advice */}
+                      {optimizedRoute.aiOptimization && (
+                        <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-lg p-4">
+                          <h4 className="font-semibold text-purple-800 mb-3 flex items-center gap-2">
+                            <Brain className="w-5 h-5" />
+                            AI Route Optimization Advice
+                          </h4>
+                          <div className="text-sm text-purple-700 whitespace-pre-wrap">
+                            {optimizedRoute.aiOptimization}
+                          </div>
+                        </div>
+                      )}
+                      
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg border border-blue-200">
                           <Map className="w-8 h-8 text-blue-600 mx-auto mb-2" />
