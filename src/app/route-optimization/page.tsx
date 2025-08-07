@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react'
 import AuthGuard from '@/components/AuthGuard'
 import { useLanguage } from '@/contexts/LanguageContext'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
+import InteractiveMap from '@/components/InteractiveMap'
+import { chatGPTService } from '@/lib/chatgptService'
 import { 
   advancedRouteOptimizer, 
   RouteOptimizationRequest, 
@@ -76,6 +78,7 @@ interface OptimizedRoute {
     delayMinutes: number
     rushHourImpact: boolean
   }
+  aiOptimization?: string
 }
 
 const RouteOptimizationPage = () => {
@@ -436,6 +439,12 @@ const RouteOptimizationPage = () => {
     }, 200)
     
     try {
+      // Get AI-powered route optimization
+      const aiOptimization = await chatGPTService.optimizeRoute(
+        departure.name, 
+        destination.name
+      )
+      
       // Find nearest depot for optimization
       const nearestDepot = findNearestDepot(departure, destination)
       const directDistance = calculateDistance(departure, destination)
@@ -488,7 +497,8 @@ const RouteOptimizationPage = () => {
         },
         efficiency: Math.round((1 - (optimizedDistance / Math.max(directDistance, optimizedDistance))) * 100),
         restrictions,
-        trafficAnalysis
+        trafficAnalysis,
+        aiOptimization // Add AI optimization advice
       }
       
       clearInterval(progressInterval)
@@ -624,66 +634,92 @@ const RouteOptimizationPage = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="departure">Departure Point</Label>
-                      <div className="relative">
-                        <select
-                          id="departure"
-                          value={departure?.id || ''}
+                      <Label htmlFor="departure-input">Departure Point</Label>
+                      <div className="space-y-2">
+                        <Input
+                          id="departure-input"
+                          type="text"
+                          placeholder="Nhập địa chỉ xuất phát (VD: 123 Nguyễn Văn Linh, Quận 7, TP.HCM)"
+                          value={customOrigin.address}
                           onChange={(e) => {
-                            const selected = routes.find(r => r.id === e.target.value)
-                            setDeparture(selected || null)
-                            setOptimizedRoute(null) // Reset optimization when changing points
+                            setCustomOrigin(prev => ({ ...prev, address: e.target.value, name: e.target.value }))
+                            // Auto-suggest from predefined routes
+                            const matchedRoute = routes.find(r => 
+                              r.address.toLowerCase().includes(e.target.value.toLowerCase()) ||
+                              r.name.toLowerCase().includes(e.target.value.toLowerCase())
+                            )
+                            if (matchedRoute) {
+                              setDeparture(matchedRoute)
+                            }
                           }}
-                          className="w-full p-4 border-2 rounded-lg text-base bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm hover:border-indigo-300 transition-colors appearance-none"
-                          style={{ 
-                            fontSize: '16px', 
-                            lineHeight: '1.5',
-                            color: '#1f2937',
-                            fontWeight: '500'
-                          }}
-                        >
-                          <option value="" style={{ padding: '12px', fontSize: '16px', color: '#6b7280' }}>
-                            🚛 Chọn điểm xuất phát...
-                          </option>
-                          <optgroup label="📦 Kho hàng & Depot" style={{ fontSize: '16px', fontWeight: 'bold', color: '#4F46E5', backgroundColor: '#f8fafc' }}>
-                            {routes.filter(r => r.type === 'warehouse').map(point => (
-                              <option 
-                                key={point.id} 
-                                value={point.id} 
-                                style={{ 
-                                  padding: '12px', 
-                                  fontSize: '15px', 
-                                  lineHeight: '1.4',
-                                  color: '#1f2937',
-                                  backgroundColor: '#ffffff'
-                                }}
-                              >
-                                📦 {point.name} - {point.address}
-                              </option>
-                            ))}
-                          </optgroup>
-                          <optgroup label="📍 Điểm lấy hàng" style={{ fontSize: '16px', fontWeight: 'bold', color: '#059669', backgroundColor: '#f0fdf4' }}>
-                            {routes.filter(r => r.type === 'pickup').map(point => (
-                              <option 
-                                key={point.id} 
-                                value={point.id} 
-                                style={{ 
-                                  padding: '12px', 
-                                  fontSize: '15px', 
-                                  lineHeight: '1.4',
-                                  color: '#1f2937',
-                                  backgroundColor: '#ffffff'
-                                }}
-                              >
-                                📍 {point.name} - {point.address}
-                              </option>
-                            ))}
-                          </optgroup>
-                        </select>
-                        <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-                          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
+                          className="w-full p-3 border-2 rounded-lg text-base bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        />
+                        <div className="text-sm text-slate-600">
+                          Hoặc chọn từ danh sách có sẵn:
+                        </div>
+                        <div className="relative">
+                          <select
+                            id="departure"
+                            value={departure?.id || ''}
+                            onChange={(e) => {
+                              const selected = routes.find(r => r.id === e.target.value)
+                              setDeparture(selected || null)
+                              if (selected) {
+                                setCustomOrigin({ name: selected.name, address: selected.address, lat: '', lng: '' })
+                              }
+                              setOptimizedRoute(null)
+                            }}
+                            className="w-full p-4 border-2 rounded-lg text-base bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm hover:border-indigo-300 transition-colors appearance-none"
+                            style={{ 
+                              fontSize: '16px', 
+                              lineHeight: '1.5',
+                              color: '#1f2937',
+                              fontWeight: '500'
+                            }}
+                          >
+                            <option value="" style={{ padding: '12px', fontSize: '16px', color: '#6b7280' }}>
+                              🚛 Chọn điểm xuất phát có sẵn...
+                            </option>
+                            <optgroup label="📦 Kho hàng & Depot" style={{ fontSize: '16px', fontWeight: 'bold', color: '#4F46E5', backgroundColor: '#f8fafc' }}>
+                              {routes.filter(r => r.type === 'warehouse').map(point => (
+                                <option 
+                                  key={point.id} 
+                                  value={point.id} 
+                                  style={{ 
+                                    padding: '12px', 
+                                    fontSize: '15px', 
+                                    lineHeight: '1.4',
+                                    color: '#1f2937',
+                                    backgroundColor: '#ffffff'
+                                  }}
+                                >
+                                  📦 {point.name} - {point.address}
+                                </option>
+                              ))}
+                            </optgroup>
+                            <optgroup label="📍 Điểm lấy hàng" style={{ fontSize: '16px', fontWeight: 'bold', color: '#059669', backgroundColor: '#f0fdf4' }}>
+                              {routes.filter(r => r.type === 'pickup').map(point => (
+                                <option 
+                                  key={point.id} 
+                                  value={point.id} 
+                                  style={{ 
+                                    padding: '12px', 
+                                    fontSize: '15px', 
+                                    lineHeight: '1.4',
+                                    color: '#1f2937',
+                                    backgroundColor: '#ffffff'
+                                  }}
+                                >
+                                  📍 {point.name} - {point.address}
+                                </option>
+                              ))}
+                            </optgroup>
+                          </select>
+                          <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </div>
                         </div>
                       </div>
                       {departure && (
@@ -696,66 +732,92 @@ const RouteOptimizationPage = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="destination">Destination Point</Label>
-                      <div className="relative">
-                        <select
-                          id="destination"
-                          value={destination?.id || ''}
+                      <Label htmlFor="destination-input">Destination Point</Label>
+                      <div className="space-y-2">
+                        <Input
+                          id="destination-input"
+                          type="text"
+                          placeholder="Nhập địa chỉ đích đến (VD: 456 Lê Lợi, Quận 1, TP.HCM)"
+                          value={customDestination.address}
                           onChange={(e) => {
-                            const selected = routes.find(r => r.id === e.target.value)
-                            setDestination(selected || null)
-                            setOptimizedRoute(null) // Reset optimization when changing points
+                            setCustomDestination(prev => ({ ...prev, address: e.target.value, name: e.target.value }))
+                            // Auto-suggest from predefined routes
+                            const matchedRoute = routes.find(r => 
+                              r.address.toLowerCase().includes(e.target.value.toLowerCase()) ||
+                              r.name.toLowerCase().includes(e.target.value.toLowerCase())
+                            )
+                            if (matchedRoute) {
+                              setDestination(matchedRoute)
+                            }
                           }}
-                          className="w-full p-4 border-2 rounded-lg text-base bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm hover:border-indigo-300 transition-colors appearance-none"
-                          style={{ 
-                            fontSize: '16px', 
-                            lineHeight: '1.5',
-                            color: '#1f2937',
-                            fontWeight: '500'
-                          }}
-                        >
-                          <option value="" style={{ padding: '12px', fontSize: '16px', color: '#6b7280' }}>
-                            🎯 Chọn điểm đến...
-                          </option>
-                          <optgroup label="🏭 Kho hàng & Depot" style={{ fontSize: '16px', fontWeight: 'bold', color: '#4F46E5', backgroundColor: '#f8fafc' }}>
-                            {routes.filter(r => r.type === 'warehouse').map(point => (
-                              <option 
-                                key={point.id} 
-                                value={point.id} 
-                                style={{ 
-                                  padding: '12px', 
-                                  fontSize: '15px', 
-                                  lineHeight: '1.4',
-                                  color: '#1f2937',
-                                  backgroundColor: '#ffffff'
-                                }}
-                              >
-                                🏭 {point.name} - {point.address}
-                              </option>
-                            ))}
-                          </optgroup>
-                          <optgroup label="🚚 Điểm giao hàng" style={{ fontSize: '16px', fontWeight: 'bold', color: '#DC2626', backgroundColor: '#fef2f2' }}>
-                            {routes.filter(r => r.type === 'delivery').map(point => (
-                              <option 
-                                key={point.id} 
-                                value={point.id} 
-                                style={{ 
-                                  padding: '12px', 
-                                  fontSize: '15px', 
-                                  lineHeight: '1.4',
-                                  color: '#1f2937',
-                                  backgroundColor: '#ffffff'
-                                }}
-                              >
-                                🚚 {point.name} - {point.address}
-                              </option>
-                            ))}
-                          </optgroup>
-                        </select>
-                        <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-                          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
+                          className="w-full p-3 border-2 rounded-lg text-base bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        />
+                        <div className="text-sm text-slate-600">
+                          Hoặc chọn từ danh sách có sẵn:
+                        </div>
+                        <div className="relative">
+                          <select
+                            id="destination"
+                            value={destination?.id || ''}
+                            onChange={(e) => {
+                              const selected = routes.find(r => r.id === e.target.value)
+                              setDestination(selected || null)
+                              if (selected) {
+                                setCustomDestination({ name: selected.name, address: selected.address, lat: '', lng: '' })
+                              }
+                              setOptimizedRoute(null)
+                            }}
+                            className="w-full p-4 border-2 rounded-lg text-base bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm hover:border-indigo-300 transition-colors appearance-none"
+                            style={{ 
+                              fontSize: '16px', 
+                              lineHeight: '1.5',
+                              color: '#1f2937',
+                              fontWeight: '500'
+                            }}
+                          >
+                            <option value="" style={{ padding: '12px', fontSize: '16px', color: '#6b7280' }}>
+                              🎯 Chọn điểm đến có sẵn...
+                            </option>
+                            <optgroup label="🏭 Kho hàng & Depot" style={{ fontSize: '16px', fontWeight: 'bold', color: '#4F46E5', backgroundColor: '#f8fafc' }}>
+                              {routes.filter(r => r.type === 'warehouse').map(point => (
+                                <option 
+                                  key={point.id} 
+                                  value={point.id} 
+                                  style={{ 
+                                    padding: '12px', 
+                                    fontSize: '15px', 
+                                    lineHeight: '1.4',
+                                    color: '#1f2937',
+                                    backgroundColor: '#ffffff'
+                                  }}
+                                >
+                                  🏭 {point.name} - {point.address}
+                                </option>
+                              ))}
+                            </optgroup>
+                            <optgroup label="🚚 Điểm giao hàng" style={{ fontSize: '16px', fontWeight: 'bold', color: '#DC2626', backgroundColor: '#fef2f2' }}>
+                              {routes.filter(r => r.type === 'delivery').map(point => (
+                                <option 
+                                  key={point.id} 
+                                  value={point.id} 
+                                  style={{ 
+                                    padding: '12px', 
+                                    fontSize: '15px', 
+                                    lineHeight: '1.4',
+                                    color: '#1f2937',
+                                    backgroundColor: '#ffffff'
+                                  }}
+                                >
+                                  🚚 {point.name} - {point.address}
+                                </option>
+                              ))}
+                            </optgroup>
+                          </select>
+                          <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </div>
                         </div>
                       </div>
                       {destination && (
@@ -1006,40 +1068,24 @@ const RouteOptimizationPage = () => {
 
             {/* Map and Results */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Interactive Map Placeholder */}
+              {/* Interactive Map */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Map className="w-5 h-5" />
-                    Vietnam Truck Route Map
+                    Vietnam Interactive Route Map
                   </CardTitle>
                   <CardDescription>
-                    Interactive map showing route optimization and restrictions
+                    Bản đồ tương tác với tính năng tối ưu tuyến đường và depot
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="relative bg-slate-100 rounded-lg h-96 flex items-center justify-center">
-                    <div className="text-center">
-                      <Map className="w-16 h-16 mx-auto mb-4 text-slate-400" />
-                      <h3 className="text-lg font-semibold text-slate-600 mb-2">Interactive Route Map</h3>
-                      <p className="text-slate-500 mb-4">
-                        {departure && destination ? 
-                          `Route: ${departure.name} → ${destination.name}` :
-                          'Select departure and destination to view route'
-                        }
-                      </p>
-                      {optimizedRoute && (
-                        <div className="bg-white p-4 rounded-lg shadow-sm">
-                          <div className="text-sm text-slate-600 space-y-1">
-                            <div>📍 Distance: {optimizedRoute.distance} km</div>
-                            <div>⏱️ Time: {Math.floor(optimizedRoute.estimatedTime / 60)}h {optimizedRoute.estimatedTime % 60}m</div>
-                            <div>🚛 Truck: {truckType} Container</div>
-                            <div>⛽ Fuel: {(optimizedRoute.distance * vietnamTruckSpecs[truckType].fuel / 100).toFixed(1)}L</div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  <InteractiveMap
+                    departure={departure}
+                    destination={destination}
+                    depot={departure && destination ? findNearestDepot(departure, destination) : undefined}
+                    optimizedRoute={optimizedRoute}
+                  />
                 </CardContent>
               </Card>
 

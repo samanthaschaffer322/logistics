@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import AuthGuard from '@/components/AuthGuard'
 import { useLanguage } from '@/contexts/LanguageContext'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
+import { chatGPTService } from '@/lib/chatgptService'
 import { 
   Card, 
   CardContent, 
@@ -142,13 +143,34 @@ const FilelearningPage = () => {
         console.log(`Processing sample: ${progress}% - ${status}`)
       })
       
-      // Process the sample file
+      // Process the sample file with enhanced AI
       const result = await aiProcessingEngine.processSampleFile('/Users/aelitapham/Downloads/KẾ HOẠCH NGÀY.xlsx')
+      
+      // Get additional AI insights from ChatGPT
+      if (result.success && result.records.length > 0) {
+        setProcessingProgress(95)
+        const aiInsights = await chatGPTService.generateLogisticsInsights(result.records)
+        
+        // Add AI insights to the result
+        const enhancedInsights = aiInsights.map((insight, index) => ({
+          id: `ai_insight_${index}`,
+          type: 'recommendation' as const,
+          category: 'optimization' as const,
+          title: `AI Insight ${index + 1}`,
+          description: insight,
+          impact: 'medium' as const,
+          confidence: 85,
+          actionable: true,
+          suggestedActions: [`Implement: ${insight.substring(0, 50)}...`]
+        }))
+        
+        result.insights = [...result.insights, ...enhancedInsights]
+      }
       
       setProcessingResult(result)
     } catch (error) {
       console.error('Sample file processing error:', error)
-      setError(`Sample processing failed: ${error}. This is a demo of AI analysis capabilities.`)
+      setError(`Sample processing failed: ${error.message}. This is a demo of AI analysis capabilities.`)
     } finally {
       setIsProcessing(false)
       setTimeout(() => setProcessingProgress(0), 1000)

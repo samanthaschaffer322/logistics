@@ -680,10 +680,13 @@ export class AIProcessingEngine {
     }
   }
 
-  // Method to process the sample file
+  // Method to process the sample file with proper error handling
   async processSampleFile(filePath: string): Promise<ProcessingResult> {
     try {
-      // For the sample file, we'll create mock data that represents what would be extracted
+      // Simulate progress updates
+      this.updateProgress(10, 'Initializing AI analysis...')
+      
+      // Create realistic mock data based on Vietnamese logistics
       const mockRecords: LogisticsRecord[] = [
         {
           id: 'KH-001',
@@ -732,20 +735,62 @@ export class AIProcessingEngine {
           scheduledTime: '14:00',
           actualTime: '14:30',
           notes: 'Đang vận chuyển'
+        },
+        {
+          id: 'KH-004',
+          date: '2025-01-08',
+          origin: 'TP.HCM',
+          destination: 'Cần Thơ',
+          truckId: '51A-12345',
+          driver: 'Nguyễn Văn A',
+          cargo: 'Nông sản',
+          weight: 18000,
+          status: 'pending',
+          cost: 12000000,
+          distance: 169,
+          scheduledTime: '09:00',
+          actualTime: null,
+          notes: 'Chuẩn bị xuất phát'
+        },
+        {
+          id: 'KH-005',
+          date: '2025-01-08',
+          origin: 'Hải Phòng',
+          destination: 'Hà Nội',
+          truckId: '30C-55555',
+          driver: 'Phạm Văn D',
+          cargo: 'Máy móc',
+          weight: 25000,
+          status: 'completed',
+          cost: 6500000,
+          distance: 102,
+          scheduledTime: '07:30',
+          actualTime: '07:20',
+          notes: 'Hoàn thành sớm'
         }
       ]
 
-      // Generate insights for the sample data
+      this.updateProgress(30, 'Processing Vietnamese logistics data...')
+      
+      // Generate comprehensive AI insights
       const insights = await this.generateAIInsights(mockRecords)
+      
+      this.updateProgress(60, 'Analyzing patterns and trends...')
       
       // Generate staff analysis
       const staffAnalysis = this.analyzeStaffReplacementOpportunities(mockRecords, insights)
       
+      this.updateProgress(80, 'Generating future schedules...')
+      
       // Generate future schedule
       const futureSchedule = this.generateFutureSchedule(mockRecords)
       
+      this.updateProgress(95, 'Finalizing analysis...')
+      
       // Generate summary
       const summary = this.generateSummary(mockRecords, 1)
+
+      this.updateProgress(100, 'Analysis complete!')
 
       return {
         success: true,
@@ -759,7 +804,8 @@ export class AIProcessingEngine {
         futureSchedule
       }
     } catch (error) {
-      throw new Error(`Failed to process sample file: ${error}`)
+      console.error('Sample file processing error:', error)
+      throw new Error(`Failed to process sample file: ${error.message}`)
     }
   }
 
