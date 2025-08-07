@@ -124,24 +124,18 @@ const FilelearningPage = () => {
     if (!automationPlan) return
 
     const planGenerator = new AutomationPlanGenerator(language)
-    let content = ''
-    let filename = ''
-    let mimeType = ''
+    let blob: Blob
+    let filename: string
 
     if (format === 'pdf') {
-      content = planGenerator.exportToPDF(automationPlan)
-      filename = `automation-plan-${Date.now()}.txt` // Using .txt for now since it's text content
-      mimeType = 'text/plain'
+      blob = planGenerator.exportToPDF(automationPlan)
+      filename = `automation-plan-${Date.now()}.html`
     } else {
-      content = planGenerator.exportToExcel(automationPlan)
+      blob = planGenerator.exportToExcel(automationPlan)
       filename = `automation-plan-${Date.now()}.csv`
-      mimeType = 'text/csv'
     }
 
-    // Create and download file with proper encoding
-    const BOM = '\uFEFF' // UTF-8 BOM for Excel compatibility
-    const finalContent = format === 'excel' ? BOM + content : content
-    const blob = new Blob([finalContent], { type: mimeType + ';charset=utf-8' })
+    // Create and download file
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -154,8 +148,8 @@ const FilelearningPage = () => {
 
     // Show success message
     alert(language === 'vi' 
-      ? `Đã tải xuống ${filename} thành công!`
-      : `Successfully downloaded ${filename}!`
+      ? `✅ Đã tải xuống ${filename} thành công! File có thể mở bằng ${format === 'pdf' ? 'trình duyệt web' : 'Excel/LibreOffice'}.`
+      : `✅ Successfully downloaded ${filename}! File can be opened with ${format === 'pdf' ? 'web browser' : 'Excel/LibreOffice'}.`
     )
   }
 

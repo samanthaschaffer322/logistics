@@ -1,681 +1,541 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import AuthGuard from '@/components/AuthGuard'
+import Layout from '@/components/Layout'
+import { useLanguage } from '@/contexts/LanguageContext'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
 import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle,
-  Button,
-  Input,
-  Label,
-  Badge,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-  Progress
-} from '@/components/ui-components'
-import { 
-  Brain, 
   Truck, 
   MapPin, 
-  Calculator,
-  Fuel,
-  Navigation,
-  Clock,
-  DollarSign,
+  Clock, 
+  DollarSign, 
+  Fuel, 
   AlertTriangle,
   CheckCircle,
-  TrendingUp,
-  BarChart3,
-  Zap,
-  Target,
-  Package,
   Activity,
-  RefreshCw,
-  Play,
-  Pause,
-  Plus,
-  X,
   Users,
-  Gauge
+  Package,
+  Navigation,
+  Zap,
+  BarChart3,
+  TrendingUp,
+  Gauge,
+  Wrench,
+  Shield,
+  Radio,
+  Wifi,
+  Battery,
+  Thermometer
 } from 'lucide-react'
 
-// Generate realistic logistics operations data
-const generateOperationsData = () => {
-  const operations = [
-    {
-      id: 'OP-001',
-      name: 'TP.HCM → Hà Nội Express',
-      status: 'active',
-      type: 'long_haul',
-      vehicles: 5,
-      distance: 1720,
-      duration: 28,
-      cost: 45000000,
-      efficiency: 92,
-      fuel_consumption: 35.2,
-      on_time_rate: 94,
-      cargo_types: ['Electronics', 'Textiles', 'Food Products'],
-      last_updated: '2025-01-07 14:30'
-    },
-    {
-      id: 'OP-002', 
-      name: 'Cái Mép Port Distribution',
-      status: 'active',
-      type: 'port_distribution',
-      vehicles: 12,
-      distance: 85,
-      duration: 2.5,
-      cost: 8500000,
-      efficiency: 88,
-      fuel_consumption: 28.7,
-      on_time_rate: 98,
-      cargo_types: ['Containers', 'Import Goods', 'Export Goods'],
-      last_updated: '2025-01-07 15:45'
-    },
-    {
-      id: 'OP-003',
-      name: 'Mekong Delta Circuit',
-      status: 'planning',
-      type: 'regional',
-      vehicles: 8,
-      distance: 450,
-      duration: 12,
-      cost: 18000000,
-      efficiency: 85,
-      fuel_consumption: 32.1,
-      on_time_rate: 89,
-      cargo_types: ['Agricultural Products', 'Seafood', 'Rice'],
-      last_updated: '2025-01-07 10:15'
-    },
-    {
-      id: 'OP-004',
-      name: 'Industrial Zone Shuttle',
-      status: 'active',
-      type: 'shuttle',
-      vehicles: 15,
-      distance: 25,
-      duration: 1,
-      cost: 3200000,
-      efficiency: 95,
-      fuel_consumption: 22.5,
-      on_time_rate: 96,
-      cargo_types: ['Manufacturing Parts', 'Raw Materials', 'Finished Goods'],
-      last_updated: '2025-01-07 16:20'
-    }
-  ]
+interface Vehicle {
+  id: string
+  name: string
+  type: 'container_40ft' | 'container_20ft' | 'flatbed' | 'refrigerated'
+  status: 'active' | 'maintenance' | 'idle' | 'emergency'
+  location: { lat: number; lng: number; address: string }
+  driver: string
+  route: string
+  progress: number
+  fuel: number
+  speed: number
+  temperature?: number
+  lastUpdate: Date
+}
 
-  const vehicles = [
-    {
-      id: 'VH-001',
-      license_plate: '51A-12345',
-      type: '40ft Container',
-      status: 'in_transit',
-      driver: 'Nguyễn Văn A',
-      current_location: 'Đồng Nai',
-      destination: 'TP.HCM',
-      cargo: 'Electronics',
-      fuel_level: 75,
-      maintenance_due: '2025-02-15',
-      last_service: '2024-12-20'
-    },
-    {
-      id: 'VH-002',
-      license_plate: '29B-67890',
-      type: '20ft Container',
-      status: 'loading',
-      driver: 'Trần Thị B',
-      current_location: 'Cái Mép Port',
-      destination: 'Biên Hòa',
-      cargo: 'Import Goods',
-      fuel_level: 90,
-      maintenance_due: '2025-03-10',
-      last_service: '2025-01-05'
-    },
-    {
-      id: 'VH-003',
-      license_plate: '43C-11111',
-      type: 'Standard Truck',
-      status: 'available',
-      driver: 'Lê Văn C',
-      current_location: 'Depot Tân Vạn',
-      destination: null,
-      cargo: null,
-      fuel_level: 85,
-      maintenance_due: '2025-01-20',
-      last_service: '2024-11-15'
-    }
-  ]
-
-  const drivers = [
-    {
-      id: 'DR-001',
-      name: 'Nguyễn Văn A',
-      license: 'B2, C, D',
-      experience: 8,
-      rating: 4.8,
-      trips_completed: 1250,
-      on_time_rate: 96,
-      safety_score: 98,
-      current_status: 'driving',
-      phone: '0901234567'
-    },
-    {
-      id: 'DR-002',
-      name: 'Trần Thị B',
-      license: 'B2, C',
-      experience: 5,
-      rating: 4.6,
-      trips_completed: 890,
-      on_time_rate: 94,
-      safety_score: 95,
-      current_status: 'loading',
-      phone: '0907654321'
-    },
-    {
-      id: 'DR-003',
-      name: 'Lê Văn C',
-      license: 'B2, C, D, E',
-      experience: 12,
-      rating: 4.9,
-      trips_completed: 2100,
-      on_time_rate: 98,
-      safety_score: 99,
-      current_status: 'available',
-      phone: '0909876543'
-    }
-  ]
-
-  const statistics = {
-    totalOperations: operations.length,
-    activeOperations: operations.filter(op => op.status === 'active').length,
-    totalVehicles: vehicles.length,
-    activeVehicles: vehicles.filter(v => v.status !== 'available').length,
-    totalDrivers: drivers.length,
-    availableDrivers: drivers.filter(d => d.current_status === 'available').length,
-    avgEfficiency: Math.round(operations.reduce((sum, op) => sum + op.efficiency, 0) / operations.length),
-    totalDistance: operations.reduce((sum, op) => sum + op.distance, 0),
-    totalCost: operations.reduce((sum, op) => sum + op.cost, 0)
-  }
-
-  return { operations, vehicles, drivers, statistics }
+interface Operation {
+  id: string
+  type: 'delivery' | 'pickup' | 'transfer' | 'maintenance'
+  priority: 'high' | 'medium' | 'low'
+  status: 'pending' | 'in_progress' | 'completed' | 'delayed'
+  vehicle: string
+  route: string
+  estimatedTime: number
+  actualTime?: number
+  cost: number
+  cargo: string
+  weight: number
 }
 
 const LogisticsOperationsPage = () => {
-  const [activeTab, setActiveTab] = useState('overview')
-  const [isLoading, setIsLoading] = useState(true)
-  const [data, setData] = useState(null)
-  const [selectedOperation, setSelectedOperation] = useState(null)
-  const [realTimeUpdates, setRealTimeUpdates] = useState(true)
+  const { language, t } = useLanguage()
+  const [vehicles, setVehicles] = useState<Vehicle[]>([])
+  const [operations, setOperations] = useState<Operation[]>([])
+  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null)
+  const [isRealTimeActive, setIsRealTimeActive] = useState(true)
 
+  // Initialize data
   useEffect(() => {
-    // Simulate loading data
-    const timer = setTimeout(() => {
-      setData(generateOperationsData())
-      setIsLoading(false)
-    }, 1000)
+    const initialVehicles: Vehicle[] = [
+      {
+        id: 'VN-001',
+        name: 'Container Truck 001',
+        type: 'container_40ft',
+        status: 'active',
+        location: { lat: 10.8231, lng: 106.6297, address: 'TP. Hồ Chí Minh' },
+        driver: 'Nguyễn Văn A',
+        route: 'TP.HCM → Hà Nội',
+        progress: 65,
+        fuel: 78,
+        speed: 65,
+        lastUpdate: new Date()
+      },
+      {
+        id: 'VN-002',
+        name: 'Container Truck 002',
+        type: 'container_20ft',
+        status: 'active',
+        location: { lat: 16.0544, lng: 108.2022, address: 'Đà Nẵng' },
+        driver: 'Trần Văn B',
+        route: 'Đà Nẵng → TP.HCM',
+        progress: 45,
+        fuel: 45,
+        speed: 58,
+        lastUpdate: new Date()
+      },
+      {
+        id: 'VN-003',
+        name: 'Refrigerated Truck 003',
+        type: 'refrigerated',
+        status: 'active',
+        location: { lat: 21.0285, lng: 105.8542, address: 'Hà Nội' },
+        driver: 'Lê Văn C',
+        route: 'Hà Nội → Hải Phòng',
+        progress: 80,
+        fuel: 92,
+        speed: 45,
+        temperature: -18,
+        lastUpdate: new Date()
+      },
+      {
+        id: 'VN-004',
+        name: 'Flatbed Truck 004',
+        type: 'flatbed',
+        status: 'maintenance',
+        location: { lat: 10.0452, lng: 105.7469, address: 'Cần Thơ' },
+        driver: 'Phạm Văn D',
+        route: 'Depot Cần Thơ',
+        progress: 0,
+        fuel: 25,
+        speed: 0,
+        lastUpdate: new Date()
+      }
+    ]
 
-    return () => clearTimeout(timer)
+    const initialOperations: Operation[] = [
+      {
+        id: 'OP-001',
+        type: 'delivery',
+        priority: 'high',
+        status: 'in_progress',
+        vehicle: 'VN-001',
+        route: 'TP.HCM → Hà Nội',
+        estimatedTime: 18,
+        cost: 15000000,
+        cargo: 'Electronics',
+        weight: 28500
+      },
+      {
+        id: 'OP-002',
+        type: 'pickup',
+        priority: 'medium',
+        status: 'pending',
+        vehicle: 'VN-002',
+        route: 'Đà Nẵng → TP.HCM',
+        estimatedTime: 12,
+        cost: 8500000,
+        cargo: 'Textiles',
+        weight: 15200
+      },
+      {
+        id: 'OP-003',
+        type: 'delivery',
+        priority: 'high',
+        status: 'in_progress',
+        vehicle: 'VN-003',
+        route: 'Hà Nội → Hải Phòng',
+        estimatedTime: 3,
+        cost: 2800000,
+        cargo: 'Frozen Food',
+        weight: 12000
+      },
+      {
+        id: 'OP-004',
+        type: 'maintenance',
+        priority: 'low',
+        status: 'pending',
+        vehicle: 'VN-004',
+        route: 'Depot Cần Thơ',
+        estimatedTime: 8,
+        cost: 5000000,
+        cargo: 'N/A',
+        weight: 0
+      }
+    ]
+
+    setVehicles(initialVehicles)
+    setOperations(initialOperations)
   }, [])
 
-  // Simulate real-time updates
+  // Real-time updates simulation
   useEffect(() => {
-    if (!realTimeUpdates || !data) return
+    if (!isRealTimeActive) return
 
     const interval = setInterval(() => {
-      setData(prevData => {
-        const newData = { ...prevData }
-        // Update vehicle fuel levels and locations randomly
-        newData.vehicles = newData.vehicles.map(vehicle => ({
-          ...vehicle,
-          fuel_level: Math.max(20, vehicle.fuel_level - Math.random() * 2)
-        }))
-        return newData
-      })
+      setVehicles(prev => prev.map(vehicle => {
+        if (vehicle.status === 'active') {
+          return {
+            ...vehicle,
+            progress: Math.min(100, vehicle.progress + Math.random() * 2),
+            fuel: Math.max(10, vehicle.fuel - Math.random() * 0.5),
+            speed: 45 + Math.random() * 30,
+            lastUpdate: new Date()
+          }
+        }
+        return vehicle
+      }))
     }, 5000)
 
     return () => clearInterval(interval)
-  }, [realTimeUpdates, data])
+  }, [isRealTimeActive])
 
-  const getStatusColor = (status) => {
+  const getVehicleStatusColor = (status: Vehicle['status']) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800'
-      case 'planning': return 'bg-yellow-100 text-yellow-800'
-      case 'paused': return 'bg-red-100 text-red-800'
-      case 'in_transit': return 'bg-blue-100 text-blue-800'
-      case 'loading': return 'bg-purple-100 text-purple-800'
-      case 'available': return 'bg-gray-100 text-gray-800'
-      case 'driving': return 'bg-green-100 text-green-800'
-      default: return 'bg-gray-100 text-gray-800'
+      case 'active': return 'text-green-400 bg-green-500/10 border-green-500/20'
+      case 'maintenance': return 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20'
+      case 'idle': return 'text-blue-400 bg-blue-500/10 border-blue-500/20'
+      case 'emergency': return 'text-red-400 bg-red-500/10 border-red-500/20'
+      default: return 'text-gray-400 bg-gray-500/10 border-gray-500/20'
     }
   }
 
-  const getStatusIcon = (status) => {
+  const getOperationStatusColor = (status: Operation['status']) => {
     switch (status) {
-      case 'active': return <Play className="w-4 h-4" />
-      case 'planning': return <Clock className="w-4 h-4" />
-      case 'paused': return <Pause className="w-4 h-4" />
-      case 'in_transit': return <Truck className="w-4 h-4" />
-      case 'loading': return <Package className="w-4 h-4" />
-      case 'available': return <CheckCircle className="w-4 h-4" />
-      case 'driving': return <Navigation className="w-4 h-4" />
-      default: return <Activity className="w-4 h-4" />
+      case 'completed': return 'text-green-400 bg-green-500/10'
+      case 'in_progress': return 'text-blue-400 bg-blue-500/10'
+      case 'delayed': return 'text-red-400 bg-red-500/10'
+      case 'pending': return 'text-yellow-400 bg-yellow-500/10'
+      default: return 'text-gray-400 bg-gray-500/10'
     }
   }
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
-      minimumFractionDigits: 0
-    }).format(amount)
+  const getPriorityColor = (priority: Operation['priority']) => {
+    switch (priority) {
+      case 'high': return 'text-red-400'
+      case 'medium': return 'text-yellow-400'
+      case 'low': return 'text-green-400'
+      default: return 'text-gray-400'
+    }
   }
 
-  if (isLoading || !data) {
-    return (
-      <AuthGuard>
-        <div className="min-h-screen bg-slate-900 p-6">
-          <div className="max-w-7xl mx-auto">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-white mb-2">Logistics Operations</h1>
-              <p className="text-slate-400">Real-time operations management and optimization</p>
-            </div>
-            
-            <div className="text-center text-slate-400">
-              <Truck className="w-8 h-8 mx-auto mb-2 animate-spin" />
-              <p>Loading operations data...</p>
-            </div>
-          </div>
-        </div>
-      </AuthGuard>
-    )
+  const getVehicleIcon = (type: Vehicle['type']) => {
+    switch (type) {
+      case 'container_40ft':
+      case 'container_20ft':
+        return <Package className="w-5 h-5" />
+      case 'refrigerated':
+        return <Thermometer className="w-5 h-5" />
+      case 'flatbed':
+        return <Truck className="w-5 h-5" />
+      default:
+        return <Truck className="w-5 h-5" />
+    }
   }
 
-  const { operations, vehicles, drivers, statistics } = data
+  const activeVehicles = vehicles.filter(v => v.status === 'active').length
+  const totalOperations = operations.length
+  const completedOperations = operations.filter(op => op.status === 'completed').length
+  const avgEfficiency = Math.round((completedOperations / totalOperations) * 100) || 85
 
   return (
-    <AuthGuard>
-      <div className="min-h-screen bg-slate-900 p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <div className="flex items-center justify-between">
+    <Layout>
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold gradient-text flex items-center gap-3">
+              <Activity className="w-8 h-8 text-indigo-400" />
+              {language === 'vi' ? 'Trung tâm Vận hành Logistics' : 'Logistics Operations Center'}
+            </h1>
+            <p className="text-slate-400 mt-1">
+              {language === 'vi' 
+                ? 'Quản lý và tối ưu hóa vận hành thời gian thực với AI'
+                : 'Real-time operations management and optimization with AI'
+              }
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <div className={`w-3 h-3 rounded-full ${isRealTimeActive ? 'bg-green-400 animate-pulse' : 'bg-gray-400'}`}></div>
+              <span className="text-sm text-slate-400">
+                {isRealTimeActive ? (language === 'vi' ? 'Trực tuyến' : 'Live') : (language === 'vi' ? 'Tạm dừng' : 'Paused')}
+              </span>
+              <button
+                onClick={() => setIsRealTimeActive(!isRealTimeActive)}
+                className="text-indigo-400 hover:text-indigo-300 text-sm"
+              >
+                {isRealTimeActive ? (language === 'vi' ? 'Tạm dừng' : 'Pause') : (language === 'vi' ? 'Tiếp tục' : 'Resume')}
+              </button>
+            </div>
+            <LanguageSwitcher />
+          </div>
+        </div>
+
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="dark-card p-4">
+            <div className="flex items-center gap-3">
+              <Truck className="w-8 h-8 text-blue-400" />
               <div>
-                <h1 className="text-3xl font-bold text-white mb-2">Logistics Operations</h1>
-                <p className="text-slate-400">Real-time operations management and optimization</p>
-              </div>
-              
-              <div className="flex items-center gap-4">
-                <Button
-                  onClick={() => setRealTimeUpdates(!realTimeUpdates)}
-                  variant={realTimeUpdates ? "default" : "outline"}
-                  className={realTimeUpdates ? "bg-green-600 hover:bg-green-700" : "text-white border-slate-600"}
-                >
-                  {realTimeUpdates ? <Pause className="w-4 h-4 mr-2" /> : <Play className="w-4 h-4 mr-2" />}
-                  {realTimeUpdates ? 'Pause Updates' : 'Resume Updates'}
-                </Button>
-                
-                <Button className="bg-indigo-600 hover:bg-indigo-700">
-                  <Plus className="w-4 h-4 mr-2" />
-                  New Operation
-                </Button>
+                <div className="text-2xl font-bold text-white">{activeVehicles}</div>
+                <div className="text-sm text-slate-400">
+                  {language === 'vi' ? 'Xe hoạt động' : 'Active Vehicles'}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Statistics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Active Operations</p>
-                    <p className="text-2xl font-bold text-slate-900">{statistics.activeOperations}</p>
-                    <p className="text-sm text-slate-500">of {statistics.totalOperations} total</p>
-                  </div>
-                  <div className="p-3 bg-green-100 rounded-full">
-                    <Activity className="w-6 h-6 text-green-600" />
-                  </div>
+          <div className="dark-card p-4">
+            <div className="flex items-center gap-3">
+              <Activity className="w-8 h-8 text-green-400" />
+              <div>
+                <div className="text-2xl font-bold text-white">{totalOperations}</div>
+                <div className="text-sm text-slate-400">
+                  {language === 'vi' ? 'Hoạt động' : 'Operations'}
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Fleet Utilization</p>
-                    <p className="text-2xl font-bold text-slate-900">
-                      {Math.round((statistics.activeVehicles / statistics.totalVehicles) * 100)}%
-                    </p>
-                    <p className="text-sm text-slate-500">{statistics.activeVehicles}/{statistics.totalVehicles} vehicles</p>
-                  </div>
-                  <div className="p-3 bg-blue-100 rounded-full">
-                    <Truck className="w-6 h-6 text-blue-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Avg Efficiency</p>
-                    <p className="text-2xl font-bold text-slate-900">{statistics.avgEfficiency}%</p>
-                    <p className="text-sm text-slate-500">Operational efficiency</p>
-                  </div>
-                  <div className="p-3 bg-purple-100 rounded-full">
-                    <Target className="w-6 h-6 text-purple-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Total Cost</p>
-                    <p className="text-2xl font-bold text-slate-900">
-                      {formatCurrency(statistics.totalCost)}
-                    </p>
-                    <p className="text-sm text-slate-500">Daily operations</p>
-                  </div>
-                  <div className="p-3 bg-orange-100 rounded-full">
-                    <DollarSign className="w-6 h-6 text-orange-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
 
-          {/* Main Content */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="bg-slate-800 border-slate-700">
-              <TabsTrigger value="overview" className="text-white">Overview</TabsTrigger>
-              <TabsTrigger value="operations" className="text-white">Operations</TabsTrigger>
-              <TabsTrigger value="vehicles" className="text-white">Fleet</TabsTrigger>
-              <TabsTrigger value="drivers" className="text-white">Drivers</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="overview" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <BarChart3 className="w-5 h-5" />
-                      Operations Performance
-                    </CardTitle>
-                    <CardDescription>Real-time performance metrics</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {operations.map((operation) => (
-                        <div key={operation.id} className="p-4 bg-slate-50 rounded-lg">
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              {getStatusIcon(operation.status)}
-                              <span className="font-medium">{operation.name}</span>
-                            </div>
-                            <Badge className={getStatusColor(operation.status)}>
-                              {operation.status}
-                            </Badge>
-                          </div>
-                          <div className="grid grid-cols-3 gap-4 text-sm">
-                            <div>
-                              <span className="text-slate-600">Efficiency:</span>
-                              <div className="flex items-center gap-2 mt-1">
-                                <Progress value={operation.efficiency} className="h-2 flex-1" />
-                                <span className="font-medium">{operation.efficiency}%</span>
-                              </div>
-                            </div>
-                            <div>
-                              <span className="text-slate-600">Vehicles:</span>
-                              <p className="font-medium">{operation.vehicles} active</p>
-                            </div>
-                            <div>
-                              <span className="text-slate-600">On-time:</span>
-                              <p className="font-medium">{operation.on_time_rate}%</p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Gauge className="w-5 h-5" />
-                      Real-time Monitoring
-                    </CardTitle>
-                    <CardDescription>Live system status and alerts</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <CheckCircle className="w-5 h-5 text-green-600" />
-                          <span className="text-sm font-medium">System Status</span>
-                        </div>
-                        <Badge className="bg-green-100 text-green-800">Operational</Badge>
-                      </div>
-
-                      <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <Activity className="w-5 h-5 text-blue-600" />
-                          <span className="text-sm font-medium">GPS Tracking</span>
-                        </div>
-                        <Badge className="bg-blue-100 text-blue-800">Active</Badge>
-                      </div>
-
-                      <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <AlertTriangle className="w-5 h-5 text-yellow-600" />
-                          <span className="text-sm font-medium">Maintenance Due</span>
-                        </div>
-                        <Badge className="bg-yellow-100 text-yellow-800">1 Vehicle</Badge>
-                      </div>
-
-                      <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <Fuel className="w-5 h-5 text-purple-600" />
-                          <span className="text-sm font-medium">Fuel Monitoring</span>
-                        </div>
-                        <Badge className="bg-purple-100 text-purple-800">Normal</Badge>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+          <div className="dark-card p-4">
+            <div className="flex items-center gap-3">
+              <Gauge className="w-8 h-8 text-purple-400" />
+              <div>
+                <div className="text-2xl font-bold text-white">{avgEfficiency}%</div>
+                <div className="text-sm text-slate-400">
+                  {language === 'vi' ? 'Hiệu suất' : 'Efficiency'}
+                </div>
               </div>
-            </TabsContent>
+            </div>
+          </div>
 
-            <TabsContent value="operations" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MapPin className="w-5 h-5" />
-                    Operations Management
-                  </CardTitle>
-                  <CardDescription>Monitor and control all logistics operations</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b bg-slate-50">
-                          <th className="text-left p-3 font-medium">Operation</th>
-                          <th className="text-left p-3 font-medium">Type</th>
-                          <th className="text-left p-3 font-medium">Status</th>
-                          <th className="text-left p-3 font-medium">Vehicles</th>
-                          <th className="text-left p-3 font-medium">Distance</th>
-                          <th className="text-left p-3 font-medium">Efficiency</th>
-                          <th className="text-left p-3 font-medium">Cost</th>
-                          <th className="text-left p-3 font-medium">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {operations.map((operation) => (
-                          <tr key={operation.id} className="border-b hover:bg-slate-50">
-                            <td className="p-3 font-medium">{operation.name}</td>
-                            <td className="p-3">
-                              <Badge className="bg-slate-100 text-slate-800">
-                                {operation.type.replace('_', ' ')}
-                              </Badge>
-                            </td>
-                            <td className="p-3">
-                              <Badge className={getStatusColor(operation.status)}>
-                                {operation.status}
-                              </Badge>
-                            </td>
-                            <td className="p-3">{operation.vehicles}</td>
-                            <td className="p-3">{operation.distance} km</td>
-                            <td className="p-3">
-                              <div className="flex items-center gap-2">
-                                <Progress value={operation.efficiency} className="h-2 w-16" />
-                                <span className="text-xs">{operation.efficiency}%</span>
-                              </div>
-                            </td>
-                            <td className="p-3">{formatCurrency(operation.cost)}</td>
-                            <td className="p-3">
-                              <div className="flex items-center gap-2">
-                                <Button size="sm" variant="outline">
-                                  <Play className="w-4 h-4" />
-                                </Button>
-                                <Button size="sm" variant="outline">
-                                  <Pause className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+          <div className="dark-card p-4">
+            <div className="flex items-center gap-3">
+              <DollarSign className="w-8 h-8 text-yellow-400" />
+              <div>
+                <div className="text-2xl font-bold text-white">
+                  {(operations.reduce((sum, op) => sum + op.cost, 0) / 1000000).toFixed(1)}M
+                </div>
+                <div className="text-sm text-slate-400">
+                  {language === 'vi' ? 'Tổng giá trị' : 'Total Value'}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Vehicle Fleet Status */}
+          <div className="lg:col-span-2 dark-card p-6">
+            <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+              <Truck className="w-6 h-6 text-indigo-400" />
+              {language === 'vi' ? 'Trạng thái Đội xe' : 'Fleet Status'}
+            </h2>
+            
+            <div className="space-y-4">
+              {vehicles.map(vehicle => (
+                <div 
+                  key={vehicle.id}
+                  className={`p-4 rounded-xl border cursor-pointer transition-all duration-300 hover:scale-[1.02] ${
+                    selectedVehicle?.id === vehicle.id 
+                      ? 'border-indigo-500 bg-indigo-500/10' 
+                      : 'border-slate-700 bg-slate-800/50'
+                  }`}
+                  onClick={() => setSelectedVehicle(vehicle)}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-lg ${getVehicleStatusColor(vehicle.status)}`}>
+                        {getVehicleIcon(vehicle.type)}
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-white">{vehicle.name}</h3>
+                        <p className="text-sm text-slate-400">{vehicle.driver}</p>
+                      </div>
+                    </div>
+                    <div className={`px-3 py-1 rounded-full text-xs font-medium border ${getVehicleStatusColor(vehicle.status)}`}>
+                      {vehicle.status.toUpperCase()}
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
 
-            <TabsContent value="vehicles" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {vehicles.map((vehicle) => (
-                  <Card key={vehicle.id}>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Truck className="w-5 h-5" />
-                        {vehicle.license_plate}
-                      </CardTitle>
-                      <CardDescription>{vehicle.type}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        <div className="flex justify-between">
-                          <span className="text-sm text-slate-600">Status</span>
-                          <Badge className={getStatusColor(vehicle.status)}>
-                            {vehicle.status.replace('_', ' ')}
-                          </Badge>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm text-slate-600">Driver</span>
-                          <span className="font-medium">{vehicle.driver}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm text-slate-600">Location</span>
-                          <span className="font-medium">{vehicle.current_location}</span>
-                        </div>
-                        {vehicle.destination && (
-                          <div className="flex justify-between">
-                            <span className="text-sm text-slate-600">Destination</span>
-                            <span className="font-medium">{vehicle.destination}</span>
-                          </div>
-                        )}
-                        <div>
-                          <div className="flex justify-between mb-2">
-                            <span className="text-sm text-slate-600">Fuel Level</span>
-                            <span className="text-sm font-medium">{Math.round(vehicle.fuel_level)}%</span>
-                          </div>
-                          <Progress 
-                            value={vehicle.fuel_level} 
-                            className={`h-2 ${vehicle.fuel_level < 30 ? 'bg-red-200' : 'bg-green-200'}`} 
-                          />
-                        </div>
-                        {vehicle.cargo && (
-                          <div className="flex justify-between">
-                            <span className="text-sm text-slate-600">Cargo</span>
-                            <span className="font-medium">{vehicle.cargo}</span>
-                          </div>
-                        )}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-slate-400" />
+                      <span className="text-slate-300">{vehicle.location.address}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Navigation className="w-4 h-4 text-slate-400" />
+                      <span className="text-slate-300">{vehicle.progress}%</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Fuel className="w-4 h-4 text-slate-400" />
+                      <span className={`${vehicle.fuel < 30 ? 'text-red-400' : 'text-slate-300'}`}>
+                        {vehicle.fuel}%
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Gauge className="w-4 h-4 text-slate-400" />
+                      <span className="text-slate-300">{vehicle.speed} km/h</span>
+                    </div>
+                  </div>
+
+                  {vehicle.type === 'refrigerated' && vehicle.temperature && (
+                    <div className="mt-2 flex items-center gap-2 text-sm">
+                      <Thermometer className="w-4 h-4 text-blue-400" />
+                      <span className="text-blue-300">{vehicle.temperature}°C</span>
+                    </div>
+                  )}
+
+                  <div className="mt-3">
+                    <div className="flex justify-between text-xs text-slate-400 mb-1">
+                      <span>{language === 'vi' ? 'Tiến độ' : 'Progress'}</span>
+                      <span>{vehicle.progress}%</span>
+                    </div>
+                    <div className="w-full bg-slate-700 rounded-full h-2">
+                      <div 
+                        className="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full transition-all duration-500"
+                        style={{ width: `${vehicle.progress}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Operations & Alerts */}
+          <div className="space-y-6">
+            {/* Current Operations */}
+            <div className="dark-card p-4">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <Activity className="w-5 h-5 text-green-400" />
+                {language === 'vi' ? 'Hoạt động hiện tại' : 'Current Operations'}
+              </h3>
+              
+              <div className="space-y-3 max-h-80 overflow-y-auto">
+                {operations.map(operation => (
+                  <div key={operation.id} className="p-3 bg-slate-800 rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-sm font-medium text-white">
+                        {operation.vehicle} - {operation.route}
                       </div>
-                    </CardContent>
-                  </Card>
+                      <div className={`px-2 py-1 rounded text-xs ${getOperationStatusColor(operation.status)}`}>
+                        {operation.status}
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="text-slate-400">
+                        {language === 'vi' ? 'Hàng hóa:' : 'Cargo:'} {operation.cargo}
+                      </div>
+                      <div className="text-slate-400">
+                        {language === 'vi' ? 'Trọng lượng:' : 'Weight:'} {operation.weight}kg
+                      </div>
+                      <div className="text-slate-400">
+                        {language === 'vi' ? 'Thời gian:' : 'Time:'} {operation.estimatedTime}h
+                      </div>
+                      <div className={`${getPriorityColor(operation.priority)}`}>
+                        {language === 'vi' ? 'Ưu tiên:' : 'Priority:'} {operation.priority}
+                      </div>
+                    </div>
+                  </div>
                 ))}
               </div>
-            </TabsContent>
+            </div>
 
-            <TabsContent value="drivers" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {drivers.map((driver) => (
-                  <Card key={driver.id}>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <Users className="w-5 h-5" />
-                        {driver.name}
-                      </CardTitle>
-                      <CardDescription>License: {driver.license}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        <div className="flex justify-between">
-                          <span className="text-sm text-slate-600">Status</span>
-                          <Badge className={getStatusColor(driver.current_status)}>
-                            {driver.current_status}
-                          </Badge>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm text-slate-600">Experience</span>
-                          <span className="font-medium">{driver.experience} years</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm text-slate-600">Rating</span>
-                          <span className="font-medium">⭐ {driver.rating}/5.0</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm text-slate-600">Trips</span>
-                          <span className="font-medium">{driver.trips_completed.toLocaleString()}</span>
-                        </div>
-                        <div>
-                          <div className="flex justify-between mb-2">
-                            <span className="text-sm text-slate-600">On-time Rate</span>
-                            <span className="text-sm font-medium">{driver.on_time_rate}%</span>
-                          </div>
-                          <Progress value={driver.on_time_rate} className="h-2" />
-                        </div>
-                        <div>
-                          <div className="flex justify-between mb-2">
-                            <span className="text-sm text-slate-600">Safety Score</span>
-                            <span className="text-sm font-medium">{driver.safety_score}%</span>
-                          </div>
-                          <Progress value={driver.safety_score} className="h-2" />
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm text-slate-600">Phone</span>
-                          <span className="font-medium">{driver.phone}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+            {/* System Alerts */}
+            <div className="dark-card p-4">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-yellow-400" />
+                {language === 'vi' ? 'Cảnh báo hệ thống' : 'System Alerts'}
+              </h3>
+              
+              <div className="space-y-3">
+                <div className="flex items-start gap-2 p-2 bg-yellow-500/10 rounded">
+                  <Fuel className="w-4 h-4 text-yellow-400 mt-0.5" />
+                  <div>
+                    <div className="text-yellow-400 font-medium text-sm">
+                      {language === 'vi' ? 'Nhiên liệu thấp' : 'Low Fuel'}
+                    </div>
+                    <div className="text-slate-400 text-xs">
+                      VN-002: {language === 'vi' ? 'Còn 45% nhiên liệu' : '45% fuel remaining'}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2 p-2 bg-red-500/10 rounded">
+                  <Wrench className="w-4 h-4 text-red-400 mt-0.5" />
+                  <div>
+                    <div className="text-red-400 font-medium text-sm">
+                      {language === 'vi' ? 'Bảo trì định kỳ' : 'Scheduled Maintenance'}
+                    </div>
+                    <div className="text-slate-400 text-xs">
+                      VN-004: {language === 'vi' ? 'Cần bảo trì trong 2 ngày' : 'Maintenance due in 2 days'}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-2 p-2 bg-green-500/10 rounded">
+                  <CheckCircle className="w-4 h-4 text-green-400 mt-0.5" />
+                  <div>
+                    <div className="text-green-400 font-medium text-sm">
+                      {language === 'vi' ? 'Hoàn thành' : 'Completed'}
+                    </div>
+                    <div className="text-slate-400 text-xs">
+                      VN-003: {language === 'vi' ? 'Giao hàng thành công' : 'Delivery completed'}
+                    </div>
+                  </div>
+                </div>
               </div>
-            </TabsContent>
-          </Tabs>
+            </div>
+
+            {/* AI Recommendations */}
+            <div className="dark-card p-4">
+              <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                <Zap className="w-5 h-5 text-purple-400" />
+                {language === 'vi' ? 'Khuyến nghị AI' : 'AI Recommendations'}
+              </h3>
+              
+              <div className="space-y-3 text-sm">
+                <div className="p-3 bg-purple-500/10 rounded border border-purple-500/20">
+                  <div className="text-purple-400 font-medium mb-1">
+                    {language === 'vi' ? 'Tối ưu tuyến đường' : 'Route Optimization'}
+                  </div>
+                  <div className="text-slate-300">
+                    {language === 'vi' 
+                      ? 'Có thể tiết kiệm 15% chi phí bằng cách điều chỉnh tuyến VN-001'
+                      : 'Can save 15% costs by adjusting VN-001 route'
+                    }
+                  </div>
+                </div>
+
+                <div className="p-3 bg-blue-500/10 rounded border border-blue-500/20">
+                  <div className="text-blue-400 font-medium mb-1">
+                    {language === 'vi' ? 'Dự báo nhu cầu' : 'Demand Forecast'}
+                  </div>
+                  <div className="text-slate-300">
+                    {language === 'vi' 
+                      ? 'Nhu cầu vận chuyển tăng 20% tuần tới'
+                      : 'Transportation demand will increase 20% next week'
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </AuthGuard>
+    </Layout>
   )
 }
 

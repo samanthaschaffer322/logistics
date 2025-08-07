@@ -3,6 +3,7 @@
 import React from 'react'
 import AuthGuard from '@/components/AuthGuard'
 import Layout from '@/components/Layout'
+import InteractiveMap from '@/components/InteractiveMap'
 import Link from 'next/link'
 import { 
   Brain, 
@@ -172,6 +173,24 @@ const DashboardPage = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Interactive Map Section */}
+        <div className="dark-card p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+              <Map className="w-6 h-6 text-indigo-400" />
+              Real-time Vietnam Logistics Map
+            </h2>
+            <Link 
+              href="/interactive-map" 
+              className="text-indigo-400 hover:text-indigo-300 text-sm flex items-center gap-1 transition-colors"
+            >
+              View Full Map
+              <MapPin className="w-4 h-4" />
+            </Link>
+          </div>
+          <InteractiveMap />
         </div>
 
         {/* Welcome Message */}
