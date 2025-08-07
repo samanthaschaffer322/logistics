@@ -1,557 +1,383 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-import AuthGuard from '@/components/AuthGuard'
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle,
-  Button,
-  Input,
-  Label,
-  Badge,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-  Textarea
-} from '@/components/ui-components'
-import { 
-  FileText, 
-  Download, 
+import React, { useState, useRef, useCallback } from 'react'
+import Layout from '@/components/Layout'
+import { useLanguage } from '@/contexts/LanguageContext'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
+import { ImportExportAI, ImportExportDocument, ShipmentTracking, CustomsAutomation, AIInsight } from '@/lib/importExportAI'
+import {
   Upload,
+  FileText,
+  Ship,
+  Package,
   CheckCircle,
   AlertTriangle,
   Clock,
-  Truck,
-  Package,
-  Globe,
-  Shield,
-  FileSpreadsheet,
-  Printer,
-  Eye,
-  Plus,
-  Trash2,
-  Edit,
-  Save,
-  RefreshCw,
+  DollarSign,
+  TrendingUp,
   Brain,
   Zap,
-  Activity
+  Search,
+  Download,
+  Eye,
+  RefreshCw,
+  Globe,
+  Shield,
+  Truck,
+  MapPin,
+  Calendar,
+  BarChart3,
+  Loader2,
+  X,
+  Plus
 } from 'lucide-react'
 
-// Generate realistic import-export data
-const generateImportExportData = () => {
-  const shipments = [
-    {
-      id: 'IMP-2025-001',
-      reference: 'VN-IMP-240801-001',
-      type: 'import',
-      status: 'customs_cleared',
-      company: 'Công ty TNHH ABC Import',
-      goods: 'Electronic Components',
-      container: 'MSKU-1234567',
-      value: 125000,
-      origin: 'China',
-      destination: 'TP.HCM',
-      created_at: '2025-01-15',
-      customs_code: 'VNACCS-IMP-001',
-      documents: ['Commercial Invoice', 'Packing List', 'Bill of Lading', 'Certificate of Origin']
-    },
-    {
-      id: 'EXP-2025-002',
-      reference: 'VN-EXP-240802-002',
-      type: 'export',
-      status: 'submitted_vnaccs',
-      company: 'Công ty CP XYZ Export',
-      goods: 'Coffee Beans',
-      container: 'TCLU-9876543',
-      value: 89000,
-      origin: 'Đắk Lắk',
-      destination: 'Germany',
-      created_at: '2025-01-20',
-      customs_code: 'VNACCS-EXP-002',
-      documents: ['Commercial Invoice', 'Packing List', 'Phytosanitary Certificate', 'Certificate of Origin']
-    },
-    {
-      id: 'IMP-2025-003',
-      reference: 'VN-IMP-240803-003',
-      type: 'import',
-      status: 'preparing',
-      company: 'Công ty TNHH DEF Trading',
-      goods: 'Textile Materials',
-      container: 'HLBU-5555555',
-      value: 67000,
-      origin: 'India',
-      destination: 'Hà Nội',
-      created_at: '2025-01-25',
-      customs_code: 'VNACCS-IMP-003',
-      documents: ['Commercial Invoice', 'Packing List', 'Quality Certificate']
-    }
-  ]
-
-  const documents = [
-    {
-      id: 'DOC-001',
-      name: 'Commercial Invoice Template',
-      type: 'commercial_invoice',
-      status: 'active',
-      description: 'Standard commercial invoice for import/export operations',
-      last_updated: '2025-01-10'
-    },
-    {
-      id: 'DOC-002',
-      name: 'VNACCS Declaration Form',
-      type: 'vnaccs_declaration',
-      status: 'active',
-      description: 'Vietnam Automated Cargo and Customs System declaration',
-      last_updated: '2025-01-12'
-    },
-    {
-      id: 'DOC-003',
-      name: 'Certificate of Origin',
-      type: 'certificate_origin',
-      status: 'active',
-      description: 'Certificate of origin for goods verification',
-      last_updated: '2025-01-08'
-    }
-  ]
-
-  const statistics = {
-    totalShipments: shipments.length,
-    importShipments: shipments.filter(s => s.type === 'import').length,
-    exportShipments: shipments.filter(s => s.type === 'export').length,
-    totalValue: shipments.reduce((sum, s) => sum + s.value, 0),
-    clearedShipments: shipments.filter(s => s.status === 'customs_cleared').length,
-    pendingShipments: shipments.filter(s => s.status !== 'customs_cleared').length
-  }
-
-  return { shipments, documents, statistics }
-}
-
 const ImportExportPage = () => {
-  const [activeTab, setActiveTab] = useState('overview')
-  const [isLoading, setIsLoading] = useState(true)
-  const [data, setData] = useState(null)
-  const [selectedShipment, setSelectedShipment] = useState(null)
-  const [showNewShipmentForm, setShowNewShipmentForm] = useState(false)
+  const { language, t } = useLanguage()
+  const [activeTab, setActiveTab] = useState<'documents' | 'tracking' | 'customs' | 'insights'>('documents')
+  const [documents, setDocuments] = useState<ImportExportDocument[]>([])
+  const [shipments, setShipments] = useState<ShipmentTracking[]>([])
+  const [customsDeclarations, setCustomsDeclarations] = useState<CustomsAutomation[]>([])
+  const [aiInsights, setAiInsights] = useState<AIInsight[]>([])
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [processingProgress, setProcessingProgress] = useState(0)
+  const [isDragOver, setIsDragOver] = useState(false)
+  const [trackingNumber, setTrackingNumber] = useState('')
+  
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const aiService = new ImportExportAI(language)
 
-  useEffect(() => {
-    // Simulate loading data
-    const timer = setTimeout(() => {
-      setData(generateImportExportData())
-      setIsLoading(false)
-    }, 1000)
+  const handleFileSelect = useCallback(async (files: FileList) => {
+    setIsProcessing(true)
+    setProcessingProgress(0)
 
-    return () => clearTimeout(timer)
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]
+      setProcessingProgress((i / files.length) * 100)
+      
+      try {
+        const processedDoc = await aiService.processDocument(file)
+        setDocuments(prev => [...prev, processedDoc])
+      } catch (error) {
+        console.error('Error processing document:', error)
+      }
+    }
+
+    setProcessingProgress(100)
+    setIsProcessing(false)
+  }, [aiService])
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragOver(false)
+    
+    const files = e.dataTransfer.files
+    if (files.length > 0) {
+      handleFileSelect(files)
+    }
+  }, [handleFileSelect])
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragOver(true)
   }, [])
 
-  const getStatusColor = (status) => {
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragOver(false)
+  }, [])
+
+  const handleTrackShipment = async () => {
+    if (!trackingNumber.trim()) return
+
+    setIsProcessing(true)
+    try {
+      const tracking = await aiService.trackShipment(trackingNumber)
+      setShipments(prev => [...prev, tracking])
+      setTrackingNumber('')
+    } catch (error) {
+      console.error('Error tracking shipment:', error)
+    }
+    setIsProcessing(false)
+  }
+
+  const generateAIInsights = async () => {
+    setIsProcessing(true)
+    try {
+      const insights = await aiService.generateInsights([...documents, ...shipments])
+      setAiInsights(insights)
+    } catch (error) {
+      console.error('Error generating insights:', error)
+    }
+    setIsProcessing(false)
+  }
+
+  const getStatusColor = (status: string) => {
     switch (status) {
-      case 'customs_cleared': return 'bg-green-100 text-green-800'
-      case 'submitted_vnaccs': return 'bg-blue-100 text-blue-800'
-      case 'preparing': return 'bg-yellow-100 text-yellow-800'
-      case 'documents_ready': return 'bg-purple-100 text-purple-800'
-      default: return 'bg-gray-100 text-gray-800'
+      case 'approved':
+      case 'delivered':
+      case 'cleared':
+        return 'text-green-400 bg-green-500/10 border-green-500/20'
+      case 'pending':
+      case 'in_transit':
+      case 'draft':
+        return 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20'
+      case 'rejected':
+      case 'held':
+        return 'text-red-400 bg-red-500/10 border-red-500/20'
+      case 'processing':
+      case 'customs':
+        return 'text-blue-400 bg-blue-500/10 border-blue-500/20'
+      default:
+        return 'text-slate-400 bg-slate-500/10 border-slate-500/20'
     }
   }
 
-  const getStatusIcon = (status) => {
-    switch (status) {
-      case 'customs_cleared': return <CheckCircle className="w-4 h-4" />
-      case 'submitted_vnaccs': return <Clock className="w-4 h-4" />
-      case 'preparing': return <AlertTriangle className="w-4 h-4" />
-      default: return <Package className="w-4 h-4" />
+  const getInsightIcon = (type: string) => {
+    switch (type) {
+      case 'cost_optimization':
+        return <DollarSign className="w-5 h-5" />
+      case 'compliance_risk':
+        return <Shield className="w-5 h-5" />
+      case 'delay_prediction':
+        return <Clock className="w-5 h-5" />
+      case 'document_automation':
+        return <FileText className="w-5 h-5" />
+      default:
+        return <Brain className="w-5 h-5" />
     }
   }
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0
-    }).format(amount)
-  }
-
-  if (isLoading || !data) {
-    return (
-      <AuthGuard>
-        <div className="min-h-screen bg-slate-900 p-6">
-          <div className="max-w-7xl mx-auto">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-white mb-2">Import-Export Center</h1>
-              <p className="text-slate-400">VNACCS integration and customs documentation</p>
-            </div>
-            
-            <div className="text-center text-slate-400">
-              <Package className="w-8 h-8 mx-auto mb-2 animate-spin" />
-              <p>Loading import-export data...</p>
-            </div>
-          </div>
-        </div>
-      </AuthGuard>
-    )
-  }
-
-  const { shipments, documents, statistics } = data
 
   return (
-    <AuthGuard>
-      <div className="min-h-screen bg-slate-900 p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <div className="flex items-center justify-between">
+    <Layout>
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold gradient-text flex items-center gap-3">
+              <Ship className="w-8 h-8 text-indigo-400" />
+              {language === 'vi' ? 'Trung tâm Xuất nhập khẩu AI' : 'AI Import-Export Center'}
+            </h1>
+            <p className="text-slate-400 mt-1">
+              {language === 'vi' 
+                ? 'Tự động hóa quy trình xuất nhập khẩu với AI và tích hợp VNACCS'
+                : 'Automate import-export processes with AI and VNACCS integration'
+              }
+            </p>
+          </div>
+          <LanguageSwitcher />
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="dark-card p-4">
+            <div className="flex items-center gap-3">
+              <FileText className="w-8 h-8 text-blue-400" />
               <div>
-                <h1 className="text-3xl font-bold text-white mb-2">Import-Export Center</h1>
-                <p className="text-slate-400">VNACCS integration and customs documentation management</p>
-              </div>
-              
-              <div className="flex items-center gap-4">
-                <Button 
-                  onClick={() => setShowNewShipmentForm(true)}
-                  className="bg-indigo-600 hover:bg-indigo-700"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  New Shipment
-                </Button>
-                
-                <Button variant="outline" className="text-white border-slate-600">
-                  <Download className="w-4 h-4 mr-2" />
-                  Export Report
-                </Button>
+                <div className="text-2xl font-bold text-white">{documents.length}</div>
+                <div className="text-sm text-slate-400">
+                  {language === 'vi' ? 'Tài liệu' : 'Documents'}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Statistics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Total Shipments</p>
-                    <p className="text-2xl font-bold text-slate-900">{statistics.totalShipments}</p>
-                    <p className="text-sm text-slate-500">Active operations</p>
-                  </div>
-                  <div className="p-3 bg-blue-100 rounded-full">
-                    <Package className="w-6 h-6 text-blue-600" />
-                  </div>
+          <div className="dark-card p-4">
+            <div className="flex items-center gap-3">
+              <Ship className="w-8 h-8 text-green-400" />
+              <div>
+                <div className="text-2xl font-bold text-white">{shipments.length}</div>
+                <div className="text-sm text-slate-400">
+                  {language === 'vi' ? 'Lô hàng' : 'Shipments'}
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Total Value</p>
-                    <p className="text-2xl font-bold text-slate-900">{formatCurrency(statistics.totalValue)}</p>
-                    <p className="text-sm text-slate-500">Customs declared</p>
-                  </div>
-                  <div className="p-3 bg-green-100 rounded-full">
-                    <Globe className="w-6 h-6 text-green-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Imports</p>
-                    <p className="text-2xl font-bold text-slate-900">{statistics.importShipments}</p>
-                    <p className="text-sm text-slate-500">Inbound shipments</p>
-                  </div>
-                  <div className="p-3 bg-purple-100 rounded-full">
-                    <Download className="w-6 h-6 text-purple-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-slate-600">Exports</p>
-                    <p className="text-2xl font-bold text-slate-900">{statistics.exportShipments}</p>
-                    <p className="text-sm text-slate-500">Outbound shipments</p>
-                  </div>
-                  <div className="p-3 bg-orange-100 rounded-full">
-                    <Upload className="w-6 h-6 text-orange-600" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
 
-          {/* Main Content */}
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="bg-slate-800 border-slate-700">
-              <TabsTrigger value="overview" className="text-white">Overview</TabsTrigger>
-              <TabsTrigger value="shipments" className="text-white">Shipments</TabsTrigger>
-              <TabsTrigger value="documents" className="text-white">Documents</TabsTrigger>
-              <TabsTrigger value="vnaccs" className="text-white">VNACCS Integration</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="overview" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Activity className="w-5 h-5" />
-                      Recent Activity
-                    </CardTitle>
-                    <CardDescription>Latest import-export operations</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {shipments.slice(0, 5).map((shipment) => (
-                        <div key={shipment.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            {getStatusIcon(shipment.status)}
-                            <div>
-                              <p className="font-medium">{shipment.reference}</p>
-                              <p className="text-sm text-slate-600">{shipment.company}</p>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <Badge className={getStatusColor(shipment.status)}>
-                              {shipment.status.replace('_', ' ')}
-                            </Badge>
-                            <p className="text-sm text-slate-600 mt-1">{formatCurrency(shipment.value)}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Shield className="w-5 h-5" />
-                      Compliance Status
-                    </CardTitle>
-                    <CardDescription>VNACCS and customs compliance overview</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <CheckCircle className="w-5 h-5 text-green-600" />
-                          <div>
-                            <p className="font-medium text-green-800">VNACCS Connected</p>
-                            <p className="text-sm text-green-600">System operational</p>
-                          </div>
-                        </div>
-                        <Badge className="bg-green-100 text-green-800">Active</Badge>
-                      </div>
-
-                      <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <FileText className="w-5 h-5 text-blue-600" />
-                          <div>
-                            <p className="font-medium text-blue-800">Documents Ready</p>
-                            <p className="text-sm text-blue-600">{documents.length} templates available</p>
-                          </div>
-                        </div>
-                        <Badge className="bg-blue-100 text-blue-800">Ready</Badge>
-                      </div>
-
-                      <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <Clock className="w-5 h-5 text-yellow-600" />
-                          <div>
-                            <p className="font-medium text-yellow-800">Pending Clearance</p>
-                            <p className="text-sm text-yellow-600">{statistics.pendingShipments} shipments</p>
-                          </div>
-                        </div>
-                        <Badge className="bg-yellow-100 text-yellow-800">Pending</Badge>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+          <div className="dark-card p-4">
+            <div className="flex items-center gap-3">
+              <Shield className="w-8 h-8 text-purple-400" />
+              <div>
+                <div className="text-2xl font-bold text-white">{customsDeclarations.length}</div>
+                <div className="text-sm text-slate-400">
+                  {language === 'vi' ? 'Tờ khai' : 'Declarations'}
+                </div>
               </div>
-            </TabsContent>
+            </div>
+          </div>
 
-            <TabsContent value="shipments" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Truck className="w-5 h-5" />
-                    Shipment Management
-                  </CardTitle>
-                  <CardDescription>Track and manage all import-export shipments</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b bg-slate-50">
-                          <th className="text-left p-3 font-medium">Reference</th>
-                          <th className="text-left p-3 font-medium">Type</th>
-                          <th className="text-left p-3 font-medium">Company</th>
-                          <th className="text-left p-3 font-medium">Goods</th>
-                          <th className="text-left p-3 font-medium">Value</th>
-                          <th className="text-left p-3 font-medium">Status</th>
-                          <th className="text-left p-3 font-medium">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {shipments.map((shipment) => (
-                          <tr key={shipment.id} className="border-b hover:bg-slate-50">
-                            <td className="p-3 font-medium">{shipment.reference}</td>
-                            <td className="p-3">
-                              <Badge className={shipment.type === 'import' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}>
-                                {shipment.type.toUpperCase()}
-                              </Badge>
-                            </td>
-                            <td className="p-3">{shipment.company}</td>
-                            <td className="p-3">{shipment.goods}</td>
-                            <td className="p-3">{formatCurrency(shipment.value)}</td>
-                            <td className="p-3">
-                              <Badge className={getStatusColor(shipment.status)}>
-                                {shipment.status.replace('_', ' ')}
-                              </Badge>
-                            </td>
-                            <td className="p-3">
-                              <div className="flex items-center gap-2">
-                                <Button size="sm" variant="outline">
-                                  <Eye className="w-4 h-4" />
-                                </Button>
-                                <Button size="sm" variant="outline">
-                                  <Edit className="w-4 h-4" />
-                                </Button>
-                                <Button size="sm" variant="outline">
-                                  <Download className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="documents" className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {documents.map((doc) => (
-                  <Card key={doc.id}>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <FileText className="w-5 h-5" />
-                        {doc.name}
-                      </CardTitle>
-                      <CardDescription>{doc.description}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        <div className="flex justify-between">
-                          <span className="text-sm text-slate-600">Type</span>
-                          <Badge className="bg-slate-100 text-slate-800">
-                            {doc.type.replace('_', ' ')}
-                          </Badge>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm text-slate-600">Status</span>
-                          <Badge className="bg-green-100 text-green-800">{doc.status}</Badge>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-sm text-slate-600">Updated</span>
-                          <span className="text-sm">{doc.last_updated}</span>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button size="sm" className="flex-1">
-                            <Download className="w-4 h-4 mr-2" />
-                            Download
-                          </Button>
-                          <Button size="sm" variant="outline">
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+          <div className="dark-card p-4">
+            <div className="flex items-center gap-3">
+              <Brain className="w-8 h-8 text-yellow-400" />
+              <div>
+                <div className="text-2xl font-bold text-white">{aiInsights.length}</div>
+                <div className="text-sm text-slate-400">
+                  {language === 'vi' ? 'AI Insights' : 'AI Insights'}
+                </div>
               </div>
-            </TabsContent>
+            </div>
+          </div>
+        </div>
 
-            <TabsContent value="vnaccs" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Brain className="w-5 h-5" />
-                    VNACCS Integration
-                  </CardTitle>
-                  <CardDescription>Vietnam Automated Cargo and Customs System integration</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <h3 className="font-semibold">System Status</h3>
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                          <div className="flex items-center gap-2">
-                            <CheckCircle className="w-4 h-4 text-green-600" />
-                            <span className="text-sm">Connection Status</span>
-                          </div>
-                          <Badge className="bg-green-100 text-green-800">Connected</Badge>
-                        </div>
-                        
-                        <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                          <div className="flex items-center gap-2">
-                            <Zap className="w-4 h-4 text-blue-600" />
-                            <span className="text-sm">API Status</span>
-                          </div>
-                          <Badge className="bg-blue-100 text-blue-800">Active</Badge>
-                        </div>
-                        
-                        <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
-                          <div className="flex items-center gap-2">
-                            <RefreshCw className="w-4 h-4 text-yellow-600" />
-                            <span className="text-sm">Last Sync</span>
-                          </div>
-                          <span className="text-sm">2 minutes ago</span>
-                        </div>
-                      </div>
+        {/* Tabs */}
+        <div className="dark-card">
+          <div className="flex border-b border-slate-700">
+            {[
+              { id: 'documents', label: language === 'vi' ? 'Tài liệu' : 'Documents', icon: FileText },
+              { id: 'tracking', label: language === 'vi' ? 'Theo dõi' : 'Tracking', icon: MapPin },
+              { id: 'customs', label: language === 'vi' ? 'Hải quan' : 'Customs', icon: Shield },
+              { id: 'insights', label: 'AI Insights', icon: Brain }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`flex items-center gap-2 px-6 py-4 text-sm font-medium transition-colors ${
+                  activeTab === tab.id
+                    ? 'text-indigo-400 border-b-2 border-indigo-400 bg-indigo-500/5'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                }`}
+              >
+                <tab.icon className="w-4 h-4" />
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="p-6">
+            {/* Documents Tab */}
+            {activeTab === 'documents' && (
+              <div className="space-y-6">
+                {/* Upload Area */}
+                <div
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-300 ${
+                    isDragOver 
+                      ? 'border-indigo-400 bg-indigo-500/10' 
+                      : 'border-slate-600 hover:border-slate-500 hover:bg-slate-800/50'
+                  }`}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                    onChange={(e) => e.target.files && handleFileSelect(e.target.files)}
+                    className="hidden"
+                  />
+                  
+                  <div className="space-y-4">
+                    <div className="mx-auto w-16 h-16 bg-indigo-500/20 rounded-full flex items-center justify-center">
+                      <Upload className="w-8 h-8 text-indigo-400" />
                     </div>
                     
-                    <div className="space-y-4">
-                      <h3 className="font-semibold">Quick Actions</h3>
-                      <div className="space-y-2">
-                        <Button className="w-full justify-start">
-                          <FileSpreadsheet className="w-4 h-4 mr-2" />
-                          Generate VNACCS Declaration
-                        </Button>
-                        <Button className="w-full justify-start" variant="outline">
-                          <Upload className="w-4 h-4 mr-2" />
-                          Submit to Customs
-                        </Button>
-                        <Button className="w-full justify-start" variant="outline">
-                          <Download className="w-4 h-4 mr-2" />
-                          Download Clearance Certificate
-                        </Button>
-                        <Button className="w-full justify-start" variant="outline">
-                          <RefreshCw className="w-4 h-4 mr-2" />
-                          Sync with VNACCS
-                        </Button>
-                      </div>
+                    <div>
+                      <p className="text-lg font-medium text-white mb-2">
+                        {isDragOver 
+                          ? (language === 'vi' ? 'Thả tài liệu vào đây' : 'Drop documents here')
+                          : (language === 'vi' ? 'Upload tài liệu xuất nhập khẩu' : 'Upload import-export documents')
+                        }
+                      </p>
+                      <p className="text-sm text-slate-400">
+                        {language === 'vi' 
+                          ? 'Hỗ trợ: PDF, JPG, PNG, DOC, DOCX • AI sẽ tự động xử lý và trích xuất dữ liệu'
+                          : 'Supported: PDF, JPG, PNG, DOC, DOCX • AI will automatically process and extract data'
+                        }
+                      </p>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+                </div>
+
+                {/* Processing Progress */}
+                {isProcessing && (
+                  <div className="bg-slate-800 rounded-xl p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-white font-medium">
+                        {language === 'vi' ? 'AI đang xử lý tài liệu...' : 'AI processing documents...'}
+                      </span>
+                      <span className="text-indigo-400">{Math.round(processingProgress)}%</span>
+                    </div>
+                    <div className="w-full bg-slate-700 rounded-full h-2">
+                      <div 
+                        className="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${processingProgress}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Documents List */}
+                {documents.length > 0 && (
+                  <div className="space-y-3">
+                    <h3 className="text-lg font-semibold text-white">
+                      {language === 'vi' ? 'Tài liệu đã xử lý' : 'Processed Documents'}
+                    </h3>
+                    {documents.map(doc => (
+                      <div key={doc.id} className="bg-slate-800 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-3">
+                            <FileText className="w-5 h-5 text-blue-400" />
+                            <div>
+                              <h4 className="font-medium text-white">{doc.name}</h4>
+                              <p className="text-sm text-slate-400 capitalize">{doc.type.replace('_', ' ')}</p>
+                            </div>
+                          </div>
+                          <div className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(doc.status)}`}>
+                            {doc.status.toUpperCase()}
+                          </div>
+                        </div>
+                        
+                        {doc.aiProcessed && (
+                          <div className="mt-3 p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-lg">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Brain className="w-4 h-4 text-indigo-400" />
+                              <span className="text-sm font-medium text-indigo-300">
+                                {language === 'vi' ? 'Dữ liệu AI trích xuất' : 'AI Extracted Data'}
+                              </span>
+                            </div>
+                            <div className="text-sm text-slate-300">
+                              {doc.extractedData.invoiceNumber && (
+                                <p>{language === 'vi' ? 'Số hóa đơn:' : 'Invoice:'} {doc.extractedData.invoiceNumber}</p>
+                              )}
+                              {doc.extractedData.totalValue && (
+                                <p>{language === 'vi' ? 'Giá trị:' : 'Value:'} ${doc.extractedData.totalValue.toLocaleString()}</p>
+                              )}
+                              {doc.extractedData.supplier && (
+                                <p>{language === 'vi' ? 'Nhà cung cấp:' : 'Supplier:'} {doc.extractedData.supplier}</p>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {doc.validationErrors.length > 0 && (
+                          <div className="mt-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                            <div className="flex items-center gap-2 mb-2">
+                              <AlertTriangle className="w-4 h-4 text-red-400" />
+                              <span className="text-sm font-medium text-red-300">
+                                {language === 'vi' ? 'Lỗi validation' : 'Validation Errors'}
+                              </span>
+                            </div>
+                            <ul className="text-sm text-red-300 space-y-1">
+                              {doc.validationErrors.map((error, index) => (
+                                <li key={index}>• {error}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Other tabs content will be added in the next part */}
+          </div>
         </div>
       </div>
-    </AuthGuard>
+    </Layout>
   )
 }
 

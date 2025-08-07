@@ -5,6 +5,8 @@ import Layout from '@/components/Layout'
 import { useLanguage } from '@/contexts/LanguageContext'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
 import { IntelligentFileProcessor, FileAnalysisResult, AIInsight, AutomationOpportunity } from '@/lib/intelligentFileProcessor'
+import { AutomationPlanGenerator, AutomationPlan } from '@/lib/automationPlanGenerator'
+import AutomationPlanPreview from '@/components/AutomationPlanPreview'
 import { 
   Upload, 
   FileText, 
@@ -54,6 +56,8 @@ const FilelearningPage = () => {
   const [currentProcessingStep, setCurrentProcessingStep] = useState('')
   const [isDragOver, setIsDragOver] = useState(false)
   const [analysisResults, setAnalysisResults] = useState<FileAnalysisResult | null>(null)
+  const [automationPlan, setAutomationPlan] = useState<AutomationPlan | null>(null)
+  const [showPlanPreview, setShowPlanPreview] = useState(false)
   
   const fileInputRef = useRef<HTMLInputElement>(null)
   const dropZoneRef = useRef<HTMLDivElement>(null)
@@ -113,6 +117,41 @@ const FilelearningPage = () => {
   const removeAllFiles = () => {
     setUploadedFiles([])
     setAnalysisResults(null)
+    setAutomationPlan(null)
+  }
+
+  const handleDownloadPlan = (format: 'pdf' | 'excel') => {
+    if (!automationPlan) return
+
+    const planGenerator = new AutomationPlanGenerator(language)
+    let content = ''
+    let filename = ''
+    let mimeType = ''
+
+    if (format === 'pdf') {
+      content = planGenerator.exportToPDF(automationPlan)
+      filename = `automation-plan-${Date.now()}.pdf`
+      mimeType = 'application/pdf'
+    } else {
+      content = planGenerator.exportToExcel(automationPlan)
+      filename = `automation-plan-${Date.now()}.csv`
+      mimeType = 'text/csv'
+    }
+
+    // Create and download file
+    const blob = new Blob([content], { type: mimeType })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
+  const handlePreviewPlan = () => {
+    setShowPlanPreview(true)
   }
 
   const startIntelligentAnalysis = async () => {
@@ -168,6 +207,11 @@ const FilelearningPage = () => {
         const result = await processor.processFile(file, firstFile.content)
         
         setAnalysisResults(result)
+        
+        // Generate automation plan
+        const planGenerator = new AutomationPlanGenerator(language)
+        const plan = planGenerator.generateComprehensivePlan(result)
+        setAutomationPlan(plan)
         
         // Update file status
         setUploadedFiles(prev => prev.map(f => 
@@ -575,14 +619,36 @@ const FilelearningPage = () => {
                   ))}
                 </div>
 
-                <button className="dark-button w-full mt-4 py-2 text-sm">
-                  <Download className="w-4 h-4 mr-2" />
-                  {language === 'vi' ? 'Tải xuống kế hoạch tự động hóa' : 'Download automation plan'}
-                </button>
+                <div className="flex gap-2 mt-4">
+                  <button 
+                    onClick={handlePreviewPlan}
+                    className="flex-1 dark-button py-2 text-sm flex items-center justify-center gap-2"
+                  >
+                    <Eye className="w-4 h-4" />
+                    {language === 'vi' ? 'Xem trước kế hoạch' : 'Preview plan'}
+                  </button>
+                  <button 
+                    onClick={() => handleDownloadPlan('pdf')}
+                    className="flex-1 gradient-button py-2 text-sm flex items-center justify-center gap-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    {language === 'vi' ? 'Tải xuống kế hoạch tự động hóa' : 'Download automation plan'}
+                  </button>
+                </div>
               </div>
             )}
           </div>
         </div>
+
+        {/* Automation Plan Preview Modal */}
+        {showPlanPreview && automationPlan && (
+          <AutomationPlanPreview
+            plan={automationPlan}
+            language={language}
+            onClose={() => setShowPlanPreview(false)}
+            onDownload={handleDownloadPlan}
+          />
+        )}
       </div>
     </Layout>
   )
