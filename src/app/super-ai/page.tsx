@@ -2,6 +2,8 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react'
 import Layout from '@/components/Layout'
+import { useLanguage } from '@/contexts/LanguageContext'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
 import { 
   Brain, 
   Send, 
@@ -18,7 +20,8 @@ import {
   Copy,
   RefreshCw,
   MessageSquare,
-  Sparkles
+  Sparkles,
+  Globe
 } from 'lucide-react'
 
 interface Message {
@@ -31,11 +34,21 @@ interface Message {
 }
 
 const SuperAIPage = () => {
+  const { language, t } = useLanguage()
+  
+  const getInitialMessage = () => {
+    if (language === 'vi') {
+      return '🚀 **Super AI Assistant Ready!** Tôi là hệ thống AI toàn diện cho logistics Việt Nam với tích hợp OpenAI.\n\n**Tính năng nâng cao:**\n• **Multi-model AI** - GPT-4 Omni, GPT-4 Mini, GPT-3.5 Turbo\n• **Vietnamese Expertise** - Chuyên môn logistics Việt Nam\n• **Interactive Interface** - Giao diện tương tác hoàn chỉnh\n• **Real-time Responses** - Phản hồi thời gian thực\n• **Cost Analysis** - Phân tích chi phí đa biến\n• **Route Optimization** - Tối ưu tuyến đường thông minh\n\n**OpenAI Integration:**\n• **Real AI Responses** - Kết nối trực tiếp với OpenAI API\n• **Context Awareness** - Nhớ lịch sử hội thoại\n• **Vietnamese Context** - Hiểu biết sâu về thị trường Việt Nam\n• **Interactive Features** - Giao diện tương tác hoàn chỉnh\n\nHôm nay tôi có thể giúp gì cho bạn?'
+    } else {
+      return '🚀 **Super AI Assistant Ready!** I am a comprehensive AI system for Vietnamese logistics with OpenAI integration.\n\n**Advanced Features:**\n• **Multi-model AI** - GPT-4 Omni, GPT-4 Mini, GPT-3.5 Turbo\n• **Vietnamese Expertise** - Vietnamese logistics expertise\n• **Interactive Interface** - Complete interactive interface\n• **Real-time Responses** - Real-time responses\n• **Cost Analysis** - Multi-variable cost analysis\n• **Route Optimization** - Smart route optimization\n\n**OpenAI Integration:**\n• **Real AI Responses** - Direct connection to OpenAI API\n• **Context Awareness** - Remembers conversation history\n• **Vietnamese Context** - Deep understanding of Vietnamese market\n• **Interactive Features** - Complete interactive interface\n\nHow can I help you today?'
+    }
+  }
+
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       type: 'ai',
-      content: '🚀 **Super AI Assistant Ready!** Tôi là hệ thống AI toàn diện cho logistics Việt Nam với tích hợp OpenAI.\n\n**Tính năng nâng cao:**\n• **Multi-model AI** - GPT-4 Omni, GPT-4 Mini, GPT-3.5 Turbo\n• **Vietnamese Expertise** - Chuyên môn logistics Việt Nam\n• **Interactive Interface** - Giao diện tương tác hoàn chỉnh\n• **Real-time Responses** - Phản hồi thời gian thực\n• **Cost Analysis** - Phân tích chi phí đa biến\n• **Route Optimization** - Tối ưu tuyến đường thông minh\n\n**OpenAI Integration:**\n• **Real AI Responses** - Kết nối trực tiếp với OpenAI API\n• **Context Awareness** - Nhớ lịch sử hội thoại\n• **Vietnamese Context** - Hiểu biết sâu về thị trường Việt Nam\n• **Interactive Features** - Giao diện tương tác hoàn chỉnh\n\nHôm nay tôi có thể giúp gì cho bạn?',
+      content: getInitialMessage(),
       timestamp: new Date(),
       model: 'super-ai-v2'
     }
@@ -56,6 +69,17 @@ const SuperAIPage = () => {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  // Update initial message when language changes
+  useEffect(() => {
+    setMessages(prev => [
+      {
+        ...prev[0],
+        content: getInitialMessage()
+      },
+      ...prev.slice(1)
+    ])
+  }, [language])
 
   const sendMessage = async () => {
     if (!inputMessage.trim()) return
@@ -131,16 +155,20 @@ const SuperAIPage = () => {
           <div>
             <h1 className="text-3xl font-bold gradient-text flex items-center gap-3">
               <Brain className="w-8 h-8 text-indigo-400" />
-              Super AI Assistant
+              {language === 'vi' ? 'Super AI Assistant' : 'Super AI Assistant'}
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                OpenAI Integrated
+                {language === 'vi' ? 'OpenAI Tích hợp' : 'OpenAI Integrated'}
               </span>
             </h1>
             <p className="text-slate-400 mt-1">
-              Advanced AI system with real OpenAI integration and Vietnamese logistics expertise
+              {language === 'vi' 
+                ? 'Hệ thống AI tiên tiến với tích hợp OpenAI thực và chuyên môn logistics Việt Nam'
+                : 'Advanced AI system with real OpenAI integration and Vietnamese logistics expertise'
+              }
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <LanguageSwitcher />
             <select
               value={selectedModel}
               onChange={(e) => setSelectedModel(e.target.value)}
@@ -160,7 +188,7 @@ const SuperAIPage = () => {
               <div className="border-b border-slate-700/50 p-4">
                 <h2 className="flex items-center gap-2 text-white text-lg font-semibold">
                   <MessageSquare className="w-5 h-5 text-indigo-400" />
-                  AI Conversation
+                  {language === 'vi' ? 'Cuộc trò chuyện AI' : 'AI Conversation'}
                   {isTyping && (
                     <div className="flex items-center gap-1 text-indigo-400">
                       <div className="w-1 h-1 bg-indigo-400 rounded-full animate-pulse"></div>
@@ -170,7 +198,10 @@ const SuperAIPage = () => {
                   )}
                 </h2>
                 <p className="text-slate-400 text-sm">
-                  Real OpenAI integration with Vietnamese logistics expertise - fully interactive
+                  {language === 'vi' 
+                    ? 'Tích hợp OpenAI thực với chuyên môn logistics Việt Nam - hoàn toàn tương tác'
+                    : 'Real OpenAI integration with Vietnamese logistics expertise - fully interactive'
+                  }
                 </p>
               </div>
               
@@ -234,7 +265,9 @@ const SuperAIPage = () => {
                     <div className="flex justify-start">
                       <div className="dark-card rounded-2xl p-4 flex items-center gap-2">
                         <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />
-                        <span className="text-sm text-slate-300">AI is processing...</span>
+                        <span className="text-sm text-slate-300">
+                          {language === 'vi' ? 'AI đang xử lý...' : 'AI is processing...'}
+                        </span>
                       </div>
                     </div>
                   )}
@@ -250,7 +283,10 @@ const SuperAIPage = () => {
                         value={inputMessage}
                         onChange={(e) => setInputMessage(e.target.value)}
                         onKeyPress={handleKeyPress}
-                        placeholder="Ask about Vietnamese logistics, routes, costs, or optimization..."
+                        placeholder={language === 'vi' 
+                          ? 'Hỏi về logistics Việt Nam, tuyến đường, chi phí, hoặc tối ưu hóa...'
+                          : 'Ask about Vietnamese logistics, routes, costs, or optimization...'
+                        }
                         className="dark-input flex-1 px-4 py-3 rounded-xl"
                         disabled={isLoading}
                       />
@@ -271,48 +307,65 @@ const SuperAIPage = () => {
           {/* Quick Actions Panel */}
           <div className="space-y-4">
             <div className="dark-card p-4">
-              <h3 className="text-lg font-semibold text-white mb-4">Quick Actions</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">
+                {language === 'vi' ? 'Hành động nhanh' : 'Quick Actions'}
+              </h3>
               <div className="space-y-2">
                 <button
                   className="dark-button w-full justify-start p-3 rounded-xl text-left"
-                  onClick={() => setInputMessage('Tối ưu tuyến đường từ TP.HCM đến Hà Nội')}
+                  onClick={() => setInputMessage(language === 'vi' 
+                    ? 'Tối ưu tuyến đường từ TP.HCM đến Hà Nội'
+                    : 'Optimize route from Ho Chi Minh City to Hanoi'
+                  )}
                 >
                   <Navigation className="w-4 h-4 mr-2" />
-                  Route Optimization
+                  {language === 'vi' ? 'Tối ưu tuyến đường' : 'Route Optimization'}
                 </button>
                 <button
                   className="dark-button w-full justify-start p-3 rounded-xl text-left"
-                  onClick={() => setInputMessage('Phân tích chi phí vận chuyển container 40ft')}
+                  onClick={() => setInputMessage(language === 'vi' 
+                    ? 'Phân tích chi phí vận chuyển container 40ft'
+                    : 'Analyze 40ft container transportation costs'
+                  )}
                 >
                   <DollarSign className="w-4 h-4 mr-2" />
-                  Cost Analysis
+                  {language === 'vi' ? 'Phân tích chi phí' : 'Cost Analysis'}
                 </button>
                 <button
                   className="dark-button w-full justify-start p-3 rounded-xl text-left"
-                  onClick={() => setInputMessage('Đánh giá rủi ro logistics mùa mưa bão')}
+                  onClick={() => setInputMessage(language === 'vi' 
+                    ? 'Đánh giá rủi ro logistics mùa mưa bão'
+                    : 'Assess logistics risks during rainy season'
+                  )}
                 >
                   <AlertTriangle className="w-4 h-4 mr-2" />
-                  Risk Assessment
+                  {language === 'vi' ? 'Đánh giá rủi ro' : 'Risk Assessment'}
                 </button>
               </div>
             </div>
 
             {/* Session Stats */}
             <div className="dark-card p-4">
-              <h3 className="text-lg font-semibold text-white mb-4">Session Stats</h3>
+              <h3 className="text-lg font-semibold text-white mb-4">
+                {language === 'vi' ? 'Thống kê phiên' : 'Session Stats'}
+              </h3>
               <div className="space-y-3">
                 <div className="text-center p-3 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
                   <div className="text-2xl font-bold text-indigo-400">
                     {messages.filter(m => m.type === 'ai').length}
                   </div>
-                  <div className="text-sm text-indigo-300">AI Responses</div>
+                  <div className="text-sm text-indigo-300">
+                    {language === 'vi' ? 'Phản hồi AI' : 'AI Responses'}
+                  </div>
                 </div>
                 
                 <div className="text-center p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
                   <div className="text-2xl font-bold text-emerald-400">
                     {messages.filter(m => m.usage?.openai_integration).length}
                   </div>
-                  <div className="text-sm text-emerald-300">OpenAI Calls</div>
+                  <div className="text-sm text-emerald-300">
+                    {language === 'vi' ? 'Cuộc gọi OpenAI' : 'OpenAI Calls'}
+                  </div>
                 </div>
               </div>
             </div>
