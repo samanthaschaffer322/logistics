@@ -204,7 +204,7 @@ const FilelearningPage = () => {
 
     for (const step of steps) {
       setCurrentProcessingStep(step.message)
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      await new Promise(resolve => setTimeout(resolve, 1200))
       setProcessingProgress(step.progress)
     }
 
@@ -215,11 +215,13 @@ const FilelearningPage = () => {
         const file = new File([firstFile.content], firstFile.name, { type: firstFile.type })
         const result = await processor.processFile(file, firstFile.content)
         
+        console.log('Analysis result:', result) // Debug log
         setAnalysisResults(result)
         
         // Generate automation plan
         const planGenerator = new AutomationPlanGenerator(language)
         const plan = planGenerator.generateComprehensivePlan(result)
+        console.log('Generated automation plan:', plan) // Debug log
         setAutomationPlan(plan)
         
         // Update file status
@@ -228,10 +230,18 @@ const FilelearningPage = () => {
             ? { ...f, status: 'completed', analysisResult: result }
             : f
         ))
+
+        // Show success message
+        setTimeout(() => {
+          alert(language === 'vi' 
+            ? `✅ Phân tích hoàn thành! Tìm thấy ${result.automationOpportunities.length} cơ hội tự động hóa và ${result.insights.length} insights thông minh.`
+            : `✅ Analysis complete! Found ${result.automationOpportunities.length} automation opportunities and ${result.insights.length} intelligent insights.`
+          )
+        }, 500)
       }
     } catch (error) {
       console.error('Analysis error:', error)
-      alert(language === 'vi' ? 'Lỗi khi phân tích file' : 'Error analyzing file')
+      alert(language === 'vi' ? 'Lỗi khi phân tích file: ' + error.message : 'Error analyzing file: ' + error.message)
     } finally {
       setIsProcessing(false)
     }
@@ -258,10 +268,10 @@ const FilelearningPage = () => {
 
     setUploadedFiles([demoFile])
     
-    // Start analysis immediately
-    setTimeout(() => {
-      startIntelligentAnalysis()
-    }, 500)
+    // Start analysis immediately with a small delay to show the file was added
+    setTimeout(async () => {
+      await startIntelligentAnalysis()
+    }, 800)
   }
 
   const getInsightIcon = (type: string) => {
