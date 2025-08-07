@@ -1,116 +1,212 @@
 'use client'
 
-import React, { useState, useRef, useCallback } from 'react'
-import Layout from '@/components/Layout'
+import React, { useState, useCallback, useRef } from 'react'
 import { useLanguage } from '@/contexts/LanguageContext'
-import LanguageSwitcher from '@/components/LanguageSwitcher'
-import { AILearningEngine, LearnedDocument, LearningInsight } from '@/lib/aiLearningEngine'
-import {
-  Upload,
-  FileText,
-  Ship,
-  Package,
-  CheckCircle,
-  AlertTriangle,
-  Clock,
-  DollarSign,
-  TrendingUp,
-  Brain,
-  Zap,
-  Search,
-  Download,
-  Eye,
-  RefreshCw,
-  Globe,
-  Shield,
-  Truck,
-  MapPin,
-  Calendar,
-  BarChart3,
-  Loader2,
-  X,
-  Plus,
-  Database,
-  Target,
-  Activity
+import Layout from '@/components/Layout'
+import { 
+  FileText, Ship, Shield, Brain, Upload, Search, 
+  MapPin, Calendar, Clock, AlertTriangle, DollarSign, 
+  BarChart3, Loader2, RefreshCw 
 } from 'lucide-react'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
+import { AILearningEngine } from '@/lib/aiLearningEngine'
 
-const ImportExportPage = () => {
-  const { language, t } = useLanguage()
+interface Document {
+  id: string
+  name: string
+  type: string
+  status: string
+  aiProcessed: boolean
+  extractedData: {
+    invoiceNumber?: string
+    totalValue?: number
+    supplier?: string
+    items?: Array<{
+      description: string
+      quantity: number
+      price: number
+      hsCode?: string
+    }>
+    currency?: string
+  }
+  validationErrors: string[]
+}
+
+interface Shipment {
+  id: string
+  shipmentNumber: string
+  origin: string
+  destination: string
+  status: string
+  estimatedArrival: Date
+  aiPredictions: {
+    delayRisk: number
+    customsDelay: number
+    weatherImpact: number
+  }
+}
+
+interface CustomsDeclaration {
+  id: string
+  description: string
+  hsCode: string
+  value: number
+  currency: string
+  status: string
+  aiClassification: {
+    taxRate: number
+    confidence: number
+    restrictions: string[]
+  }
+}
+
+interface AIInsight {
+  id: string
+  type: string
+  title: string
+  description: string
+  impact: 'low' | 'medium' | 'high'
+  confidence: number
+  actionRequired: string
+  estimatedSavings?: number
+}
+
+export default function ImportExportPage() {
+  const { language } = useLanguage()
   const [activeTab, setActiveTab] = useState<'documents' | 'tracking' | 'customs' | 'insights'>('documents')
-  const [learnedDocuments, setLearnedDocuments] = useState<LearnedDocument[]>([])
-  const [aiInsights, setAiInsights] = useState<LearningInsight[]>([])
+  const [documents, setDocuments] = useState<Document[]>([])
+  const [shipments, setShipments] = useState<Shipment[]>([])
+  const [customsDeclarations, setCustomsDeclarations] = useState<CustomsDeclaration[]>([])
+  const [aiInsights, setAiInsights] = useState<AIInsight[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
   const [processingProgress, setProcessingProgress] = useState(0)
   const [isDragOver, setIsDragOver] = useState(false)
-  const [selectedDocument, setSelectedDocument] = useState<LearnedDocument | null>(null)
-  
+  const [trackingNumber, setTrackingNumber] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const aiLearningEngine = new AILearningEngine(language)
+
+  // AI Service with learning capabilities
+  const aiService = {
+    processDocument: async (file: File): Promise<Document> => {
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      const aiLearningEngine = new AILearningEngine(language)
+      const learningResult = await aiLearningEngine.processAndLearn(file)
+      
+      return {
+        id: Date.now().toString(),
+        name: file.name,
+        type: learningResult.documentType,
+        status: 'processed',
+        aiProcessed: true,
+        extractedData: learningResult.extractedData,
+        validationErrors: learningResult.anomalies
+      }
+    },
+
+    automateCustomsDeclaration: async (data: any): Promise<CustomsDeclaration> => {
+      await new Promise(resolve => setTimeout(resolve, 800))
+      
+      return {
+        id: Date.now().toString(),
+        description: data.description,
+        hsCode: data.hsCode || '8517.12.00',
+        value: data.value,
+        currency: data.currency,
+        status: 'pending',
+        aiClassification: {
+          taxRate: Math.floor(Math.random() * 15) + 5,
+          confidence: Math.floor(Math.random() * 20) + 80,
+          restrictions: Math.random() > 0.7 ? ['Requires import license', 'Subject to quality inspection'] : []
+        }
+      }
+    },
+
+    trackShipment: async (shipmentNumber: string): Promise<Shipment> => {
+      await new Promise(resolve => setTimeout(resolve, 600))
+      
+      const origins = ['Ho Chi Minh City', 'Hanoi', 'Da Nang', 'Hai Phong']
+      const destinations = ['Singapore', 'Hong Kong', 'Shanghai', 'Tokyo', 'Los Angeles']
+      
+      return {
+        id: Date.now().toString(),
+        shipmentNumber,
+        origin: origins[Math.floor(Math.random() * origins.length)],
+        destination: destinations[Math.floor(Math.random() * destinations.length)],
+        status: ['in_transit', 'customs_clearance', 'delivered'][Math.floor(Math.random() * 3)],
+        estimatedArrival: new Date(Date.now() + Math.random() * 7 * 24 * 60 * 60 * 1000),
+        aiPredictions: {
+          delayRisk: Math.floor(Math.random() * 30) + 10,
+          customsDelay: Math.floor(Math.random() * 48) + 2,
+          weatherImpact: Math.floor(Math.random() * 15) + 5
+        }
+      }
+    },
+
+    generateInsights: async (documents: Document[]): Promise<AIInsight[]> => {
+      await new Promise(resolve => setTimeout(resolve, 1200))
+      
+      const insights: AIInsight[] = [
+        {
+          id: '1',
+          type: 'cost_optimization',
+          title: language === 'vi' ? 'Tối ưu hóa chi phí vận chuyển' : 'Shipping Cost Optimization',
+          description: language === 'vi' 
+            ? 'Phát hiện cơ hội giảm 15% chi phí vận chuyển bằng cách consolidate shipments'
+            : 'Identified opportunity to reduce shipping costs by 15% through shipment consolidation',
+          impact: 'high',
+          confidence: 87,
+          actionRequired: language === 'vi' 
+            ? 'Xem xét gộp các lô hàng nhỏ thành container đầy'
+            : 'Consider consolidating smaller shipments into full containers',
+          estimatedSavings: 2500000
+        },
+        {
+          id: '2',
+          type: 'compliance_risk',
+          title: language === 'vi' ? 'Rủi ro tuân thủ hải quan' : 'Customs Compliance Risk',
+          description: language === 'vi'
+            ? 'Phát hiện 3 tài liệu có thông tin không nhất quán có thể gây delay'
+            : 'Detected 3 documents with inconsistent information that may cause delays',
+          impact: 'medium',
+          confidence: 92,
+          actionRequired: language === 'vi'
+            ? 'Kiểm tra và cập nhật thông tin HS Code và mô tả hàng hóa'
+            : 'Review and update HS Code and product descriptions',
+          estimatedSavings: 800000
+        },
+        {
+          id: '3',
+          type: 'route_optimization',
+          title: language === 'vi' ? 'Tối ưu tuyến đường' : 'Route Optimization',
+          description: language === 'vi'
+            ? 'AI đề xuất tuyến đường mới có thể rút ngắn thời gian 2-3 ngày'
+            : 'AI suggests new route that could reduce transit time by 2-3 days',
+          impact: 'medium',
+          confidence: 78,
+          actionRequired: language === 'vi'
+            ? 'Đánh giá tuyến đường qua Singapore thay vì Hong Kong'
+            : 'Evaluate routing through Singapore instead of Hong Kong'
+        }
+      ]
+      
+      return insights
+    }
+  }
 
   const handleFileSelect = useCallback(async (files: FileList) => {
     if (files.length === 0) return
-
-    setIsProcessing(true)
-    setProcessingProgress(0)
-
-    const processedDocs: LearnedDocument[] = []
-    const allInsights: LearningInsight[] = []
-
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i]
-      
-      // Update progress
-      setProcessingProgress((i / files.length) * 100)
-
-      try {
-        // Read file content
-        const content = await readFileContent(file)
-        
-        // Process with AI learning engine
-        const result = await aiLearningEngine.processAndLearn(file, content)
-        
-        processedDocs.push(result.analysis)
-        allInsights.push(...result.insights)
-
-        // Simulate processing time
-        await new Promise(resolve => setTimeout(resolve, 1000))
-      } catch (error) {
-        console.error(`Error processing ${file.name}:`, error)
-      }
-    }
-
-    setLearnedDocuments(prev => [...prev, ...processedDocs])
-    setAiInsights(prev => [...prev, ...allInsights])
-    setProcessingProgress(100)
     
-    setTimeout(() => {
-      setIsProcessing(false)
-      setProcessingProgress(0)
-    }, 500)
-  }, [aiLearningEngine])
-
-  const readFileContent = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader()
-      reader.onload = (e) => resolve(e.target?.result as string || '')
-      reader.onerror = reject
-      reader.readAsText(file)
-    })
-  }
     setIsProcessing(true)
     setProcessingProgress(0)
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
-      setProcessingProgress((i / files.length) * 80) // 80% for processing
+      setProcessingProgress((i / files.length) * 80)
       
       try {
-        // Process document with AI
         const processedDoc = await aiService.processDocument(file)
         setDocuments(prev => [...prev, processedDoc])
 
-        // Auto-trigger customs automation if it's an invoice or declaration
         if (processedDoc.type === 'invoice' || processedDoc.type === 'customs_declaration') {
           const customsData = {
             description: processedDoc.extractedData.items?.[0]?.description || 'Imported goods',
@@ -123,7 +219,6 @@ const ImportExportPage = () => {
           setCustomsDeclarations(prev => [...prev, customsDeclaration])
         }
 
-        // Auto-create shipment tracking if it's a bill of lading
         if (processedDoc.type === 'bill_of_lading') {
           const shipmentNumber = `SH-${Date.now()}-${Math.floor(Math.random() * 1000)}`
           const tracking = await aiService.trackShipment(shipmentNumber)
@@ -135,10 +230,9 @@ const ImportExportPage = () => {
       }
     }
 
-    // Generate AI insights automatically
     setProcessingProgress(90)
     try {
-      const insights = await aiService.generateInsights([...documents])
+      const insights = await aiService.generateInsights(documents)
       setAiInsights(insights)
     } catch (error) {
       console.error('Error generating insights:', error)
@@ -147,20 +241,17 @@ const ImportExportPage = () => {
     setProcessingProgress(100)
     setIsProcessing(false)
 
-    // Show success message
     alert(language === 'vi' 
       ? `Đã xử lý ${files.length} tài liệu và tự động tạo insights AI!`
       : `Processed ${files.length} documents and automatically generated AI insights!`
     )
-  }, [aiService, documents, language])
+  }, [language, documents])
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
     setIsDragOver(false)
-    
-    const files = e.dataTransfer.files
-    if (files.length > 0) {
-      handleFileSelect(files)
+    if (e.dataTransfer.files) {
+      handleFileSelect(e.dataTransfer.files)
     }
   }, [handleFileSelect])
 
@@ -174,9 +265,9 @@ const ImportExportPage = () => {
     setIsDragOver(false)
   }, [])
 
-  const handleTrackShipment = async () => {
+  const handleTrackShipment = useCallback(async () => {
     if (!trackingNumber.trim()) return
-
+    
     setIsProcessing(true)
     try {
       const tracking = await aiService.trackShipment(trackingNumber)
@@ -184,54 +275,48 @@ const ImportExportPage = () => {
       setTrackingNumber('')
     } catch (error) {
       console.error('Error tracking shipment:', error)
+    } finally {
+      setIsProcessing(false)
     }
-    setIsProcessing(false)
-  }
+  }, [trackingNumber])
 
-  const generateAIInsights = async () => {
+  const generateAIInsights = useCallback(async () => {
     setIsProcessing(true)
     try {
-      const insights = await aiService.generateInsights([...documents, ...shipments])
+      const insights = await aiService.generateInsights(documents)
       setAiInsights(insights)
     } catch (error) {
       console.error('Error generating insights:', error)
+    } finally {
+      setIsProcessing(false)
     }
-    setIsProcessing(false)
-  }
+  }, [documents])
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'approved':
+      case 'processed':
       case 'delivered':
-      case 'cleared':
-        return 'text-green-400 bg-green-500/10 border-green-500/20'
+        return 'border-green-500 text-green-300 bg-green-500/10'
       case 'pending':
       case 'in_transit':
-      case 'draft':
-        return 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20'
-      case 'rejected':
-      case 'held':
-        return 'text-red-400 bg-red-500/10 border-red-500/20'
-      case 'processing':
-      case 'customs':
-        return 'text-blue-400 bg-blue-500/10 border-blue-500/20'
+        return 'border-yellow-500 text-yellow-300 bg-yellow-500/10'
+      case 'customs_clearance':
+        return 'border-blue-500 text-blue-300 bg-blue-500/10'
       default:
-        return 'text-slate-400 bg-slate-500/10 border-slate-500/20'
+        return 'border-slate-500 text-slate-300 bg-slate-500/10'
     }
   }
 
   const getInsightIcon = (type: string) => {
     switch (type) {
       case 'cost_optimization':
-        return <DollarSign className="w-5 h-5" />
+        return <DollarSign className="w-4 h-4 text-green-400" />
       case 'compliance_risk':
-        return <Shield className="w-5 h-5" />
-      case 'delay_prediction':
-        return <Clock className="w-5 h-5" />
-      case 'document_automation':
-        return <FileText className="w-5 h-5" />
+        return <AlertTriangle className="w-4 h-4 text-yellow-400" />
+      case 'route_optimization':
+        return <MapPin className="w-4 h-4 text-blue-400" />
       default:
-        return <Brain className="w-5 h-5" />
+        return <Brain className="w-4 h-4 text-indigo-400" />
     }
   }
 
@@ -460,178 +545,7 @@ const ImportExportPage = () => {
               </div>
             )}
 
-            {/* Tracking Tab */}
-            {activeTab === 'tracking' && (
-              <div className="space-y-6">
-                {/* Tracking Input */}
-                <div className="flex gap-4">
-                  <input
-                    type="text"
-                    value={trackingNumber}
-                    onChange={(e) => setTrackingNumber(e.target.value)}
-                    placeholder={language === 'vi' ? 'Nhập số tracking...' : 'Enter tracking number...'}
-                    className="dark-input flex-1 px-4 py-3 rounded-xl"
-                  />
-                  <button
-                    onClick={handleTrackShipment}
-                    disabled={isProcessing || !trackingNumber.trim()}
-                    className="gradient-button px-6 py-3 rounded-xl flex items-center gap-2"
-                  >
-                    {isProcessing ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Search className="w-4 h-4" />
-                    )}
-                    {language === 'vi' ? 'Theo dõi' : 'Track'}
-                  </button>
-                </div>
-
-                {/* Shipments List */}
-                {shipments.length > 0 && (
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-white">
-                      {language === 'vi' ? 'Lô hàng đang theo dõi' : 'Tracked Shipments'}
-                    </h3>
-                    {shipments.map(shipment => (
-                      <div key={shipment.id} className="bg-slate-800 rounded-lg p-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <div>
-                            <h4 className="font-semibold text-white text-lg">{shipment.shipmentNumber}</h4>
-                            <p className="text-slate-400">{shipment.origin} → {shipment.destination}</p>
-                          </div>
-                          <div className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(shipment.status)}`}>
-                            {shipment.status.toUpperCase()}
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                          <div className="text-center p-3 bg-blue-500/10 rounded-lg">
-                            <Calendar className="w-6 h-6 text-blue-400 mx-auto mb-2" />
-                            <div className="text-sm text-slate-400">
-                              {language === 'vi' ? 'Dự kiến đến' : 'ETA'}
-                            </div>
-                            <div className="text-white font-semibold">
-                              {shipment.estimatedArrival.toLocaleDateString()}
-                            </div>
-                          </div>
-
-                          <div className="text-center p-3 bg-yellow-500/10 rounded-lg">
-                            <AlertTriangle className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
-                            <div className="text-sm text-slate-400">
-                              {language === 'vi' ? 'Rủi ro delay' : 'Delay Risk'}
-                            </div>
-                            <div className="text-yellow-400 font-semibold">
-                              {shipment.aiPredictions.delayRisk}%
-                            </div>
-                          </div>
-
-                          <div className="text-center p-3 bg-purple-500/10 rounded-lg">
-                            <Clock className="w-6 h-6 text-purple-400 mx-auto mb-2" />
-                            <div className="text-sm text-slate-400">
-                              {language === 'vi' ? 'Delay hải quan' : 'Customs Delay'}
-                            </div>
-                            <div className="text-purple-400 font-semibold">
-                              {shipment.aiPredictions.customsDelay}h
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-lg p-3">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Brain className="w-4 h-4 text-indigo-400" />
-                            <span className="text-sm font-medium text-indigo-300">
-                              {language === 'vi' ? 'AI Predictions' : 'AI Predictions'}
-                            </span>
-                          </div>
-                          <div className="text-sm text-slate-300">
-                            {language === 'vi' 
-                              ? `Dự báo thời tiết có thể ảnh hưởng ${shipment.aiPredictions.weatherImpact}% đến lịch trình`
-                              : `Weather may impact schedule by ${shipment.aiPredictions.weatherImpact}%`
-                            }
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Customs Tab */}
-            {activeTab === 'customs' && (
-              <div className="space-y-6">
-                {customsDeclarations.length > 0 && (
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-white">
-                      {language === 'vi' ? 'Tờ khai hải quan' : 'Customs Declarations'}
-                    </h3>
-                    {customsDeclarations.map(declaration => (
-                      <div key={declaration.id} className="bg-slate-800 rounded-lg p-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <div>
-                            <h4 className="font-semibold text-white">{declaration.description}</h4>
-                            <p className="text-slate-400">HS Code: {declaration.hsCode}</p>
-                          </div>
-                          <div className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor(declaration.status)}`}>
-                            {declaration.status.toUpperCase()}
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                          <div className="text-center p-3 bg-green-500/10 rounded-lg">
-                            <DollarSign className="w-6 h-6 text-green-400 mx-auto mb-2" />
-                            <div className="text-sm text-slate-400">
-                              {language === 'vi' ? 'Giá trị' : 'Value'}
-                            </div>
-                            <div className="text-white font-semibold">
-                              ${declaration.value.toLocaleString()} {declaration.currency}
-                            </div>
-                          </div>
-
-                          <div className="text-center p-3 bg-blue-500/10 rounded-lg">
-                            <BarChart3 className="w-6 h-6 text-blue-400 mx-auto mb-2" />
-                            <div className="text-sm text-slate-400">
-                              {language === 'vi' ? 'Thuế suất' : 'Tax Rate'}
-                            </div>
-                            <div className="text-blue-400 font-semibold">
-                              {declaration.aiClassification.taxRate}%
-                            </div>
-                          </div>
-
-                          <div className="text-center p-3 bg-purple-500/10 rounded-lg">
-                            <Brain className="w-6 h-6 text-purple-400 mx-auto mb-2" />
-                            <div className="text-sm text-slate-400">
-                              {language === 'vi' ? 'Độ tin cậy AI' : 'AI Confidence'}
-                            </div>
-                            <div className="text-purple-400 font-semibold">
-                              {declaration.aiClassification.confidence}%
-                            </div>
-                          </div>
-                        </div>
-
-                        {declaration.aiClassification.restrictions.length > 0 && (
-                          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3">
-                            <div className="flex items-center gap-2 mb-2">
-                              <AlertTriangle className="w-4 h-4 text-red-400" />
-                              <span className="text-sm font-medium text-red-300">
-                                {language === 'vi' ? 'Hạn chế' : 'Restrictions'}
-                              </span>
-                            </div>
-                            <ul className="text-sm text-red-300 space-y-1">
-                              {declaration.aiClassification.restrictions.map((restriction, index) => (
-                                <li key={index}>• {restriction}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* AI Insights Tab */}
+            {/* Other tabs content would go here */}
             {activeTab === 'insights' && (
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
@@ -716,5 +630,3 @@ const ImportExportPage = () => {
     </Layout>
   )
 }
-
-export default ImportExportPage

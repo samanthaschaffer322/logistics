@@ -1,28 +1,14 @@
 'use client'
 
-import React, { useState, useRef, useCallback, useEffect } from 'react'
-import Layout from '@/components/Layout'
+import React, { useState, useRef, useEffect } from 'react'
 import { useLanguage } from '@/contexts/LanguageContext'
-import LanguageSwitcher from '@/components/LanguageSwitcher'
+import Layout from '@/components/Layout'
 import { 
-  Brain, 
-  Send, 
-  User, 
-  Upload, 
-  FileText, 
-  Zap, 
-  Navigation,
-  DollarSign,
-  AlertTriangle,
-  CheckCircle,
-  Loader2,
-  X,
-  Copy,
-  RefreshCw,
-  MessageSquare,
-  Sparkles,
-  Globe
+  Send, Bot, User, Zap, Brain, Sparkles, 
+  MessageSquare, Settings, Copy, ThumbsUp, 
+  ThumbsDown, RotateCcw, Mic, MicOff 
 } from 'lucide-react'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
 
 interface Message {
   id: string
@@ -30,55 +16,48 @@ interface Message {
   content: string
   timestamp: Date
   model?: string
-  usage?: any
+  usage?: {
+    tokens: number
+    cost: number
+  }
 }
 
-const SuperAIPage = () => {
-  const { language, t } = useLanguage()
-  
-  const getInitialMessage = () => {
-    if (language === 'vi') {
-      return '🚀 **Super AI Assistant Sẵn sàng!** Tôi là hệ thống AI toàn diện cho logistics Việt Nam với tích hợp OpenAI thực.\n\n**Tính năng nâng cao:**\n• **Multi-model AI** - GPT-4 Omni, GPT-4 Mini, GPT-3.5 Turbo\n• **Chuyên môn Việt Nam** - Hiểu biết sâu về thị trường logistics VN\n• **Giao diện tương tác** - Chat thời gian thực với lịch sử hội thoại\n• **Phản hồi thông minh** - Kết nối trực tiếp với OpenAI API\n• **Phân tích chi phí** - Tính toán đa biến cho logistics\n• **Tối ưu tuyến đường** - AI routing cho xe container\n\n**Tích hợp OpenAI:**\n• **Kết nối thực** - API trực tiếp với OpenAI servers\n• **Nhớ ngữ cảnh** - Theo dõi lịch sử cuộc trò chuyện\n• **Chuyên môn VN** - Trained trên dữ liệu logistics Việt Nam\n• **Tương tác hoàn chỉnh** - Không phải demo, hoạt động thực tế\n\nHôm nay tôi có thể giúp gì cho bạn?'
-    } else {
-      return '🚀 **Super AI Assistant Ready!** I am a comprehensive AI system for Vietnamese logistics with real OpenAI integration.\n\n**Advanced Features:**\n• **Multi-model AI** - GPT-4 Omni, GPT-4 Mini, GPT-3.5 Turbo\n• **Vietnamese Expertise** - Deep understanding of VN logistics market\n• **Interactive Interface** - Real-time chat with conversation history\n• **Smart Responses** - Direct connection to OpenAI API\n• **Cost Analysis** - Multi-variable logistics calculations\n• **Route Optimization** - AI routing for container trucks\n\n**OpenAI Integration:**\n• **Real Connection** - Direct API to OpenAI servers\n• **Context Memory** - Tracks conversation history\n• **VN Expertise** - Trained on Vietnamese logistics data\n• **Full Interaction** - Not a demo, actual functionality\n\nHow can I help you today?'
-    }
-  }
-
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      type: 'ai',
-      content: getInitialMessage(),
-      timestamp: new Date(),
-      model: 'super-ai-v2'
-    }
-  ])
-  
+export default function SuperAIPage() {
+  const { language } = useLanguage()
+  const [messages, setMessages] = useState<Message[]>([])
   const [inputMessage, setInputMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [selectedModel, setSelectedModel] = useState('gpt-4o-mini')
   const [isTyping, setIsTyping] = useState(false)
-  
+  const [selectedModel, setSelectedModel] = useState('gpt-4')
+  const [isListening, setIsListening] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
+  const models = [
+    { id: 'gpt-4', name: 'GPT-4', description: 'Most capable model' },
+    { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', description: 'Fast and efficient' },
+    { id: 'claude-3', name: 'Claude 3', description: 'Anthropic\'s latest' },
+    { id: 'gemini-pro', name: 'Gemini Pro', description: 'Google\'s advanced AI' }
+  ]
 
   useEffect(() => {
-    scrollToBottom()
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
-  // Update initial message when language changes
   useEffect(() => {
-    setMessages(prev => [
-      {
-        ...prev[0],
-        content: getInitialMessage()
-      },
-      ...prev.slice(1)
-    ])
+    // Add welcome message
+    if (messages.length === 0) {
+      const welcomeMessage: Message = {
+        id: 'welcome',
+        type: 'ai',
+        content: language === 'vi' 
+          ? 'Xin chào! Tôi là Super AI Assistant cho logistics. Tôi có thể giúp bạn với phân tích dữ liệu, tối ưu hóa tuyến đường, dự báo nhu cầu, và nhiều tác vụ logistics khác. Bạn cần hỗ trợ gì?'
+          : 'Hello! I\'m your Super AI Assistant for logistics. I can help you with data analysis, route optimization, demand forecasting, and many other logistics tasks. How can I assist you today?',
+        timestamp: new Date(),
+        model: 'super-ai'
+      }
+      setMessages([welcomeMessage])
+    }
   }, [language])
 
   const sendMessage = async () => {
@@ -96,55 +75,22 @@ const SuperAIPage = () => {
     setIsLoading(true)
     setIsTyping(true)
 
+    let aiMessage: Message
+
     try {
-      const response = await fetch('/api/enhanced-ai-assistant', {
+      // Try to call external AI service first
+      const response = await fetch('/api/ai-chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           message: inputMessage,
           model: selectedModel,
           language: language,
-          chatHistory: messages.slice(-10).map(m => ({
-            role: m.type === 'user' ? 'user' : 'assistant',
-            content: m.content
-          }))
-        })
+          context: 'logistics'
+        }),
       })
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
-      const data = await response.json()
-      
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        type: 'ai',
-        content: data.response || generateIntelligentResponse(inputMessage, language),
-        timestamp: new Date(),
-        model: data.model || selectedModel,
-        usage: data.usage
-      }
-
-      setMessages(prev => [...prev, aiMessage])
-    } catch (error) {
-      console.error('AI Error:', error)
-      
-      // Generate intelligent fallback response
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        type: 'ai',
-        content: generateIntelligentResponse(inputMessage, language),
-        timestamp: new Date(),
-        model: 'fallback-ai'
-      }
-
-      setMessages(prev => [...prev, aiMessage])
-    } finally {
-      setIsLoading(false)
-      setIsTyping(false)
-    }
-  }
 
       if (response.ok) {
         const data = await response.json()
@@ -172,7 +118,7 @@ const SuperAIPage = () => {
       console.error('AI Error:', error)
       
       // Generate intelligent fallback response
-      const aiMessage: Message = {
+      aiMessage = {
         id: (Date.now() + 1).toString(),
         type: 'ai',
         content: generateIntelligentResponse(inputMessage, language),
@@ -190,51 +136,49 @@ const SuperAIPage = () => {
   const generateIntelligentResponse = (input: string, lang: 'vi' | 'en'): string => {
     const lowerInput = input.toLowerCase()
     
-    // Route optimization queries
+    // Logistics-specific responses
     if (lowerInput.includes('route') || lowerInput.includes('tuyến') || lowerInput.includes('đường')) {
       return lang === 'vi' 
-        ? `🗺️ **Tối ưu tuyến đường AI**\n\nDựa trên câu hỏi của bạn về tuyến đường, tôi khuyến nghị:\n\n**Phân tích tuyến đường:**\n• **Tuyến chính**: QL1A (Bắc-Nam) - hiệu quả cao cho container 40ft\n• **Tuyến phụ**: QL14, QL19 - tránh tắc nghẽn giờ cao điểm\n• **Chi phí ước tính**: 12-18 triệu VNĐ cho tuyến dài\n• **Thời gian**: Giảm 15-25% với AI optimization\n\n**Khuyến nghị cụ thể:**\n• Sử dụng AI routing cho tuyến >500km\n• Tích hợp dữ liệu giao thông real-time\n• Tối ưu theo thời gian và chi phí\n\nBạn có tuyến cụ thể nào cần tôi phân tích không?`
-        : `🗺️ **AI Route Optimization**\n\nBased on your route question, I recommend:\n\n**Route Analysis:**\n• **Main routes**: QL1A (North-South) - high efficiency for 40ft containers\n• **Alternative routes**: QL14, QL19 - avoid rush hour congestion\n• **Estimated cost**: 12-18 million VND for long routes\n• **Time savings**: 15-25% reduction with AI optimization\n\n**Specific recommendations:**\n• Use AI routing for routes >500km\n• Integrate real-time traffic data\n• Optimize for both time and cost\n\nDo you have a specific route you'd like me to analyze?`
+        ? 'Tôi có thể giúp bạn tối ưu hóa tuyến đường bằng cách phân tích dữ liệu giao thông, khoảng cách, và chi phí nhiên liệu. Bạn có thể cung cấp điểm xuất phát và điểm đến không?'
+        : 'I can help optimize your routes by analyzing traffic data, distances, and fuel costs. Could you provide the starting and destination points?'
     }
-
-    // Cost analysis queries
+    
     if (lowerInput.includes('cost') || lowerInput.includes('chi phí') || lowerInput.includes('giá')) {
       return lang === 'vi'
-        ? `💰 **Phân tích Chi phí Logistics**\n\nPhân tích chi phí dựa trên dữ liệu thị trường Việt Nam:\n\n**Cấu trúc chi phí container 40ft:**\n• **Nhiên liệu**: 35-40% (8-12 triệu VNĐ)\n• **Lương tài xế**: 20-25% (4-6 triệu VNĐ)\n• **Phí đường bộ**: 15-20% (3-5 triệu VNĐ)\n• **Bảo trì xe**: 10-15% (2-3 triệu VNĐ)\n• **Bảo hiểm**: 5-10% (1-2 triệu VNĐ)\n\n**Tối ưu chi phí:**\n• Consolidation hàng hóa: tiết kiệm 20-30%\n• Route optimization: giảm 15-25% chi phí\n• Fuel management: tiết kiệm 10-15%\n\nBạn muốn phân tích chi phí cho tuyến nào?`
-        : `💰 **Logistics Cost Analysis**\n\nCost analysis based on Vietnamese market data:\n\n**40ft container cost structure:**\n• **Fuel**: 35-40% (8-12 million VND)\n• **Driver salary**: 20-25% (4-6 million VND)\n• **Road fees**: 15-20% (3-5 million VND)\n• **Vehicle maintenance**: 10-15% (2-3 million VND)\n• **Insurance**: 5-10% (1-2 million VND)\n\n**Cost optimization:**\n• Cargo consolidation: 20-30% savings\n• Route optimization: 15-25% cost reduction\n• Fuel management: 10-15% savings\n\nWhich route would you like me to analyze costs for?`
+        ? 'Để phân tích chi phí logistics, tôi cần thông tin về: loại hàng hóa, khoảng cách vận chuyển, phương tiện, và thời gian giao hàng. Điều gì bạn muốn tối ưu hóa?'
+        : 'For logistics cost analysis, I need information about: cargo type, shipping distance, transportation mode, and delivery timeline. What would you like to optimize?'
     }
-
-    // AI and automation queries
-    if (lowerInput.includes('ai') || lowerInput.includes('automation') || lowerInput.includes('tự động')) {
+    
+    if (lowerInput.includes('inventory') || lowerInput.includes('kho') || lowerInput.includes('tồn kho')) {
       return lang === 'vi'
-        ? `🤖 **AI & Tự động hóa Logistics**\n\nHệ thống AI của chúng tôi cung cấp:\n\n**Tính năng AI hiện tại:**\n• **Predictive Analytics**: Dự báo nhu cầu vận chuyển\n• **Route Optimization**: Tối ưu tuyến đường real-time\n• **Cost Prediction**: Ước tính chi phí chính xác 95%\n• **Risk Assessment**: Phân tích rủi ro thời tiết, giao thông\n• **Demand Forecasting**: Dự báo nhu cầu 30 ngày\n\n**Lợi ích tự động hóa:**\n• Giảm 40-60% thời gian lập kế hoạch\n• Tăng 25-35% hiệu quả vận chuyển\n• Tiết kiệm 20-30% chi phí vận hành\n• Giảm 80% lỗi nhân sự\n\n**Triển khai:**\n• API integration với hệ thống hiện tại\n• Training nhân viên 2-3 tuần\n• ROI đạt được trong 3-6 tháng\n\nBạn quan tâm tự động hóa quy trình nào?`
-        : `🤖 **AI & Logistics Automation**\n\nOur AI system provides:\n\n**Current AI features:**\n• **Predictive Analytics**: Transportation demand forecasting\n• **Route Optimization**: Real-time route optimization\n• **Cost Prediction**: 95% accurate cost estimation\n• **Risk Assessment**: Weather and traffic risk analysis\n• **Demand Forecasting**: 30-day demand prediction\n\n**Automation benefits:**\n• 40-60% reduction in planning time\n• 25-35% increase in transportation efficiency\n• 20-30% operational cost savings\n• 80% reduction in human errors\n\n**Implementation:**\n• API integration with existing systems\n• 2-3 weeks staff training\n• ROI achieved within 3-6 months\n\nWhich process are you interested in automating?`
+        ? 'Tôi có thể giúp quản lý tồn kho thông qua dự báo nhu cầu, tối ưu hóa mức tồn kho, và phân tích ABC. Bạn đang gặp vấn đề gì với quản lý kho?'
+        : 'I can help with inventory management through demand forecasting, stock level optimization, and ABC analysis. What inventory challenges are you facing?'
     }
-
-    // General logistics queries
-    return lang === 'vi'
-      ? `🚀 **Super AI Assistant**\n\nTôi hiểu bạn đang quan tâm đến: "${input}"\n\n**Tôi có thể hỗ trợ bạn:**\n• **Tối ưu tuyến đường** - Route planning cho xe container\n• **Phân tích chi phí** - Cost breakdown chi tiết\n• **Dự báo nhu cầu** - Demand forecasting\n• **Quản lý rủi ro** - Risk assessment\n• **Tự động hóa quy trình** - Process automation\n• **Phân tích dữ liệu** - Data insights\n\n**Chuyên môn Việt Nam:**\n• Hiểu biết sâu về thị trường VN\n• Dữ liệu cập nhật real-time\n• Tích hợp với VNACCS\n• Tuân thủ quy định địa phương\n\n**Câu hỏi gợi ý:**\n• "Tối ưu tuyến TP.HCM - Hà Nội"\n• "Chi phí vận chuyển container 40ft"\n• "Dự báo nhu cầu tháng tới"\n• "Rủi ro thời tiết tuần này"\n\nBạn muốn tìm hiểu thêm về vấn đề gì?`
-      : `🚀 **Super AI Assistant**\n\nI understand you're interested in: "${input}"\n\n**I can help you with:**\n• **Route optimization** - Container truck route planning\n• **Cost analysis** - Detailed cost breakdown\n• **Demand forecasting** - Future demand prediction\n• **Risk management** - Risk assessment\n• **Process automation** - Workflow automation\n• **Data analysis** - Business insights\n\n**Vietnamese expertise:**\n• Deep understanding of VN market\n• Real-time data updates\n• VNACCS integration\n• Local regulation compliance\n\n**Suggested questions:**\n• "Optimize HCMC - Hanoi route"\n• "40ft container transportation cost"\n• "Next month demand forecast"\n• "Weather risks this week"\n\nWhat would you like to explore further?`
-  }
-
-      setMessages(prev => [...prev, aiMessage])
-
-    } catch (error) {
-      console.error('Error sending message:', error)
-      const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        type: 'ai',
-        content: language === 'vi' 
-          ? '❌ Tôi gặp lỗi khi xử lý yêu cầu của bạn. Vui lòng kiểm tra kết nối mạng và thử lại.'
-          : '❌ I encountered an error processing your request. Please check your network connection and try again.',
-        timestamp: new Date(),
-        model: 'error-handler'
-      }
-      setMessages(prev => [...prev, errorMessage])
+    
+    if (lowerInput.includes('forecast') || lowerInput.includes('dự báo') || lowerInput.includes('predict')) {
+      return lang === 'vi'
+        ? 'Tôi có thể tạo dự báo nhu cầu dựa trên dữ liệu lịch sử, xu hướng thị trường, và các yếu tố mùa vụ. Bạn có dữ liệu bán hàng trong quá khứ không?'
+        : 'I can create demand forecasts based on historical data, market trends, and seasonal factors. Do you have past sales data available?'
     }
-
-    setIsLoading(false)
-    setIsTyping(false)
+    
+    if (lowerInput.includes('track') || lowerInput.includes('theo dõi') || lowerInput.includes('shipment')) {
+      return lang === 'vi'
+        ? 'Hệ thống theo dõi của chúng tôi có thể cung cấp thông tin real-time về vị trí hàng hóa, thời gian giao hàng dự kiến, và cảnh báo delay. Bạn cần theo dõi lô hàng nào?'
+        : 'Our tracking system provides real-time cargo location, estimated delivery times, and delay alerts. Which shipment do you need to track?'
+    }
+    
+    // General helpful responses
+    const generalResponses = lang === 'vi' ? [
+      'Tôi hiểu câu hỏi của bạn. Trong lĩnh vực logistics, tôi có thể hỗ trợ phân tích dữ liệu, tối ưu hóa quy trình, và đưa ra khuyến nghị cụ thể. Bạn có thể chia sẻ thêm chi tiết không?',
+      'Đây là một câu hỏi thú vị về logistics. Tôi có thể giúp bạn phân tích vấn đề này từ nhiều góc độ khác nhau. Bạn muốn tập trung vào khía cạnh nào?',
+      'Dựa trên kinh nghiệm trong logistics, tôi nghĩ chúng ta nên xem xét các yếu tố như chi phí, thời gian, và chất lượng dịch vụ. Bạn ưu tiên yếu tố nào nhất?'
+    ] : [
+      'I understand your question. In logistics, I can help with data analysis, process optimization, and specific recommendations. Could you share more details?',
+      'That\'s an interesting logistics question. I can help analyze this from multiple perspectives. Which aspect would you like to focus on?',
+      'Based on logistics experience, I think we should consider factors like cost, time, and service quality. Which factor is your top priority?'
+    ]
+    
+    return generalResponses[Math.floor(Math.random() * generalResponses.length)]
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -248,227 +192,171 @@ const SuperAIPage = () => {
     navigator.clipboard.writeText(content)
   }
 
+  const regenerateResponse = (messageId: string) => {
+    const messageIndex = messages.findIndex(m => m.id === messageId)
+    if (messageIndex > 0) {
+      const userMessage = messages[messageIndex - 1]
+      if (userMessage.type === 'user') {
+        setInputMessage(userMessage.content)
+        sendMessage()
+      }
+    }
+  }
+
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto h-[calc(100vh-120px)] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold gradient-text flex items-center gap-3">
-              <Brain className="w-8 h-8 text-indigo-400" />
+              <Bot className="w-8 h-8 text-indigo-400" />
               {language === 'vi' ? 'Super AI Assistant' : 'Super AI Assistant'}
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                {language === 'vi' ? 'OpenAI Tích hợp' : 'OpenAI Integrated'}
-              </span>
             </h1>
             <p className="text-slate-400 mt-1">
               {language === 'vi' 
-                ? 'Hệ thống AI tiên tiến với tích hợp OpenAI thực và chuyên môn logistics Việt Nam'
-                : 'Advanced AI system with real OpenAI integration and Vietnamese logistics expertise'
+                ? 'AI thông minh cho logistics với khả năng phân tích và tối ưu hóa'
+                : 'Intelligent AI for logistics with analysis and optimization capabilities'
               }
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <LanguageSwitcher />
+          <div className="flex items-center gap-4">
             <select
               value={selectedModel}
               onChange={(e) => setSelectedModel(e.target.value)}
-              className="dark-input px-3 py-2 rounded-xl"
+              className="dark-input px-3 py-2 rounded-lg text-sm"
             >
-              <option value="gpt-4o">GPT-4 Omni</option>
-              <option value="gpt-4o-mini">GPT-4 Mini</option>
-              <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+              {models.map(model => (
+                <option key={model.id} value={model.id}>
+                  {model.name}
+                </option>
+              ))}
             </select>
+            <LanguageSwitcher />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Main Chat Interface */}
-          <div className="lg:col-span-3">
-            <div className="dark-card h-[700px] flex flex-col">
-              <div className="border-b border-slate-700/50 p-4">
-                <h2 className="flex items-center gap-2 text-white text-lg font-semibold">
-                  <MessageSquare className="w-5 h-5 text-indigo-400" />
-                  {language === 'vi' ? 'Cuộc trò chuyện AI' : 'AI Conversation'}
-                  {isTyping && (
-                    <div className="flex items-center gap-1 text-indigo-400">
-                      <div className="w-1 h-1 bg-indigo-400 rounded-full animate-pulse"></div>
-                      <div className="w-1 h-1 bg-indigo-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-                      <div className="w-1 h-1 bg-indigo-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
-                    </div>
-                  )}
-                </h2>
-                <p className="text-slate-400 text-sm">
-                  {language === 'vi' 
-                    ? 'Tích hợp OpenAI thực với chuyên môn logistics Việt Nam - hoàn toàn tương tác'
-                    : 'Real OpenAI integration with Vietnamese logistics expertise - fully interactive'
-                  }
-                </p>
-              </div>
-              
-              <div className="flex-1 flex flex-col">
-                {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                  {messages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in group`}
-                    >
-                      <div
-                        className={`max-w-[85%] rounded-2xl p-4 relative ${
-                          message.type === 'user'
-                            ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white'
-                            : 'dark-card text-white'
-                        }`}
-                      >
-                        <div className="flex items-start gap-2 mb-2">
-                          {message.type === 'user' ? (
-                            <User className="w-4 h-4 mt-1 flex-shrink-0" />
-                          ) : (
-                            <Brain className="w-4 h-4 mt-1 flex-shrink-0 text-indigo-400" />
-                          )}
-                          <div className="flex-1">
-                            <div className="whitespace-pre-wrap text-sm">
-                              {message.content}
-                            </div>
-                            {message.usage && (
-                              <div className="mt-2 text-xs text-slate-400 flex items-center gap-2">
-                                <span>Model: {message.model}</span>
-                                <span>•</span>
-                                <span>Tokens: {message.usage.total_tokens}</span>
-                                <span>•</span>
-                                <span className="text-green-400">OpenAI ✓</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        
-                        {/* Message Actions */}
-                        {message.type === 'ai' && (
-                          <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                            <button
-                              onClick={() => copyMessage(message.content)}
-                              className="p-1 rounded bg-slate-700/50 hover:bg-slate-600/50 transition-colors"
-                              title="Copy message"
-                            >
-                              <Copy className="w-3 h-3" />
-                            </button>
-                          </div>
-                        )}
-                        
-                        <div className="text-xs opacity-75 mt-2">
-                          {message.timestamp.toLocaleTimeString('vi-VN')}
-                        </div>
+        {/* Chat Container */}
+        <div className="flex-1 dark-card flex flex-col">
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={`flex gap-4 ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                {message.type === 'ai' && (
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+                    <Bot className="w-4 h-4 text-white" />
+                  </div>
+                )}
+                
+                <div className={`max-w-3xl ${message.type === 'user' ? 'order-1' : ''}`}>
+                  <div
+                    className={`rounded-2xl px-4 py-3 ${
+                      message.type === 'user'
+                        ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white'
+                        : 'bg-slate-800 text-slate-100'
+                    }`}
+                  >
+                    <p className="whitespace-pre-wrap">{message.content}</p>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 mt-2 text-xs text-slate-500">
+                    <span>{message.timestamp.toLocaleTimeString()}</span>
+                    {message.model && (
+                      <span className="px-2 py-1 bg-slate-700 rounded text-slate-300">
+                        {message.model}
+                      </span>
+                    )}
+                    {message.type === 'ai' && (
+                      <div className="flex items-center gap-1 ml-auto">
+                        <button
+                          onClick={() => copyMessage(message.content)}
+                          className="p-1 hover:bg-slate-700 rounded"
+                          title="Copy"
+                        >
+                          <Copy className="w-3 h-3" />
+                        </button>
+                        <button
+                          onClick={() => regenerateResponse(message.id)}
+                          className="p-1 hover:bg-slate-700 rounded"
+                          title="Regenerate"
+                        >
+                          <RotateCcw className="w-3 h-3" />
+                        </button>
+                        <button className="p-1 hover:bg-slate-700 rounded" title="Like">
+                          <ThumbsUp className="w-3 h-3" />
+                        </button>
+                        <button className="p-1 hover:bg-slate-700 rounded" title="Dislike">
+                          <ThumbsDown className="w-3 h-3" />
+                        </button>
                       </div>
-                    </div>
-                  ))}
-                  {isLoading && (
-                    <div className="flex justify-start">
-                      <div className="dark-card rounded-2xl p-4 flex items-center gap-2">
-                        <Loader2 className="w-4 h-4 animate-spin text-indigo-400" />
-                        <span className="text-sm text-slate-300">
-                          {language === 'vi' ? 'AI đang xử lý...' : 'AI is processing...'}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                  <div ref={messagesEndRef} />
+                    )}
+                  </div>
                 </div>
 
-                {/* Input Area */}
-                <div className="border-t border-slate-700/50 p-4">
-                  <div className="flex gap-2">
-                    <div className="flex-1 flex gap-2">
-                      <input
-                        ref={inputRef}
-                        value={inputMessage}
-                        onChange={(e) => setInputMessage(e.target.value)}
-                        onKeyPress={handleKeyPress}
-                        placeholder={language === 'vi' 
-                          ? 'Hỏi về logistics Việt Nam, tuyến đường, chi phí, hoặc tối ưu hóa...'
-                          : 'Ask about Vietnamese logistics, routes, costs, or optimization...'
-                        }
-                        className="dark-input flex-1 px-4 py-3 rounded-xl"
-                        disabled={isLoading}
-                      />
-                      <button
-                        onClick={sendMessage}
-                        disabled={isLoading || !inputMessage.trim()}
-                        className="gradient-button px-6 py-3 rounded-xl"
-                      >
-                        <Send className="w-4 h-4" />
-                      </button>
-                    </div>
+                {message.type === 'user' && (
+                  <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0">
+                    <User className="w-4 h-4 text-slate-300" />
+                  </div>
+                )}
+              </div>
+            ))}
+
+            {isTyping && (
+              <div className="flex gap-4 justify-start">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center">
+                  <Bot className="w-4 h-4 text-white" />
+                </div>
+                <div className="bg-slate-800 rounded-2xl px-4 py-3">
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-slate-500 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                    <div className="w-2 h-2 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
+            
+            <div ref={messagesEndRef} />
           </div>
 
-          {/* Quick Actions Panel */}
-          <div className="space-y-4">
-            <div className="dark-card p-4">
-              <h3 className="text-lg font-semibold text-white mb-4">
-                {language === 'vi' ? 'Hành động nhanh' : 'Quick Actions'}
-              </h3>
-              <div className="space-y-2">
+          {/* Input Area */}
+          <div className="border-t border-slate-700 p-4">
+            <div className="flex gap-3">
+              <div className="flex-1 relative">
+                <textarea
+                  ref={inputRef}
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder={language === 'vi' ? 'Nhập câu hỏi về logistics...' : 'Ask about logistics...'}
+                  className="dark-input w-full px-4 py-3 pr-12 rounded-xl resize-none"
+                  rows={1}
+                  style={{ minHeight: '48px', maxHeight: '120px' }}
+                />
                 <button
-                  className="dark-button w-full justify-start p-3 rounded-xl text-left"
-                  onClick={() => setInputMessage(language === 'vi' 
-                    ? 'Tối ưu tuyến đường từ TP.HCM đến Hà Nội'
-                    : 'Optimize route from Ho Chi Minh City to Hanoi'
-                  )}
+                  onClick={() => setIsListening(!isListening)}
+                  className={`absolute right-3 top-3 p-1 rounded ${
+                    isListening ? 'text-red-400' : 'text-slate-400 hover:text-white'
+                  }`}
                 >
-                  <Navigation className="w-4 h-4 mr-2" />
-                  {language === 'vi' ? 'Tối ưu tuyến đường' : 'Route Optimization'}
-                </button>
-                <button
-                  className="dark-button w-full justify-start p-3 rounded-xl text-left"
-                  onClick={() => setInputMessage(language === 'vi' 
-                    ? 'Phân tích chi phí vận chuyển container 40ft'
-                    : 'Analyze 40ft container transportation costs'
-                  )}
-                >
-                  <DollarSign className="w-4 h-4 mr-2" />
-                  {language === 'vi' ? 'Phân tích chi phí' : 'Cost Analysis'}
-                </button>
-                <button
-                  className="dark-button w-full justify-start p-3 rounded-xl text-left"
-                  onClick={() => setInputMessage(language === 'vi' 
-                    ? 'Đánh giá rủi ro logistics mùa mưa bão'
-                    : 'Assess logistics risks during rainy season'
-                  )}
-                >
-                  <AlertTriangle className="w-4 h-4 mr-2" />
-                  {language === 'vi' ? 'Đánh giá rủi ro' : 'Risk Assessment'}
+                  {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
                 </button>
               </div>
-            </div>
-
-            {/* Session Stats */}
-            <div className="dark-card p-4">
-              <h3 className="text-lg font-semibold text-white mb-4">
-                {language === 'vi' ? 'Thống kê phiên' : 'Session Stats'}
-              </h3>
-              <div className="space-y-3">
-                <div className="text-center p-3 bg-indigo-500/10 rounded-xl border border-indigo-500/20">
-                  <div className="text-2xl font-bold text-indigo-400">
-                    {messages.filter(m => m.type === 'ai').length}
-                  </div>
-                  <div className="text-sm text-indigo-300">
-                    {language === 'vi' ? 'Phản hồi AI' : 'AI Responses'}
-                  </div>
-                </div>
-                
-                <div className="text-center p-3 bg-emerald-500/10 rounded-xl border border-emerald-500/20">
-                  <div className="text-2xl font-bold text-emerald-400">
-                    {messages.filter(m => m.usage?.openai_integration).length}
-                  </div>
-                  <div className="text-sm text-emerald-300">
-                    {language === 'vi' ? 'Cuộc gọi OpenAI' : 'OpenAI Calls'}
-                  </div>
-                </div>
-              </div>
+              <button
+                onClick={sendMessage}
+                disabled={isLoading || !inputMessage.trim()}
+                className="gradient-button px-6 py-3 rounded-xl flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4" />
+                )}
+                {language === 'vi' ? 'Gửi' : 'Send'}
+              </button>
             </div>
           </div>
         </div>
@@ -476,5 +364,3 @@ const SuperAIPage = () => {
     </Layout>
   )
 }
-
-export default SuperAIPage
