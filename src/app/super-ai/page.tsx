@@ -115,38 +115,36 @@ const SuperAIPage = () => {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
-  const sendMessage = async () => {
-    if (!inputMessage.trim()) return
+      const data = await response.json()
+      
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'ai',
+        content: data.response || generateIntelligentResponse(inputMessage, language),
+        timestamp: new Date(),
+        model: data.model || selectedModel,
+        usage: data.usage
+      }
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      type: 'user',
-      content: inputMessage,
-      timestamp: new Date()
+      setMessages(prev => [...prev, aiMessage])
+    } catch (error) {
+      console.error('AI Error:', error)
+      
+      // Generate intelligent fallback response
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'ai',
+        content: generateIntelligentResponse(inputMessage, language),
+        timestamp: new Date(),
+        model: 'fallback-ai'
+      }
+
+      setMessages(prev => [...prev, aiMessage])
+    } finally {
+      setIsLoading(false)
+      setIsTyping(false)
     }
-
-    setMessages(prev => [...prev, userMessage])
-    setInputMessage('')
-    setIsLoading(true)
-    setIsTyping(true)
-
-    try {
-      // First try the API endpoint
-      const response = await fetch('/api/enhanced-ai-assistant', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: inputMessage,
-          model: selectedModel,
-          language: language,
-          chatHistory: messages.slice(-10).map(m => ({
-            role: m.type === 'user' ? 'user' : 'assistant',
-            content: m.content
-          }))
-        })
-      })
-
-      let aiMessage: Message
+  }
 
       if (response.ok) {
         const data = await response.json()

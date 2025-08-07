@@ -1,9 +1,10 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import Layout from '@/components/Layout'
 import { useLanguage } from '@/contexts/LanguageContext'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
+import { FleetDataProcessor, FleetVehicle, FleetOperation, FleetAnalytics } from '@/lib/fleetDataProcessor'
 import { 
   Truck, 
   MapPin, 
@@ -25,7 +26,10 @@ import {
   Radio,
   Wifi,
   Battery,
-  Thermometer
+  Thermometer,
+  Upload,
+  Database,
+  Target
 } from 'lucide-react'
 
 interface Vehicle {
@@ -63,6 +67,74 @@ const LogisticsOperationsPage = () => {
   const [operations, setOperations] = useState<Operation[]>([])
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null)
   const [isRealTimeActive, setIsRealTimeActive] = useState(true)
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [processingProgress, setProcessingProgress] = useState(0)
+  const [isDragOver, setIsDragOver] = useState(false)
+  
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const fleetProcessor = new FleetDataProcessor(language)
+
+  const handleFileSelect = useCallback(async (files: FileList) => {
+    if (files.length === 0) return
+
+    setIsProcessing(true)
+    setProcessingProgress(0)
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]
+      setProcessingProgress((i / files.length) * 100)
+
+      try {
+        const result = await fleetProcessor.processFleetFile(file)
+        
+        // Update vehicles and operations with processed data
+        setVehicles(prev => [...prev, ...result.vehicles.map(v => ({
+          ...v,
+          lastUpdate: new Date()
+        }))])
+        
+        setOperations(prev => [...prev, ...result.operations])
+        
+        // Show success message
+        alert(language === 'vi' 
+          ? `✅ Đã xử lý ${file.name}: ${result.vehicles.length} xe, ${result.operations.length} hoạt động`
+          : `✅ Processed ${file.name}: ${result.vehicles.length} vehicles, ${result.operations.length} operations`
+        )
+      } catch (error) {
+        console.error(`Error processing ${file.name}:`, error)
+        alert(language === 'vi' 
+          ? `❌ Lỗi xử lý ${file.name}`
+          : `❌ Error processing ${file.name}`
+        )
+      }
+    }
+
+    setProcessingProgress(100)
+    setTimeout(() => {
+      setIsProcessing(false)
+      setProcessingProgress(0)
+    }, 1000)
+  }, [fleetProcessor, language])
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragOver(false)
+    
+    const files = e.dataTransfer.files
+    if (files.length > 0) {
+      handleFileSelect(files)
+    }
+  }, [handleFileSelect])
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragOver(true)
+  }, [])
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragOver(false)
+  }, [])
 
   // Initialize data
   useEffect(() => {
@@ -278,6 +350,99 @@ const LogisticsOperationsPage = () => {
               </button>
             </div>
             <LanguageSwitcher />
+          </div>
+        </div>
+
+        {/* Fleet Data Upload Section */}
+        <div className="dark-card p-6">
+          <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+            <Database className="w-6 h-6 text-purple-400" />
+            {language === 'vi' ? 'Upload Dữ liệu Đội xe' : 'Fleet Data Upload'}
+          </h2>
+          <p className="text-slate-400 mb-4">
+            {language === 'vi' 
+              ? 'Upload file CSV/Excel chứa thông tin xe, tài xế, và hoạt động để AI phân tích và tối ưu hóa'
+              : 'Upload CSV/Excel files containing vehicle, driver, and operation data for AI analysis and optimization'
+            }
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* File Upload Area */}
+            <div 
+              className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all duration-300 ${
+                isDragOver 
+                  ? 'border-indigo-400 bg-indigo-500/10' 
+                  : 'border-slate-600 hover:border-slate-500 hover:bg-slate-800/50'
+              }`}
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept=".csv,.xlsx,.xls,.json"
+                onChange={(e) => e.target.files && handleFileSelect(e.target.files)}
+                className="hidden"
+              />
+              
+              <div className="space-y-4">
+                <div className="mx-auto w-16 h-16 bg-purple-500/20 rounded-full flex items-center justify-center">
+                  <Upload className="w-8 h-8 text-purple-400" />
+                </div>
+                
+                <div>
+                  <p className="text-lg font-medium text-white mb-2">
+                    {isDragOver 
+                      ? (language === 'vi' ? 'Thả files vào đây' : 'Drop files here')
+                      : (language === 'vi' ? 'Upload dữ liệu đội xe' : 'Upload fleet data')
+                    }
+                  </p>
+                  <p className="text-sm text-slate-400">
+                    {language === 'vi' 
+                      ? 'Hỗ trợ: CSV, Excel, JSON • Tối đa 50MB'
+                      : 'Supported: CSV, Excel, JSON • Max 50MB'
+                    }
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Upload Status */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-white">
+                {language === 'vi' ? 'Trạng thái Upload' : 'Upload Status'}
+              </h3>
+              
+              {isProcessing ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-white">
+                      {language === 'vi' ? 'Đang xử lý...' : 'Processing...'}
+                    </span>
+                    <span className="text-indigo-400">{processingProgress}%</span>
+                  </div>
+                  <div className="w-full bg-slate-700 rounded-full h-3">
+                    <div 
+                      className="bg-gradient-to-r from-purple-500 to-indigo-500 h-3 rounded-full transition-all duration-500"
+                      style={{ width: `${processingProgress}%` }}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Target className="w-12 h-12 text-slate-600 mx-auto mb-4" />
+                  <p className="text-slate-500">
+                    {language === 'vi' 
+                      ? 'Sẵn sàng nhận dữ liệu đội xe...'
+                      : 'Ready to receive fleet data...'
+                    }
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

@@ -4,7 +4,7 @@ import React, { useState, useRef, useCallback } from 'react'
 import Layout from '@/components/Layout'
 import { useLanguage } from '@/contexts/LanguageContext'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
-import { ImportExportAI, ImportExportDocument, ShipmentTracking, CustomsAutomation, AIInsight } from '@/lib/importExportAI'
+import { AILearningEngine, LearnedDocument, LearningInsight } from '@/lib/aiLearningEngine'
 import {
   Upload,
   FileText,
@@ -29,25 +29,75 @@ import {
   BarChart3,
   Loader2,
   X,
-  Plus
+  Plus,
+  Database,
+  Target,
+  Activity
 } from 'lucide-react'
 
 const ImportExportPage = () => {
   const { language, t } = useLanguage()
   const [activeTab, setActiveTab] = useState<'documents' | 'tracking' | 'customs' | 'insights'>('documents')
-  const [documents, setDocuments] = useState<ImportExportDocument[]>([])
-  const [shipments, setShipments] = useState<ShipmentTracking[]>([])
-  const [customsDeclarations, setCustomsDeclarations] = useState<CustomsAutomation[]>([])
-  const [aiInsights, setAiInsights] = useState<AIInsight[]>([])
+  const [learnedDocuments, setLearnedDocuments] = useState<LearnedDocument[]>([])
+  const [aiInsights, setAiInsights] = useState<LearningInsight[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
   const [processingProgress, setProcessingProgress] = useState(0)
   const [isDragOver, setIsDragOver] = useState(false)
-  const [trackingNumber, setTrackingNumber] = useState('')
+  const [selectedDocument, setSelectedDocument] = useState<LearnedDocument | null>(null)
   
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const aiService = new ImportExportAI(language)
+  const aiLearningEngine = new AILearningEngine(language)
 
   const handleFileSelect = useCallback(async (files: FileList) => {
+    if (files.length === 0) return
+
+    setIsProcessing(true)
+    setProcessingProgress(0)
+
+    const processedDocs: LearnedDocument[] = []
+    const allInsights: LearningInsight[] = []
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]
+      
+      // Update progress
+      setProcessingProgress((i / files.length) * 100)
+
+      try {
+        // Read file content
+        const content = await readFileContent(file)
+        
+        // Process with AI learning engine
+        const result = await aiLearningEngine.processAndLearn(file, content)
+        
+        processedDocs.push(result.analysis)
+        allInsights.push(...result.insights)
+
+        // Simulate processing time
+        await new Promise(resolve => setTimeout(resolve, 1000))
+      } catch (error) {
+        console.error(`Error processing ${file.name}:`, error)
+      }
+    }
+
+    setLearnedDocuments(prev => [...prev, ...processedDocs])
+    setAiInsights(prev => [...prev, ...allInsights])
+    setProcessingProgress(100)
+    
+    setTimeout(() => {
+      setIsProcessing(false)
+      setProcessingProgress(0)
+    }, 500)
+  }, [aiLearningEngine])
+
+  const readFileContent = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = (e) => resolve(e.target?.result as string || '')
+      reader.onerror = reject
+      reader.readAsText(file)
+    })
+  }
     setIsProcessing(true)
     setProcessingProgress(0)
 
