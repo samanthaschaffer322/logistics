@@ -18,18 +18,19 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { message, model, chatHistory } = body
+    const { message, model, chatHistory, language = 'vi' } = body
 
     if (!message || typeof message !== 'string') {
+      const errorMsg = language === 'vi' ? 'Tin nhắn không được để trống' : 'Message is required'
       return NextResponse.json(
-        { error: 'Message is required' },
+        { error: errorMsg },
         { status: 400 }
       )
     }
 
-    // Enhanced AI response with Vietnamese logistics context
-    const enhancedPrompt = `
-Bạn là một chuyên gia logistics AI cho thị trường Việt Nam với kiến thức sâu về:
+    // Enhanced AI response with language-specific context
+    const enhancedPrompt = language === 'vi' 
+      ? `Bạn là một chuyên gia logistics AI cho thị trường Việt Nam với kiến thức sâu về:
 - Tối ưu tuyến đường và vận chuyển
 - Phân tích chi phí logistics
 - Quy định giao thông và hải quan Việt Nam
@@ -39,8 +40,18 @@ Bạn là một chuyên gia logistics AI cho thị trường Việt Nam với ki
 Hãy trả lời câu hỏi sau một cách chuyên nghiệp và chi tiết bằng tiếng Việt:
 ${message}
 
-Lưu ý: Cung cấp thông tin thực tế, có thể áp dụng được và phù hợp với thị trường Việt Nam.
-`
+Lưu ý: Cung cấp thông tin thực tế, có thể áp dụng được và phù hợp với thị trường Việt Nam.`
+      : `You are an AI logistics expert for the Vietnamese market with deep knowledge of:
+- Route optimization and transportation
+- Logistics cost analysis
+- Vietnamese traffic and customs regulations
+- Supply chain management
+- Forecasting and data analysis
+
+Please answer the following question professionally and in detail in English:
+${message}
+
+Note: Provide practical, applicable information suitable for the Vietnamese market.`
 
     // Generate AI response
     let aiResponse = ''
@@ -65,7 +76,7 @@ Lưu ý: Cung cấp thông tin thực tế, có thể áp dụng được và ph
       console.error('AI service error:', error)
       
       // Fallback to comprehensive demo responses
-      aiResponse = generateComprehensiveResponse(message)
+      aiResponse = generateComprehensiveResponse(message, language)
       usage = {
         prompt_tokens: 150,
         completion_tokens: 300,
@@ -95,11 +106,12 @@ Lưu ý: Cung cấp thông tin thực tế, có thể áp dụng được và ph
   }
 }
 
-function generateComprehensiveResponse(message: string): string {
+function generateComprehensiveResponse(message: string, language: string = 'vi'): string {
   const lowerMessage = message.toLowerCase()
   
-  if (lowerMessage.includes('tối ưu') || lowerMessage.includes('route') || lowerMessage.includes('tuyến')) {
-    return `🗺️ **Tối ưu tuyến đường thông minh**
+  if (lowerMessage.includes('tối ưu') || lowerMessage.includes('route') || lowerMessage.includes('tuyến') || lowerMessage.includes('optimize')) {
+    return language === 'vi' 
+      ? `🗺️ **Tối ưu tuyến đường thông minh**
 
 **Phân tích tuyến đường:**
 • **Khoảng cách**: 1,720 km (TP.HCM → Hà Nội)
@@ -121,10 +133,33 @@ function generateComprehensiveResponse(message: string): string {
 ⚠️ Tránh giờ cấm xe tải trong thành phố
 📋 Chuẩn bị đầy đủ giấy tờ hải quan
 🛣️ Kiểm tra tình trạng đường trước khi khởi hành`
+      : `🗺️ **Smart Route Optimization**
+
+**Route Analysis:**
+• **Distance**: 1,720 km (HCMC → Hanoi)
+• **Estimated Time**: 28-32 hours
+• **Projected Cost**: 45-50 million VND
+
+**Optimization Recommendations:**
+1. **Departure Time**: 05:30 (avoid peak hours)
+2. **Main Route**: QL1A → AH1 → QL5
+3. **Rest Stops**: Nha Trang, Da Nang, Vinh
+4. **Vehicle Type**: 40ft Container (most efficient)
+
+**Cost Savings:**
+• Use transit depot: **-15% cost**
+• Time optimization: **-2 hours**
+• Fuel consumption reduction: **-20%**
+
+**Special Notes:**
+⚠️ Avoid truck ban hours in cities
+📋 Prepare all customs documents
+🛣️ Check road conditions before departure`
   }
   
-  if (lowerMessage.includes('chi phí') || lowerMessage.includes('cost') || lowerMessage.includes('giá')) {
-    return `💰 **Phân tích chi phí logistics chi tiết**
+  if (lowerMessage.includes('chi phí') || lowerMessage.includes('cost') || lowerMessage.includes('giá') || lowerMessage.includes('price')) {
+    return language === 'vi'
+      ? `💰 **Phân tích chi phí logistics chi tiết**
 
 **Cấu trúc chi phí vận chuyển:**
 • **Nhiên liệu**: 15-18 triệu VNĐ (35%)
@@ -149,10 +184,36 @@ function generateComprehensiveResponse(message: string): string {
 📈 Giá nhiên liệu: +5-8% (6 tháng tới)
 📊 Phí đường bộ: Ổn định
 💼 Chi phí nhân công: +3-5% (năm tới)`
+      : `💰 **Detailed Logistics Cost Analysis**
+
+**Transportation Cost Structure:**
+• **Fuel**: 15-18 million VND (35%)
+• **Road Fees**: 8-10 million VND (20%)
+• **Driver Salary**: 6-8 million VND (15%)
+• **Vehicle Maintenance**: 4-5 million VND (10%)
+• **Insurance**: 3-4 million VND (8%)
+• **Other Costs**: 5-7 million VND (12%)
+
+**Comparison by Vehicle Type:**
+🚛 **20ft Container**: 25-30 million VND
+🚛 **40ft Container**: 40-50 million VND
+🚛 **Regular Truck**: 20-25 million VND
+
+**Savings Opportunities:**
+1. **Route Optimization**: -15% cost
+2. **Smart Scheduling**: -10% time
+3. **Regular Maintenance**: -20% repairs
+4. **Driver Training**: -12% fuel
+
+**Trend Forecast:**
+📈 Fuel Prices: +5-8% (next 6 months)
+📊 Road Fees: Stable
+💼 Labor Costs: +3-5% (next year)`
   }
   
-  if (lowerMessage.includes('rủi ro') || lowerMessage.includes('risk') || lowerMessage.includes('mưa') || lowerMessage.includes('bão')) {
-    return `⚠️ **Đánh giá rủi ro logistics mùa mưa bão**
+  if (lowerMessage.includes('rủi ro') || lowerMessage.includes('risk') || lowerMessage.includes('mưa') || lowerMessage.includes('bão') || lowerMessage.includes('weather')) {
+    return language === 'vi'
+      ? `⚠️ **Đánh giá rủi ro logistics mùa mưa bão**
 
 **Rủi ro chính:**
 🌧️ **Thời tiết**:
@@ -181,10 +242,40 @@ function generateComprehensiveResponse(message: string): string {
 • **Tháng 7-9**: Bão nhiều nhất
 • **Tháng 10-12**: Mưa lũ miền Trung
 • **Giờ 14-18**: Mưa chiều thường xuyên`
+      : `⚠️ **Logistics Risk Assessment During Rainy Season**
+
+**Main Risks:**
+🌧️ **Weather**:
+• Heavy Rain: 30-40% speed reduction
+• Flooding: Complete stoppage possible
+• Storms: 24-48h traffic ban
+
+🛣️ **Roads**:
+• Highway 1A: High flood risk
+• Hai Van Pass: Fog, strong winds
+• Mekong Delta: High tide issues
+
+**Prevention Measures:**
+1. **Weather Monitoring**: Updates every 4 hours
+2. **Backup Routes**: Prepare 2-3 alternatives
+3. **Cargo Insurance**: Mandatory in rainy season
+4. **Regular Communication**: GPS + phone
+
+**Response Plan:**
+📱 **Early Warning**: SMS/App notifications
+🚛 **Flexible Dispatch**: Route changes
+🏠 **Temporary Storage**: Ready warehouses
+💰 **Cost Reserve**: +20-30%
+
+**Times to Avoid:**
+• **July-September**: Peak storm season
+• **October-December**: Central region floods
+• **2-6 PM**: Frequent afternoon rains`
   }
   
   // Default comprehensive response
-  return `🤖 **Super AI Assistant - Chuyên gia Logistics Việt Nam**
+  return language === 'vi'
+    ? `🤖 **Super AI Assistant - Chuyên gia Logistics Việt Nam**
 
 Tôi hiểu bạn đang quan tâm về: "${message}"
 
@@ -210,4 +301,30 @@ Tôi hiểu bạn đang quan tâm về: "${message}"
 - Quy trình hải quan xuất nhập khẩu
 
 💡 **Mẹo**: Hãy cung cấp thông tin cụ thể để tôi tư vấn chính xác nhất!`
+    : `🤖 **Super AI Assistant - Vietnamese Logistics Expert**
+
+I understand you're interested in: "${message}"
+
+**I can assist you with:**
+🗺️ **Route Optimization**: Efficient transportation planning
+💰 **Cost Analysis**: Budget calculation and optimization
+📊 **Demand Forecasting**: Market trend analysis
+⚠️ **Risk Management**: Assessment and prevention
+🚛 **Fleet Management**: Operational efficiency optimization
+📋 **Compliance**: Legal guidance
+
+**Professional Expertise:**
+• **15+ years** Vietnamese logistics experience
+• **1000+ routes** optimized
+• **50+ businesses** consulted
+• **24/7 updates** on new regulations
+
+**Ask me specifically about:**
+- Route optimization from A to B
+- Cost analysis for cargo type X
+- Risk assessment for season Y
+- Suitable vehicle selection
+- Import/export customs procedures
+
+💡 **Tip**: Provide specific information for the most accurate consultation!`
 }

@@ -4,6 +4,7 @@ import React, { useState, useRef, useCallback } from 'react'
 import Layout from '@/components/Layout'
 import { useLanguage } from '@/contexts/LanguageContext'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
+import { IntelligentFileProcessor, FileAnalysisResult, AIInsight, AutomationOpportunity } from '@/lib/intelligentFileProcessor'
 import { 
   Upload, 
   FileText, 
@@ -25,7 +26,12 @@ import {
   Lightbulb,
   FileSpreadsheet,
   Eye,
-  Trash2
+  Trash2,
+  Users,
+  Cog,
+  Target,
+  TrendingDown,
+  Gauge
 } from 'lucide-react'
 
 interface UploadedFile {
@@ -37,16 +43,7 @@ interface UploadedFile {
   uploadedAt: Date
   status: 'uploaded' | 'processing' | 'completed' | 'error'
   progress?: number
-}
-
-interface AIInsight {
-  id: string
-  type: 'cost_optimization' | 'route_efficiency' | 'demand_forecast' | 'risk_analysis'
-  title: string
-  description: string
-  impact: 'high' | 'medium' | 'low'
-  savings?: number
-  confidence: number
+  analysisResult?: FileAnalysisResult
 }
 
 const FilelearningPage = () => {
@@ -54,9 +51,9 @@ const FilelearningPage = () => {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
   const [processingProgress, setProcessingProgress] = useState(0)
-  const [aiInsights, setAiInsights] = useState<AIInsight[]>([])
+  const [currentProcessingStep, setCurrentProcessingStep] = useState('')
   const [isDragOver, setIsDragOver] = useState(false)
-  const [analysisResults, setAnalysisResults] = useState<any>(null)
+  const [analysisResults, setAnalysisResults] = useState<FileAnalysisResult | null>(null)
   
   const fileInputRef = useRef<HTMLInputElement>(null)
   const dropZoneRef = useRef<HTMLDivElement>(null)
@@ -115,11 +112,10 @@ const FilelearningPage = () => {
 
   const removeAllFiles = () => {
     setUploadedFiles([])
-    setAiInsights([])
     setAnalysisResults(null)
   }
 
-  const startAIAnalysis = async () => {
+  const startIntelligentAnalysis = async () => {
     if (uploadedFiles.length === 0) {
       alert(language === 'vi' ? 'Vui lòng upload file trước' : 'Please upload files first')
       return
@@ -128,89 +124,81 @@ const FilelearningPage = () => {
     setIsProcessing(true)
     setProcessingProgress(0)
 
-    // Simulate processing steps
+    const processor = new IntelligentFileProcessor(language)
+    
+    // Processing steps with language support
     const steps = [
-      { progress: 20, message: language === 'vi' ? 'Trích xuất dữ liệu từ Excel' : 'Extracting data from Excel' },
-      { progress: 40, message: language === 'vi' ? 'Phân tích patterns & trends' : 'Analyzing patterns & trends' },
-      { progress: 60, message: language === 'vi' ? 'Tối ưu tuyến đường & chi phí' : 'Optimizing routes & costs' },
-      { progress: 80, message: language === 'vi' ? 'Dự đoán nhu cầu tương lai' : 'Predicting future demand' },
-      { progress: 100, message: language === 'vi' ? 'Hoàn thành phân tích' : 'Analysis complete' }
-    ]
-
-    for (const step of steps) {
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      setProcessingProgress(step.progress)
-    }
-
-    // Generate AI insights
-    const insights: AIInsight[] = [
-      {
-        id: '1',
-        type: 'cost_optimization',
-        title: language === 'vi' ? 'Tối ưu chi phí vận chuyển' : 'Transportation Cost Optimization',
-        description: language === 'vi' 
-          ? 'Phát hiện cơ hội tiết kiệm 15% chi phí bằng cách tối ưu tuyến đường và consolidation'
-          : 'Identified 15% cost savings opportunity through route optimization and consolidation',
-        impact: 'high',
-        savings: 2500000,
-        confidence: 92
+      { 
+        progress: 15, 
+        message: language === 'vi' ? 'Phân tích cấu trúc file và trích xuất dữ liệu...' : 'Analyzing file structure and extracting data...' 
       },
-      {
-        id: '2',
-        type: 'route_efficiency',
-        title: language === 'vi' ? 'Hiệu suất tuyến đường' : 'Route Efficiency',
-        description: language === 'vi'
-          ? 'Tuyến TP.HCM - Hà Nội có thể cải thiện 20% thời gian giao hàng'
-          : 'HCMC - Hanoi route can improve delivery time by 20%',
-        impact: 'high',
-        confidence: 88
+      { 
+        progress: 30, 
+        message: language === 'vi' ? 'Nhận diện patterns và xu hướng trong dữ liệu...' : 'Identifying patterns and trends in data...' 
       },
-      {
-        id: '3',
-        type: 'demand_forecast',
-        title: language === 'vi' ? 'Dự báo nhu cầu' : 'Demand Forecast',
-        description: language === 'vi'
-          ? 'Nhu cầu vận chuyển dự kiến tăng 25% trong Q4'
-          : 'Transportation demand expected to increase 25% in Q4',
-        impact: 'medium',
-        confidence: 85
+      { 
+        progress: 50, 
+        message: language === 'vi' ? 'Phân tích hiệu suất tuyến đường và chi phí...' : 'Analyzing route performance and costs...' 
       },
-      {
-        id: '4',
-        type: 'risk_analysis',
-        title: language === 'vi' ? 'Phân tích rủi ro' : 'Risk Analysis',
-        description: language === 'vi'
-          ? 'Cảnh báo: Tuyến miền Trung có nguy cơ delay cao do thời tiết'
-          : 'Warning: Central region routes have high delay risk due to weather',
-        impact: 'medium',
-        confidence: 78
+      { 
+        progress: 70, 
+        message: language === 'vi' ? 'Xây dựng mô hình dự báo AI...' : 'Building AI predictive models...' 
+      },
+      { 
+        progress: 85, 
+        message: language === 'vi' ? 'Tìm kiếm cơ hội tự động hóa...' : 'Identifying automation opportunities...' 
+      },
+      { 
+        progress: 100, 
+        message: language === 'vi' ? 'Tạo insights và khuyến nghị thông minh...' : 'Generating intelligent insights and recommendations...' 
       }
     ]
 
-    setAiInsights(insights)
-
-    // Generate analysis results
-    const results = {
-      totalRecords: uploadedFiles.length * 150 + Math.floor(Math.random() * 100),
-      totalCost: 45000000 + Math.floor(Math.random() * 10000000),
-      avgDistance: 280 + Math.floor(Math.random() * 50),
-      efficiency: 87 + Math.floor(Math.random() * 10),
-      onTimeDelivery: 92 + Math.floor(Math.random() * 5),
-      fuelEfficiency: 35 + Math.floor(Math.random() * 5)
+    for (const step of steps) {
+      setCurrentProcessingStep(step.message)
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      setProcessingProgress(step.progress)
     }
 
-    setAnalysisResults(results)
-    setIsProcessing(false)
+    try {
+      // Process the first file with actual intelligent analysis
+      const firstFile = uploadedFiles[0]
+      if (firstFile.content) {
+        const file = new File([firstFile.content], firstFile.name, { type: firstFile.type })
+        const result = await processor.processFile(file, firstFile.content)
+        
+        setAnalysisResults(result)
+        
+        // Update file status
+        setUploadedFiles(prev => prev.map(f => 
+          f.id === firstFile.id 
+            ? { ...f, status: 'completed', analysisResult: result }
+            : f
+        ))
+      }
+    } catch (error) {
+      console.error('Analysis error:', error)
+      alert(language === 'vi' ? 'Lỗi khi phân tích file' : 'Error analyzing file')
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
   const demoWithSampleFile = async () => {
-    // Add a demo file
+    // Create a realistic demo file with Vietnamese logistics data
+    const demoContent = `Ngày,Tuyến đường,Xe,Tài xế,Chi phí,Thời gian,Khoảng cách,Nhiên liệu
+2024-08-01,TP.HCM - Hà Nội,VN-001,Nguyễn Văn A,15000000,12,1700,680
+2024-08-02,TP.HCM - Đà Nẵng,VN-002,Trần Văn B,8000000,8,950,380
+2024-08-03,Hà Nội - Hải Phòng,VN-003,Lê Văn C,3000000,3,120,48
+2024-08-04,TP.HCM - Cần Thơ,VN-004,Phạm Văn D,4500000,4,170,68
+2024-08-05,Đà Nẵng - Huế,VN-005,Hoàng Văn E,2500000,2.5,105,42`
+
     const demoFile: UploadedFile = {
       id: 'demo-' + Date.now(),
-      name: 'ke-hoach-ngay-demo.xlsx',
-      size: 45678,
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      content: 'demo-content',
+      name: language === 'vi' ? 'ke-hoach-logistics-demo.csv' : 'logistics-plan-demo.csv',
+      size: demoContent.length,
+      type: 'text/csv',
+      content: demoContent,
       uploadedAt: new Date(),
       status: 'uploaded'
     }
@@ -219,7 +207,7 @@ const FilelearningPage = () => {
     
     // Start analysis immediately
     setTimeout(() => {
-      startAIAnalysis()
+      startIntelligentAnalysis()
     }, 500)
   }
 
@@ -233,6 +221,10 @@ const FilelearningPage = () => {
         return <TrendingUp className="w-5 h-5" />
       case 'risk_analysis':
         return <AlertTriangle className="w-5 h-5" />
+      case 'automation':
+        return <Cog className="w-5 h-5" />
+      case 'performance':
+        return <Gauge className="w-5 h-5" />
       default:
         return <Lightbulb className="w-5 h-5" />
     }
@@ -251,6 +243,19 @@ const FilelearningPage = () => {
     }
   }
 
+  const getAutomationIcon = (complexity: string) => {
+    switch (complexity) {
+      case 'low':
+        return <CheckCircle className="w-4 h-4 text-green-400" />
+      case 'medium':
+        return <Clock className="w-4 h-4 text-yellow-400" />
+      case 'high':
+        return <AlertTriangle className="w-4 h-4 text-red-400" />
+      default:
+        return <Cog className="w-4 h-4 text-blue-400" />
+    }
+  }
+
   return (
     <Layout>
       <div className="max-w-7xl mx-auto space-y-6">
@@ -263,8 +268,8 @@ const FilelearningPage = () => {
             </h1>
             <p className="text-slate-400 mt-1">
               {language === 'vi' 
-                ? 'Upload và phân tích các file kế hoạch logistics để nhận insights thông minh từ AI'
-                : 'Upload and analyze logistics planning files to receive intelligent AI insights'
+                ? 'Upload và phân tích các file kế hoạch logistics để AI học hỏi và tự động hóa quy trình thay thế nhân sự'
+                : 'Upload and analyze logistics planning files for AI learning and process automation to replace human staff'
               }
             </p>
           </div>
@@ -282,8 +287,8 @@ const FilelearningPage = () => {
               </h2>
               <p className="text-slate-400 mb-6">
                 {language === 'vi' 
-                  ? 'Upload các file Excel kế hoạch ngày để AI phân tích và đưa ra khuyến nghị tối ưu'
-                  : 'Upload Excel daily planning files for AI analysis and optimization recommendations'
+                  ? 'AI sẽ học từ các file Excel/CSV để hiểu quy trình và tự động hóa công việc của nhân viên'
+                  : 'AI will learn from Excel/CSV files to understand processes and automate staff work'
                 }
               </p>
 
@@ -397,8 +402,8 @@ const FilelearningPage = () => {
               </h3>
               <p className="text-slate-400 mb-6">
                 {language === 'vi' 
-                  ? 'Phân tích thông minh với machine learning'
-                  : 'Intelligent analysis with machine learning'
+                  ? 'Phân tích thông minh với machine learning để học hỏi và tự động hóa quy trình'
+                  : 'Intelligent analysis with machine learning to learn and automate processes'
                 }
               </p>
 
@@ -407,8 +412,8 @@ const FilelearningPage = () => {
                   <Brain className="w-12 h-12 text-slate-600 mx-auto mb-4" />
                   <p className="text-slate-500">
                     {language === 'vi' 
-                      ? 'Sẵn sàng nhận files logistics...'
-                      : 'Ready to receive logistics files...'
+                      ? 'Sẵn sàng học từ files logistics...'
+                      : 'Ready to learn from logistics files...'
                     }
                   </p>
                 </div>
@@ -416,11 +421,11 @@ const FilelearningPage = () => {
 
               {!isProcessing && uploadedFiles.length > 0 && (
                 <button
-                  onClick={startAIAnalysis}
+                  onClick={startIntelligentAnalysis}
                   className="gradient-button w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2"
                 >
                   <Zap className="w-5 h-5" />
-                  {language === 'vi' ? 'Bắt đầu phân tích AI' : 'Start AI Analysis'}
+                  {language === 'vi' ? 'Bắt đầu phân tích thông minh' : 'Start Intelligent Analysis'}
                 </button>
               )}
 
@@ -428,7 +433,7 @@ const FilelearningPage = () => {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-white font-medium">
-                      {language === 'vi' ? 'Đang phân tích AI...' : 'Analyzing with AI...'}
+                      {language === 'vi' ? 'Đang phân tích thông minh...' : 'Intelligent analysis in progress...'}
                     </span>
                     <span className="text-indigo-400">{processingProgress}%</span>
                   </div>
@@ -440,23 +445,8 @@ const FilelearningPage = () => {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className="flex items-center gap-2 text-slate-300">
-                      <FileSpreadsheet className="w-4 h-4" />
-                      {language === 'vi' ? 'Trích xuất dữ liệu từ Excel' : 'Extract data from Excel'}
-                    </div>
-                    <div className="flex items-center gap-2 text-slate-300">
-                      <BarChart3 className="w-4 h-4" />
-                      {language === 'vi' ? 'Phân tích patterns & trends' : 'Analyze patterns & trends'}
-                    </div>
-                    <div className="flex items-center gap-2 text-slate-300">
-                      <MapPin className="w-4 h-4" />
-                      {language === 'vi' ? 'Tối ưu tuyến đường & chi phí' : 'Optimize routes & costs'}
-                    </div>
-                    <div className="flex items-center gap-2 text-slate-300">
-                      <TrendingUp className="w-4 h-4" />
-                      {language === 'vi' ? 'Dự đoán nhu cầu tương lai' : 'Predict future demand'}
-                    </div>
+                  <div className="text-sm text-slate-300 text-center">
+                    {currentProcessingStep}
                   </div>
                 </div>
               )}
@@ -475,23 +465,23 @@ const FilelearningPage = () => {
                 
                 <div className="space-y-3">
                   <div className="text-center p-3 bg-blue-500/10 rounded-xl border border-blue-500/20">
-                    <div className="text-2xl font-bold text-blue-400">{analysisResults.totalRecords}</div>
+                    <div className="text-2xl font-bold text-blue-400">{analysisResults.recordCount}</div>
                     <div className="text-xs text-blue-300">
                       {language === 'vi' ? 'Bản ghi' : 'Records'}
                     </div>
                   </div>
                   
                   <div className="text-center p-3 bg-green-500/10 rounded-xl border border-green-500/20">
-                    <div className="text-2xl font-bold text-green-400">
-                      {(analysisResults.totalCost / 1000000).toFixed(1)}M
+                    <div className="text-2xl font-bold text-green-400">{analysisResults.patterns.routePatterns.length}</div>
+                    <div className="text-xs text-green-300">
+                      {language === 'vi' ? 'Tuyến đường' : 'Routes'}
                     </div>
-                    <div className="text-xs text-green-300">VNĐ</div>
                   </div>
                   
                   <div className="text-center p-3 bg-purple-500/10 rounded-xl border border-purple-500/20">
-                    <div className="text-2xl font-bold text-purple-400">{analysisResults.efficiency}%</div>
+                    <div className="text-2xl font-bold text-purple-400">{analysisResults.automationOpportunities.length}</div>
                     <div className="text-xs text-purple-300">
-                      {language === 'vi' ? 'Hiệu suất' : 'Efficiency'}
+                      {language === 'vi' ? 'Cơ hội tự động' : 'Automation Ops'}
                     </div>
                   </div>
                 </div>
@@ -499,21 +489,24 @@ const FilelearningPage = () => {
             )}
 
             {/* AI Insights */}
-            {aiInsights.length > 0 && (
+            {analysisResults && analysisResults.insights.length > 0 && (
               <div className="dark-card p-4">
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                   <Lightbulb className="w-5 h-5 text-yellow-400" />
                   {language === 'vi' ? 'AI Insights' : 'AI Insights'}
                 </h3>
                 
-                <div className="space-y-3">
-                  {aiInsights.map(insight => (
+                <div className="space-y-3 max-h-96 overflow-y-auto">
+                  {analysisResults.insights.map(insight => (
                     <div key={insight.id} className={`p-3 rounded-xl border ${getInsightColor(insight.impact)}`}>
                       <div className="flex items-start gap-2 mb-2">
                         {getInsightIcon(insight.type)}
                         <div className="flex-1">
                           <h4 className="font-medium text-sm">{insight.title}</h4>
                           <p className="text-xs opacity-80 mt-1">{insight.description}</p>
+                          <p className="text-xs opacity-60 mt-1">
+                            {language === 'vi' ? 'Triển khai:' : 'Implementation:'} {insight.implementation}
+                          </p>
                         </div>
                       </div>
                       
@@ -530,10 +523,61 @@ const FilelearningPage = () => {
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Automation Opportunities */}
+            {analysisResults && analysisResults.automationOpportunities.length > 0 && (
+              <div className="dark-card p-4">
+                <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <Cog className="w-5 h-5 text-indigo-400" />
+                  {language === 'vi' ? 'Cơ hội tự động hóa' : 'Automation Opportunities'}
+                </h3>
+                
+                <div className="space-y-3 max-h-80 overflow-y-auto">
+                  {analysisResults.automationOpportunities.map(opportunity => (
+                    <div key={opportunity.id} className="p-3 bg-slate-800 rounded-xl border border-slate-700">
+                      <div className="flex items-start gap-2 mb-2">
+                        {getAutomationIcon(opportunity.complexity)}
+                        <div className="flex-1">
+                          <h4 className="font-medium text-sm text-white">{opportunity.process}</h4>
+                          <p className="text-xs text-slate-400 mt-1">
+                            {language === 'vi' ? 'Hiện tại:' : 'Current:'} {opportunity.currentMethod}
+                          </p>
+                          <p className="text-xs text-green-400 mt-1">
+                            {language === 'vi' ? 'Tự động:' : 'Automated:'} {opportunity.automatedMethod}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-2 text-xs mt-2">
+                        <div className="text-center p-2 bg-green-500/10 rounded">
+                          <div className="font-bold text-green-400">{opportunity.timeSaving}%</div>
+                          <div className="text-green-300">{language === 'vi' ? 'Tiết kiệm TG' : 'Time Saved'}</div>
+                        </div>
+                        <div className="text-center p-2 bg-blue-500/10 rounded">
+                          <div className="font-bold text-blue-400">{(opportunity.costSaving / 1000000).toFixed(1)}M</div>
+                          <div className="text-blue-300">{language === 'vi' ? 'Tiết kiệm CP' : 'Cost Saved'}</div>
+                        </div>
+                      </div>
+
+                      {/* Human Replacement Info */}
+                      <div className="mt-3 p-2 bg-red-500/10 border border-red-500/20 rounded">
+                        <h5 className="text-xs font-medium text-red-300 mb-1">
+                          {language === 'vi' ? 'Thay thế nhân sự:' : 'Human Replacement:'}
+                        </h5>
+                        <div className="text-xs text-red-200">
+                          <p>{language === 'vi' ? 'Vị trí:' : 'Roles:'} {opportunity.humanReplacement.roles.join(', ')}</p>
+                          <p>{language === 'vi' ? 'Hiệu quả:' : 'Efficiency:'} {opportunity.humanReplacement.efficiency}%</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
 
                 <button className="dark-button w-full mt-4 py-2 text-sm">
                   <Download className="w-4 h-4 mr-2" />
-                  {language === 'vi' ? 'Tải xuống kết quả' : 'Download results'}
+                  {language === 'vi' ? 'Tải xuống kế hoạch tự động hóa' : 'Download automation plan'}
                 </button>
               </div>
             )}

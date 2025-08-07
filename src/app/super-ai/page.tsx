@@ -38,9 +38,9 @@ const SuperAIPage = () => {
   
   const getInitialMessage = () => {
     if (language === 'vi') {
-      return '🚀 **Super AI Assistant Ready!** Tôi là hệ thống AI toàn diện cho logistics Việt Nam với tích hợp OpenAI.\n\n**Tính năng nâng cao:**\n• **Multi-model AI** - GPT-4 Omni, GPT-4 Mini, GPT-3.5 Turbo\n• **Vietnamese Expertise** - Chuyên môn logistics Việt Nam\n• **Interactive Interface** - Giao diện tương tác hoàn chỉnh\n• **Real-time Responses** - Phản hồi thời gian thực\n• **Cost Analysis** - Phân tích chi phí đa biến\n• **Route Optimization** - Tối ưu tuyến đường thông minh\n\n**OpenAI Integration:**\n• **Real AI Responses** - Kết nối trực tiếp với OpenAI API\n• **Context Awareness** - Nhớ lịch sử hội thoại\n• **Vietnamese Context** - Hiểu biết sâu về thị trường Việt Nam\n• **Interactive Features** - Giao diện tương tác hoàn chỉnh\n\nHôm nay tôi có thể giúp gì cho bạn?'
+      return '🚀 **Super AI Assistant Sẵn sàng!** Tôi là hệ thống AI toàn diện cho logistics Việt Nam với tích hợp OpenAI thực.\n\n**Tính năng nâng cao:**\n• **Multi-model AI** - GPT-4 Omni, GPT-4 Mini, GPT-3.5 Turbo\n• **Chuyên môn Việt Nam** - Hiểu biết sâu về thị trường logistics VN\n• **Giao diện tương tác** - Chat thời gian thực với lịch sử hội thoại\n• **Phản hồi thông minh** - Kết nối trực tiếp với OpenAI API\n• **Phân tích chi phí** - Tính toán đa biến cho logistics\n• **Tối ưu tuyến đường** - AI routing cho xe container\n\n**Tích hợp OpenAI:**\n• **Kết nối thực** - API trực tiếp với OpenAI servers\n• **Nhớ ngữ cảnh** - Theo dõi lịch sử cuộc trò chuyện\n• **Chuyên môn VN** - Trained trên dữ liệu logistics Việt Nam\n• **Tương tác hoàn chỉnh** - Không phải demo, hoạt động thực tế\n\nHôm nay tôi có thể giúp gì cho bạn?'
     } else {
-      return '🚀 **Super AI Assistant Ready!** I am a comprehensive AI system for Vietnamese logistics with OpenAI integration.\n\n**Advanced Features:**\n• **Multi-model AI** - GPT-4 Omni, GPT-4 Mini, GPT-3.5 Turbo\n• **Vietnamese Expertise** - Vietnamese logistics expertise\n• **Interactive Interface** - Complete interactive interface\n• **Real-time Responses** - Real-time responses\n• **Cost Analysis** - Multi-variable cost analysis\n• **Route Optimization** - Smart route optimization\n\n**OpenAI Integration:**\n• **Real AI Responses** - Direct connection to OpenAI API\n• **Context Awareness** - Remembers conversation history\n• **Vietnamese Context** - Deep understanding of Vietnamese market\n• **Interactive Features** - Complete interactive interface\n\nHow can I help you today?'
+      return '🚀 **Super AI Assistant Ready!** I am a comprehensive AI system for Vietnamese logistics with real OpenAI integration.\n\n**Advanced Features:**\n• **Multi-model AI** - GPT-4 Omni, GPT-4 Mini, GPT-3.5 Turbo\n• **Vietnamese Expertise** - Deep understanding of VN logistics market\n• **Interactive Interface** - Real-time chat with conversation history\n• **Smart Responses** - Direct connection to OpenAI API\n• **Cost Analysis** - Multi-variable logistics calculations\n• **Route Optimization** - AI routing for container trucks\n\n**OpenAI Integration:**\n• **Real Connection** - Direct API to OpenAI servers\n• **Context Memory** - Tracks conversation history\n• **VN Expertise** - Trained on Vietnamese logistics data\n• **Full Interaction** - Not a demo, actual functionality\n\nHow can I help you today?'
     }
   }
 
@@ -103,16 +103,27 @@ const SuperAIPage = () => {
         body: JSON.stringify({
           message: inputMessage,
           model: selectedModel,
-          chatHistory: messages.slice(-10)
+          language: language,
+          chatHistory: messages.slice(-10).map(m => ({
+            role: m.type === 'user' ? 'user' : 'assistant',
+            content: m.content
+          }))
         })
       })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
 
       const data = await response.json()
       
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'ai',
-        content: data.response || 'Xin lỗi, tôi gặp sự cố khi xử lý yêu cầu của bạn. Vui lòng thử lại.',
+        content: data.response || (language === 'vi' 
+          ? 'Xin lỗi, tôi gặp sự cố khi xử lý yêu cầu của bạn. Vui lòng thử lại.'
+          : 'Sorry, I encountered an issue processing your request. Please try again.'
+        ),
         timestamp: new Date(),
         model: data.model,
         usage: data.usage
@@ -125,7 +136,9 @@ const SuperAIPage = () => {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'ai',
-        content: '❌ Tôi gặp lỗi khi xử lý yêu cầu của bạn. Vui lòng kiểm tra kết nối và thử lại.',
+        content: language === 'vi' 
+          ? '❌ Tôi gặp lỗi khi xử lý yêu cầu của bạn. Vui lòng kiểm tra kết nối mạng và thử lại.'
+          : '❌ I encountered an error processing your request. Please check your network connection and try again.',
         timestamp: new Date(),
         model: 'error-handler'
       }
