@@ -165,9 +165,10 @@ const RouteOptimizationPage = () => {
     return { violations, warnings, alternativeTimes }
   }
   const sampleRoutes: RoutePoint[] = [
+    // Major Warehouses & Depots
     {
       id: '1',
-      name: 'Sinovl Tan Van',
+      name: 'Sinovl Tan Van Depot',
       address: 'Khu công nghiệp Tân Vạn, Biên Hòa, Đồng Nai',
       lat: 10.9447,
       lng: 106.8197,
@@ -177,16 +178,6 @@ const RouteOptimizationPage = () => {
     },
     {
       id: '2',
-      name: 'Port Cai Mep',
-      address: 'Cảng Cái Mép, Bà Rịa - Vũng Tàu',
-      lat: 10.5833,
-      lng: 107.0833,
-      type: 'delivery',
-      priority: 1,
-      timeWindow: { start: '06:00', end: '18:00' }
-    },
-    {
-      id: '3',
       name: 'Kho trung tâm TP.HCM',
       address: 'Khu Công nghệ cao, Quận 9, TP. Hồ Chí Minh',
       lat: 10.8505,
@@ -196,27 +187,49 @@ const RouteOptimizationPage = () => {
       timeWindow: { start: '06:00', end: '22:00' }
     },
     {
+      id: '3',
+      name: 'Depot Hà Nội',
+      address: 'KCN Thăng Long, Hà Nội',
+      lat: 21.0285,
+      lng: 105.8542,
+      type: 'warehouse',
+      priority: 1,
+      timeWindow: { start: '06:00', end: '22:00' }
+    },
+    {
       id: '4',
-      name: 'Siêu thị Metro Thủ Đức',
-      address: 'Đại lộ Phạm Văn Đồng, TP. Thủ Đức',
-      lat: 10.8411,
-      lng: 106.8098,
-      type: 'delivery',
-      priority: 2,
-      timeWindow: { start: '08:00', end: '20:00' }
+      name: 'Depot Đà Nẵng',
+      address: 'KCN Hòa Khánh, Đà Nẵng',
+      lat: 16.0471,
+      lng: 108.2068,
+      type: 'warehouse',
+      priority: 1,
+      timeWindow: { start: '06:00', end: '22:00' }
     },
     {
       id: '5',
-      name: 'Chợ Bến Thành',
-      address: 'Lê Lợi, Quận 1, TP. Hồ Chí Minh',
-      lat: 10.7720,
-      lng: 106.6980,
-      type: 'pickup',
-      priority: 3,
-      timeWindow: { start: '05:00', end: '18:00' }
+      name: 'Depot Cần Thơ',
+      address: 'KCN Trà Nóc, Cần Thơ',
+      lat: 10.0452,
+      lng: 105.7469,
+      type: 'warehouse',
+      priority: 1,
+      timeWindow: { start: '06:00', end: '22:00' }
     },
+    
+    // Major Ports
     {
       id: '6',
+      name: 'Cảng Cái Mép',
+      address: 'Cảng Cái Mép, Bà Rịa - Vũng Tàu',
+      lat: 10.5833,
+      lng: 107.0833,
+      type: 'pickup',
+      priority: 1,
+      timeWindow: { start: '06:00', end: '18:00' }
+    },
+    {
+      id: '7',
       name: 'Cảng Cát Lái',
       address: 'Đường Đồng Văn Cống, Quận 2, TP. Hồ Chí Minh',
       lat: 10.7950,
@@ -226,8 +239,20 @@ const RouteOptimizationPage = () => {
       timeWindow: { start: '06:00', end: '17:00' }
     },
     {
-      id: '7',
-      name: 'Khu công nghiệp Tân Thuận',
+      id: '8',
+      name: 'Cảng Hải Phòng',
+      address: 'Cảng Hải Phòng, Hải Phòng',
+      lat: 20.8449,
+      lng: 106.6881,
+      type: 'pickup',
+      priority: 1,
+      timeWindow: { start: '06:00', end: '18:00' }
+    },
+    
+    // Industrial Zones
+    {
+      id: '9',
+      name: 'KCN Tân Thuận',
       address: 'Đường Huỳnh Tấn Phát, Quận 7, TP. Hồ Chí Minh',
       lat: 10.7378,
       lng: 106.7230,
@@ -236,7 +261,29 @@ const RouteOptimizationPage = () => {
       timeWindow: { start: '07:00', end: '19:00' }
     },
     {
-      id: '8',
+      id: '10',
+      name: 'KCN VSIP Bình Dương',
+      address: 'KCN Việt Nam - Singapore, Bình Dương',
+      lat: 10.9804,
+      lng: 106.6519,
+      type: 'delivery',
+      priority: 2,
+      timeWindow: { start: '07:00', end: '19:00' }
+    },
+    {
+      id: '11',
+      name: 'KCN Long Hậu',
+      address: 'KCN Long Hậu, Long An',
+      lat: 10.6833,
+      lng: 106.4167,
+      type: 'delivery',
+      priority: 2,
+      timeWindow: { start: '07:00', end: '19:00' }
+    },
+    
+    // Major Markets & Distribution Centers
+    {
+      id: '12',
       name: 'Chợ đầu mối Hóc Môn',
       address: 'Quốc lộ 22, Huyện Hóc Môn, TP. Hồ Chí Minh',
       lat: 10.8833,
@@ -244,6 +291,90 @@ const RouteOptimizationPage = () => {
       type: 'pickup',
       priority: 2,
       timeWindow: { start: '04:00', end: '16:00' }
+    },
+    {
+      id: '13',
+      name: 'Chợ đầu mối Thủ Đức',
+      address: 'Đại lộ Phạm Văn Đồng, TP. Thủ Đức',
+      lat: 10.8411,
+      lng: 106.8098,
+      type: 'pickup',
+      priority: 2,
+      timeWindow: { start: '05:00', end: '17:00' }
+    },
+    {
+      id: '14',
+      name: 'Chợ Long Biên',
+      address: 'Chợ Long Biên, Hà Nội',
+      lat: 21.0358,
+      lng: 105.8542,
+      type: 'pickup',
+      priority: 2,
+      timeWindow: { start: '04:00', end: '16:00' }
+    },
+    
+    // Retail & Commercial Centers
+    {
+      id: '15',
+      name: 'Siêu thị Metro Thủ Đức',
+      address: 'Đại lộ Phạm Văn Đồng, TP. Thủ Đức',
+      lat: 10.8411,
+      lng: 106.8098,
+      type: 'delivery',
+      priority: 3,
+      timeWindow: { start: '08:00', end: '20:00' }
+    },
+    {
+      id: '16',
+      name: 'Big C Miền Đông',
+      address: 'Xa lộ Hà Nội, Quận 2, TP. Hồ Chí Minh',
+      lat: 10.8017,
+      lng: 106.7442,
+      type: 'delivery',
+      priority: 3,
+      timeWindow: { start: '08:00', end: '20:00' }
+    },
+    {
+      id: '17',
+      name: 'Lotte Mart Hà Nội',
+      address: 'Số 7 Nguyễn Văn Linh, Hà Nội',
+      lat: 21.0285,
+      lng: 105.8542,
+      type: 'delivery',
+      priority: 3,
+      timeWindow: { start: '08:00', end: '20:00' }
+    },
+    
+    // Regional Centers
+    {
+      id: '18',
+      name: 'Trung tâm phân phối Nha Trang',
+      address: 'KCN Suối Dầu, Nha Trang, Khánh Hòa',
+      lat: 12.2388,
+      lng: 109.1967,
+      type: 'delivery',
+      priority: 2,
+      timeWindow: { start: '07:00', end: '19:00' }
+    },
+    {
+      id: '19',
+      name: 'Trung tâm phân phối Vũng Tàu',
+      address: 'KCN Phú Mỹ, Bà Rịa - Vũng Tàu',
+      lat: 10.5417,
+      lng: 107.2431,
+      type: 'delivery',
+      priority: 2,
+      timeWindow: { start: '07:00', end: '19:00' }
+    },
+    {
+      id: '20',
+      name: 'Trung tâm phân phối Huế',
+      address: 'KCN Phú Bài, Thừa Thiên Huế',
+      lat: 16.4637,
+      lng: 107.5909,
+      type: 'delivery',
+      priority: 2,
+      timeWindow: { start: '07:00', end: '19:00' }
     }
   ]
 
@@ -251,9 +382,39 @@ const RouteOptimizationPage = () => {
     setRoutes(sampleRoutes)
   }, [])
 
+  // Automatic depot optimization
+  const findNearestDepot = (origin: RoutePoint, destination: RoutePoint): RoutePoint | null => {
+    const depots = routes.filter(r => r.type === 'warehouse')
+    if (depots.length === 0) return null
+    
+    let nearestDepot = depots[0]
+    let minTotalDistance = calculateDistance(origin, depots[0]) + calculateDistance(depots[0], destination)
+    
+    depots.forEach(depot => {
+      const totalDistance = calculateDistance(origin, depot) + calculateDistance(depot, destination)
+      if (totalDistance < minTotalDistance) {
+        minTotalDistance = totalDistance
+        nearestDepot = depot
+      }
+    })
+    
+    return nearestDepot
+  }
+
+  // Auto-optimize route when both points are selected
+  useEffect(() => {
+    if (departure && destination && departure.id !== destination.id) {
+      const nearestDepot = findNearestDepot(departure, destination)
+      if (nearestDepot && nearestDepot.id !== departure.id && nearestDepot.id !== destination.id) {
+        // Auto-suggest depot optimization
+        console.log(`Suggested depot for optimization: ${nearestDepot.name}`)
+      }
+    }
+  }, [departure, destination, routes])
+
   const optimizeRoute = async () => {
     if (!departure || !destination) {
-      alert('Please select both departure and destination points')
+      alert('Vui lòng chọn cả điểm xuất phát và điểm đến')
       return
     }
     
@@ -272,30 +433,69 @@ const RouteOptimizationPage = () => {
     }, 200)
     
     try {
-      // Create optimization request
-      const request: RouteOptimizationRequest = {
-        origin: departure,
-        destination: destination,
-        truck_specs: VIETNAM_TRUCK_SPECS[truckType],
-        departure_time: departureTime ? 
-          new Date(`2025-08-07T${departureTime}:00`).toISOString() : 
-          new Date().toISOString(),
-        avoid_tolls: avoidTolls,
-        avoid_highways: avoidHighways,
-        optimize_for: optimizeFor
+      // Find nearest depot for optimization
+      const nearestDepot = findNearestDepot(departure, destination)
+      const directDistance = calculateDistance(departure, destination)
+      
+      let optimizedDistance = directDistance
+      let optimizedPoints = [departure, destination]
+      let depotOptimization = false
+      
+      // Check if using depot is more efficient
+      if (nearestDepot && nearestDepot.id !== departure.id && nearestDepot.id !== destination.id) {
+        const depotDistance = calculateDistance(departure, nearestDepot) + calculateDistance(nearestDepot, destination)
+        if (depotDistance < directDistance * 1.2) { // Allow 20% tolerance for depot benefits
+          optimizedDistance = depotDistance
+          optimizedPoints = [departure, nearestDepot, destination]
+          depotOptimization = true
+        }
       }
-
-      // Use advanced route optimizer
-      const routeResponse = await advancedRouteOptimizer.optimizeRoute(request)
+      
+      // Calculate comprehensive route data
+      const estimatedTime = Math.round(optimizedDistance / 60 * 60) // Assuming 60km/h average
+      const fuelCost = Math.round(optimizedDistance * vietnamTruckSpecs[truckType].fuel / 100 * 25000) // 25k VND per liter
+      const tollCost = Math.round(optimizedDistance * 2500) // 2.5k VND per km
+      const totalCost = fuelCost + tollCost
+      const co2Emission = Math.round(optimizedDistance * vietnamTruckSpecs[truckType].fuel / 100 * 2.6) // 2.6kg CO2 per liter
+      
+      // Traffic analysis
+      const isRushHourTime = isRushHour(departureTime)
+      const trafficAnalysis = {
+        congestionLevel: isRushHourTime ? 'high' : 'low' as 'low' | 'medium' | 'high',
+        delayMinutes: isRushHourTime ? 45 : 15,
+        rushHourImpact: isRushHourTime
+      }
+      
+      // Route restrictions
+      const restrictions = checkRouteRestrictions(departure, destination, departureTime, truckType)
+      
+      const optimizedRoute: OptimizedRoute = {
+        id: `route_${Date.now()}`,
+        points: optimizedPoints,
+        distance: optimizedDistance,
+        estimatedTime: estimatedTime + trafficAnalysis.delayMinutes,
+        fuelCost,
+        tollCost,
+        totalCost,
+        co2Emission,
+        savings: {
+          distance: depotOptimization ? Math.max(0, directDistance - optimizedDistance) : 0,
+          time: depotOptimization ? 30 : 0, // Depot consolidation saves time
+          fuel: depotOptimization ? Math.round((directDistance - optimizedDistance) * vietnamTruckSpecs[truckType].fuel / 100 * 25000) : 0
+        },
+        efficiency: Math.round((1 - (optimizedDistance / Math.max(directDistance, optimizedDistance))) * 100),
+        restrictions,
+        trafficAnalysis
+      }
       
       clearInterval(progressInterval)
       setOptimizationProgress(100)
-      setOptimizedRoute(routeResponse)
+      setOptimizedRoute(optimizedRoute)
       
       setTimeout(() => setOptimizationProgress(0), 1000)
     } catch (error) {
       console.error('Route optimization failed:', error)
-      alert(`Route optimization failed: ${error}`)
+      alert(`Tối ưu tuyến đường thất bại: ${error}`)
     } finally {
       setIsOptimizing(false)
     }
@@ -419,42 +619,88 @@ const RouteOptimizationPage = () => {
 
                     <div className="space-y-2">
                       <Label htmlFor="departure">Departure Point</Label>
-                      <select
-                        id="departure"
-                        value={departure?.id || ''}
-                        onChange={(e) => {
-                          const selected = routes.find(r => r.id === e.target.value)
-                          setDeparture(selected || null)
-                        }}
-                        className="w-full p-2 border rounded-md text-sm"
-                      >
-                        <option value="">Select departure point...</option>
-                        {routes.filter(r => r.type === 'warehouse' || r.type === 'pickup').map(point => (
-                          <option key={point.id} value={point.id}>
-                            {point.name} - {point.address}
-                          </option>
-                        ))}
-                      </select>
+                      <div className="relative">
+                        <select
+                          id="departure"
+                          value={departure?.id || ''}
+                          onChange={(e) => {
+                            const selected = routes.find(r => r.id === e.target.value)
+                            setDeparture(selected || null)
+                            setOptimizedRoute(null) // Reset optimization when changing points
+                          }}
+                          className="w-full p-3 border rounded-md text-sm bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        >
+                          <option value="">🚛 Chọn điểm xuất phát...</option>
+                          <optgroup label="📦 Kho hàng & Depot">
+                            {routes.filter(r => r.type === 'warehouse').map(point => (
+                              <option key={point.id} value={point.id}>
+                                📦 {point.name} - {point.address}
+                              </option>
+                            ))}
+                          </optgroup>
+                          <optgroup label="📍 Điểm lấy hàng">
+                            {routes.filter(r => r.type === 'pickup').map(point => (
+                              <option key={point.id} value={point.id}>
+                                📍 {point.name} - {point.address}
+                              </option>
+                            ))}
+                          </optgroup>
+                        </select>
+                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                      </div>
+                      {departure && (
+                        <div className="p-2 bg-green-50 border border-green-200 rounded-md text-sm">
+                          ✅ Đã chọn: <strong>{departure.name}</strong>
+                          <br />📍 {departure.address}
+                        </div>
+                      )}
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="destination">Destination Point</Label>
-                      <select
-                        id="destination"
-                        value={destination?.id || ''}
-                        onChange={(e) => {
-                          const selected = routes.find(r => r.id === e.target.value)
-                          setDestination(selected || null)
-                        }}
-                        className="w-full p-2 border rounded-md text-sm"
-                      >
-                        <option value="">Select destination point...</option>
-                        {routes.filter(r => r.type === 'delivery' || r.type === 'warehouse').map(point => (
-                          <option key={point.id} value={point.id}>
-                            {point.name} - {point.address}
-                          </option>
-                        ))}
-                      </select>
+                      <div className="relative">
+                        <select
+                          id="destination"
+                          value={destination?.id || ''}
+                          onChange={(e) => {
+                            const selected = routes.find(r => r.id === e.target.value)
+                            setDestination(selected || null)
+                            setOptimizedRoute(null) // Reset optimization when changing points
+                          }}
+                          className="w-full p-3 border rounded-md text-sm bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        >
+                          <option value="">🎯 Chọn điểm đến...</option>
+                          <optgroup label="🏭 Kho hàng & Depot">
+                            {routes.filter(r => r.type === 'warehouse').map(point => (
+                              <option key={point.id} value={point.id}>
+                                🏭 {point.name} - {point.address}
+                              </option>
+                            ))}
+                          </optgroup>
+                          <optgroup label="🚚 Điểm giao hàng">
+                            {routes.filter(r => r.type === 'delivery').map(point => (
+                              <option key={point.id} value={point.id}>
+                                🚚 {point.name} - {point.address}
+                              </option>
+                            ))}
+                          </optgroup>
+                        </select>
+                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                      </div>
+                      {destination && (
+                        <div className="p-2 bg-blue-50 border border-blue-200 rounded-md text-sm">
+                          ✅ Đã chọn: <strong>{destination.name}</strong>
+                          <br />📍 {destination.address}
+                        </div>
+                      )}
                     </div>
 
                     <div className="space-y-2">

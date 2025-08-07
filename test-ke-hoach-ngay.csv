@@ -1,0 +1,11 @@
+STT,Ngày,Điểm đi,Điểm đến,Xe,Tài xế,Hàng hóa,Trọng lượng,Chi phí,Trạng thái,Ghi chú
+1,07/08/2025,Sinovl Tan Van Depot,Cảng Cái Mép,29H-12345,Nguyễn Văn A,Gạo,15000,2500000,Hoàn thành,Giao hàng đúng giờ
+2,07/08/2025,Kho trung tâm TP.HCM,KCN Tân Thuận,51G-67890,Trần Văn B,Dệt may,8000,1800000,Đang chạy,Đang vận chuyển
+3,07/08/2025,Chợ đầu mối Hóc Môn,Siêu thị Metro Thủ Đức,43F-11111,Lê Thị C,Thực phẩm,5000,1200000,Hoàn thành,Giao sớm 30 phút
+4,08/08/2025,Depot Hà Nội,Chợ Long Biên,30A-22222,Phạm Văn D,Cà phê,12000,3200000,Chuẩn bị,Xuất phát 6h sáng
+5,08/08/2025,Cảng Cát Lái,KCN VSIP Bình Dương,29H-33333,Hoàng Văn E,Điện tử,20000,4500000,Chuẩ bị,Container 40ft
+6,08/08/2025,Depot Đà Nẵng,Trung tâm phân phối Nha Trang,43D-44444,Võ Thị F,Cao su,18000,3800000,Đang chạy,Tuyến dài
+7,09/08/2025,Depot Cần Thơ,Chợ đầu mối Hóc Môn,51C-55555,Đỗ Văn G,Gạo,25000,2800000,Chuẩn bị,Tải trọng cao
+8,09/08/2025,KCN Long Hậu,Cảng Hải Phòng,30H-66666,Bùi Thị H,Thép,30000,5200000,Chuẩn bị,Hàng nặng
+9,09/08/2025,Trung tâm phân phối Vũng Tàu,Lotte Mart Hà Nội,29G-77777,Ngô Văn I,Thực phẩm đông lạnh,10000,3500000,Chuẩn bị,Cần xe lạnh
+10,10/08/2025,Big C Miền Đông,Trung tâm phân phối Huế,43H-88888,Mai Thị K,Hàng tiêu dùng,7000,2900000,Chuẩn bị,Giao hàng cuối tuần

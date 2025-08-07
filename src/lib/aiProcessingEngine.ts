@@ -22,12 +22,14 @@ export interface LogisticsRecord {
 
 export interface AIInsight {
   id: string
-  type: 'route_optimization' | 'schedule_optimization' | 'resource_optimization' | 'cost_optimization' | 'staff_replacement'
+  type: 'optimization' | 'prediction' | 'recommendation' | 'alert'
+  category: 'route' | 'cost' | 'time' | 'resource' | 'safety'
   title: string
   description: string
   impact: 'high' | 'medium' | 'low'
-  recommendation: string
   confidence: number
+  actionable: boolean
+  suggestedActions?: string[]
   potential_savings?: number
   automation_level?: number
   staff_replacement_suggestion?: {
@@ -43,16 +45,28 @@ export interface ProcessingResult {
   totalRecords: number
   validRecords: number
   errors: string[]
-  data: LogisticsRecord[]
+  records: LogisticsRecord[] // Changed from 'data' to 'records'
   insights: AIInsight[]
   summary: {
     totalFiles: number
     totalRecords: number
+    totalCost: number
+    averageDistance: number
     successRate: number
     processingTime: number
     dataQuality: 'excellent' | 'good' | 'fair' | 'poor'
     patterns_detected: string[]
     automation_opportunities: number
+    dateRange: {
+      start: string
+      end: string
+    }
+    commonRoutes: string[]
+    performanceMetrics: {
+      onTimeDelivery: number
+      averageCost: number
+      fuelEfficiency: number
+    }
   }
   staff_analysis: {
     repetitive_tasks: string[]
@@ -60,6 +74,15 @@ export interface ProcessingResult {
     efficiency_improvements: string[]
     cost_reduction_potential: number
   }
+  futureSchedule?: {
+    id: string
+    date: string
+    route: string
+    cargo: string
+    weight: number
+    cost: number
+    notes?: string
+  }[]
 }
 
 // Vietnamese logistics patterns and knowledge base
@@ -131,7 +154,12 @@ export class AIProcessingEngine {
       // Staff analysis
       const staffAnalysis = this.analyzeStaffReplacementOpportunities(allRecords, insights)
       
-      this.updateProgress(85, 'Calculating optimization opportunities...')
+      this.updateProgress(85, 'Generating future schedule with AI...')
+      
+      // Generate AI future schedule
+      const futureSchedule = this.generateFutureSchedule(allRecords)
+      
+      this.updateProgress(95, 'Finalizing analysis...')
       
       // Summary analysis
       const summary = this.generateSummary(allRecords, files.length)
@@ -143,10 +171,11 @@ export class AIProcessingEngine {
         totalRecords: allRecords.length,
         validRecords: allRecords.filter(r => r.origin !== 'Unknown' && r.destination !== 'Unknown').length,
         errors: allErrors,
-        data: allRecords,
+        records: allRecords, // Changed from 'data' to 'records'
         insights,
         summary,
-        staff_analysis: staffAnalysis
+        staff_analysis: staffAnalysis,
+        futureSchedule
       }
     } catch (error) {
       throw new Error(`AI processing failed: ${error}`)
@@ -409,12 +438,19 @@ export class AIProcessingEngine {
       if (frequency > 2) {
         insights.push({
           id: `route_opt_${index}`,
-          type: 'route_optimization',
+          type: 'optimization',
+          category: 'route',
           title: `High-Frequency Route Detected: ${route}`,
           description: `This route appears ${frequency} times in your data, representing ${((frequency / records.length) * 100).toFixed(1)}% of all shipments.`,
           impact: frequency > 10 ? 'high' : frequency > 5 ? 'medium' : 'low',
-          recommendation: `Consider establishing a dedicated schedule or consolidating shipments for this route to reduce costs by 15-25%.`,
           confidence: 0.85,
+          actionable: true,
+          suggestedActions: [
+            'Establish a dedicated schedule for this route',
+            'Consolidate shipments to reduce costs by 15-25%',
+            'Consider using larger vehicles for better efficiency',
+            'Negotiate better rates with frequent customers'
+          ],
           potential_savings: frequency * 500000, // VND
           automation_level: 80
         })
@@ -634,9 +670,90 @@ export class AIProcessingEngine {
     }
   }
 
+  private generateFutureSchedule(records: LogisticsRecord[]): ProcessingResult['futureSchedule'] {
+    if (records.length === 0) return []
+    
+    const futureSchedule = []
+    const today = new Date()
+    
+    // Analyze patterns from historical data
+    const routeFrequency = records.reduce((acc, record) => {
+      const route = `${record.origin} → ${record.destination}`
+      acc[route] = (acc[route] || 0) + 1
+      return acc
+    }, {} as Record<string, number>)
+    
+    const cargoTypes = records.reduce((acc, record) => {
+      if (record.cargo) {
+        acc[record.cargo] = (acc[record.cargo] || 0) + 1
+      }
+      return acc
+    }, {} as Record<string, number>)
+    
+    const topRoutes = Object.entries(routeFrequency)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 5)
+    
+    const topCargo = Object.entries(cargoTypes)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 3)
+    
+    // Generate 7 days of future schedule
+    for (let i = 1; i <= 7; i++) {
+      const futureDate = new Date(today)
+      futureDate.setDate(today.getDate() + i)
+      
+      // Select route based on frequency and day pattern
+      const selectedRoute = topRoutes[i % topRoutes.length]
+      const selectedCargo = topCargo[i % topCargo.length]
+      
+      if (selectedRoute && selectedCargo) {
+        // Calculate estimated cost based on historical data
+        const similarRecords = records.filter(r => 
+          r.cargo === selectedCargo[0] && 
+          `${r.origin} → ${r.destination}` === selectedRoute[0]
+        )
+        
+        const avgCost = similarRecords.length > 0 
+          ? similarRecords.reduce((sum, r) => sum + (r.cost || 0), 0) / similarRecords.length
+          : 2000000 // Default estimate
+        
+        const avgWeight = similarRecords.length > 0
+          ? similarRecords.reduce((sum, r) => sum + (r.weight || 0), 0) / similarRecords.length
+          : 15000 // Default 15 tons
+        
+        futureSchedule.push({
+          id: `future_${i}`,
+          date: futureDate.toLocaleDateString('vi-VN'),
+          route: selectedRoute[0],
+          cargo: selectedCargo[0],
+          weight: Math.round(avgWeight),
+          cost: Math.round(avgCost),
+          notes: `AI prediction based on ${selectedRoute[1]} similar trips`
+        })
+      }
+    }
+    
+    return futureSchedule
+  }
   private generateSummary(records: LogisticsRecord[], fileCount: number): ProcessingResult['summary'] {
     const validRecords = records.filter(r => r.origin !== 'Unknown' && r.destination !== 'Unknown')
     const successRate = (validRecords.length / Math.max(records.length, 1)) * 100
+    
+    // Calculate total cost and average distance
+    const recordsWithCost = records.filter(r => r.cost && r.cost > 0)
+    const totalCost = recordsWithCost.reduce((sum, r) => sum + (r.cost || 0), 0)
+    const averageCost = recordsWithCost.length > 0 ? totalCost / recordsWithCost.length : 0
+    
+    const recordsWithDistance = records.filter(r => r.distance && r.distance > 0)
+    const averageDistance = recordsWithDistance.length > 0 
+      ? recordsWithDistance.reduce((sum, r) => sum + (r.distance || 0), 0) / recordsWithDistance.length
+      : 0
+    
+    // Date range analysis
+    const dates = records.map(r => new Date(r.date)).filter(d => !isNaN(d.getTime()))
+    const startDate = dates.length > 0 ? new Date(Math.min(...dates.map(d => d.getTime()))) : new Date()
+    const endDate = dates.length > 0 ? new Date(Math.max(...dates.map(d => d.getTime()))) : new Date()
     
     // Data quality assessment
     let dataQuality: 'excellent' | 'good' | 'fair' | 'poor' = 'poor'
@@ -671,17 +788,46 @@ export class AIProcessingEngine {
       patternsDetected.push('Comprehensive cost tracking detected')
     }
     
+    // Common routes
+    const commonRoutes = Object.entries(routeFrequency)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 5)
+      .map(([route]) => route)
+    
+    // Performance metrics
+    const completedRecords = records.filter(r => r.status === 'completed')
+    const onTimeDelivery = completedRecords.length > 0 
+      ? (completedRecords.length / records.length) * 100 
+      : 85 // Default assumption
+    
+    const recordsWithFuel = records.filter(r => r.fuelConsumption && r.distance)
+    const fuelEfficiency = recordsWithFuel.length > 0
+      ? recordsWithFuel.reduce((sum, r) => sum + ((r.fuelConsumption || 0) / (r.distance || 1)), 0) / recordsWithFuel.length
+      : 35 // Default 35L/100km
+    
     // Automation opportunities
     const automationOpportunities = Math.min(10, Math.floor(records.length / 10))
     
     return {
       totalFiles: fileCount,
       totalRecords: records.length,
+      totalCost,
+      averageDistance,
       successRate: Math.round(successRate),
       processingTime: Date.now(),
       dataQuality,
       patterns_detected: patternsDetected,
-      automation_opportunities: automationOpportunities
+      automation_opportunities: automationOpportunities,
+      dateRange: {
+        start: startDate.toLocaleDateString('vi-VN'),
+        end: endDate.toLocaleDateString('vi-VN')
+      },
+      commonRoutes,
+      performanceMetrics: {
+        onTimeDelivery: Math.round(onTimeDelivery),
+        averageCost: Math.round(averageCost),
+        fuelEfficiency: Math.round(fuelEfficiency * 100) / 100
+      }
     }
   }
 }
