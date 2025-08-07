@@ -628,34 +628,36 @@ const RouteOptimizationPage = () => {
                             setDeparture(selected || null)
                             setOptimizedRoute(null) // Reset optimization when changing points
                           }}
-                          className="w-full p-3 border rounded-md text-sm bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                          className="w-full p-4 border-2 rounded-lg text-base bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm hover:border-indigo-300 transition-colors"
+                          style={{ fontSize: '16px', lineHeight: '1.5' }}
                         >
-                          <option value="">🚛 Chọn điểm xuất phát...</option>
-                          <optgroup label="📦 Kho hàng & Depot">
+                          <option value="" style={{ padding: '8px', fontSize: '16px' }}>🚛 Chọn điểm xuất phát...</option>
+                          <optgroup label="📦 Kho hàng & Depot" style={{ fontSize: '16px', fontWeight: 'bold', color: '#4F46E5' }}>
                             {routes.filter(r => r.type === 'warehouse').map(point => (
-                              <option key={point.id} value={point.id}>
+                              <option key={point.id} value={point.id} style={{ padding: '8px', fontSize: '15px', lineHeight: '1.4' }}>
                                 📦 {point.name} - {point.address}
                               </option>
                             ))}
                           </optgroup>
-                          <optgroup label="📍 Điểm lấy hàng">
+                          <optgroup label="📍 Điểm lấy hàng" style={{ fontSize: '16px', fontWeight: 'bold', color: '#059669' }}>
                             {routes.filter(r => r.type === 'pickup').map(point => (
-                              <option key={point.id} value={point.id}>
+                              <option key={point.id} value={point.id} style={{ padding: '8px', fontSize: '15px', lineHeight: '1.4' }}>
                                 📍 {point.name} - {point.address}
                               </option>
                             ))}
                           </optgroup>
                         </select>
-                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                           </svg>
                         </div>
                       </div>
                       {departure && (
-                        <div className="p-2 bg-green-50 border border-green-200 rounded-md text-sm">
-                          ✅ Đã chọn: <strong>{departure.name}</strong>
-                          <br />📍 {departure.address}
+                        <div className="p-3 bg-green-50 border border-green-200 rounded-lg text-sm">
+                          ✅ <strong>Điểm xuất phát:</strong> {departure.name}
+                          <br />📍 <strong>Địa chỉ:</strong> {departure.address}
+                          <br />🕒 <strong>Giờ hoạt động:</strong> {departure.timeWindow?.start} - {departure.timeWindow?.end}
                         </div>
                       )}
                     </div>
@@ -671,37 +673,87 @@ const RouteOptimizationPage = () => {
                             setDestination(selected || null)
                             setOptimizedRoute(null) // Reset optimization when changing points
                           }}
-                          className="w-full p-3 border rounded-md text-sm bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                          className="w-full p-4 border-2 rounded-lg text-base bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm hover:border-indigo-300 transition-colors"
+                          style={{ fontSize: '16px', lineHeight: '1.5' }}
                         >
-                          <option value="">🎯 Chọn điểm đến...</option>
-                          <optgroup label="🏭 Kho hàng & Depot">
+                          <option value="" style={{ padding: '8px', fontSize: '16px' }}>🎯 Chọn điểm đến...</option>
+                          <optgroup label="🏭 Kho hàng & Depot" style={{ fontSize: '16px', fontWeight: 'bold', color: '#4F46E5' }}>
                             {routes.filter(r => r.type === 'warehouse').map(point => (
-                              <option key={point.id} value={point.id}>
+                              <option key={point.id} value={point.id} style={{ padding: '8px', fontSize: '15px', lineHeight: '1.4' }}>
                                 🏭 {point.name} - {point.address}
                               </option>
                             ))}
                           </optgroup>
-                          <optgroup label="🚚 Điểm giao hàng">
+                          <optgroup label="🚚 Điểm giao hàng" style={{ fontSize: '16px', fontWeight: 'bold', color: '#DC2626' }}>
                             {routes.filter(r => r.type === 'delivery').map(point => (
-                              <option key={point.id} value={point.id}>
+                              <option key={point.id} value={point.id} style={{ padding: '8px', fontSize: '15px', lineHeight: '1.4' }}>
                                 🚚 {point.name} - {point.address}
                               </option>
                             ))}
                           </optgroup>
                         </select>
-                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                           </svg>
                         </div>
                       </div>
                       {destination && (
-                        <div className="p-2 bg-blue-50 border border-blue-200 rounded-md text-sm">
-                          ✅ Đã chọn: <strong>{destination.name}</strong>
-                          <br />📍 {destination.address}
+                        <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm">
+                          ✅ <strong>Điểm đến:</strong> {destination.name}
+                          <br />📍 <strong>Địa chỉ:</strong> {destination.address}
+                          <br />🕒 <strong>Giờ hoạt động:</strong> {destination.timeWindow?.start} - {destination.timeWindow?.end}
                         </div>
                       )}
                     </div>
+
+                    {/* Nearest Depot Display */}
+                    {departure && destination && departure.id !== destination.id && (
+                      <div className="space-y-2">
+                        <Label>Nearest Depot Optimization</Label>
+                        {(() => {
+                          const nearestDepot = findNearestDepot(departure, destination)
+                          if (nearestDepot && nearestDepot.id !== departure.id && nearestDepot.id !== destination.id) {
+                            const directDistance = calculateDistance(departure, destination)
+                            const depotDistance = calculateDistance(departure, nearestDepot) + calculateDistance(nearestDepot, destination)
+                            const savings = directDistance - depotDistance
+                            
+                            return (
+                              <div className="p-3 bg-purple-50 border border-purple-200 rounded-lg text-sm">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <MapPin className="w-4 h-4 text-purple-600" />
+                                  <strong className="text-purple-800">Suggested Depot: {nearestDepot.name}</strong>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4 text-xs">
+                                  <div>
+                                    <div className="text-gray-600">Direct Route:</div>
+                                    <div className="font-medium">{directDistance.toFixed(1)} km</div>
+                                  </div>
+                                  <div>
+                                    <div className="text-gray-600">Via Depot:</div>
+                                    <div className="font-medium">{depotDistance.toFixed(1)} km</div>
+                                  </div>
+                                </div>
+                                {savings > 0 ? (
+                                  <div className="mt-2 text-green-700 font-medium">
+                                    💰 Savings: {savings.toFixed(1)} km ({(savings * 7000).toLocaleString()} VNĐ)
+                                  </div>
+                                ) : (
+                                  <div className="mt-2 text-orange-700 font-medium">
+                                    ⚠️ Direct route is more efficient
+                                  </div>
+                                )}
+                              </div>
+                            )
+                          }
+                          return (
+                            <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600">
+                              No depot optimization available for this route
+                            </div>
+                          )
+                        })()}
+                      </div>
+                    )}
 
                     <div className="space-y-2">
                       <Label htmlFor="departure-time">Departure Time</Label>

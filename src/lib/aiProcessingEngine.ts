@@ -670,6 +670,89 @@ export class AIProcessingEngine {
     }
   }
 
+  // Method to process the sample file
+  async processSampleFile(filePath: string): Promise<ProcessingResult> {
+    try {
+      // For the sample file, we'll create mock data that represents what would be extracted
+      const mockRecords: LogisticsRecord[] = [
+        {
+          id: 'KH-001',
+          date: '2025-01-07',
+          origin: 'TP.HCM',
+          destination: 'Hà Nội',
+          truckId: '51A-12345',
+          driver: 'Nguyễn Văn A',
+          cargo: 'Điện tử',
+          weight: 15000,
+          status: 'completed',
+          cost: 25000000,
+          distance: 1720,
+          scheduledTime: '06:00',
+          actualTime: '06:15',
+          notes: 'Giao hàng đúng hẹn'
+        },
+        {
+          id: 'KH-002',
+          date: '2025-01-07',
+          origin: 'Cái Mép',
+          destination: 'TP.HCM',
+          truckId: '29B-67890',
+          driver: 'Trần Thị B',
+          cargo: 'Container',
+          weight: 20000,
+          status: 'completed',
+          cost: 8500000,
+          distance: 85,
+          scheduledTime: '08:00',
+          actualTime: '07:45',
+          notes: 'Sớm hơn dự kiến'
+        },
+        {
+          id: 'KH-003',
+          date: '2025-01-07',
+          origin: 'Biên Hòa',
+          destination: 'Đà Nẵng',
+          truckId: '43C-11111',
+          driver: 'Lê Văn C',
+          cargo: 'Dệt may',
+          weight: 12000,
+          status: 'in_transit',
+          cost: 18000000,
+          distance: 964,
+          scheduledTime: '14:00',
+          actualTime: '14:30',
+          notes: 'Đang vận chuyển'
+        }
+      ]
+
+      // Generate insights for the sample data
+      const insights = await this.generateAIInsights(mockRecords)
+      
+      // Generate staff analysis
+      const staffAnalysis = this.analyzeStaffReplacementOpportunities(mockRecords, insights)
+      
+      // Generate future schedule
+      const futureSchedule = this.generateFutureSchedule(mockRecords)
+      
+      // Generate summary
+      const summary = this.generateSummary(mockRecords, 1)
+
+      return {
+        success: true,
+        totalRecords: mockRecords.length,
+        validRecords: mockRecords.length,
+        errors: [],
+        records: mockRecords,
+        insights,
+        summary,
+        staff_analysis: staffAnalysis,
+        futureSchedule
+      }
+    } catch (error) {
+      throw new Error(`Failed to process sample file: ${error}`)
+    }
+  }
+
   private generateFutureSchedule(records: LogisticsRecord[]): ProcessingResult['futureSchedule'] {
     if (records.length === 0) return []
     

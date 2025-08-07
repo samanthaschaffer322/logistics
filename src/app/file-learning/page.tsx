@@ -129,6 +129,31 @@ const FilelearningPage = () => {
     }
   }
 
+  const processSampleFile = async () => {
+    setIsProcessing(true)
+    setError(null)
+    setProcessingProgress(0)
+    
+    try {
+      // Set up progress tracking
+      aiProcessingEngine.onProgress((progress, status) => {
+        setProcessingProgress(progress)
+        console.log(`Processing sample: ${progress}% - ${status}`)
+      })
+      
+      // Process the sample file
+      const result = await aiProcessingEngine.processSampleFile('/Users/aelitapham/Downloads/KẾ HOẠCH NGÀY.xlsx')
+      
+      setProcessingResult(result)
+    } catch (error) {
+      console.error('Sample file processing error:', error)
+      setError(`Sample processing failed: ${error}. This is a demo of AI analysis capabilities.`)
+    } finally {
+      setIsProcessing(false)
+      setTimeout(() => setProcessingProgress(0), 1000)
+    }
+  }
+
   const removeFile = (index: number) => {
     setUploadedFiles(prev => prev.filter((_, i) => i !== index))
   }
@@ -345,6 +370,17 @@ const FilelearningPage = () => {
                         Bắt đầu phân tích AI
                       </>
                     )}
+                  </Button>
+
+                  <Button 
+                    onClick={processSampleFile}
+                    disabled={isProcessing}
+                    variant="outline"
+                    className="w-full border-purple-600 text-purple-600 hover:bg-purple-50"
+                    size="lg"
+                  >
+                    <Brain className="w-4 h-4 mr-2" />
+                    Demo với file mẫu
                   </Button>
                   
                   <div className="text-sm text-slate-600 space-y-2">
@@ -619,9 +655,9 @@ const FilelearningPage = () => {
                         <div key={schedule.id} className="p-4 border rounded-lg bg-blue-50">
                           <div className="flex items-center justify-between mb-2">
                             <div className="font-medium">{schedule.date}</div>
-                            <Badge className="bg-blue-100 text-blue-800">
+                            <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
                               AI Suggestion
-                            </Badge>
+                            </span>
                           </div>
                           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                             <div>
