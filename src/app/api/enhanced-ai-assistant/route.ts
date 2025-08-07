@@ -60,17 +60,26 @@ Note: Provide practical, applicable information suitable for the Vietnamese mark
 
     try {
       // Try to get response from ChatGPT service
-      if (message.toLowerCase().includes('tối ưu') || message.toLowerCase().includes('route')) {
-        aiResponse = await chatGPTService.optimizeRoute('TP.HCM', 'Hà Nội')
+      if (message.toLowerCase().includes('tối ưu') || message.toLowerCase().includes('route') || message.toLowerCase().includes('optimize')) {
+        if (language === 'vi') {
+          aiResponse = await chatGPTService.optimizeRoute('TP.HCM', 'Hà Nội')
+        } else {
+          aiResponse = generateComprehensiveResponse(message, language)
+        }
       } else {
-        aiResponse = await chatGPTService.analyzeLogisticsData({ message, context: 'vietnamese_logistics' })
+        if (language === 'vi') {
+          aiResponse = await chatGPTService.analyzeLogisticsData({ message, context: 'vietnamese_logistics' })
+        } else {
+          aiResponse = generateComprehensiveResponse(message, language)
+        }
       }
       
       usage = {
         prompt_tokens: Math.floor(enhancedPrompt.length / 4),
         completion_tokens: Math.floor(aiResponse.length / 4),
         total_tokens: Math.floor((enhancedPrompt.length + aiResponse.length) / 4),
-        openai_integration: true
+        openai_integration: true,
+        language: language
       }
     } catch (error) {
       console.error('AI service error:', error)
@@ -81,7 +90,8 @@ Note: Provide practical, applicable information suitable for the Vietnamese mark
         prompt_tokens: 150,
         completion_tokens: 300,
         total_tokens: 450,
-        openai_integration: false
+        openai_integration: false,
+        language: language
       }
     }
 

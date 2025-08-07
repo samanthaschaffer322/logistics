@@ -130,24 +130,33 @@ const FilelearningPage = () => {
 
     if (format === 'pdf') {
       content = planGenerator.exportToPDF(automationPlan)
-      filename = `automation-plan-${Date.now()}.pdf`
-      mimeType = 'application/pdf'
+      filename = `automation-plan-${Date.now()}.txt` // Using .txt for now since it's text content
+      mimeType = 'text/plain'
     } else {
       content = planGenerator.exportToExcel(automationPlan)
       filename = `automation-plan-${Date.now()}.csv`
       mimeType = 'text/csv'
     }
 
-    // Create and download file
-    const blob = new Blob([content], { type: mimeType })
+    // Create and download file with proper encoding
+    const BOM = '\uFEFF' // UTF-8 BOM for Excel compatibility
+    const finalContent = format === 'excel' ? BOM + content : content
+    const blob = new Blob([finalContent], { type: mimeType + ';charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
     a.download = filename
+    a.style.display = 'none'
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
+
+    // Show success message
+    alert(language === 'vi' 
+      ? `Đã tải xuống ${filename} thành công!`
+      : `Successfully downloaded ${filename}!`
+    )
   }
 
   const handlePreviewPlan = () => {
