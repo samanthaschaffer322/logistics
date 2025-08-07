@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import AuthGuard from '@/components/AuthGuard'
 import { useLanguage } from '@/contexts/LanguageContext'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
 import { 
   Card, 
   CardContent, 
@@ -217,10 +218,13 @@ const FilelearningPage = () => {
       <div className="min-h-screen bg-slate-900 p-6">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">AI File Learning Engine</h1>
-            <p className="text-slate-400">
-              Upload và phân tích các file kế hoạch logistics để nhận insights thông minh từ AI
-            </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-white mb-2">{t('file.title')}</h1>
+                <p className="text-slate-400">{t('file.description')}</p>
+              </div>
+              <LanguageSwitcher />
+            </div>
           </div>
 
           {/* Error Display */}

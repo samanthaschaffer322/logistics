@@ -38,7 +38,8 @@ import {
   Save,
   RefreshCw,
   Brain,
-  Zap
+  Zap,
+  Activity
 } from 'lucide-react'
 
 // Generate realistic import-export data

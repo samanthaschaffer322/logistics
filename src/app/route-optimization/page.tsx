@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react'
 import AuthGuard from '@/components/AuthGuard'
+import { useLanguage } from '@/contexts/LanguageContext'
+import LanguageSwitcher from '@/components/LanguageSwitcher'
 import { 
   advancedRouteOptimizer, 
   RouteOptimizationRequest, 
@@ -77,6 +79,7 @@ interface OptimizedRoute {
 }
 
 const RouteOptimizationPage = () => {
+  const { t } = useLanguage()
   const [routes, setRoutes] = useState<RoutePoint[]>([])
   const [optimizedRoute, setOptimizedRoute] = useState<OptimizedRoute | null>(null)
   const [isOptimizing, setIsOptimizing] = useState(false)
@@ -584,10 +587,13 @@ const RouteOptimizationPage = () => {
       <div className="min-h-screen bg-slate-900 p-6">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">AI Route Optimization for 40ft Container Trucks</h1>
-            <p className="text-slate-400">
-              Advanced truck routing with Vietnam road constraints, traffic analysis, and fuel optimization
-            </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-white mb-2">{t('route.title')}</h1>
+                <p className="text-slate-400">{t('route.description')}</p>
+              </div>
+              <LanguageSwitcher />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -628,20 +634,47 @@ const RouteOptimizationPage = () => {
                             setDeparture(selected || null)
                             setOptimizedRoute(null) // Reset optimization when changing points
                           }}
-                          className="w-full p-4 border-2 rounded-lg text-base bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm hover:border-indigo-300 transition-colors"
-                          style={{ fontSize: '16px', lineHeight: '1.5' }}
+                          className="w-full p-4 border-2 rounded-lg text-base bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm hover:border-indigo-300 transition-colors appearance-none"
+                          style={{ 
+                            fontSize: '16px', 
+                            lineHeight: '1.5',
+                            color: '#1f2937',
+                            fontWeight: '500'
+                          }}
                         >
-                          <option value="" style={{ padding: '8px', fontSize: '16px' }}>🚛 Chọn điểm xuất phát...</option>
-                          <optgroup label="📦 Kho hàng & Depot" style={{ fontSize: '16px', fontWeight: 'bold', color: '#4F46E5' }}>
+                          <option value="" style={{ padding: '12px', fontSize: '16px', color: '#6b7280' }}>
+                            🚛 Chọn điểm xuất phát...
+                          </option>
+                          <optgroup label="📦 Kho hàng & Depot" style={{ fontSize: '16px', fontWeight: 'bold', color: '#4F46E5', backgroundColor: '#f8fafc' }}>
                             {routes.filter(r => r.type === 'warehouse').map(point => (
-                              <option key={point.id} value={point.id} style={{ padding: '8px', fontSize: '15px', lineHeight: '1.4' }}>
+                              <option 
+                                key={point.id} 
+                                value={point.id} 
+                                style={{ 
+                                  padding: '12px', 
+                                  fontSize: '15px', 
+                                  lineHeight: '1.4',
+                                  color: '#1f2937',
+                                  backgroundColor: '#ffffff'
+                                }}
+                              >
                                 📦 {point.name} - {point.address}
                               </option>
                             ))}
                           </optgroup>
-                          <optgroup label="📍 Điểm lấy hàng" style={{ fontSize: '16px', fontWeight: 'bold', color: '#059669' }}>
+                          <optgroup label="📍 Điểm lấy hàng" style={{ fontSize: '16px', fontWeight: 'bold', color: '#059669', backgroundColor: '#f0fdf4' }}>
                             {routes.filter(r => r.type === 'pickup').map(point => (
-                              <option key={point.id} value={point.id} style={{ padding: '8px', fontSize: '15px', lineHeight: '1.4' }}>
+                              <option 
+                                key={point.id} 
+                                value={point.id} 
+                                style={{ 
+                                  padding: '12px', 
+                                  fontSize: '15px', 
+                                  lineHeight: '1.4',
+                                  color: '#1f2937',
+                                  backgroundColor: '#ffffff'
+                                }}
+                              >
                                 📍 {point.name} - {point.address}
                               </option>
                             ))}
@@ -673,20 +706,47 @@ const RouteOptimizationPage = () => {
                             setDestination(selected || null)
                             setOptimizedRoute(null) // Reset optimization when changing points
                           }}
-                          className="w-full p-4 border-2 rounded-lg text-base bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm hover:border-indigo-300 transition-colors"
-                          style={{ fontSize: '16px', lineHeight: '1.5' }}
+                          className="w-full p-4 border-2 rounded-lg text-base bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm hover:border-indigo-300 transition-colors appearance-none"
+                          style={{ 
+                            fontSize: '16px', 
+                            lineHeight: '1.5',
+                            color: '#1f2937',
+                            fontWeight: '500'
+                          }}
                         >
-                          <option value="" style={{ padding: '8px', fontSize: '16px' }}>🎯 Chọn điểm đến...</option>
-                          <optgroup label="🏭 Kho hàng & Depot" style={{ fontSize: '16px', fontWeight: 'bold', color: '#4F46E5' }}>
+                          <option value="" style={{ padding: '12px', fontSize: '16px', color: '#6b7280' }}>
+                            🎯 Chọn điểm đến...
+                          </option>
+                          <optgroup label="🏭 Kho hàng & Depot" style={{ fontSize: '16px', fontWeight: 'bold', color: '#4F46E5', backgroundColor: '#f8fafc' }}>
                             {routes.filter(r => r.type === 'warehouse').map(point => (
-                              <option key={point.id} value={point.id} style={{ padding: '8px', fontSize: '15px', lineHeight: '1.4' }}>
+                              <option 
+                                key={point.id} 
+                                value={point.id} 
+                                style={{ 
+                                  padding: '12px', 
+                                  fontSize: '15px', 
+                                  lineHeight: '1.4',
+                                  color: '#1f2937',
+                                  backgroundColor: '#ffffff'
+                                }}
+                              >
                                 🏭 {point.name} - {point.address}
                               </option>
                             ))}
                           </optgroup>
-                          <optgroup label="🚚 Điểm giao hàng" style={{ fontSize: '16px', fontWeight: 'bold', color: '#DC2626' }}>
+                          <optgroup label="🚚 Điểm giao hàng" style={{ fontSize: '16px', fontWeight: 'bold', color: '#DC2626', backgroundColor: '#fef2f2' }}>
                             {routes.filter(r => r.type === 'delivery').map(point => (
-                              <option key={point.id} value={point.id} style={{ padding: '8px', fontSize: '15px', lineHeight: '1.4' }}>
+                              <option 
+                                key={point.id} 
+                                value={point.id} 
+                                style={{ 
+                                  padding: '12px', 
+                                  fontSize: '15px', 
+                                  lineHeight: '1.4',
+                                  color: '#1f2937',
+                                  backgroundColor: '#ffffff'
+                                }}
+                              >
                                 🚚 {point.name} - {point.address}
                               </option>
                             ))}

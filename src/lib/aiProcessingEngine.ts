@@ -581,12 +581,19 @@ export class AIProcessingEngine {
     if (repetitiveTasks.length > 0) {
       insights.push({
         id: 'staff_replacement_1',
-        type: 'staff_replacement',
+        type: 'optimization',
+        category: 'resource',
         title: 'Automation Opportunities Identified',
         description: `${repetitiveTasks.length} repetitive tasks detected that can be automated, potentially replacing 1-2 staff members.`,
         impact: 'high',
-        recommendation: 'Implement AI-driven automation for data entry, route planning, and status tracking to reduce manual work by 70-80%.',
-        confidence: 0.92,
+        confidence: 92,
+        actionable: true,
+        suggestedActions: [
+          'Implement AI-driven automation for data entry',
+          'Automate route planning and optimization',
+          'Set up automatic status tracking',
+          'Deploy automated report generation'
+        ],
         potential_savings: 24000000, // 2 staff * 12M VND/year
         automation_level: 95,
         staff_replacement_suggestion: {
@@ -658,9 +665,12 @@ export class AIProcessingEngine {
       'Automated report generation saving 2 hours/day'
     ]
     
-    const costReductionPotential = insights
-      .filter(i => i.potential_savings)
-      .reduce((sum, i) => sum + (i.potential_savings || 0), 0)
+    // Safely calculate cost reduction potential
+    const costReductionPotential = insights && Array.isArray(insights)
+      ? insights
+          .filter(i => i && typeof i.potential_savings === 'number')
+          .reduce((sum, i) => sum + (i.potential_savings || 0), 0)
+      : 0
     
     return {
       repetitive_tasks: repetitiveTasks,
