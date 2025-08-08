@@ -355,47 +355,130 @@ const CustomsTraining: React.FC = () => {
               </Button>
 
               {fraudAnalysis && (
-                <Alert className={`mt-4 ${
-                  fraudAnalysis.riskLevel === 'CRITICAL' ? 'border-red-500' :
-                  fraudAnalysis.riskLevel === 'HIGH' ? 'border-orange-500' :
-                  fraudAnalysis.riskLevel === 'MEDIUM' ? 'border-yellow-500' :
-                  'border-green-500'
-                }`}>
-                  <AlertTriangle className="h-4 w-4" />
-                  <AlertDescription>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <span>{t('riskLevel')}:</span>
-                        <Badge className={getRiskBadgeColor(fraudAnalysis.riskLevel)}>
-                          {t(fraudAnalysis.riskLevel.toLowerCase())}
-                        </Badge>
-                        <span>{t('fraudProbability')}: {(fraudAnalysis.fraudProbability * 100).toFixed(1)}%</span>
+                <div className="mt-4 space-y-4">
+                  <Alert className={`${
+                    fraudAnalysis.riskLevel === 'CRITICAL' ? 'border-red-500' :
+                    fraudAnalysis.riskLevel === 'HIGH' ? 'border-orange-500' :
+                    fraudAnalysis.riskLevel === 'MEDIUM' ? 'border-yellow-500' :
+                    'border-green-500'
+                  }`}>
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertDescription>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-2">
+                            <span>{t('riskLevel')}:</span>
+                            <Badge className={getRiskBadgeColor(fraudAnalysis.riskLevel)}>
+                              {t(fraudAnalysis.riskLevel.toLowerCase())}
+                            </Badge>
+                          </div>
+                          <div>
+                            <span>{t('fraudProbability')}: {(fraudAnalysis.fraudProbability * 100).toFixed(1)}%</span>
+                          </div>
+                          <div>
+                            <span>{t('confidence')}: {(fraudAnalysis.confidence * 100).toFixed(1)}%</span>
+                          </div>
+                        </div>
+                        
+                        {/* Attention Weights Visualization */}
+                        {fraudAnalysis.attentionWeights && (
+                          <div>
+                            <strong>{t('attentionWeights')}:</strong>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
+                              <div className="text-sm">
+                                <span className="font-medium">{t('temporal')}: </span>
+                                <span>{(fraudAnalysis.attentionWeights.temporal * 100).toFixed(1)}%</span>
+                              </div>
+                              <div className="text-sm">
+                                <span className="font-medium">{t('categorical')}: </span>
+                                <span>{(fraudAnalysis.attentionWeights.categorical * 100).toFixed(1)}%</span>
+                              </div>
+                              <div className="text-sm">
+                                <span className="font-medium">{t('numerical')}: </span>
+                                <span>{(fraudAnalysis.attentionWeights.numerical * 100).toFixed(1)}%</span>
+                              </div>
+                              <div className="text-sm">
+                                <span className="font-medium">{t('network')}: </span>
+                                <span>{(fraudAnalysis.attentionWeights.network * 100).toFixed(1)}%</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Detailed Risk Analysis */}
+                        {fraudAnalysis.detailedAnalysis && (
+                          <div>
+                            <strong>{t('riskFactors')}:</strong>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
+                              <div className="text-sm">
+                                <span className="font-medium">{t('priceRisk')}: </span>
+                                <span className={`${
+                                  fraudAnalysis.detailedAnalysis.riskFactors.priceRisk > 0.7 ? 'text-red-600' :
+                                  fraudAnalysis.detailedAnalysis.riskFactors.priceRisk > 0.4 ? 'text-yellow-600' :
+                                  'text-green-600'
+                                }`}>
+                                  {(fraudAnalysis.detailedAnalysis.riskFactors.priceRisk * 100).toFixed(1)}%
+                                </span>
+                              </div>
+                              <div className="text-sm">
+                                <span className="font-medium">{t('volumeRisk')}: </span>
+                                <span className={`${
+                                  fraudAnalysis.detailedAnalysis.riskFactors.volumeRisk > 0.7 ? 'text-red-600' :
+                                  fraudAnalysis.detailedAnalysis.riskFactors.volumeRisk > 0.4 ? 'text-yellow-600' :
+                                  'text-green-600'
+                                }`}>
+                                  {(fraudAnalysis.detailedAnalysis.riskFactors.volumeRisk * 100).toFixed(1)}%
+                                </span>
+                              </div>
+                              <div className="text-sm">
+                                <span className="font-medium">{t('patternRisk')}: </span>
+                                <span className={`${
+                                  fraudAnalysis.detailedAnalysis.riskFactors.patternRisk > 0.7 ? 'text-red-600' :
+                                  fraudAnalysis.detailedAnalysis.riskFactors.patternRisk > 0.4 ? 'text-yellow-600' :
+                                  'text-green-600'
+                                }`}>
+                                  {(fraudAnalysis.detailedAnalysis.riskFactors.patternRisk * 100).toFixed(1)}%
+                                </span>
+                              </div>
+                              <div className="text-sm">
+                                <span className="font-medium">{t('networkRisk')}: </span>
+                                <span className={`${
+                                  fraudAnalysis.detailedAnalysis.riskFactors.networkRisk > 0.7 ? 'text-red-600' :
+                                  fraudAnalysis.detailedAnalysis.riskFactors.networkRisk > 0.4 ? 'text-yellow-600' :
+                                  'text-green-600'
+                                }`}>
+                                  {(fraudAnalysis.detailedAnalysis.riskFactors.networkRisk * 100).toFixed(1)}%
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {fraudAnalysis.anomalies.length > 0 && (
+                          <div>
+                            <strong>{t('detectedAnomalies')}:</strong>
+                            <ul className="list-disc list-inside mt-1">
+                              {fraudAnalysis.anomalies.map((anomaly: string, index: number) => (
+                                <li key={index} className="text-sm">{anomaly}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        
+                        {fraudAnalysis.recommendations.length > 0 && (
+                          <div>
+                            <strong>{t('recommendations')}:</strong>
+                            <ul className="list-disc list-inside mt-1">
+                              {fraudAnalysis.recommendations.map((rec: string, index: number) => (
+                                <li key={index} className="text-sm">{rec}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
                       </div>
-                      
-                      {fraudAnalysis.anomalies.length > 0 && (
-                        <div>
-                          <strong>{t('detectedAnomalies')}:</strong>
-                          <ul className="list-disc list-inside mt-1">
-                            {fraudAnalysis.anomalies.map((anomaly: string, index: number) => (
-                              <li key={index}>{t(anomaly.toLowerCase()) || anomaly}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                      
-                      {fraudAnalysis.recommendations.length > 0 && (
-                        <div>
-                          <strong>{t('recommendations')}:</strong>
-                          <ul className="list-disc list-inside mt-1">
-                            {fraudAnalysis.recommendations.map((rec: string, index: number) => (
-                              <li key={index}>{rec}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-                  </AlertDescription>
-                </Alert>
+                    </AlertDescription>
+                  </Alert>
+                </div>
               )}
             </CardContent>
           </Card>

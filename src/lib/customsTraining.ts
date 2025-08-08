@@ -1,15 +1,19 @@
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
+import EnhancedFraudDetectionModel, { FraudFeatures, FraudPrediction } from './enhancedFraudDetection';
 
-// Customs Declaration Training System
+// Enhanced Customs Declaration Training System with DATE model integration
 export interface CustomsDeclaration {
   id: string;
   declarationNumber: string;
   importerName: string;
+  importerCode: string;
   exporterName: string;
+  exporterCode: string;
   hsCode: string;
   productDescription: string;
   quantity: number;
+  weight?: number;
   unitPrice: number;
   totalValue: number;
   currency: string;
@@ -21,6 +25,14 @@ export interface CustomsDeclaration {
   fraudProbability: number;
   status: 'pending' | 'approved' | 'rejected' | 'under_review';
   anomalyFlags: string[];
+  seasonality?: number;
+  dayOfWeek?: number;
+  priceDeviation?: number;
+  volumeAnomaly?: number;
+  frequencyScore?: number;
+  traderRiskScore?: number;
+  countryRiskScore?: number;
+  productRiskScore?: number;
 }
 
 export interface TrainingDataset {
@@ -51,9 +63,11 @@ export class CustomsTrainingSystem {
   private trainingData: TrainingDataset | null = null;
   private fraudModel: FraudDetectionModel | null = null;
   private hsCodeDatabase: HSCodeClassification[] = [];
+  private enhancedFraudDetector: EnhancedFraudDetectionModel;
 
   constructor() {
     this.initializeHSCodeDatabase();
+    this.enhancedFraudDetector = new EnhancedFraudDetectionModel();
   }
 
   // Initialize HS Code database with common codes
@@ -124,13 +138,22 @@ export class CustomsTrainingSystem {
     }
   }
 
-  // Generate synthetic customs declaration data
+  // Generate synthetic customs declaration data with enhanced features
   private generateSyntheticData(count: number, type: string): CustomsDeclaration[] {
     const data: CustomsDeclaration[] = [];
     const companies = [
       'Global Trade Corp', 'International Imports Ltd', 'Pacific Trading Co',
       'Euro-Asia Logistics', 'American Export Inc', 'Asian Pacific Trading',
       'Continental Commerce', 'Maritime Shipping Ltd', 'Trans-Global Corp'
+    ];
+    
+    const importerCodes = [
+      'IMP001', 'IMP002', 'IMP003', 'HIGH_RISK_TRADER_001', 'HIGH_RISK_TRADER_002',
+      'MEDIUM_RISK_TRADER_001', 'MEDIUM_RISK_TRADER_002', 'LOW_RISK_TRADER_001', 'LOW_RISK_TRADER_002'
+    ];
+    
+    const exporterCodes = [
+      'EXP001', 'EXP002', 'EXP003', 'EXP004', 'EXP005', 'EXP006'
     ];
     
     const countries = [
@@ -147,31 +170,82 @@ export class CustomsTrainingSystem {
       const hsCode = this.hsCodeDatabase[Math.floor(Math.random() * this.hsCodeDatabase.length)];
       const baseValue = Math.random() * 100000 + 1000;
       const quantity = Math.floor(Math.random() * 1000) + 1;
+      const weight = quantity * (0.5 + Math.random() * 2); // kg per unit
       
-      // Introduce fraud patterns in some records
-      const isFraudulent = Math.random() < 0.15; // 15% fraud rate
+      // Enhanced fraud detection
+      const importerCode = importerCodes[Math.floor(Math.random() * importerCodes.length)];
+      const exporterCode = exporterCodes[Math.floor(Math.random() * exporterCodes.length)];
+      const countryOfOrigin = countries[Math.floor(Math.random() * countries.length)];
+      
+      // Determine if fraudulent based on importer risk
+      const isFraudulent = importerCode.includes('HIGH_RISK') ? Math.random() < 0.6 :
+                          importerCode.includes('MEDIUM_RISK') ? Math.random() < 0.3 :
+                          Math.random() < 0.05;
+      
       const undervaluationFactor = isFraudulent ? 0.3 + Math.random() * 0.4 : 1.0;
       const unitPrice = (baseValue / quantity) * undervaluationFactor;
+      
+      // Generate date and temporal features
+      const declarationDate = this.generateRandomDate();
+      const date = new Date(declarationDate);
+      const seasonality = Math.ceil((date.getMonth() + 1) / 3); // 1-4 quarters
+      const dayOfWeek = date.getDay() + 1; // 1-7
+      
+      // Create enhanced features for fraud detection
+      const fraudFeatures: FraudFeatures = {
+        unitPrice,
+        totalValue: unitPrice * quantity,
+        quantity,
+        weight,
+        hsCode: hsCode.code,
+        countryOfOrigin,
+        portOfEntry: ports[Math.floor(Math.random() * ports.length)],
+        importerCode,
+        exporterCode,
+        declarationDate,
+        seasonality,
+        dayOfWeek,
+        priceDeviation: 0,
+        volumeAnomaly: 0,
+        frequencyScore: 0,
+        traderRiskScore: 0,
+        countryRiskScore: 0,
+        productRiskScore: 0
+      };
+      
+      // Get enhanced fraud prediction
+      const fraudPrediction = this.enhancedFraudDetector.predictFraud(fraudFeatures);
       
       const declaration: CustomsDeclaration = {
         id: `${type}_${i + 1}`,
         declarationNumber: `VN${Date.now()}${i.toString().padStart(6, '0')}`,
         importerName: companies[Math.floor(Math.random() * companies.length)],
+        importerCode,
         exporterName: companies[Math.floor(Math.random() * companies.length)],
+        exporterCode,
         hsCode: hsCode.code,
         productDescription: hsCode.description,
         quantity,
+        weight,
         unitPrice: Math.round(unitPrice * 100) / 100,
         totalValue: Math.round(unitPrice * quantity * 100) / 100,
         currency: 'USD',
-        countryOfOrigin: countries[Math.floor(Math.random() * countries.length)],
-        portOfEntry: ports[Math.floor(Math.random() * ports.length)],
-        declarationDate: this.generateRandomDate(),
+        countryOfOrigin,
+        portOfEntry: fraudFeatures.portOfEntry,
+        declarationDate,
         customsOfficer: `Officer_${Math.floor(Math.random() * 50) + 1}`,
-        riskScore: isFraudulent ? 0.7 + Math.random() * 0.3 : Math.random() * 0.4,
-        fraudProbability: isFraudulent ? 0.8 + Math.random() * 0.2 : Math.random() * 0.3,
-        status: this.generateStatus(isFraudulent),
-        anomalyFlags: this.generateAnomalyFlags(isFraudulent, undervaluationFactor)
+        riskScore: fraudPrediction.fraudProbability,
+        fraudProbability: fraudPrediction.fraudProbability,
+        status: this.generateStatus(fraudPrediction.fraudProbability > 0.5),
+        anomalyFlags: this.generateAnomalyFlags(fraudPrediction),
+        seasonality,
+        dayOfWeek,
+        priceDeviation: fraudPrediction.anomalyScores.price,
+        volumeAnomaly: fraudPrediction.anomalyScores.volume,
+        frequencyScore: fraudPrediction.anomalyScores.pattern,
+        traderRiskScore: fraudPrediction.anomalyScores.network,
+        countryRiskScore: fraudPrediction.anomalyScores.network,
+        productRiskScore: fraudPrediction.anomalyScores.network
       };
       
       data.push(declaration);
@@ -201,38 +275,46 @@ export class CustomsTrainingSystem {
     }
   }
 
-  private generateAnomalyFlags(isFraudulent: boolean, undervaluationFactor: number): string[] {
+  private generateAnomalyFlags(fraudPrediction: FraudPrediction): string[] {
     const flags: string[] = [];
     
-    if (isFraudulent) {
-      if (undervaluationFactor < 0.7) {
-        flags.push('UNDERVALUATION_SUSPECTED');
-      }
-      
-      const fraudPatterns = [
-        'UNUSUAL_TRADING_PATTERN',
-        'PRICE_ANOMALY',
-        'DOCUMENT_INCONSISTENCY',
-        'HIGH_RISK_TRADER',
-        'SUSPICIOUS_ORIGIN',
-        'QUANTITY_MISMATCH'
-      ];
-      
-      const numFlags = Math.floor(Math.random() * 3) + 1;
-      for (let i = 0; i < numFlags; i++) {
-        const flag = fraudPatterns[Math.floor(Math.random() * fraudPatterns.length)];
-        if (!flags.includes(flag)) {
-          flags.push(flag);
-        }
-      }
-    } else {
-      // Occasionally add false positives
-      if (Math.random() < 0.1) {
-        flags.push('MINOR_DOCUMENTATION_ISSUE');
-      }
+    if (fraudPrediction.anomalyScores.price > 0.6) {
+      flags.push('UNDERVALUATION_SUSPECTED');
     }
     
-    return flags;
+    if (fraudPrediction.anomalyScores.volume > 0.6) {
+      flags.push('UNUSUAL_QUANTITY');
+    }
+    
+    if (fraudPrediction.anomalyScores.pattern > 0.6) {
+      flags.push('SUSPICIOUS_TRADING_PATTERN');
+    }
+    
+    if (fraudPrediction.anomalyScores.network > 0.7) {
+      flags.push('HIGH_RISK_NETWORK');
+    }
+    
+    if (fraudPrediction.riskLevel === 'CRITICAL') {
+      flags.push('CRITICAL_RISK_DETECTED');
+    }
+    
+    // Add specific explanations as flags
+    fraudPrediction.explanations.forEach(explanation => {
+      if (explanation.includes('Price deviation')) {
+        flags.push('PRICE_ANOMALY');
+      }
+      if (explanation.includes('Volume anomaly')) {
+        flags.push('QUANTITY_MISMATCH');
+      }
+      if (explanation.includes('Trading pattern')) {
+        flags.push('UNUSUAL_TRADING_PATTERN');
+      }
+      if (explanation.includes('Network risk')) {
+        flags.push('HIGH_RISK_TRADER');
+      }
+    });
+    
+    return [...new Set(flags)]; // Remove duplicates
   }
 
   // Train fraud detection model
@@ -287,58 +369,58 @@ export class CustomsTrainingSystem {
     return null;
   }
 
-  // Detect fraud in declaration
+  // Enhanced fraud detection using the DATE-based model
   detectFraud(declaration: Partial<CustomsDeclaration>): {
     fraudProbability: number;
     riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
     anomalies: string[];
     recommendations: string[];
+    confidence: number;
+    attentionWeights?: any;
+    detailedAnalysis: any;
   } {
-    const anomalies: string[] = [];
-    const recommendations: string[] = [];
-    let riskScore = 0;
+    // Convert declaration to FraudFeatures format
+    const fraudFeatures: FraudFeatures = {
+      unitPrice: declaration.unitPrice || 0,
+      totalValue: declaration.totalValue || (declaration.unitPrice || 0) * (declaration.quantity || 1),
+      quantity: declaration.quantity || 1,
+      weight: declaration.weight,
+      hsCode: declaration.hsCode || '',
+      countryOfOrigin: declaration.countryOfOrigin || '',
+      portOfEntry: declaration.portOfEntry || '',
+      importerCode: declaration.importerCode || 'UNKNOWN',
+      exporterCode: declaration.exporterCode || 'UNKNOWN',
+      declarationDate: declaration.declarationDate || new Date().toISOString().split('T')[0],
+      seasonality: declaration.seasonality || Math.ceil((new Date().getMonth() + 1) / 3),
+      dayOfWeek: declaration.dayOfWeek || new Date().getDay() + 1,
+      priceDeviation: declaration.priceDeviation || 0,
+      volumeAnomaly: declaration.volumeAnomaly || 0,
+      frequencyScore: declaration.frequencyScore || 0,
+      traderRiskScore: declaration.traderRiskScore || 0,
+      countryRiskScore: declaration.countryRiskScore || 0,
+      productRiskScore: declaration.productRiskScore || 0
+    };
 
-    // Check for undervaluation
-    if (declaration.unitPrice && declaration.hsCode) {
-      const hsCodeInfo = this.hsCodeDatabase.find(hs => hs.code === declaration.hsCode);
-      if (hsCodeInfo) {
-        // Simplified undervaluation check
-        const expectedMinPrice = this.getExpectedPrice(hsCodeInfo.category);
-        if (declaration.unitPrice < expectedMinPrice * 0.5) {
-          anomalies.push('POTENTIAL_UNDERVALUATION');
-          recommendations.push('Verify market prices for similar products');
-          riskScore += 0.3;
-        }
-      }
-    }
-
-    // Check for suspicious quantities
-    if (declaration.quantity && declaration.quantity > 10000) {
-      anomalies.push('UNUSUALLY_HIGH_QUANTITY');
-      recommendations.push('Verify business capacity and storage facilities');
-      riskScore += 0.2;
-    }
-
-    // Check for high-risk countries
-    const highRiskCountries = ['Country A', 'Country B']; // Placeholder
-    if (declaration.countryOfOrigin && highRiskCountries.includes(declaration.countryOfOrigin)) {
-      anomalies.push('HIGH_RISK_ORIGIN_COUNTRY');
-      recommendations.push('Enhanced documentation review required');
-      riskScore += 0.25;
-    }
-
-    // Determine risk level
-    let riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-    if (riskScore < 0.3) riskLevel = 'LOW';
-    else if (riskScore < 0.6) riskLevel = 'MEDIUM';
-    else if (riskScore < 0.8) riskLevel = 'HIGH';
-    else riskLevel = 'CRITICAL';
+    // Get enhanced fraud prediction
+    const prediction = this.enhancedFraudDetector.predictFraud(fraudFeatures);
 
     return {
-      fraudProbability: Math.min(riskScore, 1.0),
-      riskLevel,
-      anomalies,
-      recommendations
+      fraudProbability: prediction.fraudProbability,
+      riskLevel: prediction.riskLevel,
+      anomalies: prediction.explanations,
+      recommendations: prediction.recommendations,
+      confidence: prediction.confidence,
+      attentionWeights: prediction.attentionWeights,
+      detailedAnalysis: {
+        anomalyScores: prediction.anomalyScores,
+        attentionWeights: prediction.attentionWeights,
+        riskFactors: {
+          priceRisk: prediction.anomalyScores.price,
+          volumeRisk: prediction.anomalyScores.volume,
+          patternRisk: prediction.anomalyScores.pattern,
+          networkRisk: prediction.anomalyScores.network
+        }
+      }
     };
   }
 
