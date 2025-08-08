@@ -19,6 +19,7 @@ import {
   Menu, 
   X,
   Shield,
+  Navigation,
   User,
   ShoppingCart,
   Shield,
@@ -133,6 +134,13 @@ const navigationItems = [
     icon: Shield,
     translationKey: 'navigation.customsTraining',
     color: 'blue'
+  },
+  { 
+    key: 'enhanced-route-optimization', 
+    href: '/enhanced-route-optimization', 
+    icon: Navigation,
+    translationKey: 'navigation.enhancedRouteOptimization',
+    color: 'green'
   }
 ]
 
