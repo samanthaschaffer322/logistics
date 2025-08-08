@@ -1,87 +1,96 @@
-'use client'
+'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { authenticateUser, encryptUserSession, decryptUserSession, getCurrentUser, logout as authLogout } from '@/lib/auth';
 
 interface User {
-  id: string
-  name: string
-  email: string
-  role: string
+  email: string;
+  role: 'admin' | 'manager' | 'operator';
+  name: string;
 }
 
 interface AuthContextType {
-  user: User | null
-  login: (email: string, password: string) => Promise<boolean>
-  logout: () => void
-  isLoading: boolean
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  login: (email: string, password: string) => Promise<boolean>;
+  logout: () => void;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const useAuth = () => {
-  const context = useContext(AuthContext)
-  if (context === undefined) {
-    // For static export, return a default auth state
-    return {
-      user: {
-        id: '1',
-        name: 'Demo User',
-        email: 'demo@logiai.com',
-        role: 'admin'
-      },
-      login: async () => true,
-      logout: () => {},
-      isLoading: false
-    }
-  }
-  return context
-}
-
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    // For demo purposes, set a default user
-    setUser({
-      id: '1',
-      name: 'Demo User',
-      email: 'demo@logiai.com',
-      role: 'admin'
-    })
-  }, [])
+    // Check for existing session on mount
+    const checkAuth = () => {
+      try {
+        const currentUser = getCurrentUser();
+        if (currentUser) {
+          setUser(currentUser);
+          setIsAuthenticated(true);
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        // Clear invalid session
+        localStorage.removeItem('userSession');
+        localStorage.removeItem('isAuthenticated');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
-    setIsLoading(true)
-    
-    // Simulate login
-    setTimeout(() => {
-      setUser({
-        id: '1',
-        name: 'Demo User',
-        email: email,
-        role: 'admin'
-      })
-      setIsLoading(false)
-    }, 1000)
-    
-    return true
-  }
+    try {
+      const authenticatedUser = authenticateUser(email, password);
+      if (authenticatedUser) {
+        const encryptedSession = encryptUserSession(authenticatedUser);
+        localStorage.setItem('userSession', encryptedSession);
+        localStorage.setItem('isAuthenticated', 'true');
+        
+        setUser(authenticatedUser);
+        setIsAuthenticated(true);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Login failed:', error);
+      return false;
+    }
+  };
 
   const logout = () => {
-    setUser(null)
-  }
-
-  const value = {
-    user,
-    login,
-    logout,
-    isLoading
-  }
+    authLogout();
+    setUser(null);
+    setIsAuthenticated(false);
+    router.push('/login');
+  };
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{
+      user,
+      isAuthenticated,
+      isLoading,
+      login,
+      logout
+    }}>
       {children}
     </AuthContext.Provider>
-  )
+  );
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 }

@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { LanguageProvider } from '@/contexts/LanguageContext'
+import { AuthProvider } from '@/contexts/AuthContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,9 +21,11 @@ export default function RootLayout({
         <meta name="keywords" content="logistics, AI, Vietnam, supply chain, route optimization, transportation" />
       </head>
       <body className={inter.className}>
-        <LanguageProvider>
-          {children}
-        </LanguageProvider>
+        <AuthProvider>
+          <LanguageProvider>
+            {children}
+          </LanguageProvider>
+        </AuthProvider>
       </body>
     </html>
   )

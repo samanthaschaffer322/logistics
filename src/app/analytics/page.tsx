@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import AuthGuard from '@/components/AuthGuard'
+import ProtectedRoute from '@/components/ProtectedRoute'
 import { 
   Card, 
   CardContent, 
@@ -146,7 +146,7 @@ const AnalyticsPage = () => {
 
   if (isLoading || !analyticsData) {
     return (
-      <AuthGuard>
+      <ProtectedRoute>
         <div className="min-h-screen bg-slate-900 p-6">
           <div className="max-w-7xl mx-auto">
             <div className="mb-8">
@@ -172,14 +172,14 @@ const AnalyticsPage = () => {
             </div>
           </div>
         </div>
-      </AuthGuard>
+      </ProtectedRoute>
     )
   }
 
   const { summary, monthlyData, routePerformance, vehicleUtilization, trends } = analyticsData
 
   return (
-    <AuthGuard>
+    <ProtectedRoute>
       <div className="min-h-screen bg-slate-900 p-6">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
@@ -585,7 +585,7 @@ const AnalyticsPage = () => {
           </Tabs>
         </div>
       </div>
-    </AuthGuard>
+    </ProtectedRoute>
   )
 }
 
