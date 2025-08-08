@@ -1,342 +1,386 @@
-'use client'
+'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
-type Language = 'vi' | 'en'
+type Language = 'en' | 'vi';
 
 interface LanguageContextType {
-  language: Language
-  setLanguage: (lang: Language) => void
-  t: (key: string) => string
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  t: (key: string) => string;
 }
 
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+
+// Comprehensive translations
 const translations = {
-  vi: {
-    // Navigation
-    'nav.dashboard': 'Bảng điều khiển',
-    'nav.analytics': 'Phân tích',
-    'nav.route_optimization': 'Tối ưu tuyến đường',
-    'nav.file_learning': 'AI Học file',
-    'nav.import_export': 'Xuất nhập khẩu',
-    'nav.logistics_operations': 'Vận hành logistics',
-    'nav.fleet_management': 'Quản lý đội xe',
-    'nav.warehouse': 'Kho bãi',
-    'nav.real_time_tracking': 'Theo dõi thời gian thực',
-    
-    // Common
-    'common.loading': 'Đang tải...',
-    'common.save': 'Lưu',
-    'common.cancel': 'Hủy',
-    'common.delete': 'Xóa',
-    'common.edit': 'Sửa',
-    'common.view': 'Xem',
-    'common.download': 'Tải xuống',
-    'common.upload': 'Tải lên',
-    'common.search': 'Tìm kiếm',
-    'common.filter': 'Lọc',
-    'common.export': 'Xuất',
-    'common.import': 'Nhập',
-    'common.add': 'Thêm',
-    'common.new': 'Mới',
-    'common.status': 'Trạng thái',
-    'common.date': 'Ngày',
-    'common.time': 'Thời gian',
-    'common.cost': 'Chi phí',
-    'common.distance': 'Khoảng cách',
-    'common.weight': 'Trọng lượng',
-    'common.driver': 'Tài xế',
-    'common.vehicle': 'Phương tiện',
-    'common.cargo': 'Hàng hóa',
-    'common.route': 'Tuyến đường',
-    'common.departure': 'Điểm đi',
-    'common.destination': 'Điểm đến',
-    'common.depot': 'Depot',
-    'common.warehouse': 'Kho',
-    'common.efficiency': 'Hiệu suất',
-    'common.optimization': 'Tối ưu hóa',
-    'common.analysis': 'Phân tích',
-    'common.insights': 'Thông tin chi tiết',
-    'common.recommendations': 'Khuyến nghị',
-    'common.performance': 'Hiệu suất',
-    'common.total': 'Tổng',
-    'common.average': 'Trung bình',
-    'common.active': 'Hoạt động',
-    'common.inactive': 'Không hoạt động',
-    'common.completed': 'Hoàn thành',
-    'common.pending': 'Đang chờ',
-    'common.in_progress': 'Đang thực hiện',
-    'common.failed': 'Thất bại',
-    'common.success': 'Thành công',
-    
-    // Route Optimization
-    'route.title': 'Tối ưu tuyến đường AI cho xe container 40ft',
-    'route.description': 'Định tuyến xe tải tiên tiến với ràng buộc đường bộ Việt Nam, phân tích giao thông và tối ưu nhiên liệu',
-    'route.select_departure': 'Chọn điểm xuất phát...',
-    'route.select_destination': 'Chọn điểm đến...',
-    'route.truck_config': 'Cấu hình xe tải',
-    'route.departure_time': 'Thời gian khởi hành',
-    'route.optimize_button': 'Tối ưu tuyến đường xe 40ft',
-    'route.optimizing': 'Đang tối ưu tuyến đường Việt Nam...',
-    'route.nearest_depot': 'Depot gần nhất được đề xuất',
-    'route.direct_route': 'Tuyến trực tiếp',
-    'route.via_depot': 'Qua Depot',
-    'route.savings': 'Tiết kiệm',
-    'route.no_depot': 'Tuyến trực tiếp hiệu quả hơn',
-    'route.no_optimization': 'Không có tối ưu depot cho tuyến này',
-    
-    // AI File Learning
-    'file.title': 'AI File Learning Engine',
-    'file.description': 'Upload và phân tích các file kế hoạch logistics để nhận insights thông minh từ AI',
-    'file.upload_title': 'Upload Files Kế Hoạch Logistics',
-    'file.upload_description': 'Upload các file Excel kế hoạch ngày để AI phân tích và đưa ra khuyến nghị tối ưu',
-    'file.drag_drop': 'Kéo thả files hoặc click để chọn',
-    'file.drop_here': 'Thả files vào đây',
-    'file.supported_formats': 'Hỗ trợ: Excel (.xlsx, .xls), CSV, PDF • Tối đa 10MB mỗi file',
-    'file.ready_to_receive': 'Sẵn sàng nhận files logistics...',
-    'file.files_uploaded': 'Files đã upload',
-    'file.remove_all': 'Xóa tất cả',
-    'file.ai_processing': 'AI Processing Engine',
-    'file.ai_description': 'Phân tích thông minh với machine learning',
-    'file.start_analysis': 'Bắt đầu phân tích AI',
-    'file.analyzing': 'Đang phân tích AI...',
-    'file.demo_sample': 'Demo với file mẫu',
-    'file.extract_data': 'Trích xuất dữ liệu từ Excel',
-    'file.analyze_patterns': 'Phân tích patterns & trends',
-    'file.optimize_routes': 'Tối ưu tuyến đường & chi phí',
-    'file.predict_demand': 'Dự đoán nhu cầu tương lai',
-    'file.download_results': 'Tải xuống kết quả',
-    
-    // Analytics
-    'analytics.title': 'Analytics & Insights',
-    'analytics.description': 'Phân tích hiệu suất logistics toàn diện',
-    'analytics.total_revenue': 'Tổng doanh thu',
-    'analytics.total_shipments': 'Tổng lô hàng',
-    'analytics.on_time_delivery': 'Giao hàng đúng hẹn',
-    'analytics.active_vehicles': 'Xe hoạt động',
-    'analytics.export_report': 'Xuất báo cáo',
-    'analytics.overview': 'Tổng quan',
-    'analytics.routes': 'Hiệu suất tuyến đường',
-    'analytics.vehicles': 'Sử dụng phương tiện',
-    'analytics.trends': 'Xu hướng & Thông tin chi tiết',
-    
-    // Import Export
-    'import_export.title': 'Trung tâm Xuất nhập khẩu',
-    'import_export.description': 'Tích hợp VNACCS và quản lý tài liệu hải quan',
-    'import_export.new_shipment': 'Lô hàng mới',
-    'import_export.total_shipments': 'Tổng lô hàng',
-    'import_export.total_value': 'Tổng giá trị',
-    'import_export.imports': 'Nhập khẩu',
-    'import_export.exports': 'Xuất khẩu',
-    'import_export.vnaccs_connected': 'VNACCS đã kết nối',
-    'import_export.system_operational': 'Hệ thống hoạt động',
-    'import_export.documents_ready': 'Tài liệu sẵn sàng',
-    'import_export.pending_clearance': 'Chờ thông quan',
-    
-    // Logistics Operations
-    'operations.title': 'Vận hành Logistics',
-    'operations.description': 'Quản lý và tối ưu hóa vận hành thời gian thực',
-    'operations.active_operations': 'Hoạt động đang diễn ra',
-    'operations.fleet_utilization': 'Sử dụng đội xe',
-    'operations.avg_efficiency': 'Hiệu suất trung bình',
-    'operations.total_cost': 'Tổng chi phí',
-    'operations.new_operation': 'Hoạt động mới',
-    'operations.pause_updates': 'Tạm dừng cập nhật',
-    'operations.resume_updates': 'Tiếp tục cập nhật',
-    'operations.fleet': 'Đội xe',
-    'operations.drivers': 'Tài xế',
-    'operations.system_status': 'Trạng thái hệ thống',
-    'operations.gps_tracking': 'Theo dõi GPS',
-    'operations.maintenance_due': 'Đến hạn bảo trì',
-    'operations.fuel_monitoring': 'Giám sát nhiên liệu'
-  },
   en: {
     // Navigation
     'nav.dashboard': 'Dashboard',
-    'nav.analytics': 'Analytics',
-    'nav.route_optimization': 'Route Optimization',
-    'nav.file_learning': 'AI File Learning',
-    'nav.import_export': 'Import Export',
-    'nav.logistics_operations': 'Logistics Operations',
-    'nav.fleet_management': 'Fleet Management',
+    'nav.routeOptimization': 'Route Optimization',
+    'nav.enhancedOptimizer': 'Enhanced AI Optimizer',
+    'nav.fleetManagement': 'Fleet Management',
+    'nav.shipments': 'Shipments',
     'nav.warehouse': 'Warehouse',
-    'nav.real_time_tracking': 'Real-time Tracking',
-    
+    'nav.analytics': 'Analytics',
+    'nav.realTimeTracking': 'Real-time Tracking',
+    'nav.vietnamMap': 'Vietnam Map',
+    'nav.interactiveMap': 'Interactive Map',
+    'nav.logisticsOperations': 'Logistics Operations',
+    'nav.importExport': 'Import/Export',
+    'nav.distribution': 'Distribution',
+    'nav.transportation': 'Transportation',
+    'nav.procurement': 'Procurement',
+    'nav.superAI': 'Super AI',
+    'nav.fileLearning': 'File Learning',
+    'nav.login': 'Login',
+
     // Common
     'common.loading': 'Loading...',
     'common.save': 'Save',
     'common.cancel': 'Cancel',
     'common.delete': 'Delete',
     'common.edit': 'Edit',
-    'common.view': 'View',
-    'common.download': 'Download',
-    'common.upload': 'Upload',
+    'common.add': 'Add',
     'common.search': 'Search',
     'common.filter': 'Filter',
     'common.export': 'Export',
     'common.import': 'Import',
-    'common.add': 'Add',
-    'common.new': 'New',
+    'common.download': 'Download',
+    'common.upload': 'Upload',
+    'common.submit': 'Submit',
+    'common.reset': 'Reset',
+    'common.close': 'Close',
+    'common.open': 'Open',
+    'common.view': 'View',
+    'common.details': 'Details',
     'common.status': 'Status',
     'common.date': 'Date',
     'common.time': 'Time',
-    'common.cost': 'Cost',
+    'common.location': 'Location',
     'common.distance': 'Distance',
-    'common.weight': 'Weight',
-    'common.driver': 'Driver',
-    'common.vehicle': 'Vehicle',
-    'common.cargo': 'Cargo',
-    'common.route': 'Route',
-    'common.departure': 'Departure',
-    'common.destination': 'Destination',
-    'common.depot': 'Depot',
-    'common.warehouse': 'Warehouse',
-    'common.efficiency': 'Efficiency',
-    'common.optimization': 'Optimization',
-    'common.analysis': 'Analysis',
-    'common.insights': 'Insights',
-    'common.recommendations': 'Recommendations',
-    'common.performance': 'Performance',
+    'common.duration': 'Duration',
+    'common.cost': 'Cost',
     'common.total': 'Total',
     'common.average': 'Average',
-    'common.active': 'Active',
-    'common.inactive': 'Inactive',
-    'common.completed': 'Completed',
-    'common.pending': 'Pending',
-    'common.in_progress': 'In Progress',
-    'common.failed': 'Failed',
+    'common.minimum': 'Minimum',
+    'common.maximum': 'Maximum',
     'common.success': 'Success',
-    
+    'common.error': 'Error',
+    'common.warning': 'Warning',
+    'common.info': 'Information',
+
+    // Dashboard
+    'dashboard.title': 'Logistics Dashboard',
+    'dashboard.welcome': 'Welcome to LogiAI',
+    'dashboard.subtitle': 'Your AI-Powered Logistics Management Platform',
+    'dashboard.totalShipments': 'Total Shipments',
+    'dashboard.activeRoutes': 'Active Routes',
+    'dashboard.fleetUtilization': 'Fleet Utilization',
+    'dashboard.costSavings': 'Cost Savings',
+    'dashboard.recentActivity': 'Recent Activity',
+    'dashboard.performanceMetrics': 'Performance Metrics',
+    'dashboard.quickActions': 'Quick Actions',
+
     // Route Optimization
-    'route.title': 'AI Route Optimization for 40ft Container Trucks',
-    'route.description': 'Advanced truck routing with Vietnam road constraints, traffic analysis, and fuel optimization',
-    'route.select_departure': 'Select departure point...',
-    'route.select_destination': 'Select destination...',
-    'route.truck_config': 'Truck Configuration',
-    'route.departure_time': 'Departure Time',
-    'route.optimize_button': 'Optimize 40ft Truck Route',
-    'route.optimizing': 'Optimizing Vietnam Route...',
-    'route.nearest_depot': 'Suggested nearest depot',
-    'route.direct_route': 'Direct Route',
-    'route.via_depot': 'Via Depot',
-    'route.savings': 'Savings',
-    'route.no_depot': 'Direct route is more efficient',
-    'route.no_optimization': 'No depot optimization available for this route',
-    
-    // AI File Learning
-    'file.title': 'AI File Learning Engine',
-    'file.description': 'Upload and analyze logistics planning files to receive intelligent AI insights',
-    'file.upload_title': 'Upload Logistics Planning Files',
-    'file.upload_description': 'Upload Excel daily planning files for AI analysis and optimization recommendations',
-    'file.drag_drop': 'Drag and drop files or click to select',
-    'file.drop_here': 'Drop files here',
-    'file.supported_formats': 'Supported: Excel (.xlsx, .xls), CSV, PDF • Max 10MB per file',
-    'file.ready_to_receive': 'Ready to receive logistics files...',
-    'file.files_uploaded': 'Files uploaded',
-    'file.remove_all': 'Remove all',
-    'file.ai_processing': 'AI Processing Engine',
-    'file.ai_description': 'Intelligent analysis with machine learning',
-    'file.start_analysis': 'Start AI Analysis',
-    'file.analyzing': 'Analyzing with AI...',
-    'file.demo_sample': 'Demo with sample file',
-    'file.extract_data': 'Extract data from Excel',
-    'file.analyze_patterns': 'Analyze patterns & trends',
-    'file.optimize_routes': 'Optimize routes & costs',
-    'file.predict_demand': 'Predict future demand',
-    'file.download_results': 'Download results',
-    
+    'route.title': 'Route Optimization',
+    'route.enhancedTitle': 'Enhanced AI Route Optimizer',
+    'route.optimize': 'Optimize Routes',
+    'route.optimizing': 'Optimizing...',
+    'route.optimizationComplete': 'Optimization Complete',
+    'route.locations': 'Locations',
+    'route.vehicles': 'Vehicles',
+    'route.settings': 'Settings',
+    'route.results': 'Results',
+    'route.insights': 'AI Insights',
+    'route.addLocation': 'Add Location',
+    'route.addVehicle': 'Add Vehicle',
+    'route.totalDistance': 'Total Distance',
+    'route.totalTime': 'Total Time',
+    'route.totalCost': 'Total Cost',
+    'route.efficiency': 'Efficiency',
+    'route.carbonFootprint': 'Carbon Footprint',
+    'route.customerSatisfaction': 'Customer Satisfaction',
+    'route.algorithm': 'Algorithm',
+    'route.aiRecommendations': 'AI Recommendations',
+    'route.performanceMetrics': 'Performance Metrics',
+    'route.costAnalysis': 'Cost Analysis',
+    'route.riskAssessment': 'Risk Assessment',
+
+    // Automation Plan
+    'automation.title': 'Comprehensive Logistics Automation Plan',
+    'automation.subtitle': 'Strategic roadmap for complete logistics digitization and AI integration',
+    'automation.phase1': 'Phase 1: Foundation & Assessment',
+    'automation.phase2': 'Phase 2: Core System Implementation',
+    'automation.phase3': 'Phase 3: AI Integration & Optimization',
+    'automation.phase4': 'Phase 4: Advanced Analytics & Intelligence',
+    'automation.phase5': 'Phase 5: Full Automation & Scaling',
+    'automation.currentStatus': 'Current Implementation Status',
+    'automation.nextSteps': 'Next Steps',
+    'automation.timeline': 'Implementation Timeline',
+    'automation.budget': 'Budget Allocation',
+    'automation.roi': 'Expected ROI',
+    'automation.risks': 'Risk Assessment',
+    'automation.mitigation': 'Mitigation Strategies',
+    'automation.downloadPlan': 'Download Complete Plan',
+    'automation.exportExcel': 'Export to Excel',
+    'automation.exportPDF': 'Export to PDF',
+
+    // Fleet Management
+    'fleet.title': 'Fleet Management',
+    'fleet.vehicles': 'Vehicles',
+    'fleet.drivers': 'Drivers',
+    'fleet.maintenance': 'Maintenance',
+    'fleet.tracking': 'Tracking',
+    'fleet.performance': 'Performance',
+    'fleet.addVehicle': 'Add Vehicle',
+    'fleet.addDriver': 'Add Driver',
+    'fleet.vehicleStatus': 'Vehicle Status',
+    'fleet.driverStatus': 'Driver Status',
+    'fleet.fuelConsumption': 'Fuel Consumption',
+    'fleet.maintenanceSchedule': 'Maintenance Schedule',
+
+    // Shipments
+    'shipments.title': 'Shipments',
+    'shipments.create': 'Create Shipment',
+    'shipments.track': 'Track Shipment',
+    'shipments.pending': 'Pending',
+    'shipments.inTransit': 'In Transit',
+    'shipments.delivered': 'Delivered',
+    'shipments.cancelled': 'Cancelled',
+    'shipments.origin': 'Origin',
+    'shipments.destination': 'Destination',
+    'shipments.weight': 'Weight',
+    'shipments.dimensions': 'Dimensions',
+    'shipments.priority': 'Priority',
+    'shipments.estimatedDelivery': 'Estimated Delivery',
+
+    // Warehouse
+    'warehouse.title': 'Warehouse Management',
+    'warehouse.inventory': 'Inventory',
+    'warehouse.receiving': 'Receiving',
+    'warehouse.shipping': 'Shipping',
+    'warehouse.stockLevel': 'Stock Level',
+    'warehouse.reorderPoint': 'Reorder Point',
+    'warehouse.location': 'Location',
+    'warehouse.category': 'Category',
+    'warehouse.supplier': 'Supplier',
+
     // Analytics
-    'analytics.title': 'Analytics & Insights',
-    'analytics.description': 'Comprehensive logistics performance analytics',
-    'analytics.total_revenue': 'Total Revenue',
-    'analytics.total_shipments': 'Total Shipments',
-    'analytics.on_time_delivery': 'On-Time Delivery',
-    'analytics.active_vehicles': 'Active Vehicles',
-    'analytics.export_report': 'Export Report',
+    'analytics.title': 'Analytics & Reports',
     'analytics.overview': 'Overview',
-    'analytics.routes': 'Route Performance',
-    'analytics.vehicles': 'Vehicle Utilization',
-    'analytics.trends': 'Trends & Insights',
-    
-    // Import Export
-    'import_export.title': 'Import-Export Center',
-    'import_export.description': 'VNACCS integration and customs documentation management',
-    'import_export.new_shipment': 'New Shipment',
-    'import_export.total_shipments': 'Total Shipments',
-    'import_export.total_value': 'Total Value',
-    'import_export.imports': 'Imports',
-    'import_export.exports': 'Exports',
-    'import_export.vnaccs_connected': 'VNACCS Connected',
-    'import_export.system_operational': 'System operational',
-    'import_export.documents_ready': 'Documents Ready',
-    'import_export.pending_clearance': 'Pending Clearance',
-    
-    // Logistics Operations
-    'operations.title': 'Logistics Operations',
-    'operations.description': 'Real-time operations management and optimization',
-    'operations.active_operations': 'Active Operations',
-    'operations.fleet_utilization': 'Fleet Utilization',
-    'operations.avg_efficiency': 'Avg Efficiency',
-    'operations.total_cost': 'Total Cost',
-    'operations.new_operation': 'New Operation',
-    'operations.pause_updates': 'Pause Updates',
-    'operations.resume_updates': 'Resume Updates',
-    'operations.fleet': 'Fleet',
-    'operations.drivers': 'Drivers',
-    'operations.system_status': 'System Status',
-    'operations.gps_tracking': 'GPS Tracking',
-    'operations.maintenance_due': 'Maintenance Due',
-    'operations.fuel_monitoring': 'Fuel Monitoring'
+    'analytics.performance': 'Performance',
+    'analytics.trends': 'Trends',
+    'analytics.forecasting': 'Forecasting',
+    'analytics.customReports': 'Custom Reports',
+    'analytics.realTimeData': 'Real-time Data',
+    'analytics.historicalData': 'Historical Data',
+
+    // Language Selector
+    'language.select': 'Select Language',
+    'language.english': 'English',
+    'language.vietnamese': 'Tiếng Việt',
+  },
+  vi: {
+    // Navigation
+    'nav.dashboard': 'Bảng Điều Khiển',
+    'nav.routeOptimization': 'Tối Ưu Hóa Tuyến Đường',
+    'nav.enhancedOptimizer': 'Bộ Tối Ưu AI Nâng Cao',
+    'nav.fleetManagement': 'Quản Lý Đội Xe',
+    'nav.shipments': 'Lô Hàng',
+    'nav.warehouse': 'Kho Bãi',
+    'nav.analytics': 'Phân Tích',
+    'nav.realTimeTracking': 'Theo Dõi Thời Gian Thực',
+    'nav.vietnamMap': 'Bản Đồ Việt Nam',
+    'nav.interactiveMap': 'Bản Đồ Tương Tác',
+    'nav.logisticsOperations': 'Hoạt Động Logistics',
+    'nav.importExport': 'Xuất Nhập Khẩu',
+    'nav.distribution': 'Phân Phối',
+    'nav.transportation': 'Vận Chuyển',
+    'nav.procurement': 'Mua Sắm',
+    'nav.superAI': 'Siêu AI',
+    'nav.fileLearning': 'Học Từ Tệp',
+    'nav.login': 'Đăng Nhập',
+
+    // Common
+    'common.loading': 'Đang tải...',
+    'common.save': 'Lưu',
+    'common.cancel': 'Hủy',
+    'common.delete': 'Xóa',
+    'common.edit': 'Chỉnh sửa',
+    'common.add': 'Thêm',
+    'common.search': 'Tìm kiếm',
+    'common.filter': 'Lọc',
+    'common.export': 'Xuất',
+    'common.import': 'Nhập',
+    'common.download': 'Tải xuống',
+    'common.upload': 'Tải lên',
+    'common.submit': 'Gửi',
+    'common.reset': 'Đặt lại',
+    'common.close': 'Đóng',
+    'common.open': 'Mở',
+    'common.view': 'Xem',
+    'common.details': 'Chi tiết',
+    'common.status': 'Trạng thái',
+    'common.date': 'Ngày',
+    'common.time': 'Thời gian',
+    'common.location': 'Vị trí',
+    'common.distance': 'Khoảng cách',
+    'common.duration': 'Thời lượng',
+    'common.cost': 'Chi phí',
+    'common.total': 'Tổng cộng',
+    'common.average': 'Trung bình',
+    'common.minimum': 'Tối thiểu',
+    'common.maximum': 'Tối đa',
+    'common.success': 'Thành công',
+    'common.error': 'Lỗi',
+    'common.warning': 'Cảnh báo',
+    'common.info': 'Thông tin',
+
+    // Dashboard
+    'dashboard.title': 'Bảng Điều Khiển Logistics',
+    'dashboard.welcome': 'Chào mừng đến với LogiAI',
+    'dashboard.subtitle': 'Nền tảng Quản lý Logistics được hỗ trợ bởi AI',
+    'dashboard.totalShipments': 'Tổng Lô Hàng',
+    'dashboard.activeRoutes': 'Tuyến Đường Hoạt Động',
+    'dashboard.fleetUtilization': 'Sử Dụng Đội Xe',
+    'dashboard.costSavings': 'Tiết Kiệm Chi Phí',
+    'dashboard.recentActivity': 'Hoạt Động Gần Đây',
+    'dashboard.performanceMetrics': 'Chỉ Số Hiệu Suất',
+    'dashboard.quickActions': 'Hành Động Nhanh',
+
+    // Route Optimization
+    'route.title': 'Tối Ưu Hóa Tuyến Đường',
+    'route.enhancedTitle': 'Bộ Tối Ưu AI Nâng Cao',
+    'route.optimize': 'Tối Ưu Hóa Tuyến Đường',
+    'route.optimizing': 'Đang tối ưu hóa...',
+    'route.optimizationComplete': 'Hoàn Thành Tối Ưu Hóa',
+    'route.locations': 'Địa Điểm',
+    'route.vehicles': 'Phương Tiện',
+    'route.settings': 'Cài Đặt',
+    'route.results': 'Kết Quả',
+    'route.insights': 'Thông Tin AI',
+    'route.addLocation': 'Thêm Địa Điểm',
+    'route.addVehicle': 'Thêm Phương Tiện',
+    'route.totalDistance': 'Tổng Khoảng Cách',
+    'route.totalTime': 'Tổng Thời Gian',
+    'route.totalCost': 'Tổng Chi Phí',
+    'route.efficiency': 'Hiệu Suất',
+    'route.carbonFootprint': 'Dấu Chân Carbon',
+    'route.customerSatisfaction': 'Sự Hài Lòng Khách Hàng',
+    'route.algorithm': 'Thuật Toán',
+    'route.aiRecommendations': 'Khuyến Nghị AI',
+    'route.performanceMetrics': 'Chỉ Số Hiệu Suất',
+    'route.costAnalysis': 'Phân Tích Chi Phí',
+    'route.riskAssessment': 'Đánh Giá Rủi Ro',
+
+    // Automation Plan
+    'automation.title': 'Kế Hoạch Tự Động Hóa Logistics Toàn Diện',
+    'automation.subtitle': 'Lộ trình chiến lược cho việc số hóa hoàn toàn logistics và tích hợp AI',
+    'automation.phase1': 'Giai đoạn 1: Nền tảng & Đánh giá',
+    'automation.phase2': 'Giai đoạn 2: Triển khai Hệ thống Cốt lõi',
+    'automation.phase3': 'Giai đoạn 3: Tích hợp AI & Tối ưu hóa',
+    'automation.phase4': 'Giai đoạn 4: Phân tích Nâng cao & Trí tuệ',
+    'automation.phase5': 'Giai đoạn 5: Tự động hóa Hoàn toàn & Mở rộng',
+    'automation.currentStatus': 'Tình Trạng Triển Khai Hiện Tại',
+    'automation.nextSteps': 'Các Bước Tiếp Theo',
+    'automation.timeline': 'Lịch Trình Triển Khai',
+    'automation.budget': 'Phân Bổ Ngân Sách',
+    'automation.roi': 'ROI Dự Kiến',
+    'automation.risks': 'Đánh Giá Rủi Ro',
+    'automation.mitigation': 'Chiến Lược Giảm Thiểu',
+    'automation.downloadPlan': 'Tải Xuống Kế Hoạch Hoàn Chỉnh',
+    'automation.exportExcel': 'Xuất ra Excel',
+    'automation.exportPDF': 'Xuất ra PDF',
+
+    // Fleet Management
+    'fleet.title': 'Quản Lý Đội Xe',
+    'fleet.vehicles': 'Phương Tiện',
+    'fleet.drivers': 'Tài Xế',
+    'fleet.maintenance': 'Bảo Trì',
+    'fleet.tracking': 'Theo Dõi',
+    'fleet.performance': 'Hiệu Suất',
+    'fleet.addVehicle': 'Thêm Phương Tiện',
+    'fleet.addDriver': 'Thêm Tài Xế',
+    'fleet.vehicleStatus': 'Trạng Thái Phương Tiện',
+    'fleet.driverStatus': 'Trạng Thái Tài Xế',
+    'fleet.fuelConsumption': 'Tiêu Thụ Nhiên Liệu',
+    'fleet.maintenanceSchedule': 'Lịch Bảo Trì',
+
+    // Shipments
+    'shipments.title': 'Lô Hàng',
+    'shipments.create': 'Tạo Lô Hàng',
+    'shipments.track': 'Theo Dõi Lô Hàng',
+    'shipments.pending': 'Chờ Xử Lý',
+    'shipments.inTransit': 'Đang Vận Chuyển',
+    'shipments.delivered': 'Đã Giao',
+    'shipments.cancelled': 'Đã Hủy',
+    'shipments.origin': 'Điểm Xuất Phát',
+    'shipments.destination': 'Điểm Đến',
+    'shipments.weight': 'Trọng Lượng',
+    'shipments.dimensions': 'Kích Thước',
+    'shipments.priority': 'Ưu Tiên',
+    'shipments.estimatedDelivery': 'Dự Kiến Giao Hàng',
+
+    // Warehouse
+    'warehouse.title': 'Quản Lý Kho Bãi',
+    'warehouse.inventory': 'Tồn Kho',
+    'warehouse.receiving': 'Nhận Hàng',
+    'warehouse.shipping': 'Giao Hàng',
+    'warehouse.stockLevel': 'Mức Tồn Kho',
+    'warehouse.reorderPoint': 'Điểm Đặt Hàng Lại',
+    'warehouse.location': 'Vị Trí',
+    'warehouse.category': 'Danh Mục',
+    'warehouse.supplier': 'Nhà Cung Cấp',
+
+    // Analytics
+    'analytics.title': 'Phân Tích & Báo Cáo',
+    'analytics.overview': 'Tổng Quan',
+    'analytics.performance': 'Hiệu Suất',
+    'analytics.trends': 'Xu Hướng',
+    'analytics.forecasting': 'Dự Báo',
+    'analytics.customReports': 'Báo Cáo Tùy Chỉnh',
+    'analytics.realTimeData': 'Dữ Liệu Thời Gian Thực',
+    'analytics.historicalData': 'Dữ Liệu Lịch Sử',
+
+    // Language Selector
+    'language.select': 'Chọn Ngôn Ngữ',
+    'language.english': 'English',
+    'language.vietnamese': 'Tiếng Việt',
   }
-}
+};
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
-
-export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<Language>('vi')
-  const [isClient, setIsClient] = useState(false)
+export function LanguageProvider({ children }: { children: React.ReactNode }) {
+  const [language, setLanguage] = useState<Language>('vi'); // Default to Vietnamese
 
   useEffect(() => {
-    setIsClient(true)
-    // Load saved language from localStorage only on client side
-    if (typeof window !== 'undefined') {
-      const savedLanguage = localStorage.getItem('language') as Language
-      if (savedLanguage && (savedLanguage === 'vi' || savedLanguage === 'en')) {
-        setLanguage(savedLanguage)
-      }
+    // Load saved language from localStorage
+    const savedLanguage = localStorage.getItem('language') as Language;
+    if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'vi')) {
+      setLanguage(savedLanguage);
     }
-  }, [])
+  }, []);
 
   const handleSetLanguage = (lang: Language) => {
-    setLanguage(lang)
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('language', lang)
-    }
-  }
+    setLanguage(lang);
+    localStorage.setItem('language', lang);
+  };
 
   const t = (key: string): string => {
-    return translations[language][key] || key
-  }
-
-  // Don't render until client-side hydration is complete
-  if (!isClient) {
-    return (
-      <LanguageContext.Provider value={{ language: 'vi', setLanguage: () => {}, t }}>
-        {children}
-      </LanguageContext.Provider>
-    )
-  }
+    return translations[language][key] || key;
+  };
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage: handleSetLanguage, t }}>
       {children}
     </LanguageContext.Provider>
-  )
+  );
 }
 
-export const useLanguage = () => {
-  const context = useContext(LanguageContext)
+export function useLanguage() {
+  const context = useContext(LanguageContext);
   if (context === undefined) {
-    throw new Error('useLanguage must be used within a LanguageProvider')
+    throw new Error('useLanguage must be used within a LanguageProvider');
   }
-  return context
+  return context;
 }
