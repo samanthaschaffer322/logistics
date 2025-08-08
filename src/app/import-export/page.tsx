@@ -283,14 +283,36 @@ export default function ImportExportPage() {
   const generateAIInsights = useCallback(async () => {
     setIsProcessing(true)
     try {
-      const insights = await aiService.generateInsights(documents)
+      // Use enhanced AI insights engine
+      const { EnhancedAIInsightsEngine } = await import('@/lib/enhancedAIInsights')
+      const insightsEngine = new EnhancedAIInsightsEngine(language)
+      const enhancedInsights = await insightsEngine.generateEnhancedInsights()
+      
+      // Convert enhanced insights to regular insights format
+      const insights = enhancedInsights.map(insight => ({
+        id: insight.id,
+        type: insight.type,
+        title: insight.title,
+        description: insight.description,
+        impact: insight.impact,
+        confidence: insight.confidence,
+        actionRequired: insight.actionRequired,
+        estimatedSavings: insight.estimatedSavings,
+        routes: insight.routes,
+        specificDetails: insight.specificDetails,
+        realTimeData: insight.realTimeData
+      }))
+      
       setAiInsights(insights)
     } catch (error) {
       console.error('Error generating insights:', error)
+      // Fallback to basic insights
+      const basicInsights = await aiService.generateInsights(documents)
+      setAiInsights(basicInsights)
     } finally {
       setIsProcessing(false)
     }
-  }, [documents])
+  }, [documents, language])
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -592,17 +614,87 @@ export default function ImportExportPage() {
                           </div>
                         </div>
 
+                        {/* Specific Route Details */}
+                        {insight.routes && insight.routes.length > 0 && (
+                          <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                            <div className="text-sm text-blue-300 font-medium mb-2">
+                              {language === 'vi' ? 'Chi tiết tuyến đường:' : 'Route Details:'}
+                            </div>
+                            {insight.routes.map(route => (
+                              <div key={route.id} className="mb-3 last:mb-0">
+                                <div className="text-sm text-white font-medium">{route.routeName}</div>
+                                <div className="text-xs text-slate-300 mt-1">
+                                  <div>{route.origin} → {route.destination}</div>
+                                  <div className="flex gap-4 mt-1">
+                                    <span>{language === 'vi' ? 'Hiệu suất hiện tại:' : 'Current efficiency:'} {route.currentEfficiency}%</span>
+                                    <span className="text-green-300">{language === 'vi' ? 'Cải thiện:' : 'Improvement:'} +{route.potentialImprovement}%</span>
+                                  </div>
+                                  <div className="flex gap-4 mt-1">
+                                    <span>{language === 'vi' ? 'Tiết kiệm thời gian:' : 'Time savings:'} {route.estimatedSavings.timeMinutes} phút</span>
+                                    <span>{language === 'vi' ? 'Tiết kiệm nhiên liệu:' : 'Fuel savings:'} {route.estimatedSavings.fuelLiters}L</span>
+                                  </div>
+                                  <div className="mt-1">
+                                    <span className={`px-2 py-1 rounded text-xs ${
+                                      route.trafficData.currentTraffic === 'light' ? 'bg-green-500/20 text-green-300' :
+                                      route.trafficData.currentTraffic === 'moderate' ? 'bg-yellow-500/20 text-yellow-300' :
+                                      'bg-red-500/20 text-red-300'
+                                    }`}>
+                                      {language === 'vi' ? 'Giao thông:' : 'Traffic:'} {route.trafficData.currentTraffic}
+                                    </span>
+                                    <span className="ml-2 text-slate-400">
+                                      {language === 'vi' ? 'Tốc độ TB:' : 'Avg speed:'} {route.trafficData.averageSpeed}km/h
+                                    </span>
+                                  </div>
+                                  {route.trafficData.congestionPoints.length > 0 && (
+                                    <div className="mt-1 text-xs text-orange-300">
+                                      {language === 'vi' ? 'Điểm tắc nghẽn:' : 'Congestion points:'} {route.trafficData.congestionPoints.join(', ')}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Real-time Data */}
+                        {insight.realTimeData && (
+                          <div className="mb-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+                            <div className="text-sm text-green-300 font-medium mb-1">
+                              {language === 'vi' ? 'Dữ liệu thời gian thực:' : 'Real-time Data:'}
+                            </div>
+                            <div className="text-xs text-slate-300">
+                              <div>{language === 'vi' ? 'Nguồn:' : 'Source:'} {insight.realTimeData.dataSource}</div>
+                              <div>{language === 'vi' ? 'Độ chính xác:' : 'Accuracy:'} {insight.realTimeData.accuracy}%</div>
+                              <div>{language === 'vi' ? 'Cập nhật lần cuối:' : 'Last updated:'} {insight.realTimeData.lastUpdated.toLocaleTimeString()}</div>
+                            </div>
+                          </div>
+                        )}
+
                         <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-lg p-3">
                           <div className="text-sm text-indigo-300 font-medium mb-1">
                             {language === 'vi' ? 'Hành động cần thiết:' : 'Action Required:'}
                           </div>
                           <div className="text-sm text-slate-300">{insight.actionRequired}</div>
+                          
+                          {/* Implementation Steps */}
+                          {insight.specificDetails && insight.specificDetails.implementation && (
+                            <div className="mt-2">
+                              <div className="text-xs text-indigo-300 font-medium mb-1">
+                                {language === 'vi' ? 'Các bước triển khai:' : 'Implementation Steps:'}
+                              </div>
+                              <ul className="text-xs text-slate-300 space-y-1">
+                                {insight.specificDetails.implementation.map((step, index) => (
+                                  <li key={index}>• {step}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
                         </div>
 
                         {insight.estimatedSavings && (
                           <div className="mt-3 text-center p-2 bg-green-500/10 rounded-lg">
                             <div className="text-green-400 font-bold">
-                              {language === 'vi' ? 'Tiết kiệm:' : 'Savings:'} {(insight.estimatedSavings / 1000000).toFixed(1)}M VNĐ
+                              {language === 'vi' ? 'Tiết kiệm:' : 'Savings:'} {(insight.estimatedSavings / 1000000).toFixed(1)}M VNĐ/tháng
                             </div>
                           </div>
                         )}

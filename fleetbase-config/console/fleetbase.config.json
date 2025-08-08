@@ -1,0 +1,154 @@
+{
+  "API": {
+    "host": "http://localhost:8001",
+    "namespace": "v1",
+    "inflector": "dasherize"
+  },
+  "SOCKET": {
+    "host": "http://localhost:38000"
+  },
+  "APP": {
+    "name": "Logistics Fleetbase",
+    "version": "2.0.0",
+    "description": "Enhanced AI-Powered Logistics Management Platform"
+  },
+  "BRANDING": {
+    "logo_url": "/assets/images/logistics-logo.png",
+    "icon_url": "/assets/images/logistics-icon.png",
+    "primary_color": "#3B82F6",
+    "secondary_color": "#1E40AF"
+  },
+  "FEATURES": {
+    "real_time_tracking": true,
+    "ai_optimization": true,
+    "advanced_analytics": true,
+    "multi_tenant": true,
+    "webhook_support": true,
+    "mobile_app": true,
+    "api_access": true,
+    "custom_fields": true,
+    "bulk_operations": true,
+    "export_import": true
+  },
+  "MAPS": {
+    "provider": "mapbox",
+    "mapbox_access_token": "${MAPBOX_ACCESS_TOKEN}",
+    "google_maps_api_key": "${GOOGLE_MAPS_API_KEY}",
+    "default_center": {
+      "lat": 16.0544,
+      "lng": 108.2022
+    },
+    "default_zoom": 6,
+    "clustering": true,
+    "real_time_updates": true
+  },
+  "NOTIFICATIONS": {
+    "push_enabled": true,
+    "email_enabled": true,
+    "sms_enabled": true,
+    "webhook_enabled": true,
+    "real_time_enabled": true
+  },
+  "OPTIMIZATION": {
+    "algorithms": [
+      "genetic",
+      "simulated_annealing",
+      "ant_colony",
+      "hybrid"
+    ],
+    "default_algorithm": "hybrid",
+    "ai_insights": true,
+    "real_time_traffic": true,
+    "weather_consideration": true
+  },
+  "ANALYTICS": {
+    "enabled": true,
+    "real_time_dashboard": true,
+    "custom_reports": true,
+    "data_export": true,
+    "predictive_analytics": true
+  },
+  "INTEGRATIONS": {
+    "aws": {
+      "enabled": true,
+      "services": ["location", "lambda", "s3", "cloudwatch"]
+    },
+    "supabase": {
+      "enabled": true,
+      "features": ["database", "auth", "storage", "realtime"]
+    },
+    "cloudflare": {
+      "enabled": true,
+      "features": ["cdn", "security", "analytics"]
+    },
+    "openai": {
+      "enabled": true,
+      "models": ["gpt-4", "gpt-3.5-turbo"]
+    }
+  },
+  "SECURITY": {
+    "two_factor_auth": true,
+    "api_rate_limiting": true,
+    "cors_enabled": true,
+    "csrf_protection": true,
+    "encryption": "AES-256"
+  },
+  "PERFORMANCE": {
+    "caching": true,
+    "compression": true,
+    "lazy_loading": true,
+    "cdn_enabled": true,
+    "image_optimization": true
+  },
+  "LOCALIZATION": {
+    "default_locale": "vi",
+    "supported_locales": ["vi", "en", "zh", "ja", "ko"],
+    "timezone": "Asia/Ho_Chi_Minh",
+    "currency": "VND"
+  },
+  "THEME": {
+    "mode": "system",
+    "primary_color": "#3B82F6",
+    "secondary_color": "#1E40AF",
+    "accent_color": "#F59E0B",
+    "success_color": "#10B981",
+    "warning_color": "#F59E0B",
+    "error_color": "#EF4444",
+    "dark_mode": true
+  },
+  "MOBILE": {
+    "app_name": "Logistics Mobile",
+    "package_name": "com.logistics.mobile",
+    "version": "2.0.0",
+    "features": {
+      "offline_mode": true,
+      "push_notifications": true,
+      "gps_tracking": true,
+      "barcode_scanning": true,
+      "photo_capture": true
+    }
+  },
+  "WEBHOOKS": {
+    "enabled": true,
+    "events": [
+      "order.created",
+      "order.updated",
+      "order.completed",
+      "order.cancelled",
+      "route.optimized",
+      "route.started",
+      "route.completed",
+      "driver.location_updated",
+      "vehicle.status_changed"
+    ],
+    "retry_attempts": 3,
+    "timeout": 30
+  },
+  "BACKUP": {
+    "enabled": true,
+    "schedule": "daily",
+    "retention_days": 30,
+    "encryption": true,
+    "cloud_storage": true
+  }
+}

@@ -293,22 +293,37 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguage] = useState<Language>('vi')
+  const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
-    // Load saved language from localStorage
-    const savedLanguage = localStorage.getItem('language') as Language
-    if (savedLanguage && (savedLanguage === 'vi' || savedLanguage === 'en')) {
-      setLanguage(savedLanguage)
+    setIsClient(true)
+    // Load saved language from localStorage only on client side
+    if (typeof window !== 'undefined') {
+      const savedLanguage = localStorage.getItem('language') as Language
+      if (savedLanguage && (savedLanguage === 'vi' || savedLanguage === 'en')) {
+        setLanguage(savedLanguage)
+      }
     }
   }, [])
 
   const handleSetLanguage = (lang: Language) => {
     setLanguage(lang)
-    localStorage.setItem('language', lang)
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('language', lang)
+    }
   }
 
   const t = (key: string): string => {
     return translations[language][key] || key
+  }
+
+  // Don't render until client-side hydration is complete
+  if (!isClient) {
+    return (
+      <LanguageContext.Provider value={{ language: 'vi', setLanguage: () => {}, t }}>
+        {children}
+      </LanguageContext.Provider>
+    )
   }
 
   return (

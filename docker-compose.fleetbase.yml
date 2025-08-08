@@ -1,0 +1,301 @@
+version: '3.8'
+
+services:
+  # Redis Cache for Fleetbase
+  fleetbase-cache:
+    image: redis:7-alpine
+    container_name: logistics-fleetbase-cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - fleetbase_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - logistics-network
+
+  # MySQL Database for Fleetbase
+  fleetbase-database:
+    image: mysql:8.0
+    container_name: logistics-fleetbase-db
+    ports:
+      - "3306:3306"
+    volumes:
+      - fleetbase_mysql_data:/var/lib/mysql
+      - ./fleetbase-config/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      MYSQL_ROOT_PASSWORD: logistics_root_password
+      MYSQL_DATABASE: fleetbase_logistics
+      MYSQL_USER: fleetbase_user
+      MYSQL_PASSWORD: fleetbase_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-plogistics_root_password"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - logistics-network
+
+  # Fleetbase Socket Server
+  fleetbase-socket:
+    image: socketcluster/socketcluster:v17.4.0
+    container_name: logistics-fleetbase-socket
+    ports:
+      - "38000:8000"
+    environment:
+      SOCKETCLUSTER_WORKERS: 4
+      SOCKETCLUSTER_BROKERS: 4
+    networks:
+      - logistics-network
+
+  # Fleetbase API Server
+  fleetbase-api:
+    image: fleetbase/fleetbase-api:latest
+    container_name: logistics-fleetbase-api
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./fleetbase-config/api/.env:/fleetbase/api/.env
+      - fleetbase_storage:/fleetbase/api/storage
+    environment:
+      APP_NAME: "Logistics Fleetbase"
+      APP_ENV: production
+      APP_DEBUG: false
+      APP_URL: http://localhost:8001
+      DATABASE_URL: "mysql://fleetbase_user:fleetbase_password@fleetbase-database/fleetbase_logistics"
+      QUEUE_CONNECTION: redis
+      CACHE_DRIVER: redis
+      CACHE_URL: redis://fleetbase-cache:6379
+      REDIS_URL: redis://fleetbase-cache:6379
+      SESSION_DOMAIN: localhost
+      BROADCAST_DRIVER: socketcluster
+      SOCKETCLUSTER_HOST: fleetbase-socket
+      SOCKETCLUSTER_PORT: 8000
+      MAIL_FROM_NAME: "Logistics System"
+      LOG_CHANNEL: daily
+      REGISTRY_HOST: https://registry.fleetbase.io
+      REGISTRY_PREINSTALLED_EXTENSIONS: 'true'
+      OSRM_HOST: https://router.project-osrm.org
+      # AI Integration
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      # Supabase Integration
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      # Cloudflare Integration
+      CLOUDFLARE_ACCOUNT_ID: ${CLOUDFLARE_ACCOUNT_ID}
+      CLOUDFLARE_API_TOKEN: ${CLOUDFLARE_API_TOKEN}
+    depends_on:
+      fleetbase-database:
+        condition: service_healthy
+      fleetbase-cache:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - logistics-network
+
+  # Fleetbase Queue Worker
+  fleetbase-queue:
+    image: fleetbase/fleetbase-api:latest
+    container_name: logistics-fleetbase-queue
+    command: ["php", "artisan", "queue:work", "--verbose", "--tries=3", "--timeout=90"]
+    volumes:
+      - ./fleetbase-config/api/.env:/fleetbase/api/.env
+      - fleetbase_storage:/fleetbase/api/storage
+    environment:
+      APP_NAME: "Logistics Fleetbase"
+      APP_ENV: production
+      DATABASE_URL: "mysql://fleetbase_user:fleetbase_password@fleetbase-database/fleetbase_logistics"
+      QUEUE_CONNECTION: redis
+      CACHE_DRIVER: redis
+      CACHE_URL: redis://fleetbase-cache:6379
+      REDIS_URL: redis://fleetbase-cache:6379
+    depends_on:
+      fleetbase-database:
+        condition: service_healthy
+      fleetbase-cache:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "php", "artisan", "queue:status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - logistics-network
+
+  # Fleetbase Scheduler
+  fleetbase-scheduler:
+    image: fleetbase/fleetbase-api:latest
+    container_name: logistics-fleetbase-scheduler
+    command: ["go-crond", "--verbose", "root:./crontab"]
+    volumes:
+      - ./fleetbase-config/api/.env:/fleetbase/api/.env
+      - fleetbase_storage:/fleetbase/api/storage
+    environment:
+      APP_NAME: "Logistics Fleetbase"
+      DATABASE_URL: "mysql://fleetbase_user:fleetbase_password@fleetbase-database/fleetbase_logistics"
+      QUEUE_CONNECTION: redis
+      CACHE_DRIVER: redis
+      CACHE_URL: redis://fleetbase-cache:6379
+      REDIS_URL: redis://fleetbase-cache:6379
+    depends_on:
+      fleetbase-database:
+        condition: service_healthy
+      fleetbase-cache:
+        condition: service_healthy
+    networks:
+      - logistics-network
+
+  # Fleetbase Console (Frontend)
+  fleetbase-console:
+    image: fleetbase/fleetbase-console:latest
+    container_name: logistics-fleetbase-console
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./fleetbase-config/console/fleetbase.config.json:/usr/share/nginx/html/fleetbase.config.json
+    environment:
+      API_HOST: http://localhost:8001
+      SOCKET_HOST: http://localhost:38000
+    depends_on:
+      - fleetbase-api
+    networks:
+      - logistics-network
+
+  # NGINX Reverse Proxy
+  fleetbase-proxy:
+    image: nginx:alpine
+    container_name: logistics-fleetbase-proxy
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - ./fleetbase-config/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./fleetbase-config/nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - fleetbase-api
+      - fleetbase-console
+    networks:
+      - logistics-network
+
+  # Elasticsearch for Advanced Search (Optional)
+  fleetbase-elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: logistics-fleetbase-elasticsearch
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - fleetbase_elasticsearch_data:/usr/share/elasticsearch/data
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - logistics-network
+
+  # Kibana for Elasticsearch Visualization (Optional)
+  fleetbase-kibana:
+    image: docker.elastic.co/kibana/kibana:8.11.0
+    container_name: logistics-fleetbase-kibana
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_HOSTS: http://fleetbase-elasticsearch:9200
+    depends_on:
+      fleetbase-elasticsearch:
+        condition: service_healthy
+    networks:
+      - logistics-network
+
+  # MinIO for File Storage (S3 Compatible)
+  fleetbase-minio:
+    image: minio/minio:latest
+    container_name: logistics-fleetbase-minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - fleetbase_minio_data:/data
+    environment:
+      MINIO_ROOT_USER: logistics_minio_user
+      MINIO_ROOT_PASSWORD: logistics_minio_password
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    networks:
+      - logistics-network
+
+  # Prometheus for Monitoring (Optional)
+  fleetbase-prometheus:
+    image: prom/prometheus:latest
+    container_name: logistics-fleetbase-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./fleetbase-config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - fleetbase_prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - logistics-network
+
+  # Grafana for Monitoring Dashboard (Optional)
+  fleetbase-grafana:
+    image: grafana/grafana:latest
+    container_name: logistics-fleetbase-grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - fleetbase_grafana_data:/var/lib/grafana
+      - ./fleetbase-config/grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: logistics_grafana_password
+      GF_USERS_ALLOW_SIGN_UP: false
+    depends_on:
+      - fleetbase-prometheus
+    networks:
+      - logistics-network
+
+volumes:
+  fleetbase_mysql_data:
+    driver: local
+  fleetbase_redis_data:
+    driver: local
+  fleetbase_storage:
+    driver: local
+  fleetbase_elasticsearch_data:
+    driver: local
+  fleetbase_minio_data:
+    driver: local
+  fleetbase_prometheus_data:
+    driver: local
+  fleetbase_grafana_data:
+    driver: local
+
+networks:
+  logistics-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

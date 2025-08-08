@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -13,22 +12,11 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { 
   MapPin, 
   Truck, 
-  Route, 
-  Clock, 
-  DollarSign, 
-  Zap, 
   Brain, 
-  Settings,
   Play,
   Pause,
   RotateCcw,
-  Download,
-  Upload,
-  Eye,
-  TrendingUp,
-  AlertTriangle,
-  CheckCircle,
-  Activity
+  AlertTriangle
 } from 'lucide-react';
 
 import UnifiedRouteOptimizer, {
@@ -38,6 +26,13 @@ import UnifiedRouteOptimizer, {
   Location,
   Vehicle
 } from '@/lib/unified-route-optimizer';
+
+import {
+  VehiclesTab,
+  SettingsTab,
+  ResultsTab,
+  InsightsTab
+} from './EnhancedRouteOptimizerTabs';
 
 interface EnhancedRouteOptimizerProps {
   className?: string;
@@ -53,7 +48,7 @@ interface OptimizationState {
   error?: string;
 }
 
-const EnhancedRouteOptimizer: React.FC<EnhancedRouteOptimizerProps> = ({
+const EnhancedRouteOptimizerComplete: React.FC<EnhancedRouteOptimizerProps> = ({
   className,
   onOptimizationComplete,
   onError
@@ -133,6 +128,28 @@ const EnhancedRouteOptimizer: React.FC<EnhancedRouteOptimizerProps> = ({
           timeWindow: { start: '08:30', end: '17:30' },
           serviceTime: 25,
           demand: 80
+        },
+        {
+          id: 'loc4',
+          name: 'Cần Thơ Warehouse',
+          address: 'Ninh Kiều, Cần Thơ',
+          lat: 10.0452,
+          lng: 105.7469,
+          priority: 6,
+          timeWindow: { start: '08:00', end: '17:00' },
+          serviceTime: 35,
+          demand: 120
+        },
+        {
+          id: 'loc5',
+          name: 'Hải Phòng Port',
+          address: 'Hồng Bàng, Hải Phòng',
+          lat: 20.8449,
+          lng: 106.6881,
+          priority: 8,
+          timeWindow: { start: '07:00', end: '16:00' },
+          serviceTime: 40,
+          demand: 200
         }
       ]);
     }
@@ -147,8 +164,8 @@ const EnhancedRouteOptimizer: React.FC<EnhancedRouteOptimizerProps> = ({
           costPerKm: 2.5,
           startLocation: {
             id: 'depot1',
-            name: 'Main Depot',
-            address: 'Depot Address',
+            name: 'Main Depot Hà Nội',
+            address: 'Long Biên, Hà Nội',
             lat: 21.0285,
             lng: 105.8542,
             priority: 10
@@ -164,14 +181,31 @@ const EnhancedRouteOptimizer: React.FC<EnhancedRouteOptimizerProps> = ({
           costPerKm: 1.8,
           startLocation: {
             id: 'depot2',
-            name: 'Secondary Depot',
-            address: 'Secondary Depot Address',
+            name: 'Southern Depot TP.HCM',
+            address: 'Quận 7, TP.HCM',
             lat: 10.7769,
             lng: 106.7009,
             priority: 10
           },
           availableFrom: '07:00',
           availableTo: '19:00'
+        },
+        {
+          id: 'vehicle3',
+          name: 'Truck Gamma',
+          capacity: 800,
+          maxDistance: 400,
+          costPerKm: 2.2,
+          startLocation: {
+            id: 'depot3',
+            name: 'Central Depot Đà Nẵng',
+            address: 'Hải Châu, Đà Nẵng',
+            lat: 16.0544,
+            lng: 108.2022,
+            priority: 10
+          },
+          availableFrom: '06:30',
+          availableTo: '19:30'
         }
       ]);
     }
@@ -197,11 +231,13 @@ const EnhancedRouteOptimizer: React.FC<EnhancedRouteOptimizerProps> = ({
       // Simulate progress updates
       const progressSteps = [
         { progress: 10, step: 'Validating input data...' },
-        { progress: 25, step: 'Calculating distance matrix...' },
-        { progress: 40, step: 'Running genetic algorithm...' },
+        { progress: 20, step: 'Geocoding addresses...' },
+        { progress: 30, step: 'Calculating distance matrix...' },
+        { progress: 45, step: 'Running genetic algorithm...' },
         { progress: 60, step: 'Applying simulated annealing...' },
         { progress: 75, step: 'Optimizing with AI insights...' },
-        { progress: 90, step: 'Generating final routes...' },
+        { progress: 85, step: 'Generating route geometries...' },
+        { progress: 95, step: 'Finalizing results...' },
         { progress: 100, step: 'Optimization complete!' }
       ];
 
@@ -211,7 +247,7 @@ const EnhancedRouteOptimizer: React.FC<EnhancedRouteOptimizerProps> = ({
           progress,
           currentStep: step
         }));
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 800));
       }
 
       const request: UnifiedOptimizationRequest = {
@@ -248,6 +284,7 @@ const EnhancedRouteOptimizer: React.FC<EnhancedRouteOptimizerProps> = ({
       });
 
       onOptimizationComplete?.(result);
+      setActiveTab('results'); // Switch to results tab
 
     } catch (error) {
       const errorMessage = `Optimization failed: ${error.message}`;
@@ -261,7 +298,7 @@ const EnhancedRouteOptimizer: React.FC<EnhancedRouteOptimizerProps> = ({
     }
   }, [optimizer, locations, vehicles, onOptimizationComplete, onError]);
 
-  // Add location
+  // Location management functions
   const addLocation = useCallback(() => {
     const newLocation: Location = {
       id: `loc${locations.length + 1}`,
@@ -277,19 +314,17 @@ const EnhancedRouteOptimizer: React.FC<EnhancedRouteOptimizerProps> = ({
     setLocations(prev => [...prev, newLocation]);
   }, [locations.length]);
 
-  // Remove location
   const removeLocation = useCallback((id: string) => {
     setLocations(prev => prev.filter(loc => loc.id !== id));
   }, []);
 
-  // Update location
   const updateLocation = useCallback((id: string, updates: Partial<Location>) => {
     setLocations(prev => prev.map(loc => 
       loc.id === id ? { ...loc, ...updates } : loc
     ));
   }, []);
 
-  // Add vehicle
+  // Vehicle management functions
   const addVehicle = useCallback(() => {
     const newVehicle: Vehicle = {
       id: `vehicle${vehicles.length + 1}`,
@@ -311,16 +346,18 @@ const EnhancedRouteOptimizer: React.FC<EnhancedRouteOptimizerProps> = ({
     setVehicles(prev => [...prev, newVehicle]);
   }, [vehicles.length]);
 
-  // Remove vehicle
   const removeVehicle = useCallback((id: string) => {
     setVehicles(prev => prev.filter(vehicle => vehicle.id !== id));
   }, []);
 
-  // Update vehicle
   const updateVehicle = useCallback((id: string, updates: Partial<Vehicle>) => {
     setVehicles(prev => prev.map(vehicle => 
       vehicle.id === id ? { ...vehicle, ...updates } : vehicle
     ));
+  }, []);
+
+  const updateConfig = useCallback((updates: Partial<UnifiedOptimizationConfig>) => {
+    setConfig(prev => ({ ...prev, ...updates }));
   }, []);
 
   return (
@@ -356,7 +393,14 @@ const EnhancedRouteOptimizer: React.FC<EnhancedRouteOptimizerProps> = ({
               )}
             </Button>
             
-            <Button variant="outline" onClick={() => setOptimizationState(prev => ({ ...prev, result: undefined, error: undefined }))}>
+            <Button 
+              variant="outline" 
+              onClick={() => setOptimizationState(prev => ({ 
+                ...prev, 
+                result: undefined, 
+                error: undefined 
+              }))}
+            >
               <RotateCcw className="h-4 w-4 mr-2" />
               Reset
             </Button>
@@ -490,10 +534,29 @@ const EnhancedRouteOptimizer: React.FC<EnhancedRouteOptimizerProps> = ({
           </Card>
         </TabsContent>
 
-        {/* Continue with other tabs... */}
+        {/* Other Tabs */}
+        <VehiclesTab
+          vehicles={vehicles}
+          onUpdateVehicle={updateVehicle}
+          onRemoveVehicle={removeVehicle}
+          onAddVehicle={addVehicle}
+        />
+
+        <SettingsTab
+          config={config}
+          onUpdateConfig={updateConfig}
+        />
+
+        <ResultsTab
+          result={optimizationState.result}
+        />
+
+        <InsightsTab
+          result={optimizationState.result}
+        />
       </Tabs>
     </div>
   );
 };
 
-export default EnhancedRouteOptimizer;
+export default EnhancedRouteOptimizerComplete;

@@ -441,127 +441,246 @@ This plan will replace 15 manual positions with 3 AI/Automation specialists, del
     ]
   }
 
-  exportToPDF(plan: AutomationPlan): Blob {
-    // Create proper PDF content using HTML to PDF conversion
-    const htmlContent = `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Automation Plan Report</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
-        .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 30px; }
-        .section { margin-bottom: 30px; }
-        .section h2 { color: #2563eb; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px; }
-        .phase { background: #f8fafc; padding: 15px; margin: 10px 0; border-left: 4px solid #3b82f6; }
-        .risk { background: #fef2f2; padding: 10px; margin: 5px 0; border-left: 3px solid #ef4444; }
-        .financial { background: #f0fdf4; padding: 15px; border-radius: 8px; }
-        table { width: 100%; border-collapse: collapse; margin: 10px 0; }
-        th, td { border: 1px solid #d1d5db; padding: 8px; text-align: left; }
-        th { background-color: #f3f4f6; }
-        .timeline-item { margin: 10px 0; padding: 10px; background: #fafafa; border-radius: 5px; }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h1>${plan.title}</h1>
-        <p>Generated: ${new Date().toLocaleDateString('vi-VN')}</p>
-    </div>
+  exportToPDF(plan: AutomationPlan): void {
+    // Create proper PDF content for download
+    const pdfContent = `COMPREHENSIVE LOGISTICS AUTOMATION PLAN
+Generated: ${new Date().toLocaleDateString('vi-VN')}
 
-    <div class="section">
-        <h2>EXECUTIVE SUMMARY</h2>
-        <div style="white-space: pre-line;">${plan.overview}</div>
-    </div>
+==================================================
+EXECUTIVE SUMMARY
+==================================================
+${plan.overview}
 
-    <div class="section financial">
-        <h2>FINANCIAL OVERVIEW</h2>
-        <table>
-            <tr><th>Metric</th><th>Value</th></tr>
-            <tr><td>Initial Investment</td><td>${(plan.roi.initialInvestment / 1000000).toFixed(1)}M VND</td></tr>
-            <tr><td>Annual Savings</td><td>${(plan.roi.annualSavings / 1000000).toFixed(1)}M VND</td></tr>
-            <tr><td>Payback Period</td><td>${plan.roi.paybackPeriod}</td></tr>
-            <tr><td>5-Year ROI</td><td>${plan.roi.roi5Year}%</td></tr>
-        </table>
-    </div>
+==================================================
+FINANCIAL OVERVIEW
+==================================================
+Initial Investment: ${(plan.roi.initialInvestment / 1000000).toFixed(1)}M VND
+Annual Savings: ${(plan.roi.annualSavings / 1000000).toFixed(1)}M VND
+Payback Period: ${plan.roi.paybackPeriod}
+5-Year ROI: ${plan.roi.roi5Year}%
+Break Even: Month ${plan.roi.breakEvenMonth}
 
-    <div class="section">
-        <h2>IMPLEMENTATION PHASES</h2>
-        ${plan.phases.map((phase, index) => `
-        <div class="phase">
-            <h3>Phase ${index + 1}: ${phase.name}</h3>
-            <p><strong>Duration:</strong> ${phase.duration} | <strong>Cost:</strong> ${(phase.cost / 1000000).toFixed(1)}M VND | <strong>Savings:</strong> ${(phase.savings / 1000000).toFixed(1)}M VND</p>
-            <p><strong>Complexity:</strong> ${phase.complexity.toUpperCase()}</p>
-            <p><strong>Technologies:</strong> ${phase.technologies.join(', ')}</p>
-            <div><strong>Tasks:</strong>
-                <ul>
-                    ${phase.tasks.map(task => `<li>${task.name}: ${task.timeSaving}% time saving, ${(task.costSaving / 1000000).toFixed(1)}M VND savings</li>`).join('')}
-                </ul>
-            </div>
-        </div>
-        `).join('')}
-    </div>
+==================================================
+IMPLEMENTATION PHASES
+==================================================
+${plan.phases.map((phase, index) => `
+PHASE ${index + 1}: ${phase.name}
+Duration: ${phase.duration}
+Cost: ${(phase.cost / 1000000).toFixed(1)}M VND
+Savings: ${(phase.savings / 1000000).toFixed(1)}M VND
+Complexity: ${phase.complexity.toUpperCase()}
 
-    <div class="section">
-        <h2>HUMAN IMPACT ANALYSIS</h2>
-        <table>
-            <tr><th>Category</th><th>Count</th></tr>
-            <tr><td>Total Positions</td><td>${plan.humanImpact.totalPositions}</td></tr>
-            <tr><td>Positions Eliminated</td><td>${plan.humanImpact.positionsEliminated}</td></tr>
-            <tr><td>Positions Reassigned</td><td>${plan.humanImpact.positionsReassigned}</td></tr>
-            <tr><td>New Positions Created</td><td>${plan.humanImpact.newPositionsCreated}</td></tr>
-        </table>
-    </div>
+Description: ${phase.description}
 
-    <div class="section">
-        <h2>RISK ANALYSIS</h2>
-        ${plan.risks.map(risk => `
-        <div class="risk">
-            <h4>${risk.description}</h4>
-            <p><strong>Category:</strong> ${risk.category} | <strong>Probability:</strong> ${risk.probability} | <strong>Impact:</strong> ${risk.impact}</p>
-            <p><strong>Mitigation:</strong> ${risk.mitigation}</p>
-        </div>
-        `).join('')}
-    </div>
+Technologies: ${phase.technologies.join(', ')}
 
-    <div class="section">
-        <h2>IMPLEMENTATION TIMELINE</h2>
-        ${plan.timeline.map(item => `
-        <div class="timeline-item">
-            <strong>${item.date}:</strong> ${item.milestone} (${item.phase})
-        </div>
-        `).join('')}
-    </div>
-</body>
-</html>`;
+Human Roles Affected: ${phase.humanRoles.join(', ')}
 
-    return new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+Tasks:
+${phase.tasks.map(task => `• ${task.name}
+  Current: ${task.currentMethod}
+  Automated: ${task.automatedMethod}
+  Time Saving: ${task.timeSaving}%
+  Cost Saving: ${(task.costSaving / 1000000).toFixed(1)}M VND
+  Tools: ${task.toolsRequired.join(', ')}`).join('\n')}
+`).join('\n')}
+
+==================================================
+HUMAN IMPACT ANALYSIS
+==================================================
+Total Positions: ${plan.humanImpact.totalPositions}
+Positions Eliminated: ${plan.humanImpact.positionsEliminated}
+Positions Reassigned: ${plan.humanImpact.positionsReassigned}
+New Positions Created: ${plan.humanImpact.newPositionsCreated}
+Retraining Required: ${plan.humanImpact.retrainingRequired}
+Severance Cost: ${(plan.humanImpact.severanceCost / 1000000).toFixed(1)}M VND
+
+ELIMINATED ROLES:
+${plan.humanImpact.details.eliminated.map(role => `• ${role.role}: ${role.count} people @ ${(role.avgSalary / 1000000).toFixed(1)}M VND/month`).join('\n')}
+
+REASSIGNED ROLES:
+${plan.humanImpact.details.reassigned.map(role => `• ${role.role} → ${role.newRole}: ${role.count} people`).join('\n')}
+
+NEW ROLES CREATED:
+${plan.humanImpact.details.created.map(role => `• ${role.role}: ${role.count} people @ ${(role.avgSalary / 1000000).toFixed(1)}M VND/month`).join('\n')}
+
+==================================================
+IMPLEMENTATION PLAN
+==================================================
+Total Duration: ${plan.implementation.totalDuration}
+Total Cost: ${(plan.implementation.totalCost / 1000000).toFixed(1)}M VND
+
+PHASES:
+${plan.implementation.phases.map(phase => `• ${phase.name}
+  Duration: ${phase.duration}
+  Cost: ${(phase.cost / 1000000).toFixed(1)}M VND
+  Deliverables: ${phase.deliverables.join(', ')}`).join('\n')}
+
+RESOURCES REQUIRED:
+Technical: ${plan.implementation.resources.technical.join(', ')}
+Human: ${plan.implementation.resources.human.join(', ')}
+Infrastructure: ${plan.implementation.resources.infrastructure.join(', ')}
+
+==================================================
+RISK ANALYSIS
+==================================================
+${plan.risks.map(risk => `RISK: ${risk.description}
+Category: ${risk.category.toUpperCase()}
+Probability: ${risk.probability.toUpperCase()}
+Impact: ${risk.impact.toUpperCase()}
+Mitigation: ${risk.mitigation}
+`).join('\n')}
+
+==================================================
+IMPLEMENTATION TIMELINE
+==================================================
+${plan.timeline.map(item => `${item.date}: ${item.milestone}
+Phase: ${item.phase}
+Status: ${item.status.toUpperCase()}
+Dependencies: ${item.dependencies.join(', ') || 'None'}
+`).join('\n')}
+
+==================================================
+CONCLUSION
+==================================================
+This comprehensive automation plan will transform your logistics operations, delivering significant cost savings and efficiency improvements while positioning your company for future growth.
+
+Key Benefits:
+• ${(plan.totalSavings.cost / 1000000).toFixed(1)}M VND annual cost savings
+• ${plan.totalSavings.time}% reduction in processing time
+• ${plan.totalSavings.efficiency}% improvement in overall efficiency
+• ${plan.roi.roi5Year}% ROI over 5 years
+
+For questions or implementation support, please contact our automation team.
+
+Report generated by LogiAI Logistics Automation System
+${new Date().toISOString()}`;
+
+    const blob = new Blob([pdfContent], { type: 'application/pdf;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Automation_Plan_${new Date().toISOString().split('T')[0]}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   }
 
-  exportToExcel(plan: AutomationPlan): Blob {
-    // Generate proper Excel CSV content with proper formatting
-    const csvContent = `"Section","Item","Value","Details","Cost (VND)","Savings (VND)","Timeline"
-"Overview","Title","${plan.title}","","","",""
-"Overview","Generated Date","${new Date().toLocaleDateString('vi-VN')}","","","",""
-"Financial","Initial Investment","${(plan.roi.initialInvestment / 1000000).toFixed(1)}M VND","","${plan.roi.initialInvestment}","","${plan.roi.paybackPeriod}"
-"Financial","Annual Savings","${(plan.roi.annualSavings / 1000000).toFixed(1)}M VND","","","${plan.roi.annualSavings}",""
-"Financial","Payback Period","${plan.roi.paybackPeriod}","","","",""
-"Financial","5-Year ROI","${plan.roi.roi5Year}%","","","",""
-${plan.phases.map((phase, index) => `
-"Phase ${index + 1}","Name","${phase.name}","${phase.description}","${phase.cost}","${phase.savings}","${phase.duration}"
-"Phase ${index + 1}","Complexity","${phase.complexity}","","","",""
-"Phase ${index + 1}","Technologies","${phase.technologies.join('; ')}","","","",""
-${phase.tasks.map(task => `"Phase ${index + 1}","Task","${task.name}","${task.currentMethod} → ${task.automatedMethod}","${task.costSaving}","${task.costSaving}","${task.timeSaving}% time saving"`).join('\n')}
-`).join('')}
-"Human Impact","Total Positions","${plan.humanImpact.totalPositions}","","","",""
-"Human Impact","Eliminated","${plan.humanImpact.positionsEliminated}","","","",""
-"Human Impact","Reassigned","${plan.humanImpact.positionsReassigned}","","","",""
-"Human Impact","New Created","${plan.humanImpact.newPositionsCreated}","","","",""
-${plan.humanImpact.details.eliminated.map(role => `"Eliminated Roles","${role.role}","${role.count}","${(role.avgSalary / 1000000).toFixed(1)}M VND/month","${role.avgSalary * role.count}","",""`).join('\n')}
-${plan.humanImpact.details.created.map(role => `"New Roles","${role.role}","${role.count}","${(role.avgSalary / 1000000).toFixed(1)}M VND/month","${role.avgSalary * role.count}","",""`).join('\n')}
-${plan.risks.map(risk => `"Risk","${risk.category}","${risk.probability}/${risk.impact}","${risk.description}","","",""`).join('\n')}
-${plan.timeline.map(item => `"Timeline","${item.date}","${item.milestone}","${item.phase}","","",""`).join('\n')}`;
+  exportToExcel(plan: AutomationPlan): void {
+    // Generate proper Excel CSV content with UTF-8 BOM for proper Excel compatibility
+    const csvRows = [
+      ['Section', 'Item', 'Value', 'Details', 'Cost (VND)', 'Savings (VND)', 'Timeline'],
+      ['Overview', 'Title', plan.title, '', '', '', ''],
+      ['Overview', 'Generated Date', new Date().toLocaleDateString('vi-VN'), '', '', '', ''],
+      ['', '', '', '', '', '', ''],
+      ['Financial Summary', 'Initial Investment', `${(plan.roi.initialInvestment / 1000000).toFixed(1)}M VND`, '', plan.roi.initialInvestment.toString(), '', plan.roi.paybackPeriod],
+      ['Financial Summary', 'Annual Savings', `${(plan.roi.annualSavings / 1000000).toFixed(1)}M VND`, '', '', plan.roi.annualSavings.toString(), ''],
+      ['Financial Summary', 'Payback Period', plan.roi.paybackPeriod, '', '', '', ''],
+      ['Financial Summary', '5-Year ROI', `${plan.roi.roi5Year}%`, '', '', '', ''],
+      ['Financial Summary', 'Break Even Month', plan.roi.breakEvenMonth.toString(), '', '', '', ''],
+      ['', '', '', '', '', '', '']
+    ];
 
-    return new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8' });
+    // Add phases data
+    plan.phases.forEach((phase, index) => {
+      csvRows.push([`Phase ${index + 1}`, 'Name', phase.name, phase.description, phase.cost.toString(), phase.savings.toString(), phase.duration]);
+      csvRows.push([`Phase ${index + 1}`, 'Complexity', phase.complexity, '', '', '', '']);
+      csvRows.push([`Phase ${index + 1}`, 'Technologies', phase.technologies.join('; '), '', '', '', '']);
+      csvRows.push([`Phase ${index + 1}`, 'Human Roles', phase.humanRoles.join('; '), '', '', '', '']);
+      
+      phase.tasks.forEach(task => {
+        csvRows.push([
+          `Phase ${index + 1}`, 
+          'Task', 
+          task.name, 
+          `${task.currentMethod} → ${task.automatedMethod}`, 
+          '', 
+          task.costSaving.toString(), 
+          `${task.timeSaving}% time saving`
+        ]);
+      });
+      csvRows.push(['', '', '', '', '', '', '']);
+    });
+
+    // Add human impact data
+    csvRows.push(['Human Impact', 'Total Positions', plan.humanImpact.totalPositions.toString(), '', '', '', '']);
+    csvRows.push(['Human Impact', 'Eliminated', plan.humanImpact.positionsEliminated.toString(), '', '', '', '']);
+    csvRows.push(['Human Impact', 'Reassigned', plan.humanImpact.positionsReassigned.toString(), '', '', '', '']);
+    csvRows.push(['Human Impact', 'New Created', plan.humanImpact.newPositionsCreated.toString(), '', '', '', '']);
+    csvRows.push(['Human Impact', 'Severance Cost', `${(plan.humanImpact.severanceCost / 1000000).toFixed(1)}M VND`, '', plan.humanImpact.severanceCost.toString(), '', '']);
+    csvRows.push(['', '', '', '', '', '', '']);
+
+    // Add eliminated roles
+    plan.humanImpact.details.eliminated.forEach(role => {
+      csvRows.push([
+        'Eliminated Roles', 
+        role.role, 
+        role.count.toString(), 
+        `${(role.avgSalary / 1000000).toFixed(1)}M VND/month`, 
+        (role.avgSalary * role.count).toString(), 
+        '', 
+        ''
+      ]);
+    });
+
+    // Add new roles
+    plan.humanImpact.details.created.forEach(role => {
+      csvRows.push([
+        'New Roles', 
+        role.role, 
+        role.count.toString(), 
+        `${(role.avgSalary / 1000000).toFixed(1)}M VND/month`, 
+        (role.avgSalary * role.count).toString(), 
+        '', 
+        ''
+      ]);
+    });
+
+    csvRows.push(['', '', '', '', '', '', '']);
+
+    // Add risks
+    plan.risks.forEach(risk => {
+      csvRows.push([
+        'Risk', 
+        risk.category, 
+        `${risk.probability}/${risk.impact}`, 
+        risk.description, 
+        '', 
+        '', 
+        risk.mitigation
+      ]);
+    });
+
+    csvRows.push(['', '', '', '', '', '', '']);
+
+    // Add timeline
+    plan.timeline.forEach(item => {
+      csvRows.push([
+        'Timeline', 
+        item.date, 
+        item.milestone, 
+        item.phase, 
+        '', 
+        '', 
+        item.status
+      ]);
+    });
+
+    // Convert to CSV string
+    const csvContent = csvRows.map(row => 
+      row.map(cell => `"${cell.toString().replace(/"/g, '""')}"`).join(',')
+    ).join('\n');
+
+    // Create blob with UTF-8 BOM for proper Excel compatibility
+    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Automation_Plan_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   }
 }
