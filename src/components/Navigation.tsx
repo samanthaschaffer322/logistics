@@ -18,6 +18,7 @@ import {
   LogOut, 
   Menu, 
   X,
+  Shield,
   User,
   ShoppingCart,
   Shield,
@@ -125,6 +126,13 @@ const navigationItems = [
     icon: FileText,
     translationKey: 'navigation.fileLearning',
     color: 'cyan'
+  },
+  { 
+    key: 'customs-training', 
+    href: '/customs-training', 
+    icon: Shield,
+    translationKey: 'navigation.customsTraining',
+    color: 'blue'
   }
 ]
 
