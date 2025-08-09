@@ -1,12 +1,12 @@
 'use client';
 
 import ProtectedRoute from '@/components/ProtectedRoute';
-import CombinedRouteOptimizer from '@/components/CombinedRouteOptimizer';
+import FunctionalCombinedRouteOptimizer from '@/components/FunctionalCombinedRouteOptimizer';
 
 export default function CombinedRouteOptimizerPage() {
   return (
     <ProtectedRoute>
-      <CombinedRouteOptimizer />
+      <FunctionalCombinedRouteOptimizer />
     </ProtectedRoute>
   );
 }
