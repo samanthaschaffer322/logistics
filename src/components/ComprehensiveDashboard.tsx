@@ -84,7 +84,7 @@ const ComprehensiveDashboard = () => {
     {
       category: 'Route Optimization',
       items: [
-        { title: 'Enhanced Route Optimizer', description: 'AI-powered multi-algorithm optimization', icon: Navigation, href: '/enhanced-route-optimization', color: 'bg-gradient-to-r from-blue-600 to-cyan-600' },
+        { title: 'Combined Route Optimizer', description: 'Enhanced multi-algorithm optimization with Vietnam map', icon: Navigation, href: '/combined-route-optimizer', color: 'bg-gradient-to-r from-blue-600 to-cyan-600' },
         { title: 'Vietnam Map Routes', description: 'Interactive route planning', icon: Map, href: '/vietnam-map', color: 'bg-gradient-to-r from-green-600 to-emerald-600' }
       ]
     },
@@ -137,39 +137,39 @@ const ComprehensiveDashboard = () => {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="bg-white/10 backdrop-blur-sm border-b border-white/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
-                <Brain className="h-8 w-8 text-blue-600" />
-                <h1 className="text-2xl font-bold text-gray-900">LogiAI</h1>
+                <Brain className="h-8 w-8 text-white" />
+                <h1 className="text-2xl font-bold text-white">LogiAI</h1>
               </div>
-              <Badge variant="secondary" className="bg-green-100 text-green-800">
+              <Badge variant="secondary" className="bg-green-500/20 text-green-300 border-green-500/30">
                 Production
               </Badge>
             </div>
 
             <div className="flex items-center gap-4">
               <div className="relative">
-                <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60" />
                 <Input 
                   placeholder="Search..." 
-                  className="pl-10 w-64"
+                  className="pl-10 w-64 bg-white/20 backdrop-blur-sm text-white placeholder-white/60 border-white/30 focus:border-white/60"
                 />
               </div>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="bg-white/20 backdrop-blur-sm text-white border-white/30 hover:bg-white/30">
                 <Bell className="h-4 w-4" />
               </Button>
               <LanguageSelector />
               <div className="flex items-center gap-2">
                 <div className="text-right">
-                  <p className="text-sm font-medium text-gray-900">{user?.name}</p>
-                  <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
+                  <p className="text-sm font-medium text-white">{user?.name}</p>
+                  <p className="text-xs text-white/70 capitalize">{user?.role}</p>
                 </div>
-                <Button variant="outline" size="sm" onClick={logout}>
+                <Button variant="outline" size="sm" onClick={logout} className="bg-white/20 backdrop-blur-sm text-white border-white/30 hover:bg-white/30">
                   <LogOut className="h-4 w-4" />
                 </Button>
               </div>
@@ -181,18 +181,18 @@ const ComprehensiveDashboard = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="operations">Operations</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="fleet">Fleet</TabsTrigger>
-            <TabsTrigger value="system">System</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5 bg-white/10 backdrop-blur-sm border-white/20">
+            <TabsTrigger value="overview" className="text-white data-[state=active]:bg-white/20 data-[state=active]:text-white">Overview</TabsTrigger>
+            <TabsTrigger value="operations" className="text-white data-[state=active]:bg-white/20 data-[state=active]:text-white">Operations</TabsTrigger>
+            <TabsTrigger value="analytics" className="text-white data-[state=active]:bg-white/20 data-[state=active]:text-white">Analytics</TabsTrigger>
+            <TabsTrigger value="fleet" className="text-white data-[state=active]:bg-white/20 data-[state=active]:text-white">Fleet</TabsTrigger>
+            <TabsTrigger value="system" className="text-white data-[state=active]:bg-white/20 data-[state=active]:text-white">System</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-6">
             {/* Welcome Section */}
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-6 text-white">
+            <div className="bg-gradient-to-r from-blue-600/80 to-purple-600/80 backdrop-blur-sm rounded-lg p-6 text-white border border-white/20">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-2xl font-bold mb-2">Welcome back, {user?.name}!</h2>
@@ -208,18 +208,18 @@ const ComprehensiveDashboard = () => {
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {stats.map((stat, index) => (
-                <Card key={index} className="hover:shadow-lg transition-shadow">
+                <Card key={index} className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                        <p className="text-2xl font-bold text-gray-900 mt-1">{stat.value}</p>
-                        <p className={`text-sm mt-1 ${stat.change.startsWith('+') ? 'text-green-600' : 'text-red-600'}`}>
+                        <p className="text-sm font-medium text-white/80">{stat.title}</p>
+                        <p className="text-2xl font-bold text-white mt-1">{stat.value}</p>
+                        <p className={`text-sm mt-1 ${stat.change.startsWith('+') ? 'text-green-300' : 'text-red-300'}`}>
                           {stat.change} from last month
                         </p>
                       </div>
-                      <div className={`p-3 rounded-lg ${stat.bgColor}`}>
-                        <stat.icon className={`h-6 w-6 ${stat.color}`} />
+                      <div className={`p-3 rounded-lg bg-white/20 backdrop-blur-sm`}>
+                        <stat.icon className={`h-6 w-6 text-white`} />
                       </div>
                     </div>
                   </CardContent>

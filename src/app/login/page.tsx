@@ -118,15 +118,6 @@ export default function LoginPage() {
               )}
             </button>
           </form>
-
-          {/* Demo Credentials */}
-          <div className="mt-6 p-4 bg-white/5 backdrop-blur-sm rounded-lg border border-white/10">
-            <h3 className="text-white text-sm font-medium mb-2">Demo Credentials:</h3>
-            <div className="text-xs text-blue-200 space-y-1">
-              <p><strong>Admin:</strong> samanthaschaffer322@gmail.com / admin@trucking.com</p>
-              <p><strong>Manager:</strong> dkim20263@gmail.com / Dz300511#</p>
-            </div>
-          </div>
         </div>
 
         {/* Footer */}
