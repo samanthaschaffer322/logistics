@@ -5,6 +5,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { LanguageProvider } from '@/contexts/LanguageContext'
 import { AuthProvider } from '@/contexts/AuthContext'
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -21,11 +22,13 @@ export default function RootLayout({
         <meta name="keywords" content="logistics, AI, Vietnam, supply chain, route optimization, transportation" />
       </head>
       <body className={inter.className}>
-        <AuthProvider>
+        <ErrorBoundary>
+          <AuthProvider>
           <LanguageProvider>
             {children}
           </LanguageProvider>
         </AuthProvider>
+        </ErrorBoundary>
       </body>
     </html>
   )
