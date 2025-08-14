@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import LanguageSelector from '@/components/LanguageSelector'
+import FunctionalQuickActions from './FunctionalQuickActions'
 import { 
   Brain, 
   BarChart3, 
@@ -453,31 +454,7 @@ const ComprehensiveDashboard = () => {
                 </CardContent>
               </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Quick Actions</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <Button className="w-full justify-start" variant="outline">
-                      <Download className="h-4 w-4 mr-2" />
-                      Export System Logs
-                    </Button>
-                    <Button className="w-full justify-start" variant="outline">
-                      <Upload className="h-4 w-4 mr-2" />
-                      Import Configuration
-                    </Button>
-                    <Button className="w-full justify-start" variant="outline">
-                      <Settings className="h-4 w-4 mr-2" />
-                      System Settings
-                    </Button>
-                    <Button className="w-full justify-start" variant="outline">
-                      <Users className="h-4 w-4 mr-2" />
-                      User Management
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+              <FunctionalQuickActions />
             </div>
           </TabsContent>
         </Tabs>
