@@ -14,19 +14,23 @@ import {
   TrendingUp,
   AlertTriangle,
   CheckCircle,
-  Info
+  Info,
+  Navigation,
+  Brain,
+  Layers,
+  Target
 } from 'lucide-react';
 
 // Dynamic import to prevent SSR issues with Leaflet
-const SmartRouteOptimizer = dynamic(
-  () => import('@/components/SmartRouteOptimizer'),
+const ComprehensiveRouteOptimizer = dynamic(
+  () => import('@/components/ComprehensiveRouteOptimizer'),
   { 
     ssr: false,
     loading: () => (
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-16">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
-          <p className="text-gray-600">Loading Enhanced Route Optimizer...</p>
+          <p className="text-gray-600">Loading Comprehensive Route Optimizer...</p>
         </CardContent>
       </Card>
     )
@@ -55,11 +59,13 @@ const EnhancedRouteOptimizationPage: React.FC = () => {
     <div className="container mx-auto px-4 py-8 space-y-8">
       {/* Header */}
       <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold text-gray-900">
+        <h1 className="text-4xl font-bold text-gray-900 flex items-center justify-center gap-3">
+          <Brain className="w-10 h-10 text-blue-600" />
           Enhanced Route Optimization
         </h1>
-        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-          AI-powered route optimization with intelligent mapping for Vietnamese truck logistics
+        <p className="text-xl text-gray-600 max-w-4xl mx-auto">
+          Comprehensive AI-powered route optimization with Leaflet mapping, OpenRouteService integration, 
+          Vietnam GeoJSON data, and multiple optimization algorithms for Vietnamese truck logistics
         </p>
         
         <div className="flex justify-center gap-2 flex-wrap">
@@ -68,12 +74,24 @@ const EnhancedRouteOptimizationPage: React.FC = () => {
             AI Enhanced
           </Badge>
           <Badge variant="outline" className="flex items-center gap-1">
-            <Truck className="w-4 h-4" />
-            Truck Optimized
+            <Layers className="w-4 h-4" />
+            Leaflet + React-Leaflet
+          </Badge>
+          <Badge variant="outline" className="flex items-center gap-1">
+            <Navigation className="w-4 h-4" />
+            OpenRouteService
           </Badge>
           <Badge variant="outline" className="flex items-center gap-1">
             <Globe className="w-4 h-4" />
-            Vietnam Focused
+            Vietnam GeoJSON
+          </Badge>
+          <Badge variant="outline" className="flex items-center gap-1">
+            <Target className="w-4 h-4" />
+            Multiple Algorithms
+          </Badge>
+          <Badge variant="outline" className="flex items-center gap-1">
+            <Truck className="w-4 h-4" />
+            Truck Optimized
           </Badge>
           <Badge variant="outline" className="flex items-center gap-1">
             <Shield className="w-4 h-4" />
@@ -105,7 +123,7 @@ const EnhancedRouteOptimizationPage: React.FC = () => {
         <Alert>
           <CheckCircle className="h-4 w-4" />
           <AlertDescription>
-            <strong>Ready to go!</strong> OpenRouteService API key is configured. You can now use all enhanced mapping features.
+            <strong>Ready to go!</strong> OpenRouteService API key is configured. All enhanced mapping features are available.
           </AlertDescription>
         </Alert>
       )}
@@ -115,13 +133,13 @@ const EnhancedRouteOptimizationPage: React.FC = () => {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-lg">
-              <MapPin className="w-5 h-5 text-blue-600" />
-              Smart Mapping
+              <Layers className="w-5 h-5 text-blue-600" />
+              Leaflet Mapping
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-gray-600">
-              Interactive maps with multiple providers, Vietnamese location search, and click-to-add waypoints.
+              Interactive maps with React-Leaflet integration, multiple tile providers, and Vietnamese location search.
             </p>
           </CardContent>
         </Card>
@@ -129,13 +147,13 @@ const EnhancedRouteOptimizationPage: React.FC = () => {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-lg">
-              <Truck className="w-5 h-5 text-green-600" />
-              Truck Routing
+              <Navigation className="w-5 h-5 text-green-600" />
+              ORS Integration
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-gray-600">
-              Specialized routing for heavy goods vehicles with weight, height, and width restrictions.
+              OpenRouteService integration for truck-specific routing with weight, height, and width restrictions.
             </p>
           </CardContent>
         </Card>
@@ -143,13 +161,13 @@ const EnhancedRouteOptimizationPage: React.FC = () => {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-lg">
-              <TrendingUp className="w-5 h-5 text-purple-600" />
-              Cost Analytics
+              <Globe className="w-5 h-5 text-purple-600" />
+              Vietnam GeoJSON
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-gray-600">
-              Detailed cost breakdown in VND including fuel, driver wages, and maintenance costs.
+              Comprehensive Vietnam locations database with ports, depots, and logistics hubs for instant use.
             </p>
           </CardContent>
         </Card>
@@ -157,13 +175,13 @@ const EnhancedRouteOptimizationPage: React.FC = () => {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-lg">
-              <Globe className="w-5 h-5 text-orange-600" />
-              Vietnam Ready
+              <Target className="w-5 h-5 text-orange-600" />
+              Multi-Algorithm
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-gray-600">
-              Pre-loaded with Vietnamese provinces, major ports, and logistics hubs for instant use.
+              Multiple route optimization algorithms: fastest, shortest, eco-friendly, cost-optimized, and balanced.
             </p>
           </CardContent>
         </Card>
@@ -175,13 +193,12 @@ const EnhancedRouteOptimizationPage: React.FC = () => {
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-16">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
-              <p className="text-gray-600">Loading Enhanced Route Optimizer...</p>
+              <p className="text-gray-600">Loading Comprehensive Route Optimizer...</p>
             </CardContent>
           </Card>
         }>
-          <SmartRouteOptimizer
-            orsApiKey={orsApiKey}
-            onOptimizationComplete={handleOptimizationComplete}
+          <ComprehensiveRouteOptimizer
+            onRouteOptimized={handleOptimizationComplete}
             onError={handleError}
             className="min-h-screen"
           />
@@ -198,7 +215,7 @@ const EnhancedRouteOptimizationPage: React.FC = () => {
               It's free and takes just a few minutes to set up.
             </p>
             
-            <div className="space-y-4 text-sm">
+            <div className="space-y-4 text-sm max-w-2xl">
               <div className="bg-gray-50 p-4 rounded-lg">
                 <h4 className="font-medium mb-2">Quick Setup:</h4>
                 <ol className="list-decimal list-inside space-y-1 text-gray-600">
@@ -220,6 +237,20 @@ const EnhancedRouteOptimizationPage: React.FC = () => {
                   <li>No credit card required</li>
                 </ul>
               </div>
+
+              <div className="bg-green-50 p-4 rounded-lg">
+                <h4 className="font-medium mb-2 text-green-900">Enhanced Features Available:</h4>
+                <ul className="list-disc list-inside space-y-1 text-green-800">
+                  <li>✅ Leaflet + React-Leaflet interactive mapping</li>
+                  <li>✅ OpenRouteService integration for truck routing</li>
+                  <li>✅ Vietnam GeoJSON data with 100+ locations</li>
+                  <li>✅ Comprehensive Vietnam locations database</li>
+                  <li>✅ Multiple route optimization algorithms</li>
+                  <li>✅ Cost analysis in VND currency</li>
+                  <li>✅ Environmental impact calculations</li>
+                  <li>✅ Truck restriction warnings</li>
+                </ul>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -228,26 +259,30 @@ const EnhancedRouteOptimizationPage: React.FC = () => {
       {/* Usage Tips */}
       <Card>
         <CardHeader>
-          <CardTitle>💡 Usage Tips</CardTitle>
+          <CardTitle>💡 Usage Tips & Features</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <h4 className="font-medium mb-2">Getting Started</h4>
               <ul className="text-sm text-gray-600 space-y-1">
-                <li>• Click on the map to add locations</li>
-                <li>• Use the search bar to find Vietnamese cities</li>
-                <li>• Configure your truck specifications</li>
-                <li>• Click "Optimize Route" to generate routes</li>
+                <li>• Search and add Vietnamese locations from the database</li>
+                <li>• Click on the map to add custom waypoints</li>
+                <li>• Configure your truck specifications (20ft/40ft containers)</li>
+                <li>• Choose optimization algorithm (fastest, shortest, eco, cost, balanced)</li>
+                <li>• Set route preferences (avoid tolls, highways, ferries)</li>
+                <li>• Click "Optimize Route" to generate intelligent routes</li>
               </ul>
             </div>
             <div>
               <h4 className="font-medium mb-2">Advanced Features</h4>
               <ul className="text-sm text-gray-600 space-y-1">
                 <li>• Switch between map providers (OSM, Satellite, Terrain)</li>
-                <li>• Export routes as GPX or KML files</li>
-                <li>• View detailed cost and environmental analytics</li>
-                <li>• Compare multiple route alternatives</li>
+                <li>• View detailed cost breakdown in Vietnamese Dong (VND)</li>
+                <li>• Analyze environmental impact and CO2 emissions</li>
+                <li>• Get truck-specific warnings and recommendations</li>
+                <li>• Export optimized routes as JSON files</li>
+                <li>• Real-time route efficiency scoring</li>
               </ul>
             </div>
           </div>

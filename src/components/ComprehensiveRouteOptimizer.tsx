@@ -7,25 +7,44 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Switch } from '@/components/ui/switch';
-import { Slider } from '@/components/ui/slider';
 import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, LineChart, Line, Area, AreaChart
-} from 'recharts';
-import { 
-  Truck, MapPin, Clock, DollarSign, Package, Navigation, 
-  Settings, Play, Download, Upload, AlertTriangle, 
-  CheckCircle, TrendingUp, Users, Zap, Target, Map,
-  Fuel, Leaf, Activity, BarChart3, Globe, Shield,
-  Search, Plus, Minus, RotateCcw, Eye, Brain
+  MapPin, 
+  Truck, 
+  Navigation as RouteIcon, 
+  Clock, 
+  DollarSign, 
+  Zap, 
+  Brain, 
+  Settings,
+  Play,
+  Pause,
+  RotateCcw,
+  Download,
+  Upload,
+  Eye,
+  TrendingUp,
+  AlertTriangle,
+  CheckCircle,
+  Activity,
+  Navigation,
+  Fuel,
+  Leaf,
+  Shield,
+  Target,
+  Map,
+  Layers,
+  Search,
+  Plus,
+  Minus,
+  Globe
 } from 'lucide-react';
 
-// Dynamic imports to prevent SSR issues
+// Dynamic import to prevent SSR issues
 const EnhancedTruckMap = dynamic(
   () => import('./map/EnhancedTruckMap'),
   { 
@@ -34,820 +53,681 @@ const EnhancedTruckMap = dynamic(
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-16">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
-          <p className="text-gray-600">Loading Interactive Map...</p>
+          <p className="text-gray-600">Loading Enhanced Mapping System...</p>
         </CardContent>
       </Card>
     )
   }
 );
 
-const VietnamMap = dynamic(
-  () => import('./map/VietnamMap'),
-  { 
-    ssr: false,
-    loading: () => (
-      <Card>
-        <CardContent className="flex flex-col items-center justify-center py-16">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
-          <p className="text-gray-600">Loading Vietnam Map...</p>
-        </CardContent>
-      </Card>
-    )
-  }
-);
+import { VIETNAM_LOCATIONS, DetailedLocation } from '@/lib/vietnamLocations';
+import { ORSIntegration } from '@/lib/ors-integration';
 
-import EnhancedMappingService, { 
-  MapLocation, 
-  OptimizedRoute, 
-  RouteOptions, 
-  TruckSpecs 
-} from '@/lib/enhanced-mapping-service';
+interface RouteLocation {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  type: 'depot' | 'destination' | 'waypoint' | 'truck' | 'port' | 'warehouse';
+  address?: string;
+  province?: string;
+}
+
+interface TruckSpecs {
+  weight: number; // tons
+  height: number; // meters
+  width: number; // meters
+  length: number; // meters
+  type: 'container_20ft' | 'container_40ft' | 'flatbed' | 'tanker';
+}
+
+interface OptimizedRoute {
+  id: string;
+  locations: RouteLocation[];
+  totalDistance: number; // km
+  totalDuration: number; // hours
+  totalCost: number; // VND
+  fuelCost: number; // VND
+  tollCost: number; // VND
+  driverCost: number; // VND
+  maintenanceCost: number; // VND
+  co2Emissions: number; // kg
+  efficiency: number; // percentage
+  warnings: string[];
+  recommendations: string[];
+  routeGeometry?: any;
+}
 
 interface ComprehensiveRouteOptimizerProps {
   className?: string;
+  onRouteOptimized?: (route: OptimizedRoute) => void;
+  onError?: (error: string) => void;
 }
 
-interface OptimizationState {
-  isOptimizing: boolean;
-  progress: number;
-  currentStep: string;
-  results: OptimizedRoute[];
-  selectedRoute: OptimizedRoute | null;
-  locations: MapLocation[];
-  truckSpecs: TruckSpecs;
-  routeOptions: RouteOptions;
-}
+const TRUCK_SPECIFICATIONS = {
+  container_20ft: { weight: 24, height: 4.0, width: 2.4, length: 12.2 },
+  container_40ft: { weight: 32, height: 4.0, width: 2.4, length: 16.5 },
+  flatbed: { weight: 25, height: 3.5, width: 2.5, length: 15.0 },
+  tanker: { weight: 35, height: 4.2, width: 2.5, length: 16.0 }
+};
+
+const OPTIMIZATION_ALGORITHMS = [
+  { id: 'fastest', name: 'Fastest Route', description: 'Minimize travel time' },
+  { id: 'shortest', name: 'Shortest Distance', description: 'Minimize total distance' },
+  { id: 'eco', name: 'Eco-Friendly', description: 'Minimize fuel consumption and emissions' },
+  { id: 'cost', name: 'Cost Optimized', description: 'Minimize total operational cost' },
+  { id: 'balanced', name: 'Balanced', description: 'Balance time, distance, and cost' }
+];
 
 const ComprehensiveRouteOptimizer: React.FC<ComprehensiveRouteOptimizerProps> = ({
-  className = ''
+  className = '',
+  onRouteOptimized,
+  onError
 }) => {
-  const [state, setState] = useState<OptimizationState>({
-    isOptimizing: false,
-    progress: 0,
-    currentStep: '',
-    results: [],
-    selectedRoute: null,
-    locations: [],
-    truckSpecs: {
-      weight: 25,
-      height: 4.2,
-      width: 2.5,
-      length: 16.5,
-      axles: 5,
-      hazardousMaterials: false,
-      type: 'container'
-    },
-    routeOptions: {
-      profile: 'driving-hgv',
-      preference: 'fastest',
-      avoidTolls: false,
-      avoidFerries: false,
-      avoidHighways: false
+  // State management
+  const [locations, setLocations] = useState<RouteLocation[]>([]);
+  const [selectedTruckType, setSelectedTruckType] = useState<keyof typeof TRUCK_SPECIFICATIONS>('container_40ft');
+  const [optimizationAlgorithm, setOptimizationAlgorithm] = useState('balanced');
+  const [isOptimizing, setIsOptimizing] = useState(false);
+  const [optimizationProgress, setOptimizationProgress] = useState(0);
+  const [optimizedRoute, setOptimizedRoute] = useState<OptimizedRoute | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredLocations, setFilteredLocations] = useState<DetailedLocation[]>(VIETNAM_LOCATIONS);
+  
+  // Route options
+  const [avoidTolls, setAvoidTolls] = useState(false);
+  const [avoidHighways, setAvoidHighways] = useState(false);
+  const [avoidFerries, setAvoidFerries] = useState(false);
+  const [departureTime, setDepartureTime] = useState('08:00');
+  
+  // Map settings
+  const [mapProvider, setMapProvider] = useState('osm');
+  const [showTraffic, setShowTraffic] = useState(false);
+  const [showRestrictions, setShowRestrictions] = useState(true);
+
+  // ORS API key check
+  const orsApiKey = process.env.NEXT_PUBLIC_ORS_API_KEY;
+  const hasApiKey = orsApiKey && orsApiKey.length > 0;
+
+  // Filter locations based on search
+  useEffect(() => {
+    if (searchTerm.trim() === '') {
+      setFilteredLocations(VIETNAM_LOCATIONS);
+    } else {
+      const filtered = VIETNAM_LOCATIONS.filter(location =>
+        location.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        location.nameEn.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        location.province.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredLocations(filtered);
     }
-  });
+  }, [searchTerm]);
 
-  const [activeTab, setActiveTab] = useState('enhanced-map');
-  const [mapView, setMapView] = useState<'enhanced' | 'vietnam'>('enhanced');
-  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
+  // Add location to route
+  const addLocation = useCallback((location: DetailedLocation | RouteLocation) => {
+    const newLocation: RouteLocation = {
+      id: location.id,
+      name: location.name,
+      lat: 'coordinates' in location ? location.coordinates.lat : location.lat,
+      lng: 'coordinates' in location ? location.coordinates.lng : location.lng,
+      type: location.type as RouteLocation['type'],
+      address: 'contactInfo' in location ? location.contactInfo?.address : location.address,
+      province: location.province
+    };
 
-  // Get ORS API key from environment
-  const orsApiKey = process.env.NEXT_PUBLIC_ORS_API_KEY || '';
-  const hasApiKey = orsApiKey && orsApiKey.length > 0 && orsApiKey !== 'your_ors_api_key_here';
-
-  // Vietnam major cities for quick setup
-  const vietnamCities: MapLocation[] = [
-    { id: 'hcm', name: 'TP. Hồ Chí Minh', lat: 10.8231, lng: 106.6297, type: 'depot', province: 'TP. Hồ Chí Minh' },
-    { id: 'hanoi', name: 'Hà Nội', lat: 21.0285, lng: 105.8542, type: 'destination', province: 'Hà Nội' },
-    { id: 'danang', name: 'Đà Nẵng', lat: 16.0544, lng: 108.2022, type: 'destination', province: 'Đà Nẵng' },
-    { id: 'cantho', name: 'Cần Thơ', lat: 10.0452, lng: 105.7469, type: 'destination', province: 'Cần Thơ' },
-    { id: 'haiphong', name: 'Hải Phòng', lat: 20.8449, lng: 106.6881, type: 'destination', province: 'Hải Phòng' },
-    { id: 'nhatrang', name: 'Nha Trang', lat: 12.2388, lng: 109.1967, type: 'destination', province: 'Khánh Hòa' },
-    { id: 'vungtau', name: 'Vũng Tàu', lat: 10.4113, lng: 107.1365, type: 'destination', province: 'Bà Rịa - Vũng Tàu' },
-  ];
-
-  // Handle route optimization from map
-  const handleRouteOptimized = useCallback((route: OptimizedRoute) => {
-    setState(prev => ({
-      ...prev,
-      results: [route, ...prev.results.slice(0, 4)],
-      selectedRoute: route
-    }));
+    setLocations(prev => {
+      const exists = prev.find(loc => loc.id === newLocation.id);
+      if (exists) return prev;
+      return [...prev, newLocation];
+    });
   }, []);
 
-  // Add Vietnam cities for quick demo
-  const addVietnamCities = useCallback(() => {
-    setState(prev => ({
-      ...prev,
-      locations: [...prev.locations, ...vietnamCities.slice(0, 5)]
-    }));
+  // Remove location from route
+  const removeLocation = useCallback((locationId: string) => {
+    setLocations(prev => prev.filter(loc => loc.id !== locationId));
   }, []);
 
-  // Clear all locations
-  const clearAllLocations = useCallback(() => {
-    setState(prev => ({
-      ...prev,
-      locations: [],
-      selectedRoute: null,
-      results: []
-    }));
-  }, []);
+  // Calculate route costs
+  const calculateRouteCosts = (distance: number, duration: number, truckType: keyof typeof TRUCK_SPECIFICATIONS) => {
+    const specs = TRUCK_SPECIFICATIONS[truckType];
+    
+    // Fuel consumption (liters per 100km)
+    const fuelConsumptionPer100km = specs.weight > 30 ? 40 : specs.weight > 25 ? 35 : 30;
+    const fuelConsumed = (distance / 100) * fuelConsumptionPer100km;
+    const fuelCost = fuelConsumed * 25000; // VND per liter
+    
+    // Driver cost (VND per hour)
+    const driverCost = duration * 50000;
+    
+    // Toll cost (estimated VND per km)
+    const tollCost = avoidTolls ? 0 : distance * 2000;
+    
+    // Maintenance cost (VND per km)
+    const maintenanceCost = distance * 1500;
+    
+    const totalCost = fuelCost + driverCost + tollCost + maintenanceCost;
+    
+    return {
+      fuelCost: Math.round(fuelCost),
+      driverCost: Math.round(driverCost),
+      tollCost: Math.round(tollCost),
+      maintenanceCost: Math.round(maintenanceCost),
+      totalCost: Math.round(totalCost),
+      co2Emissions: Math.round(fuelConsumed * 2.6) // kg CO2 per liter
+    };
+  };
 
-  // Update truck specifications
-  const updateTruckSpecs = useCallback((field: keyof TruckSpecs, value: any) => {
-    setState(prev => ({
-      ...prev,
-      truckSpecs: { ...prev.truckSpecs, [field]: value }
-    }));
-  }, []);
+  // Optimize route using multiple algorithms
+  const optimizeRoute = async () => {
+    if (locations.length < 2) {
+      onError?.('Please add at least 2 locations to optimize route');
+      return;
+    }
 
-  // Update route options
-  const updateRouteOptions = useCallback((field: keyof RouteOptions, value: any) => {
-    setState(prev => ({
-      ...prev,
-      routeOptions: { ...prev.routeOptions, [field]: value }
-    }));
-  }, []);
+    if (!hasApiKey) {
+      onError?.('OpenRouteService API key is required for route optimization');
+      return;
+    }
 
-  // Sample data for charts
-  const costBreakdownData = state.selectedRoute ? [
-    { name: 'Fuel', value: state.selectedRoute.totalCost * 0.6, color: '#0088FE' },
-    { name: 'Driver', value: state.selectedRoute.totalCost * 0.3, color: '#00C49F' },
-    { name: 'Maintenance', value: state.selectedRoute.totalCost * 0.1, color: '#FFBB28' }
-  ] : [];
+    setIsOptimizing(true);
+    setOptimizationProgress(0);
 
-  const performanceData = state.results.map((route, index) => ({
-    name: `Route ${index + 1}`,
-    distance: route.totalDistance / 1000,
-    duration: route.totalDuration / 60,
-    cost: route.totalCost / 1000,
-    fuel: route.fuelConsumption
-  }));
+    try {
+      const orsService = new ORSIntegration(orsApiKey!);
+      const truckSpecs = TRUCK_SPECIFICATIONS[selectedTruckType];
+      
+      // Progress simulation
+      const progressInterval = setInterval(() => {
+        setOptimizationProgress(prev => Math.min(prev + 10, 90));
+      }, 200);
+
+      // Prepare coordinates for ORS
+      const coordinates: [number, number][] = locations.map(loc => [loc.lng, loc.lat]);
+      
+      // ORS routing options
+      const routeOptions = {
+        profile: 'driving-hgv' as const,
+        preference: optimizationAlgorithm === 'fastest' ? 'fastest' as const : 'shortest' as const,
+        options: {
+          avoid_features: [
+            ...(avoidTolls ? ['tollways'] : []),
+            ...(avoidHighways ? ['highways'] : []),
+            ...(avoidFerries ? ['ferries'] : [])
+          ],
+          vehicle_type: 'hgv' as const,
+          profile_params: {
+            weight: truckSpecs.weight,
+            height: truckSpecs.height,
+            width: truckSpecs.width,
+            length: truckSpecs.length
+          }
+        }
+      };
+
+      // Get route from ORS
+      const orsResponse = await orsService.getDirections(coordinates, routeOptions);
+      
+      if (!orsResponse.routes || orsResponse.routes.length === 0) {
+        throw new Error('No route found');
+      }
+
+      const route = orsResponse.routes[0];
+      const distanceKm = route.summary.distance / 1000;
+      const durationHours = route.summary.duration / 3600;
+
+      // Calculate costs
+      const costs = calculateRouteCosts(distanceKm, durationHours, selectedTruckType);
+
+      // Generate warnings and recommendations
+      const warnings: string[] = [];
+      const recommendations: string[] = [];
+
+      if (truckSpecs.weight > 25) {
+        warnings.push('Heavy vehicle - check bridge weight limits');
+      }
+      if (truckSpecs.height > 4.0) {
+        warnings.push('High vehicle - check tunnel and bridge clearances');
+      }
+      if (distanceKm > 500) {
+        recommendations.push('Consider overnight rest stops for driver safety');
+      }
+      if (costs.fuelCost > 2000000) {
+        recommendations.push('High fuel cost - consider fuel-efficient driving techniques');
+      }
+
+      // Calculate efficiency score
+      const baseDistance = Math.sqrt(
+        Math.pow(locations[locations.length - 1].lat - locations[0].lat, 2) +
+        Math.pow(locations[locations.length - 1].lng - locations[0].lng, 2)
+      ) * 111; // Rough km conversion
+      
+      const efficiency = Math.max(0, Math.min(100, (baseDistance / distanceKm) * 100));
+
+      const optimizedRoute: OptimizedRoute = {
+        id: Date.now().toString(),
+        locations,
+        totalDistance: Math.round(distanceKm),
+        totalDuration: Math.round(durationHours * 10) / 10,
+        ...costs,
+        efficiency: Math.round(efficiency),
+        warnings,
+        recommendations,
+        routeGeometry: route.geometry
+      };
+
+      clearInterval(progressInterval);
+      setOptimizationProgress(100);
+      setOptimizedRoute(optimizedRoute);
+      onRouteOptimized?.(optimizedRoute);
+
+    } catch (error) {
+      console.error('Route optimization error:', error);
+      onError?.(error instanceof Error ? error.message : 'Route optimization failed');
+    } finally {
+      setIsOptimizing(false);
+    }
+  };
+
+  // Export route data
+  const exportRoute = () => {
+    if (!optimizedRoute) return;
+    
+    const exportData = {
+      route: optimizedRoute,
+      settings: {
+        truckType: selectedTruckType,
+        algorithm: optimizationAlgorithm,
+        options: { avoidTolls, avoidHighways, avoidFerries }
+      },
+      exportedAt: new Date().toISOString()
+    };
+    
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `route-${optimizedRoute.id}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
-    <div className={`comprehensive-route-optimizer ${className}`}>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900">Comprehensive Route Optimizer</h2>
-            <p className="text-gray-600">AI-powered route optimization with enhanced mapping for Vietnamese logistics</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="flex items-center gap-1">
-              <Brain className="w-4 h-4" />
-              AI Enhanced
-            </Badge>
-            <Badge variant="outline" className="flex items-center gap-1">
-              <Shield className="w-4 h-4" />
-              Truck Optimized
-            </Badge>
-            <Badge variant="outline" className="flex items-center gap-1">
-              <Globe className="w-4 h-4" />
-              Vietnam Ready
-            </Badge>
-          </div>
-        </div>
+    <div className={`space-y-6 ${className}`}>
+      {/* Header */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Brain className="w-6 h-6 text-blue-600" />
+            Comprehensive Route Optimizer
+            <Badge variant="outline" className="ml-2">AI Enhanced</Badge>
+          </CardTitle>
+          <p className="text-gray-600">
+            Advanced route optimization with Leaflet mapping, OpenRouteService integration, 
+            Vietnam GeoJSON data, and multiple optimization algorithms.
+          </p>
+        </CardHeader>
+      </Card>
 
-        {/* API Key Status */}
-        {!hasApiKey && (
-          <Alert>
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
-              <strong>Setup Required:</strong> To use enhanced mapping features, configure your OpenRouteService API key. 
-              <a 
-                href="https://openrouteservice.org/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline ml-1"
-              >
-                Get your free API key here
-              </a>
-            </AlertDescription>
-          </Alert>
-        )}
+      {/* API Key Status */}
+      {!hasApiKey && (
+        <Alert>
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            <strong>Setup Required:</strong> Configure your OpenRouteService API key to enable advanced routing features.
+            <br />
+            <a 
+              href="https://openrouteservice.org/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline"
+            >
+              Get your free API key here
+            </a>
+          </AlertDescription>
+        </Alert>
+      )}
 
-        {/* Quick Actions */}
-        <div className="flex flex-wrap gap-4">
-          <Button onClick={addVietnamCities} variant="outline" className="flex items-center gap-2">
-            <Plus className="w-4 h-4" />
-            Add Vietnam Cities
-          </Button>
-          <Button onClick={clearAllLocations} variant="outline" className="flex items-center gap-2">
-            <RotateCcw className="w-4 h-4" />
-            Clear All
-          </Button>
-          <div className="flex items-center gap-2">
-            <Label>Map View:</Label>
-            <Select value={mapView} onValueChange={(value: 'enhanced' | 'vietnam') => setMapView(value)}>
-              <SelectTrigger className="w-40">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="enhanced">Enhanced Map</SelectItem>
-                <SelectItem value="vietnam">Vietnam Map</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="enhanced-map" className="flex items-center gap-2">
-              <Map className="w-4 h-4" />
-              Enhanced Map
-            </TabsTrigger>
-            <TabsTrigger value="vietnam-map" className="flex items-center gap-2">
-              <Globe className="w-4 h-4" />
-              Vietnam Map
-            </TabsTrigger>
-            <TabsTrigger value="truck-specs" className="flex items-center gap-2">
-              <Truck className="w-4 h-4" />
-              Truck Specs
-            </TabsTrigger>
-            <TabsTrigger value="results" className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4" />
-              Results
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2">
-              <BarChart3 className="w-4 h-4" />
-              Analytics
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-2">
-              <Settings className="w-4 h-4" />
-              Settings
-            </TabsTrigger>
-          </TabsList>
-
-          {/* Enhanced Map Tab */}
-          <TabsContent value="enhanced-map" className="space-y-4">
-            {hasApiKey ? (
-              <EnhancedTruckMap
-                orsApiKey={orsApiKey}
-                onRouteOptimized={handleRouteOptimized}
-                truckSpecs={state.truckSpecs}
-                initialLocations={state.locations}
-                className="h-[700px]"
-              />
-            ) : (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-16">
-                  <AlertTriangle className="w-16 h-16 text-orange-400 mb-4" />
-                  <h3 className="text-xl font-medium text-gray-900 mb-2">
-                    Enhanced Map Requires API Key
-                  </h3>
-                  <p className="text-gray-600 text-center max-w-md mb-4">
-                    Configure your OpenRouteService API key to access enhanced mapping features.
-                  </p>
-                  <Button 
-                    onClick={() => window.open('https://openrouteservice.org/', '_blank')}
-                    className="flex items-center gap-2"
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Configuration Panel */}
+        <div className="lg:col-span-1 space-y-4">
+          {/* Location Search */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Search className="w-5 h-5" />
+                Add Locations
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="search">Search Vietnam Locations</Label>
+                <Input
+                  id="search"
+                  placeholder="Search ports, depots, cities..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              
+              <div className="max-h-48 overflow-y-auto space-y-2">
+                {filteredLocations.slice(0, 10).map((location) => (
+                  <div
+                    key={location.id}
+                    className="p-2 border rounded cursor-pointer hover:bg-gray-50 text-sm"
+                    onClick={() => addLocation(location)}
                   >
-                    <Globe className="w-4 h-4" />
-                    Get Free API Key
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-
-          {/* Truck Specifications Tab */}
-          <TabsContent value="truck-specs" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Truck className="w-5 h-5" />
-                    Vehicle Specifications
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label>Weight (tons)</Label>
-                      <Input
-                        type="number"
-                        value={state.truckSpecs.weight}
-                        onChange={(e) => updateTruckSpecs('weight', parseFloat(e.target.value))}
-                        min="1"
-                        max="100"
-                        step="0.5"
-                      />
-                    </div>
-                    <div>
-                      <Label>Height (meters)</Label>
-                      <Input
-                        type="number"
-                        value={state.truckSpecs.height}
-                        onChange={(e) => updateTruckSpecs('height', parseFloat(e.target.value))}
-                        min="1"
-                        max="6"
-                        step="0.1"
-                      />
-                    </div>
-                    <div>
-                      <Label>Width (meters)</Label>
-                      <Input
-                        type="number"
-                        value={state.truckSpecs.width}
-                        onChange={(e) => updateTruckSpecs('width', parseFloat(e.target.value))}
-                        min="1"
-                        max="4"
-                        step="0.1"
-                      />
-                    </div>
-                    <div>
-                      <Label>Length (meters)</Label>
-                      <Input
-                        type="number"
-                        value={state.truckSpecs.length}
-                        onChange={(e) => updateTruckSpecs('length', parseFloat(e.target.value))}
-                        min="5"
-                        max="25"
-                        step="0.5"
-                      />
+                    <div className="font-medium">{location.name}</div>
+                    <div className="text-gray-500 text-xs">
+                      {location.province} • {location.type}
                     </div>
                   </div>
-
-                  <div>
-                    <Label>Vehicle Type</Label>
-                    <Select
-                      value={state.truckSpecs.type}
-                      onValueChange={(value: TruckSpecs['type']) => updateTruckSpecs('type', value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="container">Container Truck</SelectItem>
-                        <SelectItem value="flatbed">Flatbed Truck</SelectItem>
-                        <SelectItem value="tanker">Tanker Truck</SelectItem>
-                        <SelectItem value="refrigerated">Refrigerated Truck</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <Label>Hazardous Materials</Label>
-                    <Switch
-                      checked={state.truckSpecs.hazardousMaterials}
-                      onCheckedChange={(checked) => updateTruckSpecs('hazardousMaterials', checked)}
-                    />
-                  </div>
-
-                  <div>
-                    <Label>Number of Axles</Label>
-                    <Input
-                      type="number"
-                      value={state.truckSpecs.axles}
-                      onChange={(e) => updateTruckSpecs('axles', parseInt(e.target.value))}
-                      min="2"
-                      max="8"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Settings className="w-5 h-5" />
-                    Route Preferences
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label>Optimization Goal</Label>
-                    <Select
-                      value={state.routeOptions.preference}
-                      onValueChange={(value: RouteOptions['preference']) => 
-                        updateRouteOptions('preference', value)
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="fastest">
-                          <div className="flex items-center gap-2">
-                            <Clock className="w-4 h-4" />
-                            Fastest Route
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="shortest">
-                          <div className="flex items-center gap-2">
-                            <Navigation className="w-4 h-4" />
-                            Shortest Distance
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="eco">
-                          <div className="flex items-center gap-2">
-                            <Leaf className="w-4 h-4" />
-                            Eco-Friendly
-                          </div>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Label>Avoid Toll Roads</Label>
-                      <Switch
-                        checked={state.routeOptions.avoidTolls}
-                        onCheckedChange={(checked) => updateRouteOptions('avoidTolls', checked)}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <Label>Avoid Ferries</Label>
-                      <Switch
-                        checked={state.routeOptions.avoidFerries}
-                        onCheckedChange={(checked) => updateRouteOptions('avoidFerries', checked)}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <Label>Avoid Highways</Label>
-                      <Switch
-                        checked={state.routeOptions.avoidHighways}
-                        onCheckedChange={(checked) => updateRouteOptions('avoidHighways', checked)}
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* Results Tab */}
-          <TabsContent value="results" className="space-y-4">
-            {state.results.length === 0 ? (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <Navigation className="w-12 h-12 text-gray-400 mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Routes Optimized Yet</h3>
-                  <p className="text-gray-600 text-center mb-4">
-                    Use the Enhanced Map or Vietnam Map tabs to add locations and optimize routes.
-                  </p>
-                  <div className="flex gap-2">
-                    <Button onClick={() => setActiveTab('enhanced-map')}>
-                      Enhanced Map
-                    </Button>
-                    <Button onClick={() => setActiveTab('vietnam-map')} variant="outline">
-                      Vietnam Map
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="space-y-4">
-                {state.results.map((route, index) => (
-                  <Card 
-                    key={route.id} 
-                    className={`cursor-pointer transition-colors ${
-                      state.selectedRoute?.id === route.id ? 'ring-2 ring-blue-500' : ''
-                    }`}
-                    onClick={() => setState(prev => ({ ...prev, selectedRoute: route }))}
-                  >
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle className="flex items-center gap-2">
-                          <Navigation className="w-5 h-5" />
-                          Route {index + 1}
-                          {index === 0 && <Badge>Latest</Badge>}
-                        </CardTitle>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline">
-                            {route.locations.length} stops
-                          </Badge>
-                          <Button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              // Export functionality can be added here
-                            }}
-                            variant="outline"
-                            size="sm"
-                          >
-                            <Download className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                        <div>
-                          <div className="text-gray-500">Distance</div>
-                          <div className="font-medium">
-                            {(route.totalDistance / 1000).toFixed(1)} km
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-gray-500">Duration</div>
-                          <div className="font-medium">
-                            {Math.round(route.totalDuration / 60)} min
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-gray-500">Cost</div>
-                          <div className="font-medium">
-                            {route.totalCost.toLocaleString('vi-VN')} VND
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-gray-500">Fuel</div>
-                          <div className="font-medium">
-                            {route.fuelConsumption.toFixed(1)} L
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="mt-4">
-                        <div className="text-sm text-gray-500 mb-2">Route</div>
-                        <div className="flex flex-wrap gap-1">
-                          {route.locations.map((location, locIndex) => (
-                            <Badge key={location.id} variant="outline" className="text-xs">
-                              {locIndex + 1}. {location.name}
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
                 ))}
               </div>
-            )}
-          </TabsContent>
+            </CardContent>
+          </Card>
 
-          {/* Analytics Tab */}
-          <TabsContent value="analytics" className="space-y-4">
-            {state.selectedRoute ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Cost Breakdown */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <DollarSign className="w-5 h-5" />
-                      Cost Breakdown
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-64">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={costBreakdownData}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={60}
-                            outerRadius={100}
-                            paddingAngle={5}
-                            dataKey="value"
-                          >
-                            {costBreakdownData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                          </Pie>
-                          <Tooltip 
-                            formatter={(value: number) => [
-                              `${value.toLocaleString('vi-VN')} VND`, 
-                              'Cost'
-                            ]}
-                          />
-                        </PieChart>
-                      </ResponsiveContainer>
+          {/* Current Route */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <RouteIcon className="w-5 h-5" />
+                Route ({locations.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2 max-h-32 overflow-y-auto">
+                {locations.map((location, index) => (
+                  <div key={location.id} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
+                    <div>
+                      <span className="font-medium">{index + 1}. {location.name}</span>
+                      <div className="text-gray-500 text-xs">{location.province}</div>
                     </div>
-                    <div className="space-y-2 mt-4">
-                      {costBreakdownData.map((item, index) => (
-                        <div key={index} className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div 
-                              className="w-3 h-3 rounded-full" 
-                              style={{ backgroundColor: item.color }}
-                            />
-                            <span className="text-sm">{item.name}</span>
-                          </div>
-                          <span className="text-sm font-medium">
-                            {item.value.toLocaleString('vi-VN')} VND
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Environmental Impact */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Leaf className="w-5 h-5" />
-                      Environmental Impact
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span>CO2 Emissions</span>
-                        <span className="font-medium">
-                          {state.selectedRoute.co2Emissions.toFixed(1)} kg
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span>Fuel Consumption</span>
-                        <span className="font-medium">
-                          {state.selectedRoute.fuelConsumption.toFixed(1)} L
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span>Efficiency</span>
-                        <span className="font-medium">
-                          {(state.selectedRoute.fuelConsumption / (state.selectedRoute.totalDistance / 1000) * 100).toFixed(1)} L/100km
-                        </span>
-                      </div>
-                      
-                      {/* Environmental Score */}
-                      <div className="mt-4">
-                        <div className="flex justify-between items-center mb-2">
-                          <span>Environmental Score</span>
-                          <span className="font-medium">B+</span>
-                        </div>
-                        <Progress value={75} className="h-2" />
-                        <p className="text-xs text-gray-500 mt-1">
-                          Better than 75% of similar routes
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Route Warnings */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <AlertTriangle className="w-5 h-5" />
-                      Route Analysis
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {state.selectedRoute.truckRestrictions.length > 0 ? (
-                        state.selectedRoute.truckRestrictions.map((restriction, index) => (
-                          <Alert key={index}>
-                            <AlertTriangle className="h-4 w-4" />
-                            <AlertDescription>{restriction}</AlertDescription>
-                          </Alert>
-                        ))
-                      ) : (
-                        <div className="flex items-center gap-2 text-green-600">
-                          <CheckCircle className="w-4 h-4" />
-                          <span>No restrictions found</span>
-                        </div>
-                      )}
-                      
-                      <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                        <h4 className="font-medium text-blue-900 mb-2">Route Insights</h4>
-                        <ul className="text-sm text-blue-800 space-y-1">
-                          <li>• Optimal for {state.truckSpecs.type} trucks</li>
-                          <li>• {state.routeOptions.avoidTolls ? 'Toll-free' : 'Includes toll roads'}</li>
-                          <li>• Estimated delivery time: {Math.round(state.selectedRoute.totalDuration / 3600)}h {Math.round((state.selectedRoute.totalDuration % 3600) / 60)}m</li>
-                        </ul>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Performance Comparison */}
-                {state.results.length > 1 && (
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <BarChart3 className="w-5 h-5" />
-                        Route Comparison
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="h-64">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={performanceData}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" />
-                            <YAxis />
-                            <Tooltip />
-                            <Bar dataKey="distance" fill="#0088FE" name="Distance (km)" />
-                            <Bar dataKey="cost" fill="#00C49F" name="Cost (k VND)" />
-                          </BarChart>
-                        </ResponsiveContainer>
-                      </div>
-                    </CardContent>
-                  </Card>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => removeLocation(location.id)}
+                    >
+                      <Minus className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+                {locations.length === 0 && (
+                  <p className="text-gray-500 text-sm text-center py-4">
+                    No locations added yet
+                  </p>
                 )}
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Truck Configuration */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Truck className="w-5 h-5" />
+                Truck Settings
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="truck-type">Truck Type</Label>
+                <Select value={selectedTruckType} onValueChange={(value: any) => setSelectedTruckType(value)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="container_20ft">20ft Container</SelectItem>
+                    <SelectItem value="container_40ft">40ft Container</SelectItem>
+                    <SelectItem value="flatbed">Flatbed Truck</SelectItem>
+                    <SelectItem value="tanker">Tanker Truck</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="algorithm">Optimization Algorithm</Label>
+                <Select value={optimizationAlgorithm} onValueChange={setOptimizationAlgorithm}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {OPTIMIZATION_ALGORITHMS.map((algo) => (
+                      <SelectItem key={algo.id} value={algo.id}>
+                        {algo.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="avoid-tolls">Avoid Tolls</Label>
+                  <Switch
+                    id="avoid-tolls"
+                    checked={avoidTolls}
+                    onCheckedChange={setAvoidTolls}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="avoid-highways">Avoid Highways</Label>
+                  <Switch
+                    id="avoid-highways"
+                    checked={avoidHighways}
+                    onCheckedChange={setAvoidHighways}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="avoid-ferries">Avoid Ferries</Label>
+                  <Switch
+                    id="avoid-ferries"
+                    checked={avoidFerries}
+                    onCheckedChange={setAvoidFerries}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Optimize Button */}
+          <Button
+            onClick={optimizeRoute}
+            disabled={isOptimizing || locations.length < 2 || !hasApiKey}
+            className="w-full"
+            size="lg"
+          >
+            {isOptimizing ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                Optimizing...
+              </>
             ) : (
-              <Card>
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <Activity className="w-12 h-12 text-gray-400 mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Route Selected</h3>
-                  <p className="text-gray-600 text-center">
-                    Select a route from the Results tab to view detailed analytics.
-                  </p>
-                </CardContent>
-              </Card>
+              <>
+                <Zap className="w-4 h-4 mr-2" />
+                Optimize Route
+              </>
             )}
-          </TabsContent>
+          </Button>
 
-          {/* Settings Tab */}
-          <TabsContent value="settings" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Settings className="w-5 h-5" />
-                    Application Settings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <Label>Show Advanced Options</Label>
-                    <Switch
-                      checked={showAdvancedOptions}
-                      onCheckedChange={setShowAdvancedOptions}
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <Label>Auto-save Routes</Label>
-                    <Switch defaultChecked />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <Label>Real-time Updates</Label>
-                    <Switch defaultChecked />
-                  </div>
-                  
-                  <div>
-                    <Label>Default Map Provider</Label>
-                    <Select defaultValue="osm">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="osm">OpenStreetMap</SelectItem>
-                        <SelectItem value="satellite">Satellite</SelectItem>
-                        <SelectItem value="terrain">Terrain</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Globe className="w-5 h-5" />
-                    API Configuration
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label>OpenRouteService API Key</Label>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Input 
-                        type="password" 
-                        value={hasApiKey ? '••••••••••••••••' : ''} 
-                        placeholder="Enter your ORS API key"
-                        readOnly
-                      />
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => window.open('https://openrouteservice.org/', '_blank')}
-                      >
-                        Get Key
-                      </Button>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {hasApiKey ? 'API key configured' : 'Configure in .env.local file'}
-                    </p>
-                  </div>
-
-                  <div className="p-3 bg-gray-50 rounded-lg">
-                    <h4 className="font-medium mb-2">API Status</h4>
-                    <div className="space-y-1 text-sm">
-                      <div className="flex justify-between">
-                        <span>OpenRouteService:</span>
-                        <Badge variant={hasApiKey ? "default" : "secondary"}>
-                          {hasApiKey ? 'Connected' : 'Not configured'}
-                        </Badge>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>OpenStreetMap:</span>
-                        <Badge variant="default">Available</Badge>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+          {/* Progress */}
+          {isOptimizing && (
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Progress</span>
+                <span>{optimizationProgress}%</span>
+              </div>
+              <Progress value={optimizationProgress} />
             </div>
-          </TabsContent>
-        </Tabs>
+          )}
+        </div>
+
+        {/* Map and Results */}
+        <div className="lg:col-span-3 space-y-4">
+          {/* Interactive Map */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Map className="w-5 h-5" />
+                Interactive Map
+                <div className="ml-auto flex gap-2">
+                  <Select value={mapProvider} onValueChange={setMapProvider}>
+                    <SelectTrigger className="w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="osm">OpenStreetMap</SelectItem>
+                      <SelectItem value="satellite">Satellite</SelectItem>
+                      <SelectItem value="terrain">Terrain</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-96 rounded-lg overflow-hidden">
+                {hasApiKey ? (
+                  <EnhancedTruckMap
+                    orsApiKey={orsApiKey!}
+                    locations={locations}
+                    optimizedRoute={optimizedRoute}
+                    mapProvider={mapProvider}
+                    onLocationAdd={addLocation}
+                    onLocationRemove={removeLocation}
+                  />
+                ) : (
+                  <div className="h-full flex items-center justify-center bg-gray-100 text-gray-500">
+                    <div className="text-center">
+                      <Globe className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                      <p>Configure ORS API key to enable interactive mapping</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Route Results */}
+          {optimizedRoute && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  Optimization Results
+                  <div className="ml-auto">
+                    <Button onClick={exportRoute} variant="outline" size="sm">
+                      <Download className="w-4 h-4 mr-2" />
+                      Export
+                    </Button>
+                  </div>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="overview">
+                  <TabsList>
+                    <TabsTrigger value="overview">Overview</TabsTrigger>
+                    <TabsTrigger value="costs">Cost Analysis</TabsTrigger>
+                    <TabsTrigger value="environmental">Environmental</TabsTrigger>
+                    <TabsTrigger value="warnings">Warnings</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="overview" className="space-y-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="text-center p-4 bg-blue-50 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {optimizedRoute.totalDistance} km
+                        </div>
+                        <div className="text-sm text-gray-600">Total Distance</div>
+                      </div>
+                      <div className="text-center p-4 bg-green-50 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">
+                          {optimizedRoute.totalDuration}h
+                        </div>
+                        <div className="text-sm text-gray-600">Duration</div>
+                      </div>
+                      <div className="text-center p-4 bg-purple-50 rounded-lg">
+                        <div className="text-2xl font-bold text-purple-600">
+                          {(optimizedRoute.totalCost / 1000000).toFixed(1)}M
+                        </div>
+                        <div className="text-sm text-gray-600">Total Cost (VND)</div>
+                      </div>
+                      <div className="text-center p-4 bg-orange-50 rounded-lg">
+                        <div className="text-2xl font-bold text-orange-600">
+                          {optimizedRoute.efficiency}%
+                        </div>
+                        <div className="text-sm text-gray-600">Efficiency</div>
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="costs" className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span>Fuel Cost:</span>
+                          <span className="font-medium">{(optimizedRoute.fuelCost / 1000).toFixed(0)}K VND</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Driver Cost:</span>
+                          <span className="font-medium">{(optimizedRoute.driverCost / 1000).toFixed(0)}K VND</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Toll Cost:</span>
+                          <span className="font-medium">{(optimizedRoute.tollCost / 1000).toFixed(0)}K VND</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Maintenance:</span>
+                          <span className="font-medium">{(optimizedRoute.maintenanceCost / 1000).toFixed(0)}K VND</span>
+                        </div>
+                        <div className="flex justify-between font-bold border-t pt-2">
+                          <span>Total:</span>
+                          <span>{(optimizedRoute.totalCost / 1000000).toFixed(1)}M VND</span>
+                        </div>
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="environmental" className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-4 bg-green-50 rounded-lg">
+                        <Leaf className="w-8 h-8 text-green-600 mx-auto mb-2" />
+                        <div className="text-2xl font-bold text-green-600">
+                          {optimizedRoute.co2Emissions} kg
+                        </div>
+                        <div className="text-sm text-gray-600">CO2 Emissions</div>
+                      </div>
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="warnings" className="space-y-4">
+                    {optimizedRoute.warnings.length > 0 && (
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-orange-600">Warnings:</h4>
+                        {optimizedRoute.warnings.map((warning, index) => (
+                          <div key={index} className="flex items-start gap-2 p-2 bg-orange-50 rounded">
+                            <AlertTriangle className="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" />
+                            <span className="text-sm text-orange-800">{warning}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {optimizedRoute.recommendations.length > 0 && (
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-blue-600">Recommendations:</h4>
+                        {optimizedRoute.recommendations.map((rec, index) => (
+                          <div key={index} className="flex items-start gap-2 p-2 bg-blue-50 rounded">
+                            <Brain className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                            <span className="text-sm text-blue-800">{rec}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
     </div>
   );

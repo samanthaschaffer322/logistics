@@ -97,6 +97,24 @@ export const VIETNAM_LOCATIONS: DetailedLocation[] = [
     equipment: ['modern_cranes', 'automated_handling']
   },
   {
+    id: 'hcm_depot_central',
+    name: 'Kho trung tâm TP.HCM',
+    nameEn: 'Ho Chi Minh City Central Depot',
+    type: 'depot',
+    coordinates: { lat: 10.8505, lng: 106.7717 },
+    province: 'TP. Hồ Chí Minh',
+    region: 'south',
+    capacity: 50000,
+    operatingHours: '06:00-22:00',
+    services: ['container_storage', 'truck_loading', 'customs_clearance', 'warehousing'],
+    contactInfo: {
+      phone: '+84 28 3825 1234',
+      address: 'Khu Công nghệ cao, Quận 9, TP.HCM'
+    },
+    specialties: ['high_tech_logistics', 'e_commerce_fulfillment'],
+    equipment: ['forklifts', 'loading_docks', 'container_handlers']
+  },
+  {
     id: 'kho_chim_en',
     name: 'Kho Chim Én',
     nameEn: 'Chim En Warehouse',

@@ -141,6 +141,27 @@ const navigationItems = [
     icon: Navigation,
     translationKey: 'navigation.enhancedRouteOptimization',
     color: 'green'
+  },
+  { 
+    key: 'combined-route-optimizer', 
+    href: '/combined-route-optimizer', 
+    icon: Navigation,
+    translationKey: 'navigation.combinedRouteOptimizer',
+    color: 'emerald'
+  },
+  { 
+    key: 'ai-financial', 
+    href: '/ai-financial', 
+    icon: Brain,
+    translationKey: 'navigation.aiFinancial',
+    color: 'purple'
+  },
+  { 
+    key: 'ui-enhancements', 
+    href: '/ui-enhancements', 
+    icon: Zap,
+    translationKey: 'navigation.uiEnhancements',
+    color: 'indigo'
   }
 ]
 

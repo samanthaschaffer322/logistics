@@ -1,9 +1,12 @@
 /**
  * Enhanced Mapping Service for Vietnamese Truck Logistics
  * Integrates multiple free mapping services for optimal route planning
+ * Features: Leaflet + React-Leaflet, OpenRouteService, Vietnam GeoJSON, Multiple algorithms
  */
 
 import axios from 'axios';
+import { ORSIntegration } from './ors-integration';
+import { VIETNAM_LOCATIONS, DetailedLocation } from './vietnamLocations';
 
 // ==================== INTERFACES ====================
 
