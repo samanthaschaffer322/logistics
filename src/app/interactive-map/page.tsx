@@ -1,9 +1,23 @@
 'use client'
 
 import React from 'react'
+import dynamic from 'next/dynamic'
 import Layout from '@/components/Layout'
-import InteractiveMap from '@/components/InteractiveMap'
 import { Map } from 'lucide-react'
+
+// Dynamic import to prevent SSR issues
+const InteractiveMap = dynamic(
+  () => import('@/components/InteractiveMap'),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="flex flex-col items-center justify-center py-16">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
+        <p className="text-gray-600">Loading Interactive Map...</p>
+      </div>
+    )
+  }
+)
 
 const InteractiveMapPage = () => {
   return (

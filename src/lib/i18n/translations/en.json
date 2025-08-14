@@ -34,6 +34,9 @@
     "fileLearning": "File Learning",
     "vietnamMap": "Vietnam Map",
     "routeOptimization": "Route Optimization",
+    "enhancedRouteOptimization": "Enhanced Route Optimization",
+    "customsTraining": "Customs Training",
+    "enhancedAI": "Enhanced AI",
     "settings": "Settings",
     "logout": "Logout"
   },

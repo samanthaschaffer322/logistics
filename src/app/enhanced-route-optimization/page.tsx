@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import SmartRouteOptimizer from '@/components/SmartRouteOptimizer';
+import React, { Suspense } from 'react';
+import dynamic from 'next/dynamic';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -16,6 +16,22 @@ import {
   CheckCircle,
   Info
 } from 'lucide-react';
+
+// Dynamic import to prevent SSR issues with Leaflet
+const SmartRouteOptimizer = dynamic(
+  () => import('@/components/SmartRouteOptimizer'),
+  { 
+    ssr: false,
+    loading: () => (
+      <Card>
+        <CardContent className="flex flex-col items-center justify-center py-16">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
+          <p className="text-gray-600">Loading Enhanced Route Optimizer...</p>
+        </CardContent>
+      </Card>
+    )
+  }
+);
 
 const EnhancedRouteOptimizationPage: React.FC = () => {
   // Check if ORS API key is configured
@@ -155,12 +171,21 @@ const EnhancedRouteOptimizationPage: React.FC = () => {
 
       {/* Main Component */}
       {hasApiKey ? (
-        <SmartRouteOptimizer
-          orsApiKey={orsApiKey}
-          onOptimizationComplete={handleOptimizationComplete}
-          onError={handleError}
-          className="min-h-screen"
-        />
+        <Suspense fallback={
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-16">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
+              <p className="text-gray-600">Loading Enhanced Route Optimizer...</p>
+            </CardContent>
+          </Card>
+        }>
+          <SmartRouteOptimizer
+            orsApiKey={orsApiKey}
+            onOptimizationComplete={handleOptimizationComplete}
+            onError={handleError}
+            className="min-h-screen"
+          />
+        </Suspense>
       ) : (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16">

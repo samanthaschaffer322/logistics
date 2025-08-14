@@ -17,7 +17,7 @@ import {
   Navigation, 
   Settings, 
   Layers, 
-  Route,
+  Navigation as RouteIcon,
   Clock,
   DollarSign,
   Fuel,
@@ -480,7 +480,7 @@ const EnhancedTruckMap: React.FC<EnhancedTruckMapProps> = ({
                   </>
                 ) : (
                   <>
-                    <Route className="w-4 h-4 mr-2" />
+                    <RouteIcon className="w-4 h-4 mr-2" />
                     Optimize Route
                   </>
                 )}
@@ -492,7 +492,7 @@ const EnhancedTruckMap: React.FC<EnhancedTruckMapProps> = ({
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Route className="w-5 h-5" />
+                  <RouteIcon className="w-5 h-5" />
                   Route Summary
                 </CardTitle>
               </CardHeader>

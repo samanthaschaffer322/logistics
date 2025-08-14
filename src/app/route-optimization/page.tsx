@@ -1,10 +1,10 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import Layout from '@/components/Layout'
 import { useLanguage } from '@/contexts/LanguageContext'
 import LanguageSwitcher from '@/components/LanguageSwitcher'
-import InteractiveMap from '@/components/InteractiveMap'
 import { 
   MapPin, 
   Navigation2, 
@@ -26,6 +26,20 @@ import {
   MapIcon,
   Loader2
 } from 'lucide-react'
+
+// Dynamic import to prevent SSR issues
+const InteractiveMap = dynamic(
+  () => import('@/components/InteractiveMap'),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="flex flex-col items-center justify-center py-16">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
+        <p className="text-gray-600">Loading Interactive Map...</p>
+      </div>
+    )
+  }
+)
 
 interface RoutePoint {
   id: string
