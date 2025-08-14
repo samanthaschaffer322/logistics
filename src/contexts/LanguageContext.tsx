@@ -37,6 +37,7 @@ const translations = {
 
     // Common
     'common.loading': 'Loading...',
+    'common.ready': 'Ready',
     'common.save': 'Save',
     'common.cancel': 'Cancel',
     'common.delete': 'Delete',
@@ -58,6 +59,8 @@ const translations = {
     'common.date': 'Date',
     'common.time': 'Time',
     'common.location': 'Location',
+    'common.locations': 'locations',
+    'common.vehicles': 'vehicles',
     'common.distance': 'Distance',
     'common.duration': 'Duration',
     'common.cost': 'Cost',
@@ -69,6 +72,15 @@ const translations = {
     'common.error': 'Error',
     'common.warning': 'Warning',
     'common.info': 'Information',
+
+    'common.locations': 'locations',
+    'common.vehicles': 'vehicles',
+    'common.name': 'Name',
+    'common.address': 'Address',
+    'common.priority': 'Priority (1-10)',
+    'common.latitude': 'Latitude',
+    'common.longitude': 'Longitude',
+    'common.remove': 'Remove',
 
     // Dashboard
     'dashboard.title': 'Logistics Dashboard',
@@ -106,6 +118,21 @@ const translations = {
     'route.performanceMetrics': 'Performance Metrics',
     'route.costAnalysis': 'Cost Analysis',
     'route.riskAssessment': 'Risk Assessment',
+    'route.deliveryLocations': 'Delivery Locations',
+    'route.noLocationsAdded': 'No locations added yet. Click "Add Location" to get started.',
+
+    'route.initializingOptimization': 'Initializing optimization...',
+    'route.validatingInputData': 'Validating input data...',
+    'route.calculatingDistanceMatrix': 'Calculating distance matrix...',
+    'route.runningGeneticAlgorithm': 'Running genetic algorithm...',
+    'route.applyingSimulatedAnnealing': 'Applying simulated annealing...',
+    'route.optimizingWithAIInsights': 'Optimizing with AI insights...',
+    'route.generatingFinalRoutes': 'Generating final routes...',
+    'route.optimizationComplete': 'Optimization complete!',
+    'common.complete': 'Complete',
+    'common.error': 'Error',
+    'route.optimizationFailed': 'Optimization failed: ',
+    'route.addLocationsVehiclesPrompt': 'Please add locations and vehicles before optimizing',
 
     // Automation Plan
     'automation.title': 'Comprehensive Logistics Automation Plan',
@@ -368,6 +395,7 @@ const translations = {
     'language.select': 'Select Language',
     'language.english': 'English',
     'language.vietnamese': 'Tiếng Việt',
+    'map.selectedLocation': 'Selected Location',
   },
   vi: {
     // Navigation
@@ -424,6 +452,14 @@ const translations = {
     'common.error': 'Lỗi',
     'common.warning': 'Cảnh báo',
     'common.info': 'Thông tin',
+    'common.locations': 'địa điểm',
+    'common.vehicles': 'phương tiện',
+    'common.name': 'Tên',
+    'common.address': 'Địa chỉ',
+    'common.priority': 'Ưu tiên (1-10)',
+    'common.latitude': 'Vĩ độ',
+    'common.longitude': 'Kinh độ',
+    'common.remove': 'Xóa',
 
     // Dashboard
     'dashboard.title': 'Bảng Điều Khiển Logistics',
@@ -461,6 +497,21 @@ const translations = {
     'route.performanceMetrics': 'Chỉ Số Hiệu Suất',
     'route.costAnalysis': 'Phân Tích Chi Phí',
     'route.riskAssessment': 'Đánh Giá Rủi Ro',
+    'route.deliveryLocations': 'Địa Điểm Giao Hàng',
+    'route.noLocationsAdded': 'Chưa có địa điểm nào được thêm. Nhấp vào "Thêm Địa Điểm" để bắt đầu.',
+
+    'route.initializingOptimization': 'Đang khởi tạo tối ưu hóa...',
+    'route.validatingInputData': 'Đang xác thực dữ liệu đầu vào...',
+    'route.calculatingDistanceMatrix': 'Đang tính toán ma trận khoảng cách...',
+    'route.runningGeneticAlgorithm': 'Đang chạy thuật toán di truyền...',
+    'route.applyingSimulatedAnnealing': 'Đang áp dụng thuật toán luyện kim mô phỏng...',
+    'route.optimizingWithAIInsights': 'Đang tối ưu hóa với thông tin chi tiết AI...',
+    'route.generatingFinalRoutes': 'Đang tạo tuyến đường cuối cùng...',
+    'route.optimizationComplete': 'Hoàn thành tối ưu hóa!',
+    'common.complete': 'Hoàn thành',
+    'common.error': 'Lỗi',
+    'route.optimizationFailed': 'Tối ưu hóa thất bại: ',
+    'route.addLocationsVehiclesPrompt': 'Vui lòng thêm địa điểm và phương tiện trước khi tối ưu hóa',
 
     // Automation Plan
     'automation.title': 'Kế Hoạch Tự Động Hóa Logistics Toàn Diện',
@@ -723,6 +774,7 @@ const translations = {
     'language.select': 'Chọn Ngôn Ngữ',
     'language.english': 'English',
     'language.vietnamese': 'Tiếng Việt',
+    'map.selectedLocation': 'Vị trí đã chọn',
   }
 };
 

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { MapPin, Truck, Navigation, Clock, DollarSign, Fuel, AlertTriangle } from 'lucide-react'
+import VietnamMap from './map/VietnamMap'
 
 interface MapLocation {
   id: string
@@ -40,6 +41,11 @@ const InteractiveMap: React.FC = () => {
     { id: 'truck2', name: 'VN-002 (Container 20ft)', lat: 20.5, lng: 106.2, type: 'truck', status: 'warning' },
     { id: 'truck3', name: 'VN-003 (Flatbed)', lat: 16.5, lng: 107.8, type: 'truck', status: 'active' }
   ]
+
+  const handleMapClick = (latlng: { lat: number; lng: number }) => {
+    // For now, just set the selected location to the clicked point
+    setSelectedLocation({ id: 'clicked', name: `Lat: ${latlng.lat.toFixed(4)}, Lng: ${latlng.lng.toFixed(4)}`, lat: latlng.lat, lng: latlng.lng, type: 'destination', status: 'active' });
+  };
 
   const routes: Route[] = [
     {
@@ -143,110 +149,11 @@ const InteractiveMap: React.FC = () => {
         <div className="lg:col-span-2">
           <div className="dark-card p-6">
             <div className="relative bg-slate-800 rounded-xl overflow-hidden" style={{ height: '500px' }}>
-              {/* Map Background */}
-              <div className="absolute inset-0 bg-gradient-to-br from-slate-700 to-slate-900">
-                <div className="absolute inset-0 opacity-20">
-                  <svg viewBox="0 0 400 300" className="w-full h-full">
-                    {/* Vietnam coastline approximation */}
-                    <path
-                      d="M100 50 Q120 40 140 60 L160 80 Q180 100 200 120 L220 140 Q240 160 260 180 L280 200 Q300 220 320 240 L340 260 Q320 280 300 270 L280 260 Q260 250 240 240 L220 230 Q200 220 180 210 L160 200 Q140 190 120 180 L100 170 Q80 160 70 140 L60 120 Q50 100 60 80 L70 60 Q80 50 100 50 Z"
-                      fill="rgba(34, 197, 94, 0.2)"
-                      stroke="rgba(34, 197, 94, 0.4)"
-                      strokeWidth="2"
-                    />
-                  </svg>
-                </div>
-              </div>
-
-              {/* Location Markers */}
-              {locations.map(location => (
-                <div
-                  key={location.id}
-                  className={`absolute cursor-pointer transform -translate-x-1/2 -translate-y-1/2 transition-all duration-300 hover:scale-110 ${
-                    selectedLocation?.id === location.id ? 'scale-125 z-10' : 'z-5'
-                  }`}
-                  style={{
-                    left: `${((location.lng - 102) / 10) * 100}%`,
-                    top: `${((23 - location.lat) / 13) * 100}%`
-                  }}
-                  onClick={() => setSelectedLocation(location)}
-                >
-                  <div className={`p-2 rounded-full ${
-                    location.status === 'active' ? 'bg-indigo-500/20 border-2 border-indigo-400' :
-                    location.status === 'warning' ? 'bg-yellow-500/20 border-2 border-yellow-400' :
-                    'bg-gray-500/20 border-2 border-gray-400'
-                  } backdrop-blur-sm`}>
-                    {getLocationIcon(location)}
-                  </div>
-                  
-                  {/* Location Label */}
-                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1">
-                    <div className="bg-slate-900/90 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
-                      {location.name}
-                    </div>
-                  </div>
-
-                  {/* Animated pulse for active locations */}
-                  {location.status === 'active' && (
-                    <div className="absolute inset-0 rounded-full border-2 border-indigo-400 animate-ping opacity-75"></div>
-                  )}
-                </div>
-              ))}
-
-              {/* Route Lines */}
-              <svg className="absolute inset-0 w-full h-full pointer-events-none">
-                {activeRoutes.filter(route => route.status === 'active').map(route => {
-                  const fromLoc = locations.find(l => l.name === route.from)
-                  const toLoc = locations.find(l => l.name === route.to)
-                  if (!fromLoc || !toLoc) return null
-
-                  const x1 = ((fromLoc.lng - 102) / 10) * 100
-                  const y1 = ((23 - fromLoc.lat) / 13) * 100
-                  const x2 = ((toLoc.lng - 102) / 10) * 100
-                  const y2 = ((23 - toLoc.lat) / 13) * 100
-
-                  return (
-                    <g key={route.id}>
-                      <line
-                        x1={`${x1}%`}
-                        y1={`${y1}%`}
-                        x2={`${x2}%`}
-                        y2={`${y2}%`}
-                        stroke="rgba(99, 102, 241, 0.6)"
-                        strokeWidth="3"
-                        strokeDasharray="10,5"
-                        className="animate-pulse"
-                      />
-                      {/* Animated truck icon moving along route */}
-                      <circle
-                        cx={`${x1 + (x2 - x1) * 0.6}%`}
-                        cy={`${y1 + (y2 - y1) * 0.6}%`}
-                        r="4"
-                        fill="rgba(99, 102, 241, 0.8)"
-                        className="animate-bounce"
-                      />
-                    </g>
-                  )
-                })}
-              </svg>
-
-              {/* Map Legend */}
-              <div className="absolute bottom-4 left-4 bg-slate-900/90 backdrop-blur-sm rounded-lg p-3">
-                <div className="text-xs text-white space-y-1">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-blue-400" />
-                    <span>Depot</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Navigation className="w-4 h-4 text-green-400" />
-                    <span>Destination</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Truck className="w-4 h-4 text-indigo-400" />
-                    <span>Active Truck</span>
-                  </div>
-                </div>
-              </div>
+              <VietnamMap
+                locations={locations} // Pass locations to VietnamMap
+                selectedLocation={selectedLocation ? { lat: selectedLocation.lat, lng: selectedLocation.lng, name: selectedLocation.name } : undefined}
+                onMapClick={handleMapClick}
+              />
             </div>
           </div>
         </div>

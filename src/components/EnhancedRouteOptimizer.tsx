@@ -53,18 +53,21 @@ interface OptimizationState {
   error?: string;
 }
 
+import { useLanguage } from '@/contexts/LanguageContext';
+
 const EnhancedRouteOptimizer: React.FC<EnhancedRouteOptimizerProps> = ({
   className,
   onOptimizationComplete,
   onError
 }) => {
+  const { t } = useLanguage();
   // State management
   const [locations, setLocations] = useState<Location[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [optimizationState, setOptimizationState] = useState<OptimizationState>({
     isOptimizing: false,
     progress: 0,
-    currentStep: 'Ready'
+    currentStep: t('common.ready')
   });
   
   const [config, setConfig] = useState<UnifiedOptimizationConfig>({
@@ -180,7 +183,7 @@ const EnhancedRouteOptimizer: React.FC<EnhancedRouteOptimizerProps> = ({
   // Optimization function
   const runOptimization = useCallback(async () => {
     if (!optimizer || locations.length === 0 || vehicles.length === 0) {
-      const error = 'Please add locations and vehicles before optimizing';
+      const error = t('route.addLocationsVehiclesPrompt');
       setOptimizationState(prev => ({ ...prev, error }));
       onError?.(error);
       return;
@@ -189,7 +192,7 @@ const EnhancedRouteOptimizer: React.FC<EnhancedRouteOptimizerProps> = ({
     setOptimizationState({
       isOptimizing: true,
       progress: 0,
-      currentStep: 'Initializing optimization...',
+      currentStep: t('route.initializingOptimization'),
       error: undefined
     });
 
@@ -243,18 +246,18 @@ const EnhancedRouteOptimizer: React.FC<EnhancedRouteOptimizerProps> = ({
       setOptimizationState({
         isOptimizing: false,
         progress: 100,
-        currentStep: 'Complete',
+        currentStep: t('common.complete'),
         result
       });
 
       onOptimizationComplete?.(result);
 
     } catch (error) {
-      const errorMessage = `Optimization failed: ${error.message}`;
+                const errorMessage = `${t('route.optimizationFailed')}${error.message}`;
       setOptimizationState({
         isOptimizing: false,
         progress: 0,
-        currentStep: 'Error',
+        currentStep: t('common.error'),
         error: errorMessage
       });
       onError?.(errorMessage);
@@ -330,7 +333,7 @@ const EnhancedRouteOptimizer: React.FC<EnhancedRouteOptimizerProps> = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Brain className="h-6 w-6 text-blue-600" />
-            Enhanced AI Route Optimizer
+            {t('route.enhancedTitle')}
             <Badge variant="secondary" className="ml-2">
               {config.preferences.primaryAlgorithm.toUpperCase()}
             </Badge>
@@ -338,7 +341,7 @@ const EnhancedRouteOptimizer: React.FC<EnhancedRouteOptimizerProps> = ({
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-4 items-center">
-            <Button 
+            <Button
               onClick={runOptimization}
               disabled={optimizationState.isOptimizing || locations.length === 0 || vehicles.length === 0}
               className="flex items-center gap-2"
@@ -346,32 +349,32 @@ const EnhancedRouteOptimizer: React.FC<EnhancedRouteOptimizerProps> = ({
               {optimizationState.isOptimizing ? (
                 <>
                   <Pause className="h-4 w-4" />
-                  Optimizing...
+                  {t('route.optimizing')}
                 </>
               ) : (
                 <>
                   <Play className="h-4 w-4" />
-                  Optimize Routes
+                  {t('route.optimize')}
                 </>
               )}
             </Button>
-            
+
             <Button variant="outline" onClick={() => setOptimizationState(prev => ({ ...prev, result: undefined, error: undefined }))}>
               <RotateCcw className="h-4 w-4 mr-2" />
-              Reset
+              {t('common.reset')}
             </Button>
-            
+
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <MapPin className="h-4 w-4" />
-              {locations.length} locations
+              {locations.length} {t('common.locations')}
             </div>
-            
+
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <Truck className="h-4 w-4" />
-              {vehicles.length} vehicles
+              {vehicles.length} {t('common.vehicles')}
             </div>
           </div>
-          
+
           {optimizationState.isOptimizing && (
             <div className="mt-4 space-y-2">
               <div className="flex justify-between text-sm">
@@ -381,7 +384,7 @@ const EnhancedRouteOptimizer: React.FC<EnhancedRouteOptimizerProps> = ({
               <Progress value={optimizationState.progress} className="w-full" />
             </div>
           )}
-          
+
           {optimizationState.error && (
             <Alert className="mt-4" variant="destructive">
               <AlertTriangle className="h-4 w-4" />
@@ -394,11 +397,11 @@ const EnhancedRouteOptimizer: React.FC<EnhancedRouteOptimizerProps> = ({
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="locations">Locations</TabsTrigger>
-          <TabsTrigger value="vehicles">Vehicles</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
-          <TabsTrigger value="results">Results</TabsTrigger>
-          <TabsTrigger value="insights">AI Insights</TabsTrigger>
+          <TabsTrigger value="locations">{t('route.locations')}</TabsTrigger>
+          <TabsTrigger value="vehicles">{t('route.vehicles')}</TabsTrigger>
+          <TabsTrigger value="settings">{t('route.settings')}</TabsTrigger>
+          <TabsTrigger value="results">{t('route.results')}</TabsTrigger>
+          <TabsTrigger value="insights">{t('route.insights')}</TabsTrigger>
         </TabsList>
 
         {/* Locations Tab */}
@@ -408,10 +411,10 @@ const EnhancedRouteOptimizer: React.FC<EnhancedRouteOptimizerProps> = ({
               <CardTitle className="flex items-center justify-between">
                 <span className="flex items-center gap-2">
                   <MapPin className="h-5 w-5" />
-                  Delivery Locations
+                  {t('route.deliveryLocations')}
                 </span>
                 <Button onClick={addLocation} size="sm">
-                  Add Location
+                  {t('route.addLocation')}
                 </Button>
               </CardTitle>
             </CardHeader>
@@ -421,7 +424,7 @@ const EnhancedRouteOptimizer: React.FC<EnhancedRouteOptimizerProps> = ({
                   <Card key={location.id} className="p-4">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
-                        <Label htmlFor={`name-${location.id}`}>Name</Label>
+                        <Label htmlFor={`name-${location.id}`}>{t('common.name')}</Label>
                         <Input
                           id={`name-${location.id}`}
                           value={location.name}
@@ -429,7 +432,7 @@ const EnhancedRouteOptimizer: React.FC<EnhancedRouteOptimizerProps> = ({
                         />
                       </div>
                       <div>
-                        <Label htmlFor={`address-${location.id}`}>Address</Label>
+                        <Label htmlFor={`address-${location.id}`}>{t('common.address')}</Label>
                         <Input
                           id={`address-${location.id}`}
                           value={location.address}
@@ -437,7 +440,7 @@ const EnhancedRouteOptimizer: React.FC<EnhancedRouteOptimizerProps> = ({
                         />
                       </div>
                       <div>
-                        <Label htmlFor={`priority-${location.id}`}>Priority (1-10)</Label>
+                        <Label htmlFor={`priority-${location.id}`}>{t('common.priority')}</Label>
                         <Input
                           id={`priority-${location.id}`}
                           type="number"
@@ -448,7 +451,7 @@ const EnhancedRouteOptimizer: React.FC<EnhancedRouteOptimizerProps> = ({
                         />
                       </div>
                       <div>
-                        <Label htmlFor={`lat-${location.id}`}>Latitude</Label>
+                        <Label htmlFor={`lat-${location.id}`}>{t('common.latitude')}</Label>
                         <Input
                           id={`lat-${location.id}`}
                           type="number"
@@ -458,7 +461,7 @@ const EnhancedRouteOptimizer: React.FC<EnhancedRouteOptimizerProps> = ({
                         />
                       </div>
                       <div>
-                        <Label htmlFor={`lng-${location.id}`}>Longitude</Label>
+                        <Label htmlFor={`lng-${location.id}`}>{t('common.longitude')}</Label>
                         <Input
                           id={`lng-${location.id}`}
                           type="number"
@@ -468,21 +471,21 @@ const EnhancedRouteOptimizer: React.FC<EnhancedRouteOptimizerProps> = ({
                         />
                       </div>
                       <div className="flex items-end">
-                        <Button 
-                          variant="destructive" 
+                        <Button
+                          variant="destructive"
                           size="sm"
                           onClick={() => removeLocation(location.id)}
                         >
-                          Remove
+                          {t('common.remove')}
                         </Button>
                       </div>
                     </div>
                   </Card>
                 ))}
-                
+
                 {locations.length === 0 && (
                   <div className="text-center py-8 text-gray-500">
-                    No locations added yet. Click "Add Location" to get started.
+                    {t('route.noLocationsAdded')}
                   </div>
                 )}
               </div>
