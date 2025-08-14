@@ -1,64 +1,158 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Dark Mode Base Styles */
+/* Enhanced Dark Mode Base Styles for LogiAI */
 @layer base {
+  :root {
+    font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+    
+    /* Dark Mode Color Scheme */
+    color-scheme: dark;
+    
+    /* CSS Variables for Dark Mode */
+    --background-primary: #0a0a0b;
+    --background-secondary: #111113;
+    --background-tertiary: #1a1a1d;
+    --background-card: #1e1e21;
+    --background-hover: #252529;
+    --background-border: #2a2a2f;
+    
+    --text-primary: #ffffff;
+    --text-secondary: #e4e4e7;
+    --text-tertiary: #a1a1aa;
+    --text-muted: #71717a;
+    
+    --primary-500: #3b82f6;
+    --primary-600: #2563eb;
+    --accent-500: #a855f7;
+    --accent-600: #9333ea;
+    
+    --shadow-elegant: 0 8px 32px rgba(0, 0, 0, 0.4);
+    --shadow-glow: 0 0 20px rgba(59, 130, 246, 0.3);
+    
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+  }
+
   * {
     border-color: rgb(51 65 85);
   }
   
   body {
     @apply bg-slate-900 text-white;
-    background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
     min-height: 100vh;
+    margin: 0;
+    color: var(--text-primary);
+  }
+  
+  /* Force Dark Mode */
+  .dark {
+    color-scheme: dark;
+  }
+
+  .dark body {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+    color: #ffffff;
   }
   
   /* Custom Scrollbar */
   ::-webkit-scrollbar {
     width: 8px;
+    height: 8px;
   }
   
   ::-webkit-scrollbar-track {
-    @apply bg-slate-800;
+    background: #1a1a1d;
+    border-radius: 4px;
   }
   
   ::-webkit-scrollbar-thumb {
-    @apply bg-indigo-600 rounded;
+    background: linear-gradient(135deg, #3b82f6, #a855f7);
+    border-radius: 4px;
   }
   
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-indigo-500;
+    background: linear-gradient(135deg, #2563eb, #9333ea);
   }
 }
 
 @layer components {
-  /* Dark Card Component */
+  /* Enhanced Dark Card Component */
   .dark-card {
     @apply bg-slate-800/80 backdrop-blur-xl border border-slate-700/50 shadow-2xl rounded-xl;
-    background: rgba(30, 41, 59, 0.8);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(148, 163, 184, 0.1);
+    background: rgba(30, 30, 33, 0.9);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   }
   
   .dark-card:hover {
     @apply border-slate-600/50;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(99, 102, 241, 0.1);
+    transform: translateY(-2px);
+  }
+  
+  /* LogiAI Specific Card */
+  .logiai-card {
+    background: rgba(30, 30, 33, 0.9);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .logiai-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
   }
   
   /* Gradient Text */
   .gradient-text {
-    @apply bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 bg-clip-text text-transparent;
   }
   
-  /* Gradient Button */
+  /* LogiAI Gradient Text */
+  .logiai-gradient-text {
+    background: linear-gradient(135deg, #3b82f6 0%, #a855f7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* Enhanced Gradient Button */
   .gradient-button {
-    @apply bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 text-white font-medium px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300;
+    @apply bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300;
+  }
+
+  /* LogiAI Button */
+  .logiai-button {
+    background: linear-gradient(135deg, #3b82f6 0%, #a855f7 100%);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    padding: 12px 24px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+  }
+
+  .logiai-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
   }
   
-  /* Dark Input */
+  /* Enhanced Dark Input */
   .dark-input {
-    @apply bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-400 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 rounded-xl px-4 py-3 transition-all duration-300;
+    @apply bg-gray-700/50 border border-gray-600/50 text-white placeholder-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 rounded-xl px-4 py-3 transition-all duration-300;
     backdrop-filter: blur(10px);
   }
   
@@ -68,28 +162,30 @@
     backdrop-filter: blur(10px);
   }
   
-  /* Navigation Item */
+  /* Enhanced Navigation Item */
   .nav-item {
     @apply flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300;
   }
   
   .nav-item:hover {
-    @apply bg-slate-800/50 text-white;
+    @apply bg-gray-700/50 text-white;
     backdrop-filter: blur(10px);
+    transform: scale(105%);
   }
   
   .nav-item.active {
-    @apply bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg;
-    box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.3);
+    @apply bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg;
+    box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.3);
+    transform: scale(105%);
   }
   
-  /* Badge Styles */
+  /* Enhanced Badge Styles */
   .badge-success {
-    @apply bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full text-sm font-medium;
+    @apply bg-green-500/20 text-green-400 border border-green-500/30 px-3 py-1 rounded-full text-sm font-medium;
   }
   
   .badge-warning {
-    @apply bg-amber-500/20 text-amber-400 border border-amber-500/30 px-3 py-1 rounded-full text-sm font-medium;
+    @apply bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 px-3 py-1 rounded-full text-sm font-medium;
   }
   
   .badge-error {
@@ -106,52 +202,149 @@
   }
   
   .progress-fill {
-    @apply bg-gradient-to-r from-indigo-500 to-purple-500 h-full transition-all duration-500 ease-out;
+    @apply bg-gradient-to-r from-blue-500 to-purple-500 h-full transition-all duration-500 ease-out;
   }
   
   /* Animation Classes */
   .animate-fade-in {
-    animation: fadeIn 0.5s ease-in-out;
+    animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
   .animate-slide-up {
-    animation: slideUp 0.3s ease-out;
+    animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
   .animate-pulse-glow {
     animation: pulseGlow 2s infinite;
   }
+
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
 }
 
-/* Custom Animations */
+/* Enhanced Custom Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { 
+    opacity: 0; 
+    transform: translateY(10px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
 }
 
 @keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
 }
 
 @keyframes pulseGlow {
   0%, 100% { 
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
   }
   50% { 
-    box-shadow: 0 0 40px rgba(99, 102, 241, 0.6);
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
   }
 }
 
-/* Utility Classes */
+@keyframes glow {
+  from { 
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.2); 
+  }
+  to { 
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.4); 
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    opacity: 1; 
+  }
+  50% { 
+    opacity: 0.5; 
+  }
+}
+
+/* Enhanced Utility Classes */
 .text-shadow {
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .glow-effect {
-  box-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
 }
 
 .glow-effect:hover {
-  box-shadow: 0 0 50px rgba(99, 102, 241, 0.5);
+  box-shadow: 0 0 50px rgba(59, 130, 246, 0.5);
+}
+
+.glass-effect {
+  background: rgba(30, 30, 33, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Loading Animation */
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Selection Styles for Dark Mode */
+::selection {
+  background: rgba(59, 130, 246, 0.3);
+  color: white;
+}
+
+/* Focus Styles for Dark Mode */
+*:focus {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 2px;
+}
+
+/* Responsive Design Enhancements */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+  }
+  
+  .logiai-card {
+    margin: 0.5rem;
+    border-radius: 12px;
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  :root {
+    --text-primary: #ffffff;
+    --background-primary: #000000;
+    --primary-500: #4f9eff;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
