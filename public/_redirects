@@ -1,0 +1,16 @@
+# Cloudflare Pages redirects and rewrites
+
+# Force HTTPS redirect
+http://98391e91.logiai-logistics.pages.dev/* https://98391e91.logiai-logistics.pages.dev/:splat 301!
+http://logiai-logistics.pages.dev/* https://logiai-logistics.pages.dev/:splat 301!
+
+# Handle SPA routing
+/*    /index.html   200
+
+# Security headers
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  X-XSS-Protection: 1; mode=block
+  Referrer-Policy: strict-origin-when-cross-origin
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
