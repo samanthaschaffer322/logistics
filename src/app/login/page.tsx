@@ -29,6 +29,16 @@ import {
 // Secure user credentials for LogiAI
 const VALID_CREDENTIALS = [
   {
+    email: 'admin@trucking.com',
+    password: 'SecureAdmin2025!',
+    user: {
+      email: 'admin@trucking.com',
+      name: 'Admin User',
+      role: 'System Administrator',
+      avatar: 'AU'
+    }
+  },
+  {
     email: 'dkim20263@gmail.com',
     password: 'Dz300511#',
     user: {
@@ -36,16 +46,6 @@ const VALID_CREDENTIALS = [
       name: 'David Kim',
       role: 'Fleet Manager',
       avatar: 'DK'
-    }
-  },
-  {
-    email: 'samanthaschaffer322@gmail.com',
-    password: 'SecureAdmin2025!',
-    user: {
-      email: 'samanthaschaffer322@gmail.com',
-      name: 'Samantha Schaffer',
-      role: 'System Administrator',
-      avatar: 'SS'
     }
   }
 ];

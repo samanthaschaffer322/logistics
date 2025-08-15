@@ -115,7 +115,8 @@ const ComprehensiveDashboard = () => {
     {
       category: 'Document & Learning',
       items: [
-        { title: 'File Learning System', description: 'Document analysis & insights', icon: Zap, href: '/file-learning', color: 'bg-gradient-to-r from-yellow-600 to-orange-600' },
+        { title: 'File Learning & Automation', description: 'AI-powered file processing & automation', icon: FileSpreadsheet, href: '/file-processing', color: 'bg-gradient-to-r from-yellow-600 to-orange-600' },
+        { title: 'Document Analysis', description: 'Vietnamese logistics file insights', icon: Zap, href: '/file-learning', color: 'bg-gradient-to-r from-amber-600 to-yellow-600' },
         { title: 'Automation Planning', description: 'Comprehensive automation roadmap', icon: Settings, href: '/enhanced-optimizer', color: 'bg-gradient-to-r from-gray-600 to-slate-600' }
       ]
     }

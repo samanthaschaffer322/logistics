@@ -5,54 +5,32 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-// Date formatting utility
-export function formatDate(date: string | Date, locale: string = 'en-US'): string {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  return dateObj.toLocaleDateString(locale, {
+export function formatDate(date: Date | string): string {
+  const d = new Date(date)
+  return d.toLocaleDateString('vi-VN', {
     year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  });
+    month: '2-digit',
+    day: '2-digit'
+  })
 }
 
-// SKU generation utility
-export function generateSKU(prefix: string = 'SKU', length: number = 8): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let result = prefix + '-';
-  for (let i = 0; i < length; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
+export function generateSKU(prefix: string = 'SKU'): string {
+  const timestamp = Date.now().toString(36)
+  const random = Math.random().toString(36).substr(2, 5)
+  return `${prefix}-${timestamp}-${random}`.toUpperCase()
 }
 
-// Reorder suggestion calculation
-export function calculateReorderSuggestion(
-  currentStock: number,
-  minStock: number,
-  maxStock: number,
-  averageDailyUsage: number,
-  leadTimeDays: number = 7
-): {
-  shouldReorder: boolean;
-  suggestedQuantity: number;
-  urgency: 'low' | 'medium' | 'high';
-  daysUntilStockout: number;
+export function calculateReorderSuggestion(currentStock: number, minStock: number, avgConsumption: number): {
+  shouldReorder: boolean
+  suggestedQuantity: number
+  urgency: 'low' | 'medium' | 'high'
 } {
-  const daysUntilStockout = Math.floor(currentStock / averageDailyUsage);
-  const shouldReorder = currentStock <= minStock;
-  const suggestedQuantity = shouldReorder ? maxStock - currentStock : 0;
+  const shouldReorder = currentStock <= minStock
+  const suggestedQuantity = shouldReorder ? Math.max(avgConsumption * 30, minStock * 2) : 0
   
-  let urgency: 'low' | 'medium' | 'high' = 'low';
-  if (daysUntilStockout <= leadTimeDays) {
-    urgency = 'high';
-  } else if (daysUntilStockout <= leadTimeDays * 2) {
-    urgency = 'medium';
-  }
-
-  return {
-    shouldReorder,
-    suggestedQuantity,
-    urgency,
-    daysUntilStockout
-  };
+  let urgency: 'low' | 'medium' | 'high' = 'low'
+  if (currentStock <= minStock * 0.5) urgency = 'high'
+  else if (currentStock <= minStock * 0.8) urgency = 'medium'
+  
+  return { shouldReorder, suggestedQuantity, urgency }
 }
