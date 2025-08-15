@@ -45,12 +45,30 @@ const HomePage: React.FC = () => {
   const enhancedFeatures = [
     {
       title: 'Comprehensive Route Optimizer',
-      description: 'Advanced AI-powered route optimization with Vietnam map integration, OpenRouteService API, and multiple optimization algorithms.',
-      href: '/combined-route-optimizer',
+      description: 'Advanced AI-powered route optimization combining Vietnam map system with detailed logistics analysis and real-time traffic data.',
+      href: '/comprehensive-route-optimizer',
       icon: <Navigation className="w-8 h-8 text-blue-400" />,
-      features: ['Vietnam Map Integration', 'OpenRouteService API', '5 Optimization Algorithms', 'Cost Analysis in VND'],
-      status: 'Enhanced',
-      color: 'blue'
+      badge: 'NEW',
+      color: 'from-blue-500 to-indigo-600',
+      features: ['Vietnam Map Integration', 'AI Route Optimization', 'Real-time Traffic', 'Cost Analysis']
+    },
+    {
+      title: 'Vietnam Map System',
+      description: 'Interactive map with 28+ logistics locations including ports, depots, warehouses, and industrial zones across Vietnam.',
+      href: '/vietnam-map',
+      icon: <Map className="w-8 h-8 text-green-400" />,
+      badge: 'ENHANCED',
+      color: 'from-green-500 to-emerald-600',
+      features: ['28+ Locations', 'Port Integration', 'Depot Network', 'Industrial Zones']
+    },
+    {
+      title: 'Route Optimization',
+      description: 'Advanced route optimization with Vietnam map integration, OpenRouteService API, and multiple optimization algorithms.',
+      href: '/route-optimization',
+      icon: <Navigation className="w-8 h-8 text-blue-400" />,
+      badge: 'ENHANCED',
+      color: 'from-blue-500 to-indigo-600',
+      features: ['Vietnam Map Integration', 'OpenRouteService API', '5 Optimization Algorithms', 'Cost Analysis in VND']
     },
     {
       title: 'File Learning & Automation',

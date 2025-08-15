@@ -1,25 +1,22 @@
-'use client';
+'use client'
 
-import React from 'react';
-import dynamic from 'next/dynamic';
-import { Loader2 } from 'lucide-react';
-
-// Dynamic import to ensure proper client-side rendering
-const ComprehensiveEnhancedRouteOptimizer = dynamic(
-  () => import('@/components/ComprehensiveEnhancedRouteOptimizer'),
-  {
-    loading: () => (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-blue-400 mx-auto mb-4" />
-          <p className="text-white text-lg">Loading Route Optimizer...</p>
-        </div>
-      </div>
-    ),
-    ssr: false
-  }
-);
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 
 export default function CombinedRouteOptimizerPage() {
-  return <ComprehensiveEnhancedRouteOptimizer />;
+  const router = useRouter()
+
+  useEffect(() => {
+    // Redirect to the new comprehensive route optimizer
+    router.replace('/comprehensive-route-optimizer')
+  }, [router])
+
+  return (
+    <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+        <p className="text-slate-400">Redirecting to Comprehensive Route Optimizer...</p>
+      </div>
+    </div>
+  )
 }

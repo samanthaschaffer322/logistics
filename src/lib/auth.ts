@@ -10,19 +10,19 @@ interface UserCredentials {
   name: string
 }
 
-// Encrypted credentials - not visible in plain text
+// Authorized users with correct credentials
 const AUTHORIZED_USERS: UserCredentials[] = [
   {
-    email: 'samanthaschaffer322@gmail.com',
-    password: 'admin@trucking.com',
+    email: 'admin@trucking.com',
+    password: 'SecureAdmin2025!',
     role: 'admin',
-    name: 'Samantha Schaffer'
+    name: 'Admin User'
   },
   {
     email: 'dkim20263@gmail.com',
     password: 'Dz300511#',
     role: 'manager',
-    name: 'D. Kim'
+    name: 'David Kim'
   }
 ]
 
@@ -58,16 +58,32 @@ export const decryptUserSession = (encryptedData: string): Omit<UserCredentials,
 export const isAuthenticated = (): boolean => {
   if (typeof window === 'undefined') return false
   
+  // Check both session storage and local storage for authentication
+  const sessionAuth = sessionStorage.getItem('logiai_authenticated')
+  const localUser = localStorage.getItem('logiai_user')
   const encryptedSession = localStorage.getItem('userSession')
-  if (!encryptedSession) return false
   
-  const user = decryptUserSession(encryptedSession)
-  return user !== null
+  // If any authentication method is valid, user is authenticated
+  if (sessionAuth === 'true' && localUser) return true
+  if (encryptedSession && decryptUserSession(encryptedSession)) return true
+  
+  return false
 }
 
 export const getCurrentUser = (): Omit<UserCredentials, 'password'> | null => {
   if (typeof window === 'undefined') return null
   
+  // Try to get user from localStorage first (from login page)
+  const localUser = localStorage.getItem('logiai_user')
+  if (localUser) {
+    try {
+      return JSON.parse(localUser)
+    } catch (error) {
+      console.error('Error parsing local user:', error)
+    }
+  }
+  
+  // Fallback to encrypted session
   const encryptedSession = localStorage.getItem('userSession')
   if (!encryptedSession) return null
   
@@ -78,5 +94,7 @@ export const logout = (): void => {
   if (typeof window !== 'undefined') {
     localStorage.removeItem('userSession')
     localStorage.removeItem('isAuthenticated')
+    localStorage.removeItem('logiai_user')
+    sessionStorage.removeItem('logiai_authenticated')
   }
 }

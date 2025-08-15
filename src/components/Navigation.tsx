@@ -101,6 +101,13 @@ const navigationItems = [
     color: 'teal'
   },
   { 
+    key: 'comprehensive-route-optimizer', 
+    href: '/comprehensive-route-optimizer', 
+    icon: Navigation,
+    translationKey: 'navigation.comprehensiveRouteOptimizer',
+    color: 'indigo'
+  },
+  { 
     key: 'vietnam-map', 
     href: '/vietnam-map', 
     icon: MapPin,
