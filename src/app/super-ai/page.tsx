@@ -121,54 +121,126 @@ const SuperAIAssistant = () => {
       
       setUploadedFiles(prev => [...prev, newFile])
       
-      // Simulate reading Excel file and smart analysis
-      setTimeout(async () => {
-        try {
-          // Simulate Excel data extraction
-          const mockExcelData = [
-            ['STT', 'NGÀY', 'SỐ XE', 'SĐT', 'TÊN LÁI XE', 'SỐ CONT', 'SEAL', 'CHỦ HÀNG', 'ĐỊA ĐIỂM', 'T.GIAN Y/C', 'Vị TRÍ XE 7h', 'BILL - BOOK', 'CẢNG HẠ'],
-            [1, '17/03/2025', '50H53777', '', '', 'CBHU9513264', '', 'Khai Anh CE (N)', 'KHO CHIM ÉN', '08:00', 'XONG', 'OOLU2753948410', 'Cảng Cát Lái'],
-            [2, '17/03/2025', '48H01595', '', '', 'CCLU5168766', '', 'Khai Anh CE (N)', 'KCN Binh Duong', '09:30', 'XONG', 'OOLU2753948410', 'Cảng Sài Gòn'],
-            [3, '17/03/2025', '51C63836', '', '', 'CCLU5206660', '', 'Commodities Express', 'Cảng Vũng Tàu', '14:00', 'XONG', 'OOLU2753948410', 'Cảng Vũng Tàu'],
-            [4, '17/03/2025', '51C76124', '', '', 'CCLU5256471', '', 'Khai Anh CE (N)', 'KCN Dong Nai', '10:15', 'XONG', 'OOLU2753948410', 'Cảng Cát Lái'],
-            [5, '17/03/2025', '51C58240', '', '', 'CCLU5261441', '', 'Commodities Express', 'Cần Thơ', '16:30', 'XONG', 'OOLU2753948410', 'Cảng Cần Thơ']
-          ];
-          
-          // Smart analysis using the new analyzer
-          const smartInsights = SmartExcelAnalyzer.analyzeLogisticsFile(mockExcelData);
-          
-          const insights = [
-            language === 'vi' 
-              ? `Phát hiện ${smartInsights.totalRoutes} tuyến đường logistics miền Nam`
-              : `Detected ${smartInsights.totalRoutes} Southern Vietnam logistics routes`,
-            language === 'vi' 
-              ? `Địa điểm chính: ${smartInsights.commonLocations.slice(0, 2).join(', ')}`
-              : `Main locations: ${smartInsights.commonLocations.slice(0, 2).join(', ')}`,
-            language === 'vi' 
-              ? `Hiệu suất tối ưu: ${smartInsights.efficiency.toFixed(1)}%`
-              : `Optimized efficiency: ${smartInsights.efficiency.toFixed(1)}%`,
-            language === 'vi' 
-              ? `Chi phí trung bình: ${new Intl.NumberFormat('vi-VN').format(smartInsights.averageCost)} VNĐ`
-              : `Average cost: ${new Intl.NumberFormat('vi-VN').format(smartInsights.averageCost)} VND`
-          ];
-          
-          setUploadedFiles(prev => 
-            prev.map(f => 
-              f.id === newFile.id 
-                ? { ...f, status: 'completed', insights, rawData: mockExcelData }
-                : f
-            )
-          )
-        } catch (error) {
-          setUploadedFiles(prev => 
-            prev.map(f => 
-              f.id === newFile.id 
-                ? { ...f, status: 'error' }
-                : f
-            )
-          )
+      // Actually read and process the Excel file
+      try {
+        const XLSX = await import('xlsx')
+        const arrayBuffer = await file.arrayBuffer()
+        const workbook = XLSX.read(arrayBuffer, { type: 'array' })
+        
+        // Find the logistics data sheet (usually "THEO DÕI" or similar)
+        let targetSheet = null
+        let targetSheetName = ''
+        
+        // Look for sheets with logistics data
+        for (const sheetName of workbook.SheetNames) {
+          if (sheetName.includes('THEO DÕI') || sheetName.includes('KẾ HOẠCH') || sheetName.includes('Sheet1')) {
+            targetSheet = workbook.Sheets[sheetName]
+            targetSheetName = sheetName
+            break
+          }
         }
-      }, 2000 + i * 500)
+        
+        // If no specific sheet found, use the first one
+        if (!targetSheet && workbook.SheetNames.length > 0) {
+          targetSheetName = workbook.SheetNames[0]
+          targetSheet = workbook.Sheets[targetSheetName]
+        }
+        
+        if (!targetSheet) {
+          throw new Error('No valid sheet found in Excel file')
+        }
+        
+        // Convert sheet to JSON array
+        const jsonData = XLSX.utils.sheet_to_json(targetSheet, { header: 1, defval: '' })
+        
+        // Find header row (look for row with logistics-related headers)
+        let headerRowIndex = -1
+        let actualData = []
+        
+        for (let rowIndex = 0; rowIndex < Math.min(jsonData.length, 10); rowIndex++) {
+          const row = jsonData[rowIndex]
+          if (row && Array.isArray(row) && row.some(cell => 
+            cell && typeof cell === 'string' && 
+            (cell.includes('STT') || cell.includes('NGÀY') || cell.includes('SỐ XE') || 
+             cell.includes('CONT') || cell.includes('ĐỊA ĐIỂM') || cell.includes('CHỦ HÀNG'))
+          )) {
+            headerRowIndex = rowIndex
+            break
+          }
+        }
+        
+        if (headerRowIndex >= 0) {
+          // Extract data starting from header row
+          actualData = jsonData.slice(headerRowIndex)
+        } else {
+          // If no header found, use all data
+          actualData = jsonData.filter(row => row && row.length > 0)
+        }
+        
+        // Clean and validate data
+        const cleanedData = actualData.filter(row => 
+          row && Array.isArray(row) && row.length > 3 && 
+          row.some(cell => cell !== null && cell !== undefined && cell !== '')
+        )
+        
+        if (cleanedData.length === 0) {
+          throw new Error('No valid data found in Excel file')
+        }
+        
+        // Smart analysis using the actual data
+        const smartInsights = SmartExcelAnalyzer.analyzeLogisticsFile(cleanedData)
+        
+        const insights = [
+          language === 'vi' 
+            ? `Phát hiện ${smartInsights.totalRoutes} tuyến đường logistics từ file thực tế`
+            : `Detected ${smartInsights.totalRoutes} logistics routes from actual file`,
+          language === 'vi' 
+            ? `Địa điểm chính: ${smartInsights.commonLocations.slice(0, 3).join(', ')}`
+            : `Main locations: ${smartInsights.commonLocations.slice(0, 3).join(', ')}`,
+          language === 'vi' 
+            ? `Hiệu suất phân tích: ${smartInsights.efficiency.toFixed(1)}%`
+            : `Analysis efficiency: ${smartInsights.efficiency.toFixed(1)}%`,
+          language === 'vi' 
+            ? `Dữ liệu từ sheet: ${targetSheetName}`
+            : `Data from sheet: ${targetSheetName}`,
+          language === 'vi' 
+            ? `Tổng ${cleanedData.length} dòng dữ liệu được xử lý`
+            : `Total ${cleanedData.length} data rows processed`
+        ]
+        
+        // Update file status to completed
+        setTimeout(() => {
+          setUploadedFiles(prev => 
+            prev.map(f => 
+              f.id === newFile.id 
+                ? { ...f, status: 'completed', insights, rawData: cleanedData }
+                : f
+            )
+          )
+        }, 1000 + i * 300)
+        
+      } catch (error) {
+        console.error('Error processing file:', file.name, error)
+        
+        // Update file status to error with specific error message
+        setTimeout(() => {
+          setUploadedFiles(prev => 
+            prev.map(f => 
+              f.id === newFile.id 
+                ? { 
+                    ...f, 
+                    status: 'error',
+                    insights: [
+                      language === 'vi' 
+                        ? `Lỗi xử lý file: ${error.message}`
+                        : `File processing error: ${error.message}`
+                    ]
+                  }
+                : f
+            )
+          )
+        }, 1000 + i * 300)
+      }
     }
     
     setIsProcessing(false)

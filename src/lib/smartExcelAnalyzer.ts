@@ -175,21 +175,184 @@ export const INTELLIGENT_FEED_ROUTES = [
 ];
 
 export class SmartExcelAnalyzer {
-  static analyzeLogisticsFile(fileData: any[]): SmartInsights {
-    const routes = fileData.filter(row => row && row.length > 8);
-    const locations = routes.map(row => row[8]).filter(Boolean);
+  static analyzeLogisticsFile(data: any[][]): SmartInsights {
+    if (!data || data.length < 2) {
+      return {
+        totalRoutes: 0,
+        commonLocations: [],
+        peakTimes: [],
+        vehicleTypes: [],
+        averageCost: 0,
+        efficiency: 0,
+        recommendations: ['Không đủ dữ liệu để phân tích']
+      };
+    }
+
+    // Find header row and identify column indices
+    let headerRow = data[0];
+    let dataStartIndex = 1;
     
-    const insights: SmartInsights = {
-      totalRoutes: routes.length,
-      commonLocations: this.extractTopLocations(locations),
-      peakTimes: ['06:00-08:00', '13:00-15:00'], // Feed delivery optimal times
-      vehicleTypes: ['Truck 10 tấn', 'Truck 12 tấn', 'Truck 15 tấn', 'Truck 18 tấn'],
-      averageCost: this.calculateRealisticCost(),
-      efficiency: Math.min(97, 90 + Math.random() * 7),
-      recommendations: this.generateIntelligentRecommendations()
+    // Look for header row with Vietnamese logistics terms
+    for (let i = 0; i < Math.min(data.length, 5); i++) {
+      const row = data[i];
+      if (row && Array.isArray(row) && row.some(cell => 
+        cell && typeof cell === 'string' && 
+        (cell.includes('STT') || cell.includes('NGÀY') || cell.includes('SỐ XE') || 
+         cell.includes('CONT') || cell.includes('ĐỊA ĐIỂM') || cell.includes('CHỦ HÀNG'))
+      )) {
+        headerRow = row;
+        dataStartIndex = i + 1;
+        break;
+      }
+    }
+
+    // Map column indices based on Vietnamese headers
+    const columnMap = {
+      stt: -1,
+      date: -1,
+      vehicle: -1,
+      container: -1,
+      customer: -1,
+      location: -1,
+      time: -1,
+      status: -1,
+      bill: -1,
+      port: -1
     };
+
+    headerRow.forEach((header, index) => {
+      if (!header || typeof header !== 'string') return;
+      
+      const h = header.toLowerCase();
+      if (h.includes('stt')) columnMap.stt = index;
+      else if (h.includes('ngày') || h.includes('date')) columnMap.date = index;
+      else if (h.includes('xe') || h.includes('vehicle')) columnMap.vehicle = index;
+      else if (h.includes('cont') || h.includes('container')) columnMap.container = index;
+      else if (h.includes('chủ hàng') || h.includes('customer')) columnMap.customer = index;
+      else if (h.includes('địa điểm') || h.includes('location')) columnMap.location = index;
+      else if (h.includes('thời gian') || h.includes('t.gian') || h.includes('time')) columnMap.time = index;
+      else if (h.includes('vị trí') || h.includes('status')) columnMap.status = index;
+      else if (h.includes('bill') || h.includes('book')) columnMap.bill = index;
+      else if (h.includes('cảng') || h.includes('port')) columnMap.port = index;
+    });
+
+    // Process actual data rows
+    const processedData: LogisticsData[] = [];
+    const locations = new Set<string>();
+    const vehicles = new Set<string>();
+    const customers = new Set<string>();
+    const times = new Set<string>();
+
+    for (let i = dataStartIndex; i < data.length; i++) {
+      const row = data[i];
+      if (!row || !Array.isArray(row) || row.length < 3) continue;
+      
+      // Skip empty rows
+      if (row.every(cell => !cell || cell === '')) continue;
+
+      const logData: LogisticsData = {
+        date: columnMap.date >= 0 ? String(row[columnMap.date] || '') : '',
+        vehicleNumber: columnMap.vehicle >= 0 ? String(row[columnMap.vehicle] || '') : '',
+        containerNumber: columnMap.container >= 0 ? String(row[columnMap.container] || '') : '',
+        customer: columnMap.customer >= 0 ? String(row[columnMap.customer] || '') : '',
+        location: columnMap.location >= 0 ? String(row[columnMap.location] || '') : '',
+        timeRequired: columnMap.time >= 0 ? String(row[columnMap.time] || '') : '',
+        status: columnMap.status >= 0 ? String(row[columnMap.status] || '') : '',
+        bill: columnMap.bill >= 0 ? String(row[columnMap.bill] || '') : '',
+        port: columnMap.port >= 0 ? String(row[columnMap.port] || '') : ''
+      };
+
+      processedData.push(logData);
+
+      // Collect unique values for analysis
+      if (logData.location) locations.add(logData.location);
+      if (logData.vehicleNumber) vehicles.add(logData.vehicleNumber);
+      if (logData.customer) customers.add(logData.customer);
+      if (logData.timeRequired) times.add(logData.timeRequired);
+    }
+
+    // Analyze patterns
+    const totalRoutes = processedData.length;
+    const commonLocations = Array.from(locations).slice(0, 10);
+    const vehicleTypes = Array.from(vehicles).slice(0, 10);
+    const peakTimes = Array.from(times).slice(0, 5);
+
+    // Calculate efficiency based on data completeness and patterns
+    let efficiency = 0;
+    if (totalRoutes > 0) {
+      const completenessScore = processedData.filter(d => 
+        d.location && d.vehicleNumber && d.customer
+      ).length / totalRoutes;
+      
+      const diversityScore = Math.min(locations.size / 10, 1);
+      efficiency = (completenessScore * 0.7 + diversityScore * 0.3) * 100;
+    }
+
+    // Generate intelligent recommendations based on actual data
+    const recommendations = [];
     
-    return insights;
+    if (locations.has('KHO CHIM ÉN')) {
+      recommendations.push('Phát hiện KHO CHIM ÉN - trung tâm phân phối chính');
+    }
+    
+    const cpLocations = Array.from(locations).filter(loc => 
+      loc.includes('CP') || loc.includes('Khai Anh')
+    );
+    if (cpLocations.length > 0) {
+      recommendations.push(`Tối ưu tuyến CP Group: ${cpLocations.length} điểm`);
+    }
+
+    const containerCount = processedData.filter(d => d.containerNumber).length;
+    if (containerCount > totalRoutes * 0.5) {
+      recommendations.push('Logistics container chiếm ưu thế - tối ưu cảng biển');
+    }
+
+    if (totalRoutes > 50) {
+      recommendations.push('Dữ liệu phong phú - khuyến nghị phân tích sâu hơn');
+    }
+
+    // Estimate average cost based on route patterns
+    const averageCost = this.estimateRouteCost(processedData);
+
+    return {
+      totalRoutes,
+      commonLocations,
+      peakTimes,
+      vehicleTypes,
+      averageCost,
+      efficiency: Math.round(efficiency),
+      recommendations
+    };
+  }
+
+  private static estimateRouteCost(data: LogisticsData[]): number {
+    // Estimate costs based on route patterns and Vietnamese logistics rates
+    let totalEstimatedCost = 0;
+    
+    data.forEach(route => {
+      let routeCost = 500000; // Base cost in VND
+      
+      // Adjust based on location patterns
+      if (route.location.includes('KHO CHIM ÉN')) {
+        routeCost += 200000; // Hub operations
+      }
+      
+      if (route.location.includes('CP') || route.location.includes('JAPFA')) {
+        routeCost += 300000; // Major customer premium
+      }
+      
+      if (route.containerNumber) {
+        routeCost += 800000; // Container transport premium
+      }
+      
+      if (route.location.includes('Cảng') || route.port) {
+        routeCost += 400000; // Port operations
+      }
+      
+      totalEstimatedCost += routeCost;
+    });
+    
+    return data.length > 0 ? Math.round(totalEstimatedCost / data.length) : 0;
   }
   
   static extractTopLocations(locations: string[]): string[] {
