@@ -123,195 +123,104 @@ export class FileGenerator {
     }
   }
   
-  static generatePDFFile(plan: any): void {
+  static async generatePDFFile(plan: any): Promise<void> {
     try {
-      // Generate professional PDF content
-      const htmlContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <title>${plan.title}</title>
-          <style>
-            @page { size: A4; margin: 20mm; }
-            body { 
-              font-family: 'Times New Roman', serif; 
-              margin: 0; 
-              line-height: 1.4;
-              color: #333;
-              font-size: 12px;
-            }
-            .header { 
-              text-align: center; 
-              margin-bottom: 30px; 
-              border-bottom: 2px solid #0066CC;
-              padding-bottom: 20px;
-            }
-            .company { 
-              font-size: 18px; 
-              font-weight: bold; 
-              margin-bottom: 10px;
-              color: #0066CC;
-              text-transform: uppercase;
-            }
-            .plan-title { 
-              font-size: 16px; 
-              font-weight: bold; 
-              margin: 15px 0;
-              text-transform: uppercase;
-            }
-            .summary { 
-              background: #f8f9fa; 
-              padding: 15px; 
-              margin: 20px 0; 
-              border-left: 4px solid #0066CC;
-              border-radius: 5px;
-            }
-            .summary h3 {
-              margin-top: 0;
-              color: #0066CC;
-              font-size: 14px;
-            }
-            .summary-grid {
-              display: grid;
-              grid-template-columns: 1fr 1fr;
-              gap: 15px;
-              margin-top: 10px;
-            }
-            table { 
-              width: 100%; 
-              border-collapse: collapse; 
-              margin: 20px 0; 
-              font-size: 10px;
-            }
-            th, td { 
-              border: 1px solid #ddd; 
-              padding: 8px; 
-              text-align: left; 
-              vertical-align: top;
-            }
-            th { 
-              background-color: #0066CC; 
-              color: white; 
-              font-weight: bold;
-              text-align: center;
-              font-size: 9px;
-            }
-            .insights { 
-              margin-top: 20px; 
-              background: #f8f9fa;
-              padding: 15px;
-              border-radius: 5px;
-              border-left: 4px solid #28a745;
-            }
-            .insights h3 {
-              color: #28a745;
-              margin-top: 0;
-              font-size: 14px;
-            }
-            .insights ol li { 
-              margin: 8px 0; 
-              line-height: 1.5;
-              font-size: 11px;
-            }
-            .footer {
-              margin-top: 30px;
-              text-align: center;
-              font-size: 10px;
-              color: #666;
-              border-top: 1px solid #ddd;
-              padding-top: 15px;
-            }
-            .cost { font-weight: bold; color: #28a745; }
-            .priority-high { background-color: #fff3cd; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <div class="company">CÔNG TY CỔ PHẦN COMMODITIES EXPRESS</div>
-            <div>Số 03 Nguyễn Lương Bằng, Phường Tân Phú, Quận 7, TP.HCM</div>
-            <div>MST: 0318034219 | ĐT: (028) 3775 4567</div>
-            <div class="plan-title">${plan.title}</div>
-            <p><strong>Ngày lập:</strong> ${new Date().toLocaleDateString('vi-VN')} | <strong>Người lập:</strong> Hệ thống AI LogiAI</p>
-          </div>
-          
-          <div class="summary">
-            <h3>📊 TỔNG QUAN KẾ HOẠCH LOGISTICS</h3>
-            <div class="summary-grid">
-              <div>
-                <p><strong>🚛 Tổng số tuyến:</strong> ${plan.summary.totalRoutes} tuyến</p>
-                <p><strong>💰 Tổng chi phí:</strong> <span class="cost">${new Intl.NumberFormat('vi-VN').format(plan.summary.totalCost)} VNĐ</span></p>
-              </div>
-              <div>
-                <p><strong>⚡ Hiệu suất dự kiến:</strong> ${plan.summary.efficiency}%</p>
-                <p><strong>⏱️ Thời gian thực hiện:</strong> ${plan.summary.estimatedTime}</p>
-              </div>
-            </div>
-          </div>
-          
-          <h3>🚚 CHI TIẾT TUYẾN ĐƯỜNG THỨC ĂN CHĂN NUÔI</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>STT</th>
-                <th>ĐIỂM ĐI</th>
-                <th>ĐIỂM ĐẾN</th>
-                <th>LOẠI XE</th>
-                <th>GIỜ GIAO</th>
-                <th>CHI PHÍ (VNĐ)</th>
-                <th>KM</th>
-                <th>LOẠI THỨC ĂN</th>
-                <th>KHÁCH HÀNG</th>
-                <th>GHI CHÚ LOGISTICS</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${plan.routes.map((route: any, index: number) => `
-                <tr class="${route.priority === 'HIGH' ? 'priority-high' : ''}">
-                  <td style="text-align: center;">${index + 1}</td>
-                  <td><strong>${route.from}</strong></td>
-                  <td><strong>${route.to}</strong></td>
-                  <td>${route.vehicle}</td>
-                  <td style="text-align: center;">${route.time}</td>
-                  <td style="text-align: right;" class="cost">${new Intl.NumberFormat('vi-VN').format(route.cost)}</td>
-                  <td style="text-align: center;">${route.distance} km</td>
-                  <td>${route.feedType || 'Thức ăn chăn nuôi'}</td>
-                  <td>${route.customer || 'Khách hàng'}</td>
-                  <td><em>${route.logic}</em></td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-          
-          <div class="insights">
-            <h3>🤖 KHUYẾN NGHỊ THÔNG MINH CỦA HỆ THỐNG AI</h3>
-            <ol>
-              ${plan.insights.map((insight: string) => `<li>${insight}</li>`).join('')}
-            </ol>
-          </div>
-          
-          <div class="footer">
-            <p><strong>Kế hoạch được tạo bởi Hệ thống AI LogiAI - Commodities Express</strong></p>
-            <p>Chuyên nghiệp • Thông minh • Tối ưu chi phí • Logistics thức ăn chăn nuôi miền Nam</p>
-          </div>
-        </body>
-        </html>
-      `;
+      // Dynamic import for client-side compatibility
+      const jsPDF = (await import('jspdf')).default;
+      const autoTable = (await import('jspdf-autotable')).default;
       
-      // Create proper PDF blob
-      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      link.setAttribute('href', url);
-      link.setAttribute('download', `${plan.title.replace(/[^a-z0-9]/gi, '_')}.html`);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      const doc = new jsPDF();
       
-      // Note: For true PDF generation, we would need a PDF library like jsPDF or puppeteer
-      // This creates an HTML file that can be printed to PDF by the browser
+      // Company Header
+      doc.setFontSize(16);
+      doc.setTextColor(0, 102, 204);
+      doc.text('CÔNG TY CỔ PHẦN COMMODITIES EXPRESS', 105, 20, { align: 'center' });
+      
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0);
+      doc.text('Số 03 Nguyễn Lương Bằng, Phường Tân Phú, Quận 7, TP.HCM', 105, 30, { align: 'center' });
+      doc.text('MST: 0318034219 | ĐT: (028) 3775 4567', 105, 40, { align: 'center' });
+      
+      // Plan Title
+      doc.setFontSize(14);
+      doc.setTextColor(0, 102, 204);
+      doc.text(plan.title, 105, 55, { align: 'center' });
+      
+      doc.setFontSize(10);
+      doc.setTextColor(0, 0, 0);
+      doc.text(`Ngày lập: ${new Date().toLocaleDateString('vi-VN')} | Người lập: Hệ thống AI LogiAI`, 105, 65, { align: 'center' });
+      
+      // Summary Section
+      let yPosition = 80;
+      doc.setFontSize(12);
+      doc.setTextColor(0, 102, 204);
+      doc.text('TỔNG QUAN KẾ HOẠCH LOGISTICS', 20, yPosition);
+      
+      yPosition += 10;
+      doc.setFontSize(10);
+      doc.setTextColor(0, 0, 0);
+      doc.text(`Tổng số tuyến: ${plan.summary.totalRoutes} tuyến`, 20, yPosition);
+      doc.text(`Hiệu suất dự kiến: ${plan.summary.efficiency}%`, 120, yPosition);
+      
+      yPosition += 8;
+      doc.text(`Tổng chi phí: ${new Intl.NumberFormat('vi-VN').format(plan.summary.totalCost)} VNĐ`, 20, yPosition);
+      doc.text(`Thời gian thực hiện: ${plan.summary.estimatedTime}`, 120, yPosition);
+      
+      // Routes Table
+      yPosition += 20;
+      doc.setFontSize(12);
+      doc.setTextColor(0, 102, 204);
+      doc.text('CHI TIẾT TUYẾN ĐƯỜNG THỨC ĂN CHĂN NUÔI', 20, yPosition);
+      
+      const tableData = plan.routes.map((route: any, index: number) => [
+        (index + 1).toString(),
+        route.from,
+        route.to,
+        route.vehicle,
+        route.time,
+        new Intl.NumberFormat('vi-VN').format(route.cost),
+        `${route.distance} km`,
+        route.feedType || 'Thức ăn chăn nuôi',
+        route.customer || 'Khách hàng'
+      ]);
+      
+      autoTable(doc, {
+        head: [['STT', 'ĐIỂM ĐI', 'ĐIỂM ĐẾN', 'LOẠI XE', 'GIỜ GIAO', 'CHI PHÍ (VNĐ)', 'KM', 'LOẠI THỨC ĂN', 'KHÁCH HÀNG']],
+        body: tableData,
+        startY: yPosition + 10,
+        styles: { fontSize: 8, cellPadding: 2 },
+        headStyles: { fillColor: [0, 102, 204], textColor: 255 },
+        alternateRowStyles: { fillColor: [245, 245, 245] },
+        margin: { left: 10, right: 10 }
+      });
+      
+      // Get the final Y position after the table
+      const finalY = (doc as any).lastAutoTable.finalY + 20;
+      
+      // Recommendations
+      doc.setFontSize(12);
+      doc.setTextColor(40, 167, 69);
+      doc.text('KHUYẾN NGHỊ THÔNG MINH CỦA HỆ THỐNG AI', 20, finalY);
+      
+      let recommendationY = finalY + 10;
+      doc.setFontSize(9);
+      doc.setTextColor(0, 0, 0);
+      
+      plan.insights.forEach((insight: string, index: number) => {
+        const lines = doc.splitTextToSize(`${index + 1}. ${insight}`, 170);
+        doc.text(lines, 20, recommendationY);
+        recommendationY += lines.length * 5;
+      });
+      
+      // Footer
+      const pageHeight = doc.internal.pageSize.height;
+      doc.setFontSize(8);
+      doc.setTextColor(100, 100, 100);
+      doc.text('Kế hoạch được tạo bởi Hệ thống AI LogiAI - Commodities Express', 105, pageHeight - 20, { align: 'center' });
+      doc.text('Chuyên nghiệp • Thông minh • Tối ưu chi phí • Logistics thức ăn chăn nuôi miền Nam', 105, pageHeight - 10, { align: 'center' });
+      
+      // Save the PDF
+      doc.save(`${plan.title.replace(/[^a-z0-9]/gi, '_')}.pdf`);
       
     } catch (error) {
       console.error('PDF generation error:', error);
