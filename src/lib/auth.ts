@@ -16,13 +16,19 @@ const AUTHORIZED_USERS: UserCredentials[] = [
     email: 'admin@trucking.com',
     password: 'SecureAdmin2025!',
     role: 'admin',
-    name: 'Admin User'
+    name: 'System Administrator'
   },
   {
-    email: 'dkim20263@gmail.com',
-    password: 'Dz300511#',
+    email: 'cfo@trucking.com',
+    password: 'CFOSecure2025!',
     role: 'manager',
-    name: 'David Kim'
+    name: 'Chief Financial Officer'
+  },
+  {
+    email: 'logistics@trucking.com',
+    password: 'LogisticsSecure2025!',
+    role: 'operator',
+    name: 'Logistics Manager'
   }
 ]
 

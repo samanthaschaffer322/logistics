@@ -31,14 +31,22 @@ const HomePage: React.FC = () => {
   const router = useRouter();
 
   useEffect(() => {
-    // Force dark mode
+    // Force dark mode with enhanced styling
     document.documentElement.classList.add('dark');
     document.body.classList.add('dark');
+    document.body.style.background = 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)';
     
     // Check if user is already logged in
     const isAuthenticated = sessionStorage.getItem('logiai_authenticated');
     if (isAuthenticated) {
       router.push('/dashboard');
+    } else {
+      // Redirect to login if not authenticated
+      router.push('/login');
+    }
+    
+    return () => {
+      document.body.style.background = '';
     }
   }, [router]);
 

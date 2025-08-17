@@ -348,3 +348,198 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Enhanced Typography and Readability for LogiAI */
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.025em;
+    color: inherit;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+  }
+
+  h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    line-height: 1.7;
+    color: inherit;
+  }
+
+  input, textarea, select {
+    font-family: inherit;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+  }
+
+  input::placeholder, textarea::placeholder {
+    opacity: 0.6;
+    font-weight: 400;
+  }
+}
+
+/* Enhanced Component Styles */
+@layer components {
+  .card-enhanced {
+    @apply bg-slate-800/50 backdrop-blur-sm border-slate-700/50 rounded-2xl shadow-xl;
+    transition: all 0.3s ease-in-out;
+  }
+
+  .card-enhanced:hover {
+    @apply transform scale-105 border-slate-600/50;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  .btn-gradient {
+    @apply bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-semibold rounded-xl transition-all duration-300;
+  }
+
+  .btn-gradient:hover {
+    @apply transform scale-105 shadow-xl;
+  }
+
+  .glass-effect {
+    @apply bg-slate-800/60 backdrop-blur-xl border border-slate-700/50;
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent;
+  }
+}
+
+/* Enhanced Animations */
+@layer utilities {
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+    }
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+  }
+
+  .animate-slide-in-right {
+    animation: slideInRight 0.6s ease-out;
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+}
+
+/* Enhanced Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.3);
+  border-radius: 4px;
+  transition: background 0.2s ease-in-out;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.5);
+}
+
+/* Enhanced Focus States */
+*:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Enhanced Selection */
+::selection {
+  background-color: rgba(59, 130, 246, 0.3);
+  color: inherit;
+}
+
+/* Responsive Typography */
+@media (max-width: 640px) {
+  h1 {
+    font-size: 2rem;
+  }
+  
+  h2 {
+    font-size: 1.75rem;
+  }
+  
+  h3 {
+    font-size: 1.25rem;
+  }
+}
+
+/* Enhanced Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Enhanced High Contrast Mode */
+@media (prefers-contrast: high) {
+  .card-enhanced {
+    border: 2px solid currentColor;
+  }
+  
+  button {
+    border: 2px solid currentColor;
+  }
+}
