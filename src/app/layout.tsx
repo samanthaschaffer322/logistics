@@ -15,27 +15,13 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         <title>LogiAI - Enhanced AI-Powered Vietnamese Logistics Management</title>
         <meta name="description" content="Advanced AI-powered logistics management platform with Vietnamese market expertise, route optimization, and intelligent supply chain solutions." />
         <meta name="keywords" content="logistics, AI, Vietnam, supply chain, route optimization, transportation" />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              // Enhanced LogiAI initialization
-              (function() {
-                if (typeof window !== 'undefined') {
-                  document.documentElement.classList.add('dark');
-                  document.body.classList.add('dark');
-                  console.log('LogiAI Enhanced Platform Active');
-                }
-              })();
-            `,
-          }}
-        />
       </head>
-      <body className={inter.className}>
+      <body className={`${inter.className} dark bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900`}>
         <ErrorBoundary>
           <AuthProvider>
             <LanguageProvider>
