@@ -142,13 +142,15 @@ const ComprehensiveDashboard = () => {
                   <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                     LogiAI
                   </h1>
-                  <p className="text-xs text-slate-400 font-medium">Intelligent Logistics Platform</p>
+                  <p className="text-xs text-slate-400 font-medium">
+                    {t('dashboard.overview')}
+                  </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <Badge className="bg-green-500/20 text-green-400 border-green-500/30 px-3 py-1 font-medium">
                   <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
-                  System Online
+                  {t('status.online')}
                 </Badge>
                 <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 px-3 py-1 font-medium">
                   Enhanced v2.1
@@ -160,7 +162,7 @@ const ComprehensiveDashboard = () => {
               <div className="relative">
                 <Search className="h-5 w-5 absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400" />
                 <Input 
-                  placeholder="Search features, routes, or data..." 
+                  placeholder={t('common.search') + "..."} 
                   className="pl-12 pr-4 w-80 bg-slate-700/50 text-white placeholder-slate-400 border-slate-600/50 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 rounded-xl h-12 text-sm"
                 />
               </div>
@@ -206,35 +208,35 @@ const ComprehensiveDashboard = () => {
               className="text-slate-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-xl font-semibold transition-all duration-300 h-10"
             >
               <BarChart3 className="w-4 h-4 mr-2" />
-              Overview
+              {t('nav.overview')}
             </TabsTrigger>
             <TabsTrigger 
               value="operations" 
               className="text-slate-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-xl font-semibold transition-all duration-300 h-10"
             >
               <Activity className="w-4 h-4 mr-2" />
-              Operations
+              {t('nav.operations')}
             </TabsTrigger>
             <TabsTrigger 
               value="analytics" 
               className="text-slate-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-xl font-semibold transition-all duration-300 h-10"
             >
               <TrendingUp className="w-4 h-4 mr-2" />
-              Analytics
+              {t('nav.analytics')}
             </TabsTrigger>
             <TabsTrigger 
               value="fleet" 
               className="text-slate-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-xl font-semibold transition-all duration-300 h-10"
             >
               <Truck className="w-4 h-4 mr-2" />
-              Fleet
+              {t('nav.fleet')}
             </TabsTrigger>
             <TabsTrigger 
               value="system" 
               className="text-slate-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-xl font-semibold transition-all duration-300 h-10"
             >
               <Settings className="w-4 h-4 mr-2" />
-              System
+              {t('nav.system')}
             </TabsTrigger>
           </TabsList>
 
