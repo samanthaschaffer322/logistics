@@ -203,24 +203,116 @@ const SuperAIAssistant = () => {
     }
   }
 
-  const downloadPlan = (plan: GeneratedPlan) => {
-    const planData = {
-      title: plan.title,
-      generatedAt: plan.generatedAt.toISOString(),
-      routes: plan.routes,
-      summary: plan.summary,
-      insights: plan.insights
-    };
-    
-    const dataStr = JSON.stringify(planData, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
-    const exportFileDefaultName = `${plan.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
+  const downloadPlan = (plan: GeneratedPlan, format: 'excel' | 'pdf' = 'excel') => {
+    if (format === 'excel') {
+      // Generate Excel format
+      const excelData = SmartExcelAnalyzer.generateExcelData(plan);
+      
+      // Convert to CSV format for Excel compatibility
+      const csvContent = excelData.map(row => 
+        row.map(cell => `"${cell}"`).join(',')
+      ).join('\n');
+      
+      const blob = new Blob(['\uFEFF' + csvContent], { 
+        type: 'text/csv;charset=utf-8;' 
+      });
+      
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `${plan.title.replace(/[^a-z0-9]/gi, '_')}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+    } else if (format === 'pdf') {
+      // Generate PDF content
+      const pdfContent = SmartExcelAnalyzer.generatePDFContent(plan);
+      
+      // Create HTML content for PDF
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <title>${pdfContent.title}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .summary { background: #f5f5f5; padding: 15px; margin: 20px 0; }
+            table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+            th { background-color: #4CAF50; color: white; }
+            .insights { margin-top: 20px; }
+            .insights li { margin: 5px 0; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>${pdfContent.title}</h1>
+            <p>Ngày tạo: ${pdfContent.date}</p>
+          </div>
+          
+          <div class="summary">
+            <h3>Tóm tắt kế hoạch</h3>
+            <p><strong>Tổng số tuyến:</strong> ${pdfContent.summary.totalRoutes}</p>
+            <p><strong>Tổng chi phí:</strong> ${pdfContent.totalCost}</p>
+            <p><strong>Hiệu suất:</strong> ${pdfContent.summary.efficiency}%</p>
+            <p><strong>Thời gian ước tính:</strong> ${pdfContent.summary.estimatedTime}</p>
+          </div>
+          
+          <h3>Chi tiết tuyến đường</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>STT</th>
+                <th>Điểm đi</th>
+                <th>Điểm đến</th>
+                <th>Loại xe</th>
+                <th>Giờ</th>
+                <th>Chi phí</th>
+                <th>Khoảng cách</th>
+                <th>Logic nghiệp vụ</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${pdfContent.routes.map((route: any, index: number) => `
+                <tr>
+                  <td>${index + 1}</td>
+                  <td>${route.from}</td>
+                  <td>${route.to}</td>
+                  <td>${route.vehicle}</td>
+                  <td>${route.time}</td>
+                  <td>${new Intl.NumberFormat('vi-VN').format(route.cost)} VNĐ</td>
+                  <td>${route.distance} km</td>
+                  <td>${route.logic}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          
+          <div class="insights">
+            <h3>Khuyến nghị AI</h3>
+            <ul>
+              ${pdfContent.insights.map((insight: string) => `<li>${insight}</li>`).join('')}
+            </ul>
+          </div>
+        </body>
+        </html>
+      `;
+      
+      // Create blob and download
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `${plan.title.replace(/[^a-z0-9]/gi, '_')}.html`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   };
 
   const applyPlan = (plan: GeneratedPlan) => {
@@ -518,20 +610,36 @@ const SuperAIAssistant = () => {
                             {language === 'vi' ? 'Tuyến đường:' : 'Routes:'}
                           </h4>
                           {plan.routes.map((route, index) => (
-                            <div key={index} className="flex items-center justify-between bg-slate-600/20 rounded-lg p-3">
-                              <div className="flex items-center gap-3">
-                                <Truck className="w-4 h-4 text-blue-400" />
-                                <span className="text-white text-sm">
-                                  {route.from} → {route.to}
-                                </span>
+                            <div key={index} className="bg-slate-600/20 rounded-lg p-4 space-y-2">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <Truck className="w-4 h-4 text-blue-400" />
+                                  <span className="text-white font-medium">
+                                    {route.from} → {route.to}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-4 text-sm">
+                                  <span className="text-slate-400">{route.vehicle}</span>
+                                  <span className="text-slate-400">{route.time}</span>
+                                  <span className="text-green-400 font-medium">
+                                    {formatCurrency(route.cost)}
+                                  </span>
+                                </div>
                               </div>
-                              <div className="flex items-center gap-4 text-sm">
-                                <span className="text-slate-400">{route.vehicle}</span>
-                                <span className="text-slate-400">{route.time}</span>
-                                <span className="text-green-400 font-medium">
-                                  {formatCurrency(route.cost)}
-                                </span>
-                              </div>
+                              {/* Business Logic Display */}
+                              {(route as any).logic && (
+                                <div className="flex items-center gap-2 text-xs">
+                                  <Info className="w-3 h-3 text-blue-400" />
+                                  <span className="text-blue-300 italic">{(route as any).logic}</span>
+                                </div>
+                              )}
+                              {/* Distance and Duration */}
+                              {(route as any).distance && (
+                                <div className="flex items-center gap-4 text-xs text-slate-400">
+                                  <span>📏 {(route as any).distance} km</span>
+                                  <span>⏱️ {(route as any).duration} giờ</span>
+                                </div>
+                              )}
                             </div>
                           ))}
                         </div>
@@ -553,18 +661,27 @@ const SuperAIAssistant = () => {
                           </div>
                         )}
 
-                        {/* Functional Actions */}
+                        {/* Enhanced Functional Actions */}
                         <div className="flex gap-2">
-                          <Button 
-                            onClick={() => downloadPlan(plan)}
-                            className="bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-all duration-300"
-                          >
-                            <Download className="w-4 h-4 mr-2" />
-                            {language === 'vi' ? 'Tải xuống' : 'Download'}
-                          </Button>
+                          <div className="flex gap-1">
+                            <Button 
+                              onClick={() => downloadPlan(plan, 'excel')}
+                              className="bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500/30 transition-all duration-300"
+                            >
+                              <FileSpreadsheet className="w-4 h-4 mr-2" />
+                              {language === 'vi' ? 'Excel' : 'Excel'}
+                            </Button>
+                            <Button 
+                              onClick={() => downloadPlan(plan, 'pdf')}
+                              className="bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30 transition-all duration-300"
+                            >
+                              <FileText className="w-4 h-4 mr-2" />
+                              {language === 'vi' ? 'PDF' : 'PDF'}
+                            </Button>
+                          </div>
                           <Button 
                             onClick={() => applyPlan(plan)}
-                            className="bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500/30 transition-all duration-300"
+                            className="bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-all duration-300"
                           >
                             <CheckCircle className="w-4 h-4 mr-2" />
                             {language === 'vi' ? 'Áp dụng' : 'Apply'}
