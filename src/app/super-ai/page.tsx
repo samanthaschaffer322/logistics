@@ -39,7 +39,9 @@ import {
   TrendingUp,
   Activity
 } from 'lucide-react'
-import SmartExcelAnalyzer from '@/lib/smartExcelAnalyzer'
+import FileGenerator from '@/lib/fileGenerator'
+
+// ... existing imports ...
 
 interface UploadedFile {
   id: string;
@@ -203,260 +205,19 @@ const SuperAIAssistant = () => {
     }
   }
 
-  const downloadPlan = (plan: GeneratedPlan, format: 'excel' | 'pdf' = 'excel') => {
-    if (format === 'excel') {
-      // Generate proper Excel file using XLSX
-      const excelData = SmartExcelAnalyzer.generateExcelData(plan);
-      
-      // Create workbook
-      const wb = {
-        SheetNames: [excelData.sheetName],
-        Sheets: {}
-      };
-      
-      // Create worksheet
-      const ws = {};
-      
-      // Add data to worksheet
-      excelData.data.forEach((row, rowIndex) => {
-        row.forEach((cell, colIndex) => {
-          const cellAddress = String.fromCharCode(65 + colIndex) + (rowIndex + 1);
-          ws[cellAddress] = { v: cell, t: typeof cell === 'number' ? 'n' : 's' };
-        });
-      });
-      
-      // Set worksheet range
-      const range = `A1:${String.fromCharCode(65 + Math.max(...excelData.data.map(row => row.length)) - 1)}${excelData.data.length}`;
-      ws['!ref'] = range;
-      
-      wb.Sheets[excelData.sheetName] = ws;
-      
-      // Generate Excel file
-      try {
-        // Use dynamic import for client-side
-        import('xlsx').then(XLSX => {
-          const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-          const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-          
-          const link = document.createElement('a');
-          const url = URL.createObjectURL(blob);
-          link.setAttribute('href', url);
-          link.setAttribute('download', `${plan.title.replace(/[^a-z0-9]/gi, '_')}.xlsx`);
-          link.style.visibility = 'hidden';
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-        });
-      } catch (error) {
-        // Fallback to CSV if XLSX fails
-        const csvContent = excelData.data.map(row => 
-          row.map(cell => `"${cell}"`).join(',')
-        ).join('\n');
-        
-        const blob = new Blob(['\uFEFF' + csvContent], { 
-          type: 'text/csv;charset=utf-8;' 
-        });
-        
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        link.setAttribute('href', url);
-        link.setAttribute('download', `${plan.title.replace(/[^a-z0-9]/gi, '_')}.csv`);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+  const downloadPlan = async (plan: GeneratedPlan, format: 'excel' | 'pdf' = 'excel') => {
+    try {
+      if (format === 'excel') {
+        await FileGenerator.generateExcelFile(plan);
+      } else if (format === 'pdf') {
+        FileGenerator.generatePDFFile(plan);
       }
-      
-    } else if (format === 'pdf') {
-      // Generate professional PDF content
-      const pdfContent = SmartExcelAnalyzer.generatePDFContent(plan);
-      
-      const htmlContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <title>${pdfContent.title}</title>
-          <style>
-            body { 
-              font-family: 'Times New Roman', serif; 
-              margin: 20px; 
-              line-height: 1.4;
-              color: #333;
-            }
-            .header { 
-              text-align: center; 
-              margin-bottom: 30px; 
-              border-bottom: 2px solid #333;
-              padding-bottom: 20px;
-            }
-            .company { 
-              font-size: 16px; 
-              font-weight: bold; 
-              margin-bottom: 10px;
-              text-transform: uppercase;
-            }
-            .plan-title { 
-              font-size: 18px; 
-              font-weight: bold; 
-              margin: 10px 0;
-              text-transform: uppercase;
-            }
-            .summary { 
-              background: #f8f9fa; 
-              padding: 15px; 
-              margin: 20px 0; 
-              border-left: 4px solid #007bff;
-            }
-            .summary h3 {
-              margin-top: 0;
-              color: #007bff;
-            }
-            table { 
-              width: 100%; 
-              border-collapse: collapse; 
-              margin: 20px 0; 
-              font-size: 12px;
-            }
-            th, td { 
-              border: 1px solid #ddd; 
-              padding: 8px; 
-              text-align: left; 
-              vertical-align: top;
-            }
-            th { 
-              background-color: #007bff; 
-              color: white; 
-              font-weight: bold;
-              text-align: center;
-            }
-            .insights { 
-              margin-top: 20px; 
-              background: #f8f9fa;
-              padding: 15px;
-              border-radius: 5px;
-            }
-            .insights h3 {
-              color: #28a745;
-              margin-top: 0;
-            }
-            .insights ol li { 
-              margin: 8px 0; 
-              line-height: 1.5;
-            }
-            .notes {
-              margin-top: 20px;
-              font-size: 11px;
-              color: #666;
-              border-top: 1px solid #ddd;
-              padding-top: 15px;
-            }
-            .notes h4 {
-              color: #dc3545;
-              margin-bottom: 10px;
-            }
-            .footer {
-              margin-top: 30px;
-              text-align: center;
-              font-size: 10px;
-              color: #666;
-              border-top: 1px solid #ddd;
-              padding-top: 10px;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <div class="company">${pdfContent.company}</div>
-            <div class="plan-title">${pdfContent.planType}</div>
-            <p><strong>Ngày lập:</strong> ${pdfContent.date}</p>
-            <p><strong>Người lập:</strong> Hệ thống AI LogiAI</p>
-          </div>
-          
-          <div class="summary">
-            <h3>📊 TỔNG QUAN KẾ HOẠCH</h3>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-              <div>
-                <p><strong>🚛 Tổng số tuyến:</strong> ${pdfContent.summary.totalRoutes} tuyến</p>
-                <p><strong>💰 Tổng chi phí:</strong> ${pdfContent.totalCost}</p>
-              </div>
-              <div>
-                <p><strong>⚡ Hiệu suất dự kiến:</strong> ${pdfContent.summary.efficiency}%</p>
-                <p><strong>⏱️ Thời gian thực hiện:</strong> ${pdfContent.summary.estimatedTime}</p>
-              </div>
-            </div>
-          </div>
-          
-          <h3>🚚 CHI TIẾT TUYẾN ĐƯỜNG</h3>
-          <table>
-            <thead>
-              <tr>
-                <th>STT</th>
-                <th>ĐIỂM ĐI</th>
-                <th>ĐIỂM ĐẾN</th>
-                <th>LOẠI XE</th>
-                <th>GIỜ GIAO</th>
-                <th>CHI PHÍ (VNĐ)</th>
-                <th>KM</th>
-                <th>LOẠI THỨC ĂN</th>
-                <th>KHÁCH HÀNG</th>
-                <th>GHI CHÚ</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${pdfContent.routes.map((route: any, index: number) => `
-                <tr>
-                  <td style="text-align: center;">${index + 1}</td>
-                  <td><strong>${route.from}</strong></td>
-                  <td><strong>${route.to}</strong></td>
-                  <td>${route.vehicle}</td>
-                  <td style="text-align: center;">${route.time}</td>
-                  <td style="text-align: right;"><strong>${new Intl.NumberFormat('vi-VN').format(route.cost)}</strong></td>
-                  <td style="text-align: center;">${route.distance}</td>
-                  <td>${route.feedType || 'Thức ăn chăn nuôi'}</td>
-                  <td>${route.customer || 'Khách hàng'}</td>
-                  <td><em>${route.logic}</em></td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-          
-          <div class="insights">
-            <h3>🤖 KHUYẾN NGHỊ CỦA HỆ THỐNG AI</h3>
-            <ol>
-              ${pdfContent.insights.map((insight: string) => `<li>${insight}</li>`).join('')}
-            </ol>
-          </div>
-          
-          <div class="notes">
-            <h4>📋 GHI CHÚ QUAN TRỌNG:</h4>
-            <ul>
-              <li>Thời gian giao hàng có thể thay đổi tùy theo tình hình giao thông</li>
-              <li>Cần kiểm tra chất lượng thức ăn trước khi giao hàng</li>
-              <li>Liên hệ khách hàng trước 30 phút khi đến điểm giao hàng</li>
-              <li>Báo cáo tình hình giao hàng về văn phòng sau khi hoàn thành</li>
-              <li>Đảm bảo xe chuyên dụng thức ăn chăn nuôi, không chở hàng hóa khác</li>
-            </ul>
-          </div>
-          
-          <div class="footer">
-            <p>Kế hoạch được tạo bởi Hệ thống AI LogiAI - Công ty Cổ phần Commodities Express</p>
-            <p>Địa chỉ: Số 03 Nguyễn Lương Bằng, Phường Tân Phú, Quận 7, TP.HCM</p>
-          </div>
-        </body>
-        </html>
-      `;
-      
-      // Create blob and download
-      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      link.setAttribute('href', url);
-      link.setAttribute('download', `${plan.title.replace(/[^a-z0-9]/gi, '_')}.html`);
-      link.style.visibility = 'hidden';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Download error:', error);
+      alert(language === 'vi' 
+        ? 'Có lỗi xảy ra khi tạo file. Vui lòng thử lại.'
+        : 'Error generating file. Please try again.'
+      );
     }
   };
 
@@ -472,8 +233,8 @@ const SuperAIAssistant = () => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
       currency: 'VND'
-    }).format(amount)
-  }
+    }).format(amount);
+  };
 
   return (
     <AuthGuard>
