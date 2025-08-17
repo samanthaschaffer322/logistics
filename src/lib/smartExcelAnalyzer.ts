@@ -391,57 +391,13 @@ export class SmartExcelAnalyzer {
   }
   
   static generateRealisticPlan(insights: SmartInsights, language: 'vi' | 'en' = 'vi'): any {
-    // Import the detailed plan generator
-    const DetailedPlanGenerator = require('./detailedPlanGenerator').DetailedPlanGenerator;
+    // Use the new Intelligent Logistics AI with 35 years of experience
+    const IntelligentLogisticsAI = require('./intelligentLogisticsAI').IntelligentLogisticsAI;
     
-    // Generate staff-level detailed plan
-    const staffPlan = DetailedPlanGenerator.generateStaffLevelPlan(insights, language);
+    // Generate intelligent plan with real-world constraints and experience
+    const intelligentPlan = IntelligentLogisticsAI.generateIntelligentPlan(insights, language);
     
-    // Convert to the format expected by the UI
-    const plan = {
-      id: staffPlan.id,
-      title: staffPlan.title,
-      generatedAt: staffPlan.generatedAt,
-      routes: staffPlan.routes.map((route: any) => ({
-        from: route.from,
-        to: route.to,
-        vehicle: route.vehicleType,
-        time: route.time,
-        cost: route.cost,
-        distance: route.distance,
-        duration: route.duration,
-        logic: route.logic,
-        feedType: route.feedType,
-        customer: route.customer,
-        priority: route.priority,
-        frequency: route.frequency,
-        // Staff-level details
-        vehiclePlate: route.vehiclePlate,
-        driverName: route.driverName,
-        driverPhone: route.driverPhone,
-        containerNumber: route.containerNumber,
-        sealNumber: route.sealNumber,
-        billNumber: route.billNumber,
-        portUnload: route.portUnload,
-        vehiclePosition7h: route.vehiclePosition7h,
-        status: route.status
-      })),
-      summary: {
-        totalRoutes: staffPlan.summary.totalRoutes,
-        totalCost: staffPlan.summary.totalCost,
-        totalDistance: staffPlan.summary.totalDistance,
-        estimatedTime: staffPlan.summary.estimatedTime,
-        efficiency: staffPlan.summary.efficiency,
-        avgCostPerRoute: staffPlan.summary.avgCostPerRoute,
-        highPriorityRoutes: staffPlan.summary.highPriorityRoutes,
-        containerRoutes: staffPlan.summary.containerRoutes,
-        truckRoutes: staffPlan.summary.truckRoutes
-      },
-      insights: staffPlan.insights,
-      businessIntelligence: staffPlan.businessIntelligence
-    };
-    
-    return plan;
+    return intelligentPlan;
   }
   
   static generateRealisticDeliveryTime(feedType: string): string {
