@@ -52,7 +52,7 @@ import {
 
 const ComprehensiveDashboard = () => {
   const { user, logout } = useAuth()
-  const { t } = useLanguage()
+  const { t, language } = useLanguage()
   const [activeTab, setActiveTab] = useState('overview')
 
   // Sample data for charts
@@ -84,26 +84,67 @@ const ComprehensiveDashboard = () => {
 
   const quickActions = [
     {
-      category: 'Route Optimization',
+      category: language === 'vi' ? 'Tối ưu hóa tuyến đường' : 'Route Optimization',
       items: [
-        { title: 'Combined Route Optimizer', description: 'Enhanced multi-algorithm optimization with Vietnam map', icon: Navigation, href: '/combined-route-optimizer', color: 'bg-gradient-to-r from-blue-600 to-cyan-600' },
-        { title: 'Vietnam Map Routes', description: 'Interactive route planning', icon: Map, href: '/vietnam-map', color: 'bg-gradient-to-r from-green-600 to-emerald-600' }
+        { 
+          title: language === 'vi' ? 'Tối ưu tuyến đường tổng hợp' : 'Combined Route Optimizer', 
+          description: language === 'vi' ? 'Tối ưu hóa đa thuật toán nâng cao với bản đồ Việt Nam' : 'Enhanced multi-algorithm optimization with Vietnam map', 
+          icon: Navigation, 
+          href: '/combined-route-optimizer', 
+          color: 'bg-gradient-to-r from-blue-600 to-cyan-600' 
+        }
       ]
     },
     {
-      category: 'AI & Analytics',
+      category: language === 'vi' ? 'AI & Phân tích' : 'AI & Analytics',
       items: [
-        { title: 'Super AI Assistant', description: 'Intelligent logistics insights', icon: Brain, href: '/super-ai', color: 'bg-gradient-to-r from-purple-600 to-pink-600' },
-        { title: 'Analytics Dashboard', description: 'Performance metrics & KPIs', icon: BarChart3, href: '/analytics', color: 'bg-gradient-to-r from-indigo-600 to-purple-600' },
-        { title: 'Logistics Operations', description: 'AI-powered operations center', icon: Activity, href: '/logistics-operations', color: 'bg-gradient-to-r from-orange-600 to-red-600' }
+        { 
+          title: language === 'vi' ? 'Trợ lý AI siêu thông minh' : 'Super AI Assistant', 
+          description: language === 'vi' ? 'Thông tin logistics thông minh với AI' : 'Intelligent logistics insights', 
+          icon: Brain, 
+          href: '/super-ai', 
+          color: 'bg-gradient-to-r from-purple-600 to-pink-600' 
+        },
+        { 
+          title: language === 'vi' ? 'Bảng điều khiển phân tích' : 'Analytics Dashboard', 
+          description: language === 'vi' ? 'Số liệu hiệu suất & KPI' : 'Performance metrics & KPIs', 
+          icon: BarChart3, 
+          href: '/analytics', 
+          color: 'bg-gradient-to-r from-indigo-600 to-purple-600' 
+        },
+        { 
+          title: language === 'vi' ? 'Vận hành logistics' : 'Logistics Operations', 
+          description: language === 'vi' ? 'Trung tâm vận hành được hỗ trợ bởi AI' : 'AI-powered operations center', 
+          icon: Activity, 
+          href: '/logistics-operations', 
+          color: 'bg-gradient-to-r from-orange-600 to-red-600' 
+        }
       ]
     },
     {
-      category: 'Fleet & Shipments',
+      category: language === 'vi' ? 'Đội xe & Vận chuyển' : 'Fleet & Shipments',
       items: [
-        { title: 'Fleet Management', description: 'Vehicle tracking & maintenance', icon: Truck, href: '/fleet-management', color: 'bg-gradient-to-r from-teal-600 to-cyan-600' },
-        { title: 'Shipment Tracking', description: 'Real-time shipment monitoring', icon: Package, href: '/shipments', color: 'bg-gradient-to-r from-blue-600 to-indigo-600' },
-        { title: 'Real-time Tracking', description: 'Live GPS tracking system', icon: MapPin, href: '/real-time-tracking', color: 'bg-gradient-to-r from-green-600 to-teal-600' }
+        { 
+          title: language === 'vi' ? 'Quản lý đội xe' : 'Fleet Management', 
+          description: language === 'vi' ? 'Theo dõi xe & bảo trì' : 'Vehicle tracking & maintenance', 
+          icon: Truck, 
+          href: '/fleet-management', 
+          color: 'bg-gradient-to-r from-teal-600 to-cyan-600' 
+        },
+        { 
+          title: language === 'vi' ? 'Theo dõi lô hàng' : 'Shipment Tracking', 
+          description: language === 'vi' ? 'Giám sát lô hàng thời gian thực' : 'Real-time shipment monitoring', 
+          icon: Package, 
+          href: '/shipments', 
+          color: 'bg-gradient-to-r from-blue-600 to-indigo-600' 
+        },
+        { 
+          title: language === 'vi' ? 'Theo dõi thời gian thực' : 'Real-time Tracking', 
+          description: language === 'vi' ? 'Hệ thống theo dõi GPS trực tiếp' : 'Live GPS tracking system', 
+          icon: MapPin, 
+          href: '/real-time-tracking', 
+          color: 'bg-gradient-to-r from-green-600 to-teal-600' 
+        }
       ]
     }
   ]
@@ -143,14 +184,14 @@ const ComprehensiveDashboard = () => {
                     LogiAI
                   </h1>
                   <p className="text-xs text-slate-400 font-medium">
-                    {t('dashboard.overview')}
+                    {language === 'vi' ? 'Nền tảng Logistics Thông minh' : 'Intelligent Logistics Platform'}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
                 <Badge className="bg-green-500/20 text-green-400 border-green-500/30 px-3 py-1 font-medium">
                   <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
-                  {t('status.online')}
+                  {language === 'vi' ? 'Hệ thống hoạt động' : 'System Online'}
                 </Badge>
                 <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 px-3 py-1 font-medium">
                   Enhanced v2.1
@@ -162,7 +203,7 @@ const ComprehensiveDashboard = () => {
               <div className="relative">
                 <Search className="h-5 w-5 absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400" />
                 <Input 
-                  placeholder={t('common.search') + "..."} 
+                  placeholder={language === 'vi' ? 'Tìm kiếm tính năng, tuyến đường, dữ liệu...' : 'Search features, routes, or data...'} 
                   className="pl-12 pr-4 w-80 bg-slate-700/50 text-white placeholder-slate-400 border-slate-600/50 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 rounded-xl h-12 text-sm"
                 />
               </div>
@@ -208,35 +249,35 @@ const ComprehensiveDashboard = () => {
               className="text-slate-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-xl font-semibold transition-all duration-300 h-10"
             >
               <BarChart3 className="w-4 h-4 mr-2" />
-              {t('nav.overview')}
+              {language === 'vi' ? 'Tổng quan' : 'Overview'}
             </TabsTrigger>
             <TabsTrigger 
               value="operations" 
               className="text-slate-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-xl font-semibold transition-all duration-300 h-10"
             >
               <Activity className="w-4 h-4 mr-2" />
-              {t('nav.operations')}
+              {language === 'vi' ? 'Vận hành' : 'Operations'}
             </TabsTrigger>
             <TabsTrigger 
               value="analytics" 
               className="text-slate-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-xl font-semibold transition-all duration-300 h-10"
             >
               <TrendingUp className="w-4 h-4 mr-2" />
-              {t('nav.analytics')}
+              {language === 'vi' ? 'Phân tích' : 'Analytics'}
             </TabsTrigger>
             <TabsTrigger 
               value="fleet" 
               className="text-slate-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-xl font-semibold transition-all duration-300 h-10"
             >
               <Truck className="w-4 h-4 mr-2" />
-              {t('nav.fleet')}
+              {language === 'vi' ? 'Đội xe' : 'Fleet'}
             </TabsTrigger>
             <TabsTrigger 
               value="system" 
               className="text-slate-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-xl font-semibold transition-all duration-300 h-10"
             >
               <Settings className="w-4 h-4 mr-2" />
-              {t('nav.system')}
+              {language === 'vi' ? 'Hệ thống' : 'System'}
             </TabsTrigger>
           </TabsList>
 
@@ -251,24 +292,35 @@ const ComprehensiveDashboard = () => {
                       <Brain className="w-8 h-8 text-white" />
                     </div>
                     <div>
-                      <h2 className="text-3xl font-bold mb-2">Welcome back, {user?.name}!</h2>
+                      <h2 className="text-3xl font-bold mb-2">
+                        {language === 'vi' ? `Chào mừng trở lại, ${user?.name}!` : `Welcome back, ${user?.name}!`}
+                      </h2>
                       <p className="text-lg text-blue-100 opacity-90">
-                        Your intelligent logistics command center is ready. Monitor operations, optimize routes, and drive efficiency.
+                        {language === 'vi' 
+                          ? 'Trung tâm chỉ huy logistics thông minh của bạn đã sẵn sàng. Giám sát hoạt động, tối ưu hóa tuyến đường và thúc đẩy hiệu quả.'
+                          : 'Your intelligent logistics command center is ready. Monitor operations, optimize routes, and drive efficiency.'
+                        }
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-6 mt-6">
                     <div className="flex items-center gap-2 bg-green-500/20 px-4 py-2 rounded-xl border border-green-500/30">
                       <CheckCircle className="w-5 h-5 text-green-400" />
-                      <span className="text-green-100 font-medium">All Systems Operational</span>
+                      <span className="text-green-100 font-medium">
+                        {language === 'vi' ? 'Tất cả hệ thống hoạt động' : 'All Systems Operational'}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 bg-blue-500/20 px-4 py-2 rounded-xl border border-blue-500/30">
                       <Zap className="w-5 h-5 text-blue-400" />
-                      <span className="text-blue-100 font-medium">AI Assistant Active</span>
+                      <span className="text-blue-100 font-medium">
+                        {language === 'vi' ? 'Trợ lý AI hoạt động' : 'AI Assistant Active'}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 bg-purple-500/20 px-4 py-2 rounded-xl border border-purple-500/30">
                       <Globe className="w-5 h-5 text-purple-400" />
-                      <span className="text-purple-100 font-medium">Real-time Data</span>
+                      <span className="text-purple-100 font-medium">
+                        {language === 'vi' ? 'Dữ liệu thời gian thực' : 'Real-time Data'}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -331,13 +383,17 @@ const ComprehensiveDashboard = () => {
                     <Zap className="w-5 h-5 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold text-white">Quick Actions</h3>
-                    <p className="text-slate-400">Access key features and tools instantly</p>
+                    <h3 className="text-2xl font-bold text-white">
+                      {language === 'vi' ? 'Thao tác nhanh' : 'Quick Actions'}
+                    </h3>
+                    <p className="text-slate-400">
+                      {language === 'vi' ? 'Truy cập các tính năng và công cụ chính ngay lập tức' : 'Access key features and tools instantly'}
+                    </p>
                   </div>
                 </div>
                 <Button className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-xl px-6 py-3 font-semibold">
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Custom Action
+                  {language === 'vi' ? 'Thêm thao tác tùy chỉnh' : 'Add Custom Action'}
                 </Button>
               </div>
 
