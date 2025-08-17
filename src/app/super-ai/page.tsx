@@ -40,6 +40,7 @@ import {
   Activity
 } from 'lucide-react'
 import FileGenerator from '@/lib/fileGenerator'
+import { SmartExcelAnalyzer } from '@/lib/smartExcelAnalyzer'
 
 // ... existing imports ...
 
@@ -261,17 +262,25 @@ const SuperAIAssistant = () => {
       // Get the most recent file's data for analysis
       const latestFile = uploadedFiles.find(f => f.status === 'completed' && f.rawData);
       if (!latestFile?.rawData) {
-        throw new Error('No valid data found');
+        throw new Error('No valid data found - please ensure files are processed successfully');
       }
+      
+      console.log('Generating plan with data:', latestFile.rawData.length, 'rows');
       
       // Use smart analyzer to generate realistic plan
       const smartInsights = SmartExcelAnalyzer.analyzeLogisticsFile(latestFile.rawData);
+      console.log('Smart insights generated:', smartInsights);
+      
       const realisticPlan = SmartExcelAnalyzer.generateRealisticPlan(smartInsights, language);
+      console.log('Realistic plan generated:', realisticPlan);
       
       setGeneratedPlans(prev => [realisticPlan, ...prev])
     } catch (error) {
       console.error('Plan generation error:', error);
-      alert(language === 'vi' ? 'Có lỗi xảy ra khi tạo kế hoạch' : 'Error occurred while generating plan');
+      alert(language === 'vi' 
+        ? `Có lỗi xảy ra khi tạo kế hoạch: ${error.message}` 
+        : `Error occurred while generating plan: ${error.message}`
+      );
     } finally {
       setIsGenerating(false)
     }
