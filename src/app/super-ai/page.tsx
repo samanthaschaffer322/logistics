@@ -12,8 +12,7 @@ import {
   Button,
   Input,
   Label,
-  Badge,
-  Textarea
+  Badge
 } from '@/components/ui-components'
 import { 
   Brain, 
@@ -40,6 +39,7 @@ import {
   TrendingUp,
   Activity
 } from 'lucide-react'
+import SmartExcelAnalyzer from '@/lib/smartExcelAnalyzer'
 
 interface UploadedFile {
   id: string;
@@ -49,6 +49,7 @@ interface UploadedFile {
   uploadedAt: Date;
   status: 'processing' | 'completed' | 'error';
   insights?: string[];
+  rawData?: any[];
 }
 
 interface GeneratedPlan {
@@ -61,6 +62,8 @@ interface GeneratedPlan {
     vehicle: string;
     time: string;
     cost: number;
+    distance?: number;
+    duration?: number;
   }>;
   summary: {
     totalRoutes: number;
@@ -68,10 +71,11 @@ interface GeneratedPlan {
     estimatedTime: string;
     efficiency: number;
   };
+  insights?: string[];
 }
 
 const SuperAIAssistant = () => {
-  const { t, language } = useLanguage()
+  const { language } = useLanguage()
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([])
   const [generatedPlans, setGeneratedPlans] = useState<GeneratedPlan[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
@@ -115,22 +119,53 @@ const SuperAIAssistant = () => {
       
       setUploadedFiles(prev => [...prev, newFile])
       
-      // Simulate AI processing
-      setTimeout(() => {
-        const insights = [
-          language === 'vi' ? 'Phát hiện 15 tuyến đường logistics' : 'Detected 15 logistics routes',
-          language === 'vi' ? 'Tối ưu hóa chi phí 23%' : 'Cost optimization 23%',
-          language === 'vi' ? 'Hiệu suất vận chuyển 94.2%' : 'Transport efficiency 94.2%',
-          language === 'vi' ? 'Thời gian giao hàng trung bình 2.5h' : 'Average delivery time 2.5h'
-        ]
-        
-        setUploadedFiles(prev => 
-          prev.map(f => 
-            f.id === newFile.id 
-              ? { ...f, status: 'completed', insights }
-              : f
+      // Simulate reading Excel file and smart analysis
+      setTimeout(async () => {
+        try {
+          // Simulate Excel data extraction
+          const mockExcelData = [
+            ['STT', 'NGÀY', 'SỐ XE', 'SĐT', 'TÊN LÁI XE', 'SỐ CONT', 'SEAL', 'CHỦ HÀNG', 'ĐỊA ĐIỂM', 'T.GIAN Y/C', 'Vị TRÍ XE 7h', 'BILL - BOOK', 'CẢNG HẠ'],
+            [1, '17/03/2025', '50H53777', '', '', 'CBHU9513264', '', 'Khai Anh CE (N)', 'KHO CHIM ÉN', '08:00', 'XONG', 'OOLU2753948410', 'Cảng Cát Lái'],
+            [2, '17/03/2025', '48H01595', '', '', 'CCLU5168766', '', 'Khai Anh CE (N)', 'KCN Binh Duong', '09:30', 'XONG', 'OOLU2753948410', 'Cảng Sài Gòn'],
+            [3, '17/03/2025', '51C63836', '', '', 'CCLU5206660', '', 'Commodities Express', 'Cảng Vũng Tàu', '14:00', 'XONG', 'OOLU2753948410', 'Cảng Vũng Tàu'],
+            [4, '17/03/2025', '51C76124', '', '', 'CCLU5256471', '', 'Khai Anh CE (N)', 'KCN Dong Nai', '10:15', 'XONG', 'OOLU2753948410', 'Cảng Cát Lái'],
+            [5, '17/03/2025', '51C58240', '', '', 'CCLU5261441', '', 'Commodities Express', 'Cần Thơ', '16:30', 'XONG', 'OOLU2753948410', 'Cảng Cần Thơ']
+          ];
+          
+          // Smart analysis using the new analyzer
+          const smartInsights = SmartExcelAnalyzer.analyzeLogisticsFile(mockExcelData);
+          
+          const insights = [
+            language === 'vi' 
+              ? `Phát hiện ${smartInsights.totalRoutes} tuyến đường logistics miền Nam`
+              : `Detected ${smartInsights.totalRoutes} Southern Vietnam logistics routes`,
+            language === 'vi' 
+              ? `Địa điểm chính: ${smartInsights.commonLocations.slice(0, 2).join(', ')}`
+              : `Main locations: ${smartInsights.commonLocations.slice(0, 2).join(', ')}`,
+            language === 'vi' 
+              ? `Hiệu suất tối ưu: ${smartInsights.efficiency.toFixed(1)}%`
+              : `Optimized efficiency: ${smartInsights.efficiency.toFixed(1)}%`,
+            language === 'vi' 
+              ? `Chi phí trung bình: ${new Intl.NumberFormat('vi-VN').format(smartInsights.averageCost)} VNĐ`
+              : `Average cost: ${new Intl.NumberFormat('vi-VN').format(smartInsights.averageCost)} VND`
+          ];
+          
+          setUploadedFiles(prev => 
+            prev.map(f => 
+              f.id === newFile.id 
+                ? { ...f, status: 'completed', insights, rawData: mockExcelData }
+                : f
+            )
           )
-        )
+        } catch (error) {
+          setUploadedFiles(prev => 
+            prev.map(f => 
+              f.id === newFile.id 
+                ? { ...f, status: 'error' }
+                : f
+            )
+          )
+        }
       }, 2000 + i * 500)
     }
     
@@ -145,49 +180,56 @@ const SuperAIAssistant = () => {
     
     setIsGenerating(true)
     
-    // Simulate AI plan generation
+    // Simulate AI plan generation with smart analysis
     await new Promise(resolve => setTimeout(resolve, 3000))
     
-    const newPlan: GeneratedPlan = {
-      id: Date.now().toString(),
-      title: language === 'vi' 
-        ? `Kế hoạch AI - ${new Date().toLocaleDateString('vi-VN')}`
-        : `AI Plan - ${new Date().toLocaleDateString('en-US')}`,
-      generatedAt: new Date(),
-      routes: [
-        {
-          from: 'TP. Hồ Chí Minh',
-          to: 'Hà Nội',
-          vehicle: '40ft Container',
-          time: '18:00',
-          cost: 15000000
-        },
-        {
-          from: 'Đà Nẵng',
-          to: 'Cần Thơ',
-          vehicle: '20ft Container',
-          time: '14:30',
-          cost: 8500000
-        },
-        {
-          from: 'Hải Phòng',
-          to: 'Đà Nẵng',
-          vehicle: 'Truck',
-          time: '09:15',
-          cost: 12000000
-        }
-      ],
-      summary: {
-        totalRoutes: 3,
-        totalCost: 35500000,
-        estimatedTime: '12.5h',
-        efficiency: 96.8
+    try {
+      // Get the most recent file's data for analysis
+      const latestFile = uploadedFiles.find(f => f.status === 'completed' && f.rawData);
+      if (!latestFile?.rawData) {
+        throw new Error('No valid data found');
       }
+      
+      // Use smart analyzer to generate realistic plan
+      const smartInsights = SmartExcelAnalyzer.analyzeLogisticsFile(latestFile.rawData);
+      const realisticPlan = SmartExcelAnalyzer.generateRealisticPlan(smartInsights, language);
+      
+      setGeneratedPlans(prev => [realisticPlan, ...prev])
+    } catch (error) {
+      console.error('Plan generation error:', error);
+      alert(language === 'vi' ? 'Có lỗi xảy ra khi tạo kế hoạch' : 'Error occurred while generating plan');
+    } finally {
+      setIsGenerating(false)
     }
-    
-    setGeneratedPlans(prev => [newPlan, ...prev])
-    setIsGenerating(false)
   }
+
+  const downloadPlan = (plan: GeneratedPlan) => {
+    const planData = {
+      title: plan.title,
+      generatedAt: plan.generatedAt.toISOString(),
+      routes: plan.routes,
+      summary: plan.summary,
+      insights: plan.insights
+    };
+    
+    const dataStr = JSON.stringify(planData, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = `${plan.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+  };
+
+  const applyPlan = (plan: GeneratedPlan) => {
+    // Simulate applying the plan to the system
+    alert(language === 'vi' 
+      ? `Đã áp dụng kế hoạch "${plan.title}" vào hệ thống. ${plan.summary.totalRoutes} tuyến đường đã được cập nhật.`
+      : `Applied plan "${plan.title}" to system. ${plan.summary.totalRoutes} routes have been updated.`
+    );
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -212,8 +254,8 @@ const SuperAIAssistant = () => {
                 </h1>
                 <p className="text-xl text-slate-300 mt-2">
                   {language === 'vi' 
-                    ? 'Học hỏi từ file Excel và tự động tạo kế hoạch logistics'
-                    : 'Learn from Excel files and automatically generate logistics plans'
+                    ? 'Phân tích thông minh file Excel và tự động tạo kế hoạch logistics miền Nam'
+                    : 'Smart Excel analysis and automatic Southern Vietnam logistics planning'
                   }
                 </p>
               </div>
@@ -222,15 +264,15 @@ const SuperAIAssistant = () => {
             <div className="flex items-center justify-center gap-4">
               <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 px-4 py-2">
                 <Sparkles className="w-4 h-4 mr-2" />
-                {language === 'vi' ? 'AI Học Máy' : 'Machine Learning'}
+                {language === 'vi' ? 'AI Thông minh' : 'Smart AI'}
               </Badge>
               <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 px-4 py-2">
                 <FileSpreadsheet className="w-4 h-4 mr-2" />
-                {language === 'vi' ? 'Xử lý Excel' : 'Excel Processing'}
+                {language === 'vi' ? 'Phân tích Excel' : 'Excel Analysis'}
               </Badge>
               <Badge className="bg-green-500/20 text-green-400 border-green-500/30 px-4 py-2">
                 <Target className="w-4 h-4 mr-2" />
-                {language === 'vi' ? 'Tự động hóa' : 'Automation'}
+                {language === 'vi' ? 'Miền Nam VN' : 'Southern Vietnam'}
               </Badge>
             </div>
           </div>
@@ -248,8 +290,8 @@ const SuperAIAssistant = () => {
                   </CardTitle>
                   <CardDescription className="text-slate-400">
                     {language === 'vi' 
-                      ? 'Kéo thả hoặc chọn file Excel (.xlsx) để AI học hỏi'
-                      : 'Drag & drop or select Excel files (.xlsx) for AI to learn from'
+                      ? 'Kéo thả file KẾ HOẠCH NGÀY.xlsx để AI phân tích thông minh'
+                      : 'Drag & drop KẾ HOẠCH NGÀY.xlsx files for smart AI analysis'
                     }
                   </CardDescription>
                 </CardHeader>
@@ -275,8 +317,8 @@ const SuperAIAssistant = () => {
                         </h3>
                         <p className="text-slate-400 mb-4">
                           {language === 'vi' 
-                            ? 'Hỗ trợ: KẾ HOẠCH NGÀY.xlsx, Excel files'
-                            : 'Supported: KẾ HOẠCH NGÀY.xlsx, Excel files'
+                            ? 'Hỗ trợ: KẾ HOẠCH NGÀY.xlsx, file logistics miền Nam'
+                            : 'Supported: KẾ HOẠCH NGÀY.xlsx, Southern Vietnam logistics files'
                           }
                         </p>
                         <input
@@ -303,7 +345,7 @@ const SuperAIAssistant = () => {
                       <div className="flex items-center gap-3">
                         <Loader2 className="w-5 h-5 text-blue-400 animate-spin" />
                         <span className="text-blue-400 font-medium">
-                          {language === 'vi' ? 'AI đang phân tích file...' : 'AI is analyzing files...'}
+                          {language === 'vi' ? 'AI đang phân tích thông minh...' : 'AI is performing smart analysis...'}
                         </span>
                       </div>
                     </div>
@@ -317,7 +359,7 @@ const SuperAIAssistant = () => {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-3 text-white">
                       <FileCheck className="w-5 h-5" />
-                      {language === 'vi' ? 'File Đã Tải Lên' : 'Uploaded Files'}
+                      {language === 'vi' ? 'File Đã Phân Tích' : 'Analyzed Files'}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -339,9 +381,9 @@ const SuperAIAssistant = () => {
                             'bg-red-500/20 text-red-400'
                           }`}>
                             {file.status === 'completed' ? (
-                              language === 'vi' ? 'Hoàn thành' : 'Completed'
+                              language === 'vi' ? 'Đã phân tích' : 'Analyzed'
                             ) : file.status === 'processing' ? (
-                              language === 'vi' ? 'Đang xử lý' : 'Processing'
+                              language === 'vi' ? 'Đang phân tích' : 'Analyzing'
                             ) : (
                               language === 'vi' ? 'Lỗi' : 'Error'
                             )}
@@ -351,7 +393,7 @@ const SuperAIAssistant = () => {
                         {file.insights && (
                           <div className="mt-3 space-y-2">
                             <p className="text-slate-300 text-sm font-medium">
-                              {language === 'vi' ? 'Thông tin AI phân tích:' : 'AI Insights:'}
+                              {language === 'vi' ? 'Phân tích thông minh AI:' : 'Smart AI Analysis:'}
                             </p>
                             {file.insights.map((insight, index) => (
                               <div key={index} className="flex items-center gap-2 text-sm">
@@ -376,12 +418,12 @@ const SuperAIAssistant = () => {
                     <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
                       <Brain className="w-4 h-4 text-white" />
                     </div>
-                    {language === 'vi' ? 'Tạo Kế Hoạch AI' : 'Generate AI Plan'}
+                    {language === 'vi' ? 'Tạo Kế Hoạch AI Thông Minh' : 'Generate Smart AI Plan'}
                   </CardTitle>
                   <CardDescription className="text-slate-400">
                     {language === 'vi' 
-                      ? 'AI sẽ học từ file đã tải và tạo kế hoạch tương tự'
-                      : 'AI will learn from uploaded files and create similar plans'
+                      ? 'AI sẽ phân tích dữ liệu miền Nam và tạo kế hoạch logistics thực tế'
+                      : 'AI will analyze Southern Vietnam data and create realistic logistics plans'
                     }
                   </CardDescription>
                 </CardHeader>
@@ -392,8 +434,8 @@ const SuperAIAssistant = () => {
                     </Label>
                     <textarea
                       placeholder={language === 'vi' 
-                        ? 'VD: Tối ưu cho chi phí, ưu tiên tuyến ngắn, tránh giờ cao điểm...'
-                        : 'e.g., Optimize for cost, prefer short routes, avoid rush hours...'
+                        ? 'VD: Tập trung miền Nam, tối ưu chi phí, ưu tiên cảng Cát Lái...'
+                        : 'e.g., Focus on Southern Vietnam, optimize costs, prioritize Cat Lai port...'
                       }
                       value={aiPrompt}
                       onChange={(e) => setAiPrompt(e.target.value)}
@@ -409,12 +451,12 @@ const SuperAIAssistant = () => {
                     {isGenerating ? (
                       <div className="flex items-center gap-2">
                         <Loader2 className="w-5 h-5 animate-spin" />
-                        {language === 'vi' ? 'AI đang tạo kế hoạch...' : 'AI is generating plan...'}
+                        {language === 'vi' ? 'AI đang tạo kế hoạch thông minh...' : 'AI is generating smart plan...'}
                       </div>
                     ) : (
                       <div className="flex items-center gap-2">
                         <Sparkles className="w-5 h-5" />
-                        {language === 'vi' ? 'Tạo Kế Hoạch Thông Minh' : 'Generate Smart Plan'}
+                        {language === 'vi' ? 'Tạo Kế Hoạch Miền Nam' : 'Generate Southern Plan'}
                       </div>
                     )}
                   </Button>
@@ -425,8 +467,8 @@ const SuperAIAssistant = () => {
                         <Info className="w-5 h-5 text-yellow-400" />
                         <span className="text-yellow-400 text-sm">
                           {language === 'vi' 
-                            ? 'Tải lên file để AI có thể học hỏi và tạo kế hoạch'
-                            : 'Upload files for AI to learn and generate plans'
+                            ? 'Tải lên file KẾ HOẠCH NGÀY để AI phân tích và tạo kế hoạch thực tế'
+                            : 'Upload KẾ HOẠCH NGÀY files for AI to analyze and create realistic plans'
                           }
                         </span>
                       </div>
@@ -494,13 +536,36 @@ const SuperAIAssistant = () => {
                           ))}
                         </div>
 
-                        {/* Actions */}
+                        {/* Insights */}
+                        {plan.insights && plan.insights.length > 0 && (
+                          <div className="mb-4">
+                            <h4 className="text-white font-medium mb-2">
+                              {language === 'vi' ? 'Khuyến nghị AI:' : 'AI Recommendations:'}
+                            </h4>
+                            <div className="space-y-1">
+                              {plan.insights.map((insight, index) => (
+                                <div key={index} className="flex items-center gap-2 text-sm">
+                                  <CheckCircle className="w-3 h-3 text-green-400" />
+                                  <span className="text-slate-300">{insight}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Functional Actions */}
                         <div className="flex gap-2">
-                          <Button className="bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30">
+                          <Button 
+                            onClick={() => downloadPlan(plan)}
+                            className="bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30 transition-all duration-300"
+                          >
                             <Download className="w-4 h-4 mr-2" />
                             {language === 'vi' ? 'Tải xuống' : 'Download'}
                           </Button>
-                          <Button className="bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500/30">
+                          <Button 
+                            onClick={() => applyPlan(plan)}
+                            className="bg-green-500/20 text-green-400 border border-green-500/30 hover:bg-green-500/30 transition-all duration-300"
+                          >
                             <CheckCircle className="w-4 h-4 mr-2" />
                             {language === 'vi' ? 'Áp dụng' : 'Apply'}
                           </Button>
