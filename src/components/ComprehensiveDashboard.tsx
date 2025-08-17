@@ -37,7 +37,8 @@ import {
   Layers,
   Database,
   Cpu,
-  Wifi
+  Wifi,
+  ArrowRight
 } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -73,12 +74,12 @@ const ComprehensiveDashboard = () => {
   ]
 
   const stats = [
-    { title: 'Total Shipments', value: '2,847', change: '+12.5%', icon: Package, color: 'text-blue-500', bgColor: 'bg-blue-50' },
-    { title: 'Active Routes', value: '156', change: '+8.2%', icon: Navigation, color: 'text-green-500', bgColor: 'bg-green-50' },
-    { title: 'Fleet Utilization', value: '94.2%', change: '+3.1%', icon: Truck, color: 'text-purple-500', bgColor: 'bg-purple-50' },
-    { title: 'Cost Savings', value: '₫2.4M', change: '+15.7%', icon: DollarSign, color: 'text-yellow-500', bgColor: 'bg-yellow-50' },
-    { title: 'On-time Delivery', value: '98.5%', change: '+2.3%', icon: Clock, color: 'text-indigo-500', bgColor: 'bg-indigo-50' },
-    { title: 'Customer Satisfaction', value: '4.8/5', change: '+0.2', icon: Target, color: 'text-pink-500', bgColor: 'bg-pink-50' }
+    { title: 'Total Shipments', value: '2,847', change: '+12.5%', icon: Package, color: 'text-blue-500' },
+    { title: 'Active Routes', value: '156', change: '+8.2%', icon: Navigation, color: 'text-green-500' },
+    { title: 'Fleet Utilization', value: '94.2%', change: '+3.1%', icon: Truck, color: 'text-purple-500' },
+    { title: 'Cost Savings', value: '₫2.4M', change: '+15.7%', icon: DollarSign, color: 'text-yellow-500' },
+    { title: 'On-time Delivery', value: '98.5%', change: '+2.3%', icon: Clock, color: 'text-indigo-500' },
+    { title: 'Customer Satisfaction', value: '4.8/5', change: '+0.2', icon: Target, color: 'text-pink-500' }
   ]
 
   const quickActions = [
@@ -103,21 +104,6 @@ const ComprehensiveDashboard = () => {
         { title: 'Fleet Management', description: 'Vehicle tracking & maintenance', icon: Truck, href: '/fleet-management', color: 'bg-gradient-to-r from-teal-600 to-cyan-600' },
         { title: 'Shipment Tracking', description: 'Real-time shipment monitoring', icon: Package, href: '/shipments', color: 'bg-gradient-to-r from-blue-600 to-indigo-600' },
         { title: 'Real-time Tracking', description: 'Live GPS tracking system', icon: MapPin, href: '/real-time-tracking', color: 'bg-gradient-to-r from-green-600 to-teal-600' }
-      ]
-    },
-    {
-      category: 'Import/Export & Compliance',
-      items: [
-        { title: 'Import-Export Center', description: 'VNACCS document processing', icon: Globe, href: '/import-export', color: 'bg-gradient-to-r from-emerald-600 to-teal-600' },
-        { title: 'Customs Training', description: 'AI fraud detection system', icon: Shield, href: '/customs-training', color: 'bg-gradient-to-r from-red-600 to-pink-600' }
-      ]
-    },
-    {
-      category: 'Document & Learning',
-      items: [
-        { title: 'File Learning & Automation', description: 'AI-powered file processing & automation', icon: FileSpreadsheet, href: '/file-processing', color: 'bg-gradient-to-r from-yellow-600 to-orange-600' },
-        { title: 'Document Analysis', description: 'Vietnamese logistics file insights', icon: Zap, href: '/file-learning', color: 'bg-gradient-to-r from-amber-600 to-yellow-600' },
-        { title: 'Automation Planning', description: 'Comprehensive automation roadmap', icon: Settings, href: '/enhanced-optimizer', color: 'bg-gradient-to-r from-gray-600 to-slate-600' }
       ]
     }
   ]
@@ -334,36 +320,6 @@ const ComprehensiveDashboard = () => {
                 )
               })}
             </div>
-                  <p className="text-blue-100">Here's your logistics overview for today</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm text-blue-100">Today</p>
-                  <p className="text-lg font-semibold">{new Date().toLocaleDateString()}</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {stats.map((stat, index) => (
-                <Card key={index} className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-white/80">{stat.title}</p>
-                        <p className="text-2xl font-bold text-white mt-1">{stat.value}</p>
-                        <p className={`text-sm mt-1 ${stat.change.startsWith('+') ? 'text-green-300' : 'text-red-300'}`}>
-                          {stat.change} from last month
-                        </p>
-                      </div>
-                      <div className={`p-3 rounded-lg bg-white/20 backdrop-blur-sm`}>
-                        <stat.icon className={`h-6 w-6 text-white`} />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
 
             {/* Enhanced Quick Actions */}
             <div className="space-y-8">
@@ -433,475 +389,34 @@ const ComprehensiveDashboard = () => {
                 </div>
               ))}
             </div>
-            </div>
           </TabsContent>
 
-          {/* Enhanced Operations Tab */}
+          {/* Other tabs content would go here */}
           <TabsContent value="operations" className="space-y-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Enhanced Recent Activities */}
-              <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50 shadow-xl">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-3 text-white text-xl">
-                    <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
-                      <Activity className="h-5 w-5 text-white" />
-                    </div>
-                    Recent Activities
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {recentActivities.map((activity) => {
-                    const Icon = activity.icon
-                    return (
-                      <div key={activity.id} className="flex items-start gap-4 p-4 rounded-xl bg-slate-700/30 hover:bg-slate-700/50 transition-all duration-300 group">
-                        <div className={`p-2 rounded-lg ${
-                          activity.type === 'success' ? 'bg-green-500/20 text-green-400' :
-                          activity.type === 'warning' ? 'bg-yellow-500/20 text-yellow-400' :
-                          'bg-blue-500/20 text-blue-400'
-                        }`}>
-                          <Icon className="h-4 w-4" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-white font-medium group-hover:text-blue-100 transition-colors">
-                            {activity.message}
-                          </p>
-                          <p className="text-slate-400 text-sm mt-1">{activity.time}</p>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </CardContent>
-              </Card>
-
-              {/* Enhanced System Status */}
-              <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50 shadow-xl">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-3 text-white text-xl">
-                    <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
-                      <Shield className="h-5 w-5 text-white" />
-                    </div>
-                    System Status
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {systemStatus.map((system, index) => {
-                    const Icon = system.icon
-                    return (
-                      <div key={index} className="flex items-center justify-between p-4 rounded-xl bg-slate-700/30 hover:bg-slate-700/50 transition-all duration-300 group">
-                        <div className="flex items-center gap-3">
-                          <Icon className="h-5 w-5 text-blue-400" />
-                          <span className="text-white font-medium">{system.name}</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span className="text-slate-400 text-sm">{system.uptime}</span>
-                          <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                            <span className="text-green-400 text-sm font-medium">Online</span>
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-                          activity.type === 'warning' ? 'bg-yellow-100 text-yellow-600' :
-                          'bg-blue-100 text-blue-600'
-                        }`}>
-                          <activity.icon className="h-4 w-4" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900">{activity.message}</p>
-                          <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* System Status */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Settings className="h-5 w-5" />
-                    System Status
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {systemStatus.map((system, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
-                        <div className="flex items-center gap-3">
-                          <system.icon className="h-5 w-5 text-gray-600" />
-                          <span className="font-medium text-gray-900">{system.name}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="secondary" className="bg-green-100 text-green-800">
-                            {system.uptime}
-                          </Badge>
-                          <div className="flex items-center gap-1">
-                            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                            <span className="text-sm text-green-600">Online</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="text-center py-12">
+              <h3 className="text-2xl font-bold text-white mb-4">Operations Dashboard</h3>
+              <p className="text-slate-400">Operations content coming soon...</p>
             </div>
           </TabsContent>
 
-          {/* Enhanced Analytics Tab */}
           <TabsContent value="analytics" className="space-y-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Enhanced Performance Chart */}
-              <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50 shadow-xl">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-3 text-white text-xl">
-                    <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center">
-                      <TrendingUp className="h-5 w-5 text-white" />
-                    </div>
-                    Performance Trends
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={performanceData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                      <XAxis dataKey="name" stroke="#94a3b8" />
-                      <YAxis stroke="#94a3b8" />
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: '#1e293b', 
-                          border: '1px solid #475569',
-                          borderRadius: '12px',
-                          color: '#f1f5f9'
-                        }} 
-                      />
-                      <Line type="monotone" dataKey="deliveries" stroke="#3B82F6" strokeWidth={3} dot={{ fill: '#3B82F6', strokeWidth: 2, r: 6 }} />
-                      <Line type="monotone" dataKey="efficiency" stroke="#10B981" strokeWidth={3} dot={{ fill: '#10B981', strokeWidth: 2, r: 6 }} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-
-              {/* Enhanced Route Distribution */}
-              <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50 shadow-xl">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-3 text-white text-xl">
-                    <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-                      <MapPin className="h-5 w-5 text-white" />
-                    </div>
-                    Route Distribution
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie
-                        data={routeDistribution}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                        outerRadius={100}
-                        fill="#8884d8"
-                        dataKey="value"
-                        stroke="#1e293b"
-                        strokeWidth={2}
-                      >
-                        {routeDistribution.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip 
-                        contentStyle={{ 
-                          backgroundColor: '#1e293b', 
-                          border: '1px solid #475569',
-                          borderRadius: '12px',
-                          color: '#f1f5f9'
-                        }} 
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
+            <div className="text-center py-12">
+              <h3 className="text-2xl font-bold text-white mb-4">Analytics Dashboard</h3>
+              <p className="text-slate-400">Analytics content coming soon...</p>
             </div>
-
-            {/* Revenue Chart */}
-            <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50 shadow-xl">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-3 text-white text-xl">
-                  <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
-                    <DollarSign className="h-5 w-5 text-white" />
-                  </div>
-                  Revenue Analysis
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={400}>
-                  <AreaChart data={performanceData}>
-                    <defs>
-                      <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                    <XAxis dataKey="name" stroke="#94a3b8" />
-                    <YAxis stroke="#94a3b8" />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: '#1e293b', 
-                        border: '1px solid #475569',
-                        borderRadius: '12px',
-                        color: '#f1f5f9'
-                      }} 
-                    />
-                    <Area 
-                      type="monotone" 
-                      dataKey="revenue" 
-                      stroke="#10B981" 
-                      strokeWidth={3}
-                      fillOpacity={1} 
-                      fill="url(#colorRevenue)" 
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
           </TabsContent>
 
-          {/* Enhanced Fleet Tab */}
           <TabsContent value="fleet" className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50 shadow-xl group hover:transform hover:scale-105 transition-all duration-300">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-3 text-white">
-                    <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Truck className="h-5 w-5 text-white" />
-                    </div>
-                    Active Vehicles
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-4xl font-bold text-blue-400 mb-2">89</div>
-                  <p className="text-slate-400">Currently on routes</p>
-                  <div className="mt-4 flex items-center gap-2">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    <span className="text-green-400 text-sm font-medium">All operational</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50 shadow-xl group hover:transform hover:scale-105 transition-all duration-300">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-3 text-white">
-                    <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <CheckCircle className="h-5 w-5 text-white" />
-                    </div>
-                    Maintenance Due
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-4xl font-bold text-yellow-400 mb-2">12</div>
-                  <p className="text-slate-400">Vehicles scheduled</p>
-                  <div className="mt-4 flex items-center gap-2">
-                    <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
-                    <span className="text-yellow-400 text-sm font-medium">Attention needed</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50 shadow-xl group hover:transform hover:scale-105 transition-all duration-300">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-3 text-white">
-                    <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <TrendingUp className="h-5 w-5 text-white" />
-                    </div>
-                    Fuel Efficiency
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-4xl font-bold text-purple-400 mb-2">94.2%</div>
-                  <p className="text-slate-400">Average efficiency</p>
-                  <div className="mt-4 flex items-center gap-2">
-                    <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
-                    <span className="text-purple-400 text-sm font-medium">Excellent performance</span>
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="text-center py-12">
+              <h3 className="text-2xl font-bold text-white mb-4">Fleet Management</h3>
+              <p className="text-slate-400">Fleet management content coming soon...</p>
             </div>
-
-            {/* Fleet Performance Chart */}
-            <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50 shadow-xl">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-3 text-white text-xl">
-                  <div className="w-10 h-10 bg-gradient-to-r from-orange-500 to-red-500 rounded-xl flex items-center justify-center">
-                    <BarChart3 className="h-5 w-5 text-white" />
-                  </div>
-                  Fleet Performance Overview
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={400}>
-                  <BarChart data={performanceData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
-                    <XAxis dataKey="name" stroke="#94a3b8" />
-                    <YAxis stroke="#94a3b8" />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: '#1e293b', 
-                        border: '1px solid #475569',
-                        borderRadius: '12px',
-                        color: '#f1f5f9'
-                      }} 
-                    />
-                    <Bar dataKey="deliveries" fill="#3B82F6" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="efficiency" fill="#10B981" radius={[4, 4, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
           </TabsContent>
 
-          {/* Enhanced System Tab */}
           <TabsContent value="system" className="space-y-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* System Health */}
-              <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50 shadow-xl">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-3 text-white text-xl">
-                    <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center">
-                      <Shield className="h-5 w-5 text-white" />
-                    </div>
-                    System Health
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {systemStatus.map((system, index) => {
-                    const Icon = system.icon
-                    return (
-                      <div key={index} className="flex items-center justify-between p-4 rounded-xl bg-slate-700/30 hover:bg-slate-700/50 transition-all duration-300 group">
-                        <div className="flex items-center gap-4">
-                          <div className="w-10 h-10 bg-slate-600/50 rounded-lg flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
-                            <Icon className="h-5 w-5 text-blue-400" />
-                          </div>
-                          <div>
-                            <span className="text-white font-semibold text-lg">{system.name}</span>
-                            <p className="text-slate-400 text-sm">Uptime: {system.uptime}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <div className="flex items-center gap-2 bg-green-500/20 px-3 py-1 rounded-lg border border-green-500/30">
-                            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                            <span className="text-green-400 text-sm font-medium">Online</span>
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </CardContent>
-              </Card>
-
-              {/* System Configuration */}
-              <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50 shadow-xl">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-3 text-white text-xl">
-                    <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
-                      <Settings className="h-5 w-5 text-white" />
-                    </div>
-                    Quick Settings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-4">
-                    <Button className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-xl py-3 font-semibold">
-                      <Database className="w-4 h-4 mr-2" />
-                      Database Backup
-                    </Button>
-                    <Button className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl py-3 font-semibold">
-                      <Download className="w-4 h-4 mr-2" />
-                      Export Reports
-                    </Button>
-                    <Button className="w-full bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-xl py-3 font-semibold">
-                      <Upload className="w-4 h-4 mr-2" />
-                      Import Data
-                    </Button>
-                    <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl py-3 font-semibold">
-                      <Users className="w-4 h-4 mr-2" />
-                      User Management
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-                  <p className="text-sm text-gray-600">Currently on routes</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Target className="h-5 w-5" />
-                    Utilization Rate
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-green-600">94.2%</div>
-                  <p className="text-sm text-gray-600">Fleet efficiency</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Clock className="h-5 w-5" />
-                    Avg Delivery Time
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-purple-600">2.4h</div>
-                  <p className="text-sm text-gray-600">Per route</p>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* System Tab */}
-          <TabsContent value="system" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>System Health</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span>CPU Usage</span>
-                      <span className="text-green-600">23%</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>Memory Usage</span>
-                      <span className="text-yellow-600">67%</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>Storage</span>
-                      <span className="text-blue-600">45%</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span>Network</span>
-                      <span className="text-green-600">Optimal</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <FunctionalQuickActions />
+            <div className="text-center py-12">
+              <h3 className="text-2xl font-bold text-white mb-4">System Settings</h3>
+              <p className="text-slate-400">System settings content coming soon...</p>
             </div>
           </TabsContent>
         </Tabs>
