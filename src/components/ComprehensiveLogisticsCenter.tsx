@@ -35,7 +35,9 @@ import {
   Phone,
   User
 } from 'lucide-react'
-import InteractiveFleetActions from './InteractiveFleetActions'
+import ComprehensiveRouteOptimizer from './ComprehensiveRouteOptimizer'
+import InteractiveVietnamMap from './InteractiveVietnamMap'
+import InteractiveOperationsPanel from './InteractiveOperationsPanel'
 import EnhancedAnalytics from './EnhancedAnalytics'
 import EnhancedTracking from './EnhancedTracking'
 import AdvancedFleetManagement from './AdvancedFleetManagement'
@@ -240,10 +242,12 @@ const ComprehensiveLogisticsCenter = () => {
       <div className="flex flex-wrap gap-2">
         {[
           { id: 'overview', label: 'Tổng Quan', icon: <BarChart3 className="w-4 h-4" /> },
-          { id: 'tracking', label: 'Theo Dõi Real-time', icon: <MapPin className="w-4 h-4" /> },
+          { id: 'operations', label: 'Điều Khiển Vận Hành', icon: <Settings className="w-4 h-4" /> },
+          { id: 'routes', label: 'Tối Ưu Tuyến Đường', icon: <Navigation2 className="w-4 h-4" /> },
+          { id: 'map', label: 'Bản Đồ Tương Tác', icon: <MapPin className="w-4 h-4" /> },
+          { id: 'tracking', label: 'Theo Dõi Real-time', icon: <Activity className="w-4 h-4" /> },
           { id: 'fleet', label: 'Quản Lý Đội Xe', icon: <Truck className="w-4 h-4" /> },
-          { id: 'analytics', label: 'Phân Tích Thông Minh', icon: <PieChart className="w-4 h-4" /> },
-          { id: 'actions', label: 'Hành Động Nhanh', icon: <Settings className="w-4 h-4" /> }
+          { id: 'analytics', label: 'Phân Tích Thông Minh', icon: <PieChart className="w-4 h-4" /> }
         ].map((tab) => (
           <Button
             key={tab.id}
@@ -404,10 +408,12 @@ const ComprehensiveLogisticsCenter = () => {
       )}
 
       {/* Other Tabs */}
+      {activeTab === 'operations' && <InteractiveOperationsPanel />}
+      {activeTab === 'routes' && <ComprehensiveRouteOptimizer />}
+      {activeTab === 'map' && <InteractiveVietnamMap />}
       {activeTab === 'tracking' && <EnhancedTracking />}
       {activeTab === 'fleet' && <AdvancedFleetManagement />}
       {activeTab === 'analytics' && <EnhancedAnalytics />}
-      {activeTab === 'actions' && <InteractiveFleetActions />}
     </div>
   );
 };
