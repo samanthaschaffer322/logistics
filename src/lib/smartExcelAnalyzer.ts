@@ -391,189 +391,54 @@ export class SmartExcelAnalyzer {
   }
   
   static generateRealisticPlan(insights: SmartInsights, language: 'vi' | 'en' = 'vi'): any {
-    // REAL BUSINESS INTELLIGENCE based on actual data analysis
-    const REAL_ROUTE_PATTERNS = [
-      // Primary Hub Operations (450+ occurrences in real data)
-      {
-        from: 'Cảng Cát Lái',
-        to: 'KHO CHIM ÉN',
-        customer: 'Khai Anh CE (N)',
-        vehicleType: 'Container 40ft',
-        feedType: 'Nguyên liệu thức ăn chăn nuôi',
-        cost: 1200000,
-        distance: 25,
-        duration: 1.5,
-        logic: 'Container nguyên liệu từ cảng về kho trung tâm - tuyến chính 450+ lần/tháng',
-        priority: 'HIGH',
-        frequency: 450
-      },
-      
-      // CP Group Distribution (Real customer with 32+ routes)
-      {
-        from: 'KHO CHIM ÉN',
-        to: 'CP TIỀN GIANG',
-        customer: 'CP Việt Nam',
-        vehicleType: 'Truck 15 tấn',
-        feedType: 'Thức ăn heo con, heo thịt',
-        cost: 1800000,
-        distance: 85,
-        duration: 2.8,
-        logic: 'Phân phối thức ăn heo từ kho trung tâm đến nhà máy CP Tiền Giang',
-        priority: 'HIGH',
-        frequency: 32
-      },
-      
-      {
-        from: 'KHO CHIM ÉN',
-        to: 'CP BÌNH DƯƠNG',
-        customer: 'CP Việt Nam',
-        vehicleType: 'Truck 12 tấn',
-        feedType: 'Thức ăn gà broiler, gà ta',
-        cost: 1400000,
-        distance: 45,
-        duration: 2.0,
-        logic: 'Giao thức ăn gà từ kho trung tâm đến trang trại CP Bình Dương',
-        priority: 'HIGH',
-        frequency: 17
-      },
-      
-      {
-        from: 'KHO CHIM ÉN',
-        to: 'CP ĐỒNG NAI',
-        customer: 'CP Việt Nam',
-        vehicleType: 'Truck 18 tấn',
-        feedType: 'Thức ăn heo nái, heo thịt',
-        cost: 1600000,
-        distance: 55,
-        duration: 2.3,
-        logic: 'Vận chuyển thức ăn heo đến trang trại CP Đồng Nai',
-        priority: 'HIGH',
-        frequency: 13
-      },
-      
-      // GAD Distribution Network (38+ routes to Long An)
-      {
-        from: 'Cảng Vũng Tàu',
-        to: 'KHO LONG AN',
-        customer: 'GAD',
-        vehicleType: 'Container 20ft',
-        feedType: 'Nguyên liệu thức ăn thủy sản',
-        cost: 2200000,
-        distance: 120,
-        duration: 3.5,
-        logic: 'Container nguyên liệu thủy sản từ cảng Vũng Tàu về kho Long An - 38 lần/tháng',
-        priority: 'HIGH',
-        frequency: 38
-      },
-      
-      // Rico Feed Operations (10+ routes)
-      {
-        from: 'KHO CHIM ÉN',
-        to: 'RICO HẬU GIANG',
-        customer: 'Rico Feed',
-        vehicleType: 'Truck 15 tấn',
-        feedType: 'Thức ăn cá tra, cá basa',
-        cost: 2800000,
-        distance: 180,
-        duration: 4.5,
-        logic: 'Giao thức ăn cá tra từ HCM xuống Hậu Giang - tuyến ĐBSCL',
-        priority: 'MEDIUM',
-        frequency: 10
-      },
-      
-      // Japfa Operations (23+ routes to Hàm Tân)
-      {
-        from: 'JAPFA BÌNH THUẬN',
-        to: 'KHO HÀM TÂN',
-        customer: 'Japfa Comfeed',
-        vehicleType: 'Truck 12 tấn',
-        feedType: 'Thức ăn heo con chất lượng cao',
-        cost: 1900000,
-        distance: 95,
-        duration: 3.0,
-        logic: 'Thu gom thức ăn từ nhà máy Japfa Bình Thuận về kho Hàm Tân',
-        priority: 'MEDIUM',
-        frequency: 23
-      },
-      
-      // Uni-President Operations
-      {
-        from: 'KHO LONG AN',
-        to: 'UNI TIỀN GIANG',
-        customer: 'Uni-President',
-        vehicleType: 'Truck 10 tấn',
-        feedType: 'Thức ăn gà công nghiệp',
-        cost: 1300000,
-        distance: 35,
-        duration: 1.8,
-        logic: 'Phân phối thức ăn gà từ kho Long An đến Uni-President Tiền Giang',
-        priority: 'MEDIUM',
-        frequency: 15
-      },
-      
-      // Aquaculture Feed Distribution (8+ routes)
-      {
-        from: 'KHO LONG AN',
-        to: 'HÙNG CÁ ĐỒNG THÁP',
-        customer: 'Hùng Cá',
-        vehicleType: 'Truck 18 tấn',
-        feedType: 'Thức ăn cá tra xuất khẩu',
-        cost: 2400000,
-        distance: 140,
-        duration: 3.8,
-        logic: 'Giao thức ăn cá tra chất lượng xuất khẩu đến Đồng Tháp',
-        priority: 'MEDIUM',
-        frequency: 8
-      }
-    ];
+    // Import the detailed plan generator
+    const DetailedPlanGenerator = require('./detailedPlanGenerator').DetailedPlanGenerator;
     
-    // Select routes based on actual business frequency and priority
-    const selectedRoutes = REAL_ROUTE_PATTERNS
-      .sort((a, b) => b.frequency - a.frequency) // Sort by real frequency
-      .slice(0, Math.min(8, Math.max(4, Math.floor(insights.totalRoutes / 100))))
-      .map(route => ({
+    // Generate staff-level detailed plan
+    const staffPlan = DetailedPlanGenerator.generateStaffLevelPlan(insights, language);
+    
+    // Convert to the format expected by the UI
+    const plan = {
+      id: staffPlan.id,
+      title: staffPlan.title,
+      generatedAt: staffPlan.generatedAt,
+      routes: staffPlan.routes.map((route: any) => ({
         from: route.from,
         to: route.to,
         vehicle: route.vehicleType,
-        time: this.generateRealisticDeliveryTime(route.feedType),
-        cost: route.cost + Math.floor(Math.random() * 200000 - 100000), // ±100k variation
+        time: route.time,
+        cost: route.cost,
         distance: route.distance,
         duration: route.duration,
         logic: route.logic,
         feedType: route.feedType,
         customer: route.customer,
         priority: route.priority,
-        frequency: route.frequency
-      }));
-    
-    const totalCost = selectedRoutes.reduce((sum, route) => sum + route.cost, 0);
-    const totalDistance = selectedRoutes.reduce((sum, route) => sum + route.distance, 0);
-    const totalDuration = selectedRoutes.reduce((sum, route) => sum + route.duration, 0);
-    
-    const plan = {
-      id: Date.now().toString(),
-      title: language === 'vi' 
-        ? `Kế hoạch Logistics Thức ăn Chăn nuôi - ${new Date().toLocaleDateString('vi-VN')}`
-        : `Feed Logistics Plan - ${new Date().toLocaleDateString('en-US')}`,
-      generatedAt: new Date(),
-      routes: selectedRoutes,
+        frequency: route.frequency,
+        // Staff-level details
+        vehiclePlate: route.vehiclePlate,
+        driverName: route.driverName,
+        driverPhone: route.driverPhone,
+        containerNumber: route.containerNumber,
+        sealNumber: route.sealNumber,
+        billNumber: route.billNumber,
+        portUnload: route.portUnload,
+        vehiclePosition7h: route.vehiclePosition7h,
+        status: route.status
+      })),
       summary: {
-        totalRoutes: selectedRoutes.length,
-        totalCost: totalCost,
-        totalDistance: totalDistance,
-        estimatedTime: `${totalDuration.toFixed(1)}h`,
-        efficiency: Math.round(96 + Math.random() * 3), // 96-99% for real data
-        avgCostPerRoute: Math.round(totalCost / selectedRoutes.length),
-        highPriorityRoutes: selectedRoutes.filter(r => r.priority === 'HIGH').length
+        totalRoutes: staffPlan.summary.totalRoutes,
+        totalCost: staffPlan.summary.totalCost,
+        totalDistance: staffPlan.summary.totalDistance,
+        estimatedTime: staffPlan.summary.estimatedTime,
+        efficiency: staffPlan.summary.efficiency,
+        avgCostPerRoute: staffPlan.summary.avgCostPerRoute,
+        highPriorityRoutes: staffPlan.summary.highPriorityRoutes,
+        containerRoutes: staffPlan.summary.containerRoutes,
+        truckRoutes: staffPlan.summary.truckRoutes
       },
-      insights: this.generateIntelligentRecommendations(selectedRoutes, language),
-      businessIntelligence: {
-        primaryHub: 'KHO CHIM ÉN',
-        majorCustomers: ['CP Việt Nam', 'GAD', 'Rico Feed', 'Japfa Comfeed', 'Uni-President'],
-        feedTypes: ['Thức ăn heo', 'Thức ăn gà', 'Thức ăn cá tra', 'Nguyên liệu'],
-        operationalPorts: ['Cảng Cát Lái', 'Cảng Vũng Tàu'],
-        coverageArea: 'Miền Nam Việt Nam + ĐBSCL'
-      }
+      insights: staffPlan.insights,
+      businessIntelligence: staffPlan.businessIntelligence
     };
     
     return plan;

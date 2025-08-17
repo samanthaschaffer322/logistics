@@ -51,30 +51,40 @@ export class FileGenerator {
       worksheet.getCell(`A${row}`).font = { bold: true, size: 12 };
       row++;
       
-      // Table Headers
-      const headers = ['STT', 'ĐIỂM ĐI', 'ĐIỂM ĐẾN', 'LOẠI XE', 'GIỜ GIAO', 'CHI PHÍ (VNĐ)', 'KM', 'LOẠI THỨC ĂN', 'KHÁCH HÀNG', 'GHI CHÚ'];
+      // Table Headers - Staff Level Detail
+      const headers = [
+        'STT', 'NGÀY', 'SỐ XE', 'SĐT LÁI XE', 'TÊN LÁI XE', 'SỐ CONT', 
+        'SEAL', 'CHỦ HÀNG', 'ĐỊA ĐIỂM', 'T.GIAN Y/C', 'VỊ TRÍ XE 7H', 
+        'BILL - BOOK', 'CẢNG HẠ', 'CHI PHÍ (VNĐ)', 'KM', 'LOẠI THỨC ĂN'
+      ];
       headers.forEach((header, index) => {
         const cell = worksheet.getCell(row, index + 1);
         cell.value = header;
-        cell.font = { bold: true };
+        cell.font = { bold: true, size: 10 };
         cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE6F3FF' } };
         cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
       });
       row++;
       
-      // Routes Data
+      // Routes Data - Staff Level Detail
       plan.routes.forEach((route: any, index: number) => {
         const rowData = [
           index + 1,
-          route.from,
+          new Date().toLocaleDateString('vi-VN'),
+          route.vehiclePlate || 'N/A',
+          route.driverPhone || 'N/A',
+          route.driverName || 'N/A',
+          route.containerNumber || '',
+          route.sealNumber || '',
+          route.customer || 'Khách hàng',
           route.to,
-          route.vehicle,
           route.time,
+          route.vehiclePosition7h || route.from,
+          route.billNumber || 'N/A',
+          route.portUnload || '',
           new Intl.NumberFormat('vi-VN').format(route.cost),
           route.distance + ' km',
-          route.feedType || 'Thức ăn chăn nuôi',
-          route.customer || 'Khách hàng',
-          route.logic || 'Tuyến logistics'
+          route.feedType || 'Thức ăn chăn nuôi'
         ];
         
         rowData.forEach((data, colIndex) => {
@@ -174,18 +184,21 @@ export class FileGenerator {
       
       const tableData = plan.routes.map((route: any, index: number) => [
         (index + 1).toString(),
-        route.from,
+        new Date().toLocaleDateString('vi-VN'),
+        route.vehiclePlate || 'N/A',
+        route.driverPhone || 'N/A', 
+        route.driverName || 'N/A',
+        route.containerNumber || '',
+        route.customer || 'Khách hàng',
         route.to,
-        route.vehicle,
         route.time,
         new Intl.NumberFormat('vi-VN').format(route.cost),
         `${route.distance} km`,
-        route.feedType || 'Thức ăn chăn nuôi',
-        route.customer || 'Khách hàng'
+        route.feedType || 'Thức ăn chăn nuôi'
       ]);
       
       autoTable(doc, {
-        head: [['STT', 'ĐIỂM ĐI', 'ĐIỂM ĐẾN', 'LOẠI XE', 'GIỜ GIAO', 'CHI PHÍ (VNĐ)', 'KM', 'LOẠI THỨC ĂN', 'KHÁCH HÀNG']],
+        head: [['STT', 'NGÀY', 'SỐ XE', 'SĐT LÁI XE', 'TÊN LÁI XE', 'SỐ CONT', 'CHỦ HÀNG', 'ĐỊA ĐIỂM', 'GIỜ GIAO', 'CHI PHÍ (VNĐ)', 'KM', 'LOẠI THỨC ĂN']],
         body: tableData,
         startY: yPosition + 10,
         styles: { fontSize: 8, cellPadding: 2 },

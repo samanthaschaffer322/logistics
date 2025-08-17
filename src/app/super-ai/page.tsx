@@ -41,6 +41,7 @@ import {
 } from 'lucide-react'
 import FileGenerator from '@/lib/fileGenerator'
 import { SmartExcelAnalyzer } from '@/lib/smartExcelAnalyzer'
+import { DetailedPlanGenerator } from '@/lib/detailedPlanGenerator'
 
 // ... existing imports ...
 
