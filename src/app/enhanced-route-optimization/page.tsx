@@ -55,6 +55,9 @@ const EnhancedRouteOptimizationPage: React.FC = () => {
     // Handle errors appropriately
   };
 
+  // ALWAYS LOAD COMPONENT FOR TESTING - REMOVE API KEY REQUIREMENT
+  const forceLoad = true;
+
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
       {/* VERY OBVIOUS RED TEST ELEMENT */}
@@ -200,10 +203,11 @@ const EnhancedRouteOptimizationPage: React.FC = () => {
         </Card>
       </div>
 
-      {/* Main Component - FORCE LOAD FOR TESTING */}
-      <div className="w-full bg-purple-500 border-4 border-orange-400 p-4 text-white mb-4">
-        <h2 className="text-xl font-bold">🔴 FORCING COMPONENT LOAD FOR TESTING</h2>
-        <p>Loading ComprehensiveRouteOptimizer regardless of API key...</p>
+      {/* Main Component - ALWAYS LOAD */}
+      <div className="w-full bg-green-500 border-4 border-blue-400 p-4 text-white mb-4">
+        <h2 className="text-xl font-bold">✅ COMPONENT WILL ALWAYS LOAD NOW</h2>
+        <p>Removed API key requirement - ComprehensiveRouteOptimizer will load regardless</p>
+        <p>API Key Status: {hasApiKey ? '✅ Present' : '❌ Missing (but loading anyway)'}</p>
       </div>
       
       <Suspense fallback={
