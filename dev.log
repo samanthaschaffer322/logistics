@@ -1,5 +1,5 @@
 
-> logiai-logistics@1.0.0 dev
+> logiai-logistics@2.0.0 dev
 > next dev
 
  ⚠ Warning: Found multiple lockfiles. Selecting /Users/aelitapham/package-lock.json.
@@ -9,59 +9,22 @@
    ▲ Next.js 15.4.5
    - Local:        http://localhost:3000
    - Network:      http://127.0.2.2:3000
+   - Environments: .env.local
 
  ✓ Starting...
- ✓ Ready in 1484ms
+ ✓ Ready in 1516ms
  ○ Compiling / ...
- ✓ Compiled / in 2.5s (643 modules)
- GET / 200 in 2740ms
- ✓ Compiled in 126ms (247 modules)
- ✓ Compiled /route-optimization in 357ms (735 modules)
- GET /route-optimization 200 in 521ms
- ✓ Compiled /file-learning in 483ms (768 modules)
- GET /file-learning 200 in 641ms
- ⨯ Error: Cannot find module './985.js'
-Require stack:
-- /Users/aelitapham/Development/logistics/.next/server/webpack-runtime.js
-- /Users/aelitapham/Development/logistics/.next/server/app/file-learning/page.js
-- /Users/aelitapham/Development/logistics/node_modules/next/dist/server/require.js
-- /Users/aelitapham/Development/logistics/node_modules/next/dist/server/load-components.js
-- /Users/aelitapham/Development/logistics/node_modules/next/dist/build/utils.js
-- /Users/aelitapham/Development/logistics/node_modules/next/dist/build/swc/options.js
-- /Users/aelitapham/Development/logistics/node_modules/next/dist/build/swc/index.js
-- /Users/aelitapham/Development/logistics/node_modules/next/dist/build/analysis/parse-module.js
-- /Users/aelitapham/Development/logistics/node_modules/next/dist/build/analysis/get-page-static-info.js
-- /Users/aelitapham/Development/logistics/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
-- /Users/aelitapham/Development/logistics/node_modules/next/dist/server/lib/router-server.js
-- /Users/aelitapham/Development/logistics/node_modules/next/dist/server/lib/start-server.js
-    at <unknown> (.next/server/app/page.js:2:7380)
-    at Object.<anonymous> (.next/server/app/page.js:2:7434) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [Array],
-  page: '/'
-}
- ○ Compiling /_error ...
- ✓ Compiled /_error in 1028ms (1019 modules)
- GET / 500 in 1444ms
- ⨯ Error: Cannot find module './985.js'
-Require stack:
-- /Users/aelitapham/Development/logistics/.next/server/webpack-runtime.js
-- /Users/aelitapham/Development/logistics/.next/server/pages/_document.js
-- /Users/aelitapham/Development/logistics/node_modules/next/dist/server/require.js
-- /Users/aelitapham/Development/logistics/node_modules/next/dist/server/load-components.js
-- /Users/aelitapham/Development/logistics/node_modules/next/dist/build/utils.js
-- /Users/aelitapham/Development/logistics/node_modules/next/dist/build/swc/options.js
-- /Users/aelitapham/Development/logistics/node_modules/next/dist/build/swc/index.js
-- /Users/aelitapham/Development/logistics/node_modules/next/dist/build/analysis/parse-module.js
-- /Users/aelitapham/Development/logistics/node_modules/next/dist/build/analysis/get-page-static-info.js
-- /Users/aelitapham/Development/logistics/node_modules/next/dist/server/lib/router-utils/setup-dev-bundler.js
-- /Users/aelitapham/Development/logistics/node_modules/next/dist/server/lib/router-server.js
-- /Users/aelitapham/Development/logistics/node_modules/next/dist/server/lib/start-server.js
-    at <unknown> (.next/server/app/page.js:2:7380)
-    at Object.<anonymous> (.next/server/app/page.js:2:7434) {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: [Array],
-  page: '/'
-}
- GET / 500 in 245ms
+ ✓ Compiled / in 1376ms (767 modules)
+ HEAD / 200 in 1617ms
+ ✓ Compiled in 493ms (313 modules)
+ ✓ Compiled /enhanced-route-optimization in 394ms (814 modules)
+ GET /enhanced-route-optimization 200 in 582ms
+ ✓ Compiled in 198ms (343 modules)
+ ✓ Compiled in 107ms (814 modules)
+ ✓ Compiled /debug-test in 145ms (821 modules)
+ GET /debug-test 200 in 248ms
+ ✓ Compiled in 154ms (345 modules)
+ ✓ Compiled in 93ms (821 modules)
+ ✓ Compiled /simple-test in 137ms (823 modules)
+ GET /simple-test 200 in 218ms
 [?25h
