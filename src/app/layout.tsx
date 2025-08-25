@@ -22,6 +22,26 @@ export default function RootLayout({
         <meta name="keywords" content="logistics, AI, Vietnam, supply chain, route optimization, transportation" />
       </head>
       <body className={`${inter.className} dark bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900`}>
+        {/* VERY OBVIOUS GLOBAL TEST ELEMENT */}
+        <div style={{
+          position: 'fixed',
+          top: '0',
+          left: '0',
+          width: '100%',
+          height: '100px',
+          backgroundColor: 'red',
+          border: '10px solid yellow',
+          zIndex: '9999',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '24px',
+          fontWeight: 'bold',
+          color: 'white'
+        }}>
+          🔴 GLOBAL TEST - LAYOUT IS LOADING! 🔴
+        </div>
+        
         <ErrorBoundary>
           <AuthProvider>
             <LanguageProvider>
