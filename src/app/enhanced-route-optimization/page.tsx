@@ -57,6 +57,19 @@ const EnhancedRouteOptimizationPage: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
+      {/* VERY OBVIOUS RED TEST ELEMENT */}
+      <div className="w-full h-20 bg-red-500 border-4 border-yellow-400 flex items-center justify-center">
+        <h1 className="text-2xl font-bold text-white">🔴 ENHANCED ROUTE OPTIMIZATION PAGE LOADED! 🗺️</h1>
+      </div>
+      
+      {/* API KEY DEBUG INFO */}
+      <div className="w-full bg-blue-500 border-4 border-green-400 p-4 text-white">
+        <h2 className="text-xl font-bold">DEBUG INFO:</h2>
+        <p>API Key Present: {hasApiKey ? '✅ YES' : '❌ NO'}</p>
+        <p>API Key Value: {orsApiKey ? 'CONFIGURED' : 'NOT SET'}</p>
+        <p>Will Load Component: {hasApiKey ? '✅ YES' : '❌ NO - THIS IS WHY YOU DON\'T SEE THE MAP'}</p>
+      </div>
+
       {/* Header */}
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold text-gray-900 flex items-center justify-center gap-3">
@@ -187,74 +200,26 @@ const EnhancedRouteOptimizationPage: React.FC = () => {
         </Card>
       </div>
 
-      {/* Main Component */}
-      {hasApiKey ? (
-        <Suspense fallback={
-          <Card>
-            <CardContent className="flex flex-col items-center justify-center py-16">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
-              <p className="text-gray-600">Loading Comprehensive Route Optimizer...</p>
-            </CardContent>
-          </Card>
-        }>
-          <ComprehensiveRouteOptimizer
-            onRouteOptimized={handleOptimizationComplete}
-            onError={handleError}
-            className="min-h-screen"
-          />
-        </Suspense>
-      ) : (
+      {/* Main Component - FORCE LOAD FOR TESTING */}
+      <div className="w-full bg-purple-500 border-4 border-orange-400 p-4 text-white mb-4">
+        <h2 className="text-xl font-bold">🔴 FORCING COMPONENT LOAD FOR TESTING</h2>
+        <p>Loading ComprehensiveRouteOptimizer regardless of API key...</p>
+      </div>
+      
+      <Suspense fallback={
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16">
-            <Info className="w-16 h-16 text-gray-400 mb-4" />
-            <h3 className="text-xl font-medium text-gray-900 mb-2">
-              API Key Required
-            </h3>
-            <p className="text-gray-600 text-center max-w-md mb-6">
-              To use the enhanced mapping features, please configure your OpenRouteService API key. 
-              It's free and takes just a few minutes to set up.
-            </p>
-            
-            <div className="space-y-4 text-sm max-w-2xl">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h4 className="font-medium mb-2">Quick Setup:</h4>
-                <ol className="list-decimal list-inside space-y-1 text-gray-600">
-                  <li>Visit <a href="https://openrouteservice.org/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">openrouteservice.org</a></li>
-                  <li>Sign up for a free account</li>
-                  <li>Generate an API key</li>
-                  <li>Add <code className="bg-gray-200 px-1 rounded">NEXT_PUBLIC_ORS_API_KEY=your_key</code> to your <code className="bg-gray-200 px-1 rounded">.env.local</code> file</li>
-                  <li>Restart your development server</li>
-                </ol>
-              </div>
-              
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <h4 className="font-medium mb-2 text-blue-900">Free Tier Includes:</h4>
-                <ul className="list-disc list-inside space-y-1 text-blue-800">
-                  <li>40 requests per minute</li>
-                  <li>2,000 requests per day</li>
-                  <li>All routing profiles (car, truck, bike, walking)</li>
-                  <li>Truck-specific routing with restrictions</li>
-                  <li>No credit card required</li>
-                </ul>
-              </div>
-
-              <div className="bg-green-50 p-4 rounded-lg">
-                <h4 className="font-medium mb-2 text-green-900">Enhanced Features Available:</h4>
-                <ul className="list-disc list-inside space-y-1 text-green-800">
-                  <li>✅ Leaflet + React-Leaflet interactive mapping</li>
-                  <li>✅ OpenRouteService integration for truck routing</li>
-                  <li>✅ Vietnam GeoJSON data with 100+ locations</li>
-                  <li>✅ Comprehensive Vietnam locations database</li>
-                  <li>✅ Multiple route optimization algorithms</li>
-                  <li>✅ Cost analysis in VND currency</li>
-                  <li>✅ Environmental impact calculations</li>
-                  <li>✅ Truck restriction warnings</li>
-                </ul>
-              </div>
-            </div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
+            <p className="text-gray-600">Loading Comprehensive Route Optimizer...</p>
           </CardContent>
         </Card>
-      )}
+      }>
+        <ComprehensiveRouteOptimizer
+          onRouteOptimized={handleOptimizationComplete}
+          onError={handleError}
+          className="min-h-screen"
+        />
+      </Suspense>
 
       {/* Usage Tips */}
       <Card>
