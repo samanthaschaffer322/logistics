@@ -24,7 +24,7 @@ import {
   Map
 } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
-import EnhancedRouteMap from './EnhancedRouteMap'
+import VisibleRouteMap from './VisibleRouteMap'
 
 interface RouteAnalysis {
   origin: string;
@@ -500,10 +500,8 @@ const ComprehensiveRouteOptimizer = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
-            <EnhancedRouteMap
-              routes={[]}
+            <VisibleRouteMap
               selectedRoute={selectedRoute}
-              onRouteSelect={setSelectedRoute}
               className="h-[400px] rounded-b-lg"
             />
           </CardContent>
