@@ -24,7 +24,7 @@ import {
   Map
 } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
-import VisibleRouteMap from './VisibleRouteMap'
+import TestMap from './TestMap'
 
 interface RouteAnalysis {
   origin: string;
@@ -450,6 +450,11 @@ const ComprehensiveRouteOptimizer = () => {
 
   return (
     <div className="space-y-6">
+      {/* VERY OBVIOUS TEST ELEMENT */}
+      <div className="w-full h-20 bg-red-500 border-4 border-yellow-400 flex items-center justify-center">
+        <h1 className="text-2xl font-bold text-white">🚛 ROUTE OPTIMIZER IS LOADING! 🗺️</h1>
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -500,7 +505,7 @@ const ComprehensiveRouteOptimizer = () => {
             </CardDescription>
           </CardHeader>
           <CardContent className="p-0">
-            <VisibleRouteMap
+            <TestMap
               selectedRoute={selectedRoute}
               className="h-[400px] rounded-b-lg"
             />
