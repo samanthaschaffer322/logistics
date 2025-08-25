@@ -60,19 +60,6 @@ const EnhancedRouteOptimizationPage: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
-      {/* VERY OBVIOUS RED TEST ELEMENT */}
-      <div className="w-full h-20 bg-red-500 border-4 border-yellow-400 flex items-center justify-center">
-        <h1 className="text-2xl font-bold text-white">🔴 ENHANCED ROUTE OPTIMIZATION PAGE LOADED! 🗺️</h1>
-      </div>
-      
-      {/* API KEY DEBUG INFO */}
-      <div className="w-full bg-blue-500 border-4 border-green-400 p-4 text-white">
-        <h2 className="text-xl font-bold">DEBUG INFO:</h2>
-        <p>API Key Present: {hasApiKey ? '✅ YES' : '❌ NO'}</p>
-        <p>API Key Value: {orsApiKey ? 'CONFIGURED' : 'NOT SET'}</p>
-        <p>Will Load Component: {hasApiKey ? '✅ YES' : '❌ NO - THIS IS WHY YOU DON\'T SEE THE MAP'}</p>
-      </div>
-
       {/* Header */}
       <div className="text-center space-y-4">
         <h1 className="text-4xl font-bold text-gray-900 flex items-center justify-center gap-3">
@@ -203,13 +190,7 @@ const EnhancedRouteOptimizationPage: React.FC = () => {
         </Card>
       </div>
 
-      {/* Main Component - ALWAYS LOAD */}
-      <div className="w-full bg-green-500 border-4 border-blue-400 p-4 text-white mb-4">
-        <h2 className="text-xl font-bold">✅ COMPONENT WILL ALWAYS LOAD NOW</h2>
-        <p>Removed API key requirement - ComprehensiveRouteOptimizer will load regardless</p>
-        <p>API Key Status: {hasApiKey ? '✅ Present' : '❌ Missing (but loading anyway)'}</p>
-      </div>
-      
+      {/* Main Component */}
       <Suspense fallback={
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16">
