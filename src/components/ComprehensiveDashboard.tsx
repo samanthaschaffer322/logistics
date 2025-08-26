@@ -106,13 +106,6 @@ const ComprehensiveDashboard = () => {
           color: 'bg-gradient-to-r from-purple-600 to-pink-600' 
         },
         { 
-          title: language === 'vi' ? 'Bảng điều khiển phân tích' : 'Analytics Dashboard', 
-          description: language === 'vi' ? 'Số liệu hiệu suất & KPI' : 'Performance metrics & KPIs', 
-          icon: BarChart3, 
-          href: '/analytics', 
-          color: 'bg-gradient-to-r from-indigo-600 to-purple-600' 
-        },
-        { 
           title: language === 'vi' ? 'Vận hành logistics' : 'Logistics Operations', 
           description: language === 'vi' ? 'Trung tâm vận hành được hỗ trợ bởi AI' : 'AI-powered operations center', 
           icon: Activity, 

@@ -72,11 +72,37 @@ const LogisticsOperationsPage: React.FC = () => {
 
   const handleExport = (type: 'pdf' | 'excel') => {
     setIsExporting(true)
+    
+    // Show immediate feedback
+    alert(language === 'vi' 
+      ? `📊 Đang chuẩn bị xuất ${type.toUpperCase()}...\n⏳ Vui lòng đợi trong giây lát.` 
+      : `📊 Preparing ${type.toUpperCase()} export...\n⏳ Please wait a moment.`
+    )
+    
     setTimeout(() => {
       setIsExporting(false)
+      
+      // Create and download file
+      const data = `LogiAI Analytics Report - ${type.toUpperCase()}\n` +
+                  `Generated: ${new Date().toLocaleString('vi-VN')}\n\n` +
+                  `Revenue: ${formatCurrency(2450000000)}\n` +
+                  `Profit: ${formatCurrency(490000000)}\n` +
+                  `Deliveries: 1,247\n` +
+                  `On-time Rate: 94.2%\n\n` +
+                  `Vietnamese Logistics Performance Report\n` +
+                  `© LogiAI - Smart Logistics Management`
+      
+      const blob = new Blob([data], { type: 'text/plain' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `logiai-analytics-${type}-${new Date().toISOString().split('T')[0]}.txt`
+      link.click()
+      URL.revokeObjectURL(url)
+      
       alert(language === 'vi' 
-        ? `Xuất ${type.toUpperCase()} thành công!` 
-        : `${type.toUpperCase()} exported successfully!`
+        ? `✅ Xuất ${type.toUpperCase()} thành công!\n📁 File đã được tải xuống.` 
+        : `✅ ${type.toUpperCase()} exported successfully!\n📁 File has been downloaded.`
       )
     }, 2000)
   }

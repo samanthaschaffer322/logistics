@@ -40,35 +40,45 @@ const PaymentTrackingAssistant: React.FC = () => {
       company: 'Long Transport Co.',
       amount: 2500000,
       status: 'upcoming',
-      dueDate: '2025-08-28'
+      dueDate: '2025-08-28',
+      email: 'nguyen.long@longtransport.vn',
+      phone: '+84 901 234 567'
     },
     {
       name: 'Ngo Gia',
       company: 'Gia Logistics',
       amount: 1800000,
       status: 'overdue',
-      dueDate: '2025-08-15'
+      dueDate: '2025-08-15',
+      email: 'ngo.gia@gialogistics.vn',
+      phone: '+84 902 345 678'
     },
     {
       name: 'AO Shipping',
       company: 'AO Shipping Vietnam',
       amount: 3200000,
       status: 'upcoming',
-      dueDate: '2025-08-30'
+      dueDate: '2025-08-30',
+      email: 'contact@aoshipping.vn',
+      phone: '+84 903 456 789'
     },
     {
       name: 'Bao Giao',
       company: 'Bao Giao Express',
       amount: 4000000,
       status: 'upcoming',
-      dueDate: '2025-08-27'
+      dueDate: '2025-08-27',
+      email: 'baogiao@express.vn',
+      phone: '+84 904 567 890'
     },
     {
       name: 'CNL',
       company: 'CNL Logistics Solutions',
       amount: 2700000,
       status: 'upcoming',
-      dueDate: '2025-09-02'
+      dueDate: '2025-09-02',
+      email: 'payments@cnllogistics.vn',
+      phone: '+84 905 678 901'
     }
   ]
 
@@ -88,15 +98,40 @@ const PaymentTrackingAssistant: React.FC = () => {
 
   const handleMarkPaid = (clientName: string) => {
     alert(language === 'vi' 
-      ? `Đánh dấu thanh toán của ${clientName} đã hoàn tất!` 
-      : `Marked ${clientName} payment as completed!`
+      ? `✅ Đã đánh dấu thanh toán của ${clientName} hoàn tất!\n💰 Số tiền đã được ghi nhận vào hệ thống.` 
+      : `✅ Marked ${clientName} payment as completed!\n💰 Amount has been recorded in the system.`
     )
   }
 
-  const handleSendReminder = (clientName: string) => {
+  const handleSendReminder = (clientName: string, clientEmail: string) => {
+    // Simulate sending email
+    setTimeout(() => {
+      alert(language === 'vi' 
+        ? `📧 Đã gửi email nhắc nhở thanh toán đến ${clientName}!\n📨 Email: ${clientEmail}\n⏰ Thời gian: ${new Date().toLocaleString('vi-VN')}` 
+        : `📧 Payment reminder email sent to ${clientName}!\n📨 Email: ${clientEmail}\n⏰ Time: ${new Date().toLocaleString()}`
+      )
+    }, 1000)
+    
+    // Show immediate feedback
     alert(language === 'vi' 
-      ? `Đã gửi nhắc nhở thanh toán đến ${clientName}!` 
-      : `Payment reminder sent to ${clientName}!`
+      ? `📤 Đang gửi email nhắc nhở đến ${clientName}...` 
+      : `📤 Sending payment reminder to ${clientName}...`
+    )
+  }
+
+  const handleSendFollowUp = (clientName: string) => {
+    // Simulate follow-up process
+    setTimeout(() => {
+      alert(language === 'vi' 
+        ? `📞 Đã gửi thông báo theo dõi cho ${clientName}!\n🔔 Hệ thống sẽ tự động nhắc nhở sau 24 giờ.\n📊 Trạng thái: Đang theo dõi` 
+        : `📞 Follow-up notification sent to ${clientName}!\n🔔 System will automatically remind in 24 hours.\n📊 Status: Under monitoring`
+      )
+    }, 1500)
+    
+    // Show immediate feedback
+    alert(language === 'vi' 
+      ? `🚀 Đang khởi tạo quy trình theo dõi cho ${clientName}...` 
+      : `🚀 Initiating follow-up process for ${clientName}...`
     )
   }
 
@@ -234,20 +269,19 @@ const PaymentTrackingAssistant: React.FC = () => {
                 <div className="flex gap-2">
                   <Button 
                     size="sm" 
-                    className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg"
-                    onClick={() => handleSendReminder('Ngo Gia')}
+                    className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg transform hover:scale-105 transition-all duration-300"
+                    onClick={() => handleSendFollowUp('Ngo Gia')}
                   >
                     <Mail className="h-4 w-4 mr-2" />
-                    Send follow-up reminder
+                    {language === 'vi' ? '📧 Gửi theo dõi' : '📧 Send follow-up reminder'}
                   </Button>
                   <Button 
                     size="sm" 
-                    variant="outline"
-                    className="border-orange-300 text-orange-700 hover:bg-orange-50"
+                    className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white shadow-lg transform hover:scale-105 transition-all duration-300"
                     onClick={() => handleMarkPaid('Ngo Gia')}
                   >
                     <CheckCircle className="h-4 w-4 mr-2" />
-                    {language === 'vi' ? 'Đánh dấu đã trả' : 'Mark Paid'}
+                    {language === 'vi' ? '✅ Đã trả' : '✅ Mark Paid'}
                   </Button>
                 </div>
               </div>
@@ -300,19 +334,26 @@ const PaymentTrackingAssistant: React.FC = () => {
                       <div className="flex flex-col gap-2 ml-4">
                         <Button 
                           onClick={() => handleMarkPaid(client.name)}
-                          className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-lg"
+                          className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-lg transform hover:scale-105 transition-all duration-300"
                         >
                           <CheckCircle className="h-4 w-4 mr-2" />
-                          {language === 'vi' ? 'Đã trả' : 'Mark Paid'}
+                          {language === 'vi' ? '✅ Đã trả' : '✅ Mark Paid'}
                         </Button>
                         <Button 
-                          variant="outline" 
-                          size="sm"
-                          className="border-blue-300 text-blue-700 hover:bg-blue-50"
-                          onClick={() => handleSendReminder(client.name)}
+                          className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white shadow-lg transform hover:scale-105 transition-all duration-300"
+                          onClick={() => handleSendReminder(client.name, client.email)}
                         >
                           <Mail className="h-4 w-4 mr-2" />
-                          {language === 'vi' ? 'Email' : 'Email'}
+                          {language === 'vi' ? '📧 Email' : '📧 Email'}
+                        </Button>
+                        <Button 
+                          variant="outline"
+                          size="sm"
+                          className="border-purple-300 text-purple-700 hover:bg-purple-50 transform hover:scale-105 transition-all duration-300"
+                          onClick={() => alert(`📞 ${language === 'vi' ? 'Đang gọi' : 'Calling'} ${client.phone}`)}
+                        >
+                          <Phone className="h-4 w-4 mr-2" />
+                          {language === 'vi' ? '📞 Gọi' : '📞 Call'}
                         </Button>
                       </div>
                     </div>
@@ -346,10 +387,10 @@ const PaymentTrackingAssistant: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-semibold text-blue-800">
-                    {language === 'vi' ? 'Theo dõi lô hàng' : 'Shipment Tracking'}
+                    {language === 'vi' ? '💰 Theo dõi Thanh toán' : '💰 Payment Tracking'}
                   </h3>
                   <p className="text-blue-600 mt-2">
-                    {language === 'vi' ? 'Theo dõi 5 khoản thanh toán' : 'Tracking 5 payments'}
+                    {language === 'vi' ? 'Quản lý 5 khoản thanh toán thông minh' : 'Smart management of 5 payments'}
                   </p>
                 </div>
                 <DollarSign className="h-8 w-8 text-blue-600" />
@@ -362,10 +403,10 @@ const PaymentTrackingAssistant: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-lg font-semibold text-purple-800">
-                    {language === 'vi' ? 'Giám sát lô hàng thời gian thực' : 'Real-time Monitoring'}
+                    {language === 'vi' ? '🤖 Trợ lý AI Thông minh' : '🤖 Smart AI Assistant'}
                   </h3>
                   <p className="text-purple-600 mt-2">
-                    {language === 'vi' ? 'Giám sát thời gian thực hoạt động' : 'Real-time monitoring active'}
+                    {language === 'vi' ? 'Nhắc nhở tự động và theo dõi thanh toán' : 'Automatic reminders and payment tracking'}
                   </p>
                 </div>
                 <Activity className="h-8 w-8 text-purple-600" />
