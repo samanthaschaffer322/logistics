@@ -1,449 +1,430 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import AuthGuard from '@/components/AuthGuard'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui-components'
-import { Button } from '@/components/ui-components'
-import { Input } from '@/components/ui-components'
-import { supabase, isSupabaseConfigured } from '../../../supabase/client'
+import { useLanguage } from '@/contexts/LanguageContext'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Input } from '@/components/ui/input'
 import { 
-  Package, 
-  Plus, 
-  Search, 
-  Eye, 
-  Edit, 
-  Truck, 
-  MapPin, 
-  Clock, 
-  DollarSign,
-  AlertCircle,
+  Package,
+  Truck,
+  MapPin,
+  Clock,
   CheckCircle,
-  XCircle,
-  Filter
+  AlertTriangle,
+  Search,
+  Filter,
+  Plus,
+  Eye,
+  Navigation,
+  Calendar,
+  DollarSign,
+  User,
+  Phone,
+  Mail,
+  FileText,
+  BarChart3
 } from 'lucide-react'
-import { formatDate } from '@/lib/utils'
 
 interface Shipment {
   id: string
-  docket_no: string
-  sender_id: string
-  receiver_id: string
-  package_contact_person: string
-  package_contact_phone: string
-  package_type: string
-  package_weight: number
-  pickup_address: string
-  delivery_address: string
-  transport_company: string
-  transport_driver: string
-  transport_vehicle: string
-  charge_total: number
-  charge_advance_paid: number
-  charge_balance: number
-  status: 'pending' | 'picked_up' | 'in_transit' | 'out_for_delivery' | 'delivered' | 'cancelled'
-  priority: 'low' | 'normal' | 'high' | 'urgent'
-  pickup_date: string
-  delivery_date: string
-  estimated_delivery: string
-  payment_status: 'pending' | 'partial' | 'paid' | 'overdue'
-  current_location: string
-  notes: string
-  created_at: string
+  trackingNumber: string
+  client: string
+  company: string
+  origin: string
+  destination: string
+  status: 'in-transit' | 'delivered' | 'pending' | 'delayed'
+  value: number
+  weight: number
+  estimatedDelivery: string
+  actualDelivery?: string
+  driver: string
+  vehicle: string
+  progress: number
 }
 
-interface Customer {
-  id: string
-  company_name: string
-  contact_person: string
-  email: string
-  phone: string
-}
+const ShipmentManagementPage: React.FC = () => {
+  const { language } = useLanguage()
+  const [activeTab, setActiveTab] = useState('overview')
+  const [searchQuery, setSearchQuery] = useState('')
 
-export default function ShipmentsPage() {
-  const [shipments, setShipments] = useState<Shipment[]>([])
-  const [customers, setCustomers] = useState<Customer[]>([])
-  const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<string>('all')
-  const [priorityFilter, setPriorityFilter] = useState<string>('all')
-
-  useEffect(() => {
-    if (isSupabaseConfigured) {
-      fetchData()
-    } else {
-      // Use mock data for build time
-      setShipments([])
-      setCustomers([])
-      setLoading(false)
+  // Realistic Vietnamese logistics shipment data
+  const shipments: Shipment[] = [
+    {
+      id: '1',
+      trackingNumber: 'VN-LOG-2025-001247',
+      client: 'Nguyen Van Duc',
+      company: 'Duc Thanh Import Export Co., Ltd',
+      origin: 'Cảng Cát Lái, TP.HCM',
+      destination: 'Kho Nội Bài, Hà Nội',
+      status: 'in-transit',
+      value: 125000000, // 125 million VND
+      weight: 15.5, // tons
+      estimatedDelivery: '2025-08-27',
+      driver: 'Tran Van Minh',
+      vehicle: '51A-12345',
+      progress: 65
+    },
+    {
+      id: '2',
+      trackingNumber: 'VN-LOG-2025-001248',
+      client: 'Le Thi Hong',
+      company: 'Hong Phat Trading Corporation',
+      origin: 'Khu CN Binh Duong',
+      destination: 'Cảng Đà Nẵng',
+      status: 'delivered',
+      value: 89500000, // 89.5 million VND
+      weight: 12.3,
+      estimatedDelivery: '2025-08-25',
+      actualDelivery: '2025-08-25',
+      driver: 'Pham Thanh Son',
+      vehicle: '59B-67890',
+      progress: 100
+    },
+    {
+      id: '3',
+      trackingNumber: 'VN-LOG-2025-001249',
+      client: 'Vo Minh Tam',
+      company: 'Tam Thinh Logistics Services',
+      origin: 'Cảng Hải Phòng',
+      destination: 'KCN Long Biên, Hà Nội',
+      status: 'pending',
+      value: 67800000, // 67.8 million VND
+      weight: 8.7,
+      estimatedDelivery: '2025-08-29',
+      driver: 'Nguyen Duc Huy',
+      vehicle: '30C-11111',
+      progress: 0
+    },
+    {
+      id: '4',
+      trackingNumber: 'VN-LOG-2025-001250',
+      client: 'Dang Thi Mai',
+      company: 'Mai Phuong International Trade',
+      origin: 'Cảng Cần Thơ',
+      destination: 'Chợ Lớn, TP.HCM',
+      status: 'delayed',
+      value: 156200000, // 156.2 million VND
+      weight: 22.1,
+      estimatedDelivery: '2025-08-26',
+      driver: 'Le Van Duc',
+      vehicle: '50D-22222',
+      progress: 35
+    },
+    {
+      id: '5',
+      trackingNumber: 'VN-LOG-2025-001251',
+      client: 'Hoang Van Phuc',
+      company: 'Phuc Thinh Manufacturing Ltd',
+      origin: 'KCN Đồng Nai',
+      destination: 'Cảng Quy Nhon',
+      status: 'in-transit',
+      value: 198700000, // 198.7 million VND
+      weight: 18.9,
+      estimatedDelivery: '2025-08-28',
+      driver: 'Bui Thanh Tung',
+      vehicle: '61E-33333',
+      progress: 78
     }
-  }, [])
+  ]
 
-  const fetchData = async () => {
-    if (!isSupabaseConfigured) {
-      setShipments([])
-      setCustomers([])
-      setLoading(false)
-      return
-    }
-
-    try {
-      // Fetch shipments
-      const { data: shipmentData, error: shipmentError } = await supabase
-        .from('shipments')
-        .select('*')
-        .order('created_at', { ascending: false })
-
-      if (shipmentError) throw shipmentError
-
-      // Fetch customers
-      const { data: customerData, error: customerError } = await supabase
-        .from('customers')
-        .select('*')
-        .eq('status', 'active')
-
-      if (customerError) throw customerError
-
-      setShipments(shipmentData || [])
-      setCustomers(customerData || [])
-    } catch (error) {
-      console.error('Error fetching data:', error)
-    } finally {
-      setLoading(false)
-    }
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+      minimumFractionDigits: 0
+    }).format(amount)
   }
 
-  const getStatusColor = (status: Shipment['status']) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800'
-      case 'picked_up':
-        return 'bg-blue-100 text-blue-800'
-      case 'in_transit':
-        return 'bg-purple-100 text-purple-800'
-      case 'out_for_delivery':
-        return 'bg-orange-100 text-orange-800'
       case 'delivered':
-        return 'bg-green-100 text-green-800'
-      case 'cancelled':
-        return 'bg-red-100 text-red-800'
+        return 'bg-gradient-to-r from-green-500 to-green-600 text-white'
+      case 'in-transit':
+        return 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
+      case 'pending':
+        return 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white'
+      case 'delayed':
+        return 'bg-gradient-to-r from-red-500 to-red-600 text-white'
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-gradient-to-r from-gray-500 to-gray-600 text-white'
     }
   }
 
-  const getPriorityColor = (priority: Shipment['priority']) => {
-    switch (priority) {
-      case 'urgent':
-        return 'bg-red-100 text-red-800'
-      case 'high':
-        return 'bg-orange-100 text-orange-800'
-      case 'normal':
-        return 'bg-blue-100 text-blue-800'
-      case 'low':
-        return 'bg-gray-100 text-gray-800'
-      default:
-        return 'bg-gray-100 text-gray-800'
-    }
-  }
-
-  const getStatusIcon = (status: Shipment['status']) => {
+  const getStatusText = (status: string) => {
     switch (status) {
-      case 'pending':
-        return <Clock className="h-4 w-4" />
-      case 'picked_up':
-      case 'in_transit':
-        return <Truck className="h-4 w-4" />
-      case 'out_for_delivery':
-        return <MapPin className="h-4 w-4" />
       case 'delivered':
-        return <CheckCircle className="h-4 w-4" />
-      case 'cancelled':
-        return <XCircle className="h-4 w-4" />
+        return language === 'vi' ? 'Đã giao' : 'Delivered'
+      case 'in-transit':
+        return language === 'vi' ? 'Đang vận chuyển' : 'In Transit'
+      case 'pending':
+        return language === 'vi' ? 'Chờ xử lý' : 'Pending'
+      case 'delayed':
+        return language === 'vi' ? 'Chậm trễ' : 'Delayed'
       default:
-        return <Package className="h-4 w-4" />
+        return status
     }
   }
 
-  const filteredShipments = shipments.filter(shipment => {
-    const matchesSearch = 
-      shipment.docket_no.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      shipment.package_contact_person?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      shipment.pickup_address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      shipment.delivery_address?.toLowerCase().includes(searchTerm.toLowerCase())
-
-    const matchesStatus = statusFilter === 'all' || shipment.status === statusFilter
-    const matchesPriority = priorityFilter === 'all' || shipment.priority === priorityFilter
-
-    return matchesSearch && matchesStatus && matchesPriority
-  })
-
+  // Calculate statistics
   const stats = {
     total: shipments.length,
-    pending: shipments.filter(s => s.status === 'pending').length,
-    inTransit: shipments.filter(s => ['picked_up', 'in_transit', 'out_for_delivery'].includes(s.status)).length,
+    inTransit: shipments.filter(s => s.status === 'in-transit').length,
     delivered: shipments.filter(s => s.status === 'delivered').length,
-    totalRevenue: shipments.reduce((sum, s) => sum + (s.charge_total || 0), 0),
-    pendingPayments: shipments.filter(s => s.payment_status !== 'paid').length,
-  }
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    )
+    delayed: shipments.filter(s => s.status === 'delayed').length,
+    totalValue: shipments.reduce((sum, s) => sum + s.value, 0),
+    totalWeight: shipments.reduce((sum, s) => sum + s.weight, 0)
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Shipment Management</h1>
-          <p className="text-gray-600">Track and manage all your shipments and dockets</p>
-        </div>
-        <div className="flex space-x-2">
-          <Button variant="outline" onClick={() => window.location.href = '/shipments/track'}>
-            <Search className="h-4 w-4 mr-2" />
-            Track Shipment
-          </Button>
-          <Button onClick={() => window.location.href = '/shipments/create'}>
-            <Plus className="h-4 w-4 mr-2" />
-            Create Docket
-          </Button>
-        </div>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Shipments</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending</CardTitle>
-            <Clock className="h-4 w-4 text-yellow-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">In Transit</CardTitle>
-            <Truck className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{stats.inTransit}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Delivered</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.delivered}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">₫{stats.totalRevenue.toLocaleString()}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Payments</CardTitle>
-            <AlertCircle className="h-4 w-4 text-orange-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{stats.pendingPayments}</div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filters and Search */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search by docket number, contact person, or address..."
-                  className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
+    <AuthGuard>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-6">
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* Beautiful Header */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-3xl mb-6 shadow-2xl">
+              <Package className="h-10 w-10 text-white" />
             </div>
-            
-            <div className="flex gap-2">
-              <select
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <option value="all">All Status</option>
-                <option value="pending">Pending</option>
-                <option value="picked_up">Picked Up</option>
-                <option value="in_transit">In Transit</option>
-                <option value="out_for_delivery">Out for Delivery</option>
-                <option value="delivered">Delivered</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-
-              <select
-                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={priorityFilter}
-                onChange={(e) => setPriorityFilter(e.target.value)}
-              >
-                <option value="all">All Priority</option>
-                <option value="urgent">Urgent</option>
-                <option value="high">High</option>
-                <option value="normal">Normal</option>
-                <option value="low">Low</option>
-              </select>
-            </div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">
+              📦 {language === 'vi' ? 'Quản lý Lô hàng' : 'Shipment Management'}
+            </h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+              {language === 'vi' ? 'Theo dõi và quản lý lô hàng thông minh với giao diện đẹp' : 'Smart shipment tracking and management with beautiful interface'}
+            </p>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Shipments List */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Shipments ({filteredShipments.length})</CardTitle>
-          <CardDescription>
-            Manage and track all your shipments
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {filteredShipments.length === 0 ? (
-            <div className="text-center py-8">
-              <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">
-                {searchTerm || statusFilter !== 'all' || priorityFilter !== 'all' 
-                  ? 'No shipments match your filters.' 
-                  : 'No shipments found. Create your first docket to get started.'
-                }
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {filteredShipments.map((shipment) => (
-                <div key={shipment.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="font-semibold text-lg text-blue-600">
-                          {shipment.docket_no}
-                        </h3>
-                        <span className={`px-2 py-1 text-xs rounded-full flex items-center ${getStatusColor(shipment.status)}`}>
-                          {getStatusIcon(shipment.status)}
-                          <span className="ml-1 capitalize">{shipment.status.replace('_', ' ')}</span>
-                        </span>
-                        <span className={`px-2 py-1 text-xs rounded-full capitalize ${getPriorityColor(shipment.priority)}`}>
-                          {shipment.priority}
-                        </span>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-                        <div>
-                          <p className="text-gray-600">Contact Person</p>
-                          <p className="font-medium">{shipment.package_contact_person || 'N/A'}</p>
-                          <p className="text-gray-500">{shipment.package_contact_phone}</p>
-                        </div>
-                        
-                        <div>
-                          <p className="text-gray-600">Route</p>
-                          <p className="font-medium">
-                            {shipment.pickup_address?.substring(0, 30)}...
-                          </p>
-                          <p className="text-gray-500">
-                            → {shipment.delivery_address?.substring(0, 30)}...
-                          </p>
-                        </div>
-                        
-                        <div>
-                          <p className="text-gray-600">Transport</p>
-                          <p className="font-medium">{shipment.transport_company || 'Not assigned'}</p>
-                          <p className="text-gray-500">{shipment.transport_driver}</p>
-                        </div>
-                        
-                        <div>
-                          <p className="text-gray-600">Financial</p>
-                          <p className="font-medium">₫{shipment.charge_total?.toLocaleString() || '0'}</p>
-                          <p className={`text-sm ${
-                            shipment.payment_status === 'paid' ? 'text-green-600' : 'text-orange-600'
-                          }`}>
-                            {shipment.payment_status === 'paid' ? 'Paid' : `Balance: ₫${shipment.charge_balance?.toLocaleString() || '0'}`}
-                          </p>
-                        </div>
-                      </div>
-
-                      {shipment.current_location && (
-                        <div className="mt-2 flex items-center text-sm text-gray-600">
-                          <MapPin className="h-4 w-4 mr-1" />
-                          Current Location: {shipment.current_location}
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex flex-col space-y-2 ml-4">
-                      <Button size="sm" variant="outline" onClick={() => window.location.href = `/shipments/${shipment.id}`}>
-                        <Eye className="h-4 w-4 mr-1" />
-                        View
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={() => window.location.href = `/shipments/${shipment.id}/edit`}>
-                        <Edit className="h-4 w-4 mr-1" />
-                        Edit
-                      </Button>
-                    </div>
+          {/* Stunning KPI Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <Card className="relative overflow-hidden bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 text-white border-0 shadow-2xl hover:shadow-blue-500/25 transition-all duration-300 hover:scale-105">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-transparent"></div>
+              <CardContent className="relative p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
+                    <Package className="h-8 w-8 text-white" />
                   </div>
-
-                  <div className="mt-3 pt-3 border-t flex justify-between items-center text-sm text-gray-500">
-                    <div>
-                      Created: {formatDate(shipment.created_at)}
-                      {shipment.pickup_date && (
-                        <span className="ml-4">
-                          Pickup: {formatDate(shipment.pickup_date)}
-                        </span>
-                      )}
-                      {shipment.estimated_delivery && (
-                        <span className="ml-4">
-                          Est. Delivery: {formatDate(shipment.estimated_delivery)}
-                        </span>
-                      )}
-                    </div>
-                    
-                    {shipment.package_weight && (
-                      <div>
-                        Weight: {shipment.package_weight} kg
-                      </div>
-                    )}
+                  <div className="text-right">
+                    <div className="text-3xl font-bold">{stats.total}</div>
+                    <div className="text-blue-100 text-sm">{language === 'vi' ? 'Tổng lô hàng' : 'Total Shipments'}</div>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+                <div className="space-y-2">
+                  <div className="text-xl font-bold">{formatCurrency(stats.totalValue)}</div>
+                  <div className="flex items-center text-blue-100">
+                    <DollarSign className="h-4 w-4 mr-1" />
+                    <span className="text-sm">{language === 'vi' ? 'Tổng giá trị' : 'Total Value'}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="relative overflow-hidden bg-gradient-to-br from-green-500 via-green-600 to-emerald-600 text-white border-0 shadow-2xl hover:shadow-green-500/25 transition-all duration-300 hover:scale-105">
+              <div className="absolute inset-0 bg-gradient-to-r from-green-400/20 to-transparent"></div>
+              <CardContent className="relative p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
+                    <CheckCircle className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="text-right">
+                    <div className="text-3xl font-bold">{stats.delivered}</div>
+                    <div className="text-green-100 text-sm">{language === 'vi' ? 'Đã giao' : 'Delivered'}</div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-xl font-bold">{Math.round((stats.delivered / stats.total) * 100)}%</div>
+                  <div className="flex items-center text-green-100">
+                    <CheckCircle className="h-4 w-4 mr-1" />
+                    <span className="text-sm">{language === 'vi' ? 'Tỷ lệ thành công' : 'Success Rate'}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="relative overflow-hidden bg-gradient-to-br from-orange-500 via-orange-600 to-red-600 text-white border-0 shadow-2xl hover:shadow-orange-500/25 transition-all duration-300 hover:scale-105">
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 to-transparent"></div>
+              <CardContent className="relative p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
+                    <Truck className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="text-right">
+                    <div className="text-3xl font-bold">{stats.inTransit}</div>
+                    <div className="text-orange-100 text-sm">{language === 'vi' ? 'Đang vận chuyển' : 'In Transit'}</div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-xl font-bold">{stats.totalWeight.toFixed(1)} {language === 'vi' ? 'tấn' : 'tons'}</div>
+                  <div className="flex items-center text-orange-100">
+                    <Package className="h-4 w-4 mr-1" />
+                    <span className="text-sm">{language === 'vi' ? 'Tổng trọng lượng' : 'Total Weight'}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="relative overflow-hidden bg-gradient-to-br from-purple-500 via-purple-600 to-pink-600 text-white border-0 shadow-2xl hover:shadow-purple-500/25 transition-all duration-300 hover:scale-105">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-transparent"></div>
+              <CardContent className="relative p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
+                    <AlertTriangle className="h-8 w-8 text-white" />
+                  </div>
+                  <div className="text-right">
+                    <div className="text-3xl font-bold">{stats.delayed}</div>
+                    <div className="text-purple-100 text-sm">{language === 'vi' ? 'Chậm trễ' : 'Delayed'}</div>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="text-xl font-bold">{language === 'vi' ? 'Cần xử lý' : 'Needs Attention'}</div>
+                  <div className="flex items-center text-purple-100">
+                    <Clock className="h-4 w-4 mr-1" />
+                    <span className="text-sm">{language === 'vi' ? 'Ưu tiên cao' : 'High Priority'}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Search and Filter */}
+          <Card className="shadow-2xl border-0 bg-gradient-to-r from-white to-blue-50">
+            <CardContent className="p-6">
+              <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div className="relative flex-1 max-w-md">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                  <Input
+                    placeholder={language === 'vi' ? 'Tìm kiếm theo mã vận đơn, khách hàng...' : 'Search by tracking number, client...'}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 h-12 text-lg border-2 border-blue-200 focus:border-blue-500"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <Button className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 shadow-lg h-12 px-6">
+                    <Filter className="h-5 w-5 mr-2" />
+                    {language === 'vi' ? 'Lọc' : 'Filter'}
+                  </Button>
+                  <Button className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg h-12 px-6">
+                    <Plus className="h-5 w-5 mr-2" />
+                    {language === 'vi' ? 'Tạo mới' : 'Create New'}
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Beautiful Shipment List */}
+          <div className="space-y-6">
+            {shipments.map((shipment) => (
+              <Card key={shipment.id} className="shadow-2xl border-0 bg-gradient-to-r from-white to-blue-50 hover:shadow-blue-500/10 transition-all duration-300">
+                <CardContent className="p-8">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg">
+                        <Package className="h-8 w-8 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-bold text-gray-800">{shipment.trackingNumber}</h3>
+                        <p className="text-lg text-blue-600 font-semibold">{shipment.client}</p>
+                        <p className="text-gray-600">{shipment.company}</p>
+                      </div>
+                    </div>
+                    <Badge className={`${getStatusColor(shipment.status)} shadow-lg text-lg px-4 py-2`}>
+                      {getStatusText(shipment.status)}
+                    </Badge>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
+                      <div className="flex items-center gap-2 mb-2">
+                        <MapPin className="h-5 w-5 text-blue-600" />
+                        <span className="font-semibold text-gray-700">{language === 'vi' ? 'Xuất phát' : 'Origin'}</span>
+                      </div>
+                      <p className="text-gray-800 font-medium">{shipment.origin}</p>
+                    </div>
+
+                    <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Navigation className="h-5 w-5 text-green-600" />
+                        <span className="font-semibold text-gray-700">{language === 'vi' ? 'Đích đến' : 'Destination'}</span>
+                      </div>
+                      <p className="text-gray-800 font-medium">{shipment.destination}</p>
+                    </div>
+
+                    <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl">
+                      <div className="flex items-center gap-2 mb-2">
+                        <DollarSign className="h-5 w-5 text-purple-600" />
+                        <span className="font-semibold text-gray-700">{language === 'vi' ? 'Giá trị' : 'Value'}</span>
+                      </div>
+                      <p className="text-gray-800 font-bold text-lg">{formatCurrency(shipment.value)}</p>
+                    </div>
+
+                    <div className="p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-xl">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Package className="h-5 w-5 text-orange-600" />
+                        <span className="font-semibold text-gray-700">{language === 'vi' ? 'Trọng lượng' : 'Weight'}</span>
+                      </div>
+                      <p className="text-gray-800 font-bold text-lg">{shipment.weight} {language === 'vi' ? 'tấn' : 'tons'}</p>
+                    </div>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div className="mb-6">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-semibold text-gray-700">{language === 'vi' ? 'Tiến độ vận chuyển' : 'Delivery Progress'}</span>
+                      <span className="font-bold text-blue-600">{shipment.progress}%</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-4 shadow-inner">
+                      <div 
+                        className="bg-gradient-to-r from-blue-500 to-indigo-500 h-4 rounded-full shadow-lg transition-all duration-500" 
+                        style={{ width: `${shipment.progress}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-6 text-sm text-gray-600">
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4" />
+                        <span>{language === 'vi' ? 'Tài xế:' : 'Driver:'} {shipment.driver}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Truck className="h-4 w-4" />
+                        <span>{language === 'vi' ? 'Xe:' : 'Vehicle:'} {shipment.vehicle}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        <span>{language === 'vi' ? 'Dự kiến:' : 'ETA:'} {new Date(shipment.estimatedDelivery).toLocaleDateString('vi-VN')}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <Button 
+                        className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 shadow-lg"
+                        onClick={() => alert(`${language === 'vi' ? 'Xem chi tiết' : 'View details'}: ${shipment.trackingNumber}`)}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        {language === 'vi' ? 'Chi tiết' : 'Details'}
+                      </Button>
+                      <Button 
+                        variant="outline"
+                        className="border-blue-300 text-blue-700 hover:bg-blue-50"
+                        onClick={() => alert(`${language === 'vi' ? 'Theo dõi' : 'Track'}: ${shipment.trackingNumber}`)}
+                      >
+                        <MapPin className="h-4 w-4 mr-2" />
+                        {language === 'vi' ? 'Theo dõi' : 'Track'}
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </div>
+    </AuthGuard>
   )
 }
+
+export default ShipmentManagementPage

@@ -30,47 +30,47 @@ const PaymentTrackingAssistant: React.FC = () => {
   const [editingCompany, setEditingCompany] = useState<string | null>(null)
   const [editCompanyName, setEditCompanyName] = useState<string>('')
 
-  // Simple, safe data structure with editable amounts
+  // Simple, safe data structure with editable amounts - REALISTIC VIETNAMESE LOGISTICS AMOUNTS
   const [clients, setClients] = useState([
     {
-      name: 'Nguyen Long',
-      company: 'Long Transport Co.',
-      amount: 2500000,
+      name: 'Nguyen Van Long',
+      company: 'Long Transport & Logistics Co., Ltd',
+      amount: 45000000, // 45 million VND - realistic for container transport HCM-Hanoi
       status: 'upcoming',
       dueDate: '2025-08-28',
-      email: 'nguyen.long@longtransport.vn'
+      email: 'accounting@longtransport.vn'
     },
     {
-      name: 'Ngo Gia',
-      company: 'Gia Logistics',
-      amount: 1800000,
+      name: 'Ngo Minh Gia',
+      company: 'Gia Logistics & Freight Services',
+      amount: 28500000, // 28.5 million VND - realistic for port handling + customs
       status: 'overdue',
       dueDate: '2025-08-15',
-      email: 'ngo.gia@gialogistics.vn'
+      email: 'finance@gialogistics.vn'
     },
     {
-      name: 'AO Shipping',
-      company: 'AO Shipping Vietnam',
-      amount: 3200000,
+      name: 'AO Shipping Vietnam',
+      company: 'AO International Shipping Co., Ltd',
+      amount: 67200000, // 67.2 million VND - realistic for international shipping
       status: 'upcoming',
       dueDate: '2025-08-30',
-      email: 'contact@aoshipping.vn'
+      email: 'payments@aoshipping.vn'
     },
     {
-      name: 'Bao Giao',
-      company: 'Bao Giao Express',
-      amount: 4000000,
+      name: 'Bao Giao Express',
+      company: 'Bao Giao Express Delivery Services',
+      amount: 52800000, // 52.8 million VND - realistic for express delivery network
       status: 'upcoming',
       dueDate: '2025-08-27',
-      email: 'baogiao@express.vn'
+      email: 'billing@baogiao-express.vn'
     },
     {
-      name: 'CNL',
-      company: 'CNL Logistics Solutions',
-      amount: 2700000,
+      name: 'CNL Logistics',
+      company: 'CNL Supply Chain Solutions Vietnam',
+      amount: 89400000, // 89.4 million VND - realistic for comprehensive logistics
       status: 'upcoming',
       dueDate: '2025-09-02',
-      email: 'payments@cnllogistics.vn'
+      email: 'accounts@cnl-logistics.vn'
     }
   ])
 
@@ -305,7 +305,7 @@ const PaymentTrackingAssistant: React.FC = () => {
                 <div className="flex items-center gap-4">
                   <div className="w-4 h-4 rounded-full shadow-lg bg-red-500 animate-pulse" />
                   <div>
-                    <div className="font-semibold text-gray-800">Ngo Gia is 11 days overdue ({formatCurrency(1800000)})</div>
+                    <div className="font-semibold text-gray-800">Ngo Minh Gia is 11 days overdue ({formatCurrency(28500000)})</div>
                     <div className="text-sm text-gray-600">🚨 Urgent</div>
                   </div>
                 </div>
