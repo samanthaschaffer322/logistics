@@ -1,6 +1,28 @@
 'use client'
 
 import React, { useState } from 'react'
+import dynamic from 'next/dynamic'
+
+// Dynamic import for Leaflet map to avoid SSR issues
+const LeafletRouteMap = dynamic(() => import('@/components/LeafletRouteMap'), {
+  ssr: false,
+  loading: () => (
+    <div style={{
+      height: '400px',
+      background: 'rgba(30, 41, 59, 0.8)',
+      borderRadius: '15px',
+      border: '2px solid rgba(139, 92, 246, 0.3)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      flexDirection: 'column'
+    }}>
+      <div style={{ fontSize: '48px', marginBottom: '15px' }}>🗺️</div>
+      <div style={{ color: '#8b5cf6', fontSize: '18px', fontWeight: 'bold' }}>Loading Interactive Map...</div>
+      <div style={{ color: '#94a3b8', fontSize: '14px', marginTop: '5px' }}>Initializing Leaflet with OpenStreetMap</div>
+    </div>
+  )
+})
 
 export default function CombinedRouteOptimizerPage() {
   const [activeView, setActiveView] = useState('map')
@@ -396,26 +418,9 @@ export default function CombinedRouteOptimizerPage() {
               </div>
             )}
 
-            {/* Map Visualization */}
-            <div style={{
-              background: 'rgba(30, 41, 59, 0.8)',
-              borderRadius: '15px',
-              padding: '25px',
-              border: '1px solid rgba(139, 92, 246, 0.3)',
-              minHeight: '400px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              flexDirection: 'column'
-            }}>
-              <div style={{ fontSize: '64px', marginBottom: '20px' }}>🗺️</div>
-              <h3 style={{ color: '#8b5cf6', fontSize: '24px', marginBottom: '10px' }}>Interactive Map View</h3>
-              <p style={{ color: '#94a3b8', textAlign: 'center', maxWidth: '500px' }}>
-                {selectedRoute ? 
-                  `Route visualization: ${selectedRoute.origin.name} → ${selectedRoute.destination.name}` :
-                  'Enter origin and destination above to visualize the optimized route'
-                }
-              </p>
+            {/* Interactive Leaflet Map */}
+            <div style={{ position: 'relative' }}>
+              <LeafletRouteMap selectedRoute={selectedRoute} />
             </div>
           </div>
         ) : (
