@@ -27,6 +27,8 @@ const PaymentTrackingAssistant: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview')
   const [editingClient, setEditingClient] = useState<string | null>(null)
   const [editAmount, setEditAmount] = useState<number>(0)
+  const [editingCompany, setEditingCompany] = useState<string | null>(null)
+  const [editCompanyName, setEditCompanyName] = useState<string>('')
 
   // Simple, safe data structure with editable amounts
   const [clients, setClients] = useState([
@@ -155,6 +157,24 @@ const PaymentTrackingAssistant: React.FC = () => {
     alert(language === 'vi' 
       ? `💰 Đã cập nhật số tiền cho ${clientName}: ${formatCurrency(editAmount)}` 
       : `💰 Updated amount for ${clientName}: ${formatCurrency(editAmount)}`
+    )
+  }
+
+  const handleEditCompany = (clientName: string, currentCompany: string) => {
+    setEditingCompany(clientName)
+    setEditCompanyName(currentCompany)
+  }
+
+  const handleSaveCompany = (clientName: string) => {
+    setClients(prev => prev.map(client => 
+      client.name === clientName 
+        ? { ...client, company: editCompanyName }
+        : client
+    ))
+    setEditingCompany(null)
+    alert(language === 'vi' 
+      ? `🏢 Đã cập nhật tên công ty cho ${clientName}: ${editCompanyName}` 
+      : `🏢 Updated company name for ${clientName}: ${editCompanyName}`
     )
   }
 
@@ -333,7 +353,32 @@ const PaymentTrackingAssistant: React.FC = () => {
                         <div className="flex items-center gap-3 mb-3">
                           <div className="flex flex-col">
                             <h3 className="font-bold text-xl text-gray-800">{client.name}</h3>
-                            <h4 className="font-semibold text-lg text-blue-600">{client.company}</h4>
+                            {editingCompany === client.name ? (
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  type="text"
+                                  value={editCompanyName}
+                                  onChange={(e) => setEditCompanyName(e.target.value)}
+                                  className="w-60 h-8 text-lg font-semibold"
+                                  placeholder="Enter company name"
+                                />
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => handleSaveCompany(client.name)}
+                                  className="bg-green-500 hover:bg-green-600 h-8"
+                                >
+                                  <Save className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <h4 
+                                className="font-semibold text-lg text-blue-600 cursor-pointer hover:text-blue-800 transition-colors flex items-center gap-2"
+                                onClick={() => handleEditCompany(client.name, client.company)}
+                              >
+                                {client.company}
+                                <Edit className="h-4 w-4 text-gray-400 hover:text-blue-600" />
+                              </h4>
+                            )}
                           </div>
                           <Badge className={getStatusColor(client.status)}>
                             {client.status === 'overdue' ? (language === 'vi' ? 'Quá hạn' : 'Overdue') :
