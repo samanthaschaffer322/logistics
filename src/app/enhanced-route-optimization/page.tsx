@@ -1,9 +1,36 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { Suspense, useState, useEffect } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { MapPin, Navigation, Zap, Globe, Truck, Clock, DollarSign } from 'lucide-react'
+import dynamic from 'next/dynamic'
 
-export default function EnhancedRouteOptimizationPage() {
+// Dynamic import for Leaflet to avoid SSR issues
+const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false })
+const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false })
+const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false })
+const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false })
+const Polyline = dynamic(() => import('react-leaflet').then(mod => mod.Polyline), { ssr: false })
+
+interface RouteOptimizationPageProps {
+  onRouteOptimized?: (route: any) => void
+  onError?: (error: string) => void
+}
+
+export default function EnhancedRouteOptimizationPage({ 
+  onRouteOptimized, 
+  onError 
+}: RouteOptimizationPageProps) {
   const [selectedRoute, setSelectedRoute] = useState('cat-lai-chim-en')
+  const [mapReady, setMapReady] = useState(false)
+  const [activeTab, setActiveTab] = useState('overview')
+
+  useEffect(() => {
+    setMapReady(true)
+  }, [])
 
   const routes = {
     'cat-lai-chim-en': {
@@ -12,8 +39,21 @@ export default function EnhancedRouteOptimizationPage() {
       destination: 'Chim Én',
       distance: '25 km',
       time: '1.25h',
+      cost: '450,000 VND',
+      fuel: '18L',
       color: '#22c55e',
-      waypoints: ['Đồng Văn Cống', 'Võ Chí Công', 'Nguyễn Văn Linh']
+      coordinates: {
+        origin: [10.7769, 106.7009],
+        destination: [10.7829, 106.6919],
+        waypoints: [
+          [10.7789, 106.6989],
+          [10.7809, 106.6969],
+          [10.7819, 106.6949]
+        ]
+      },
+      waypoints: ['Đồng Văn Cống', 'Võ Chí Công', 'Nguyễn Văn Linh'],
+      traffic: 'Moderate',
+      efficiency: 92
     },
     'vung-tau-long-an': {
       name: 'Vũng Tàu → Long An',
@@ -21,8 +61,20 @@ export default function EnhancedRouteOptimizationPage() {
       destination: 'Long An',
       distance: '120 km',
       time: '3.0h',
+      cost: '1,200,000 VND',
+      fuel: '85L',
       color: '#3b82f6',
-      waypoints: ['QL51', 'QL1A']
+      coordinates: {
+        origin: [10.3460, 107.0843],
+        destination: [10.6956, 106.2431],
+        waypoints: [
+          [10.4200, 106.8500],
+          [10.5500, 106.5000]
+        ]
+      },
+      waypoints: ['QL51', 'QL1A'],
+      traffic: 'Heavy',
+      efficiency: 78
     },
     'chim-en-cp-tien-giang': {
       name: 'Chim Én → CP Tiền Giang',
@@ -30,8 +82,20 @@ export default function EnhancedRouteOptimizationPage() {
       destination: 'CP Tiền Giang',
       distance: '85 km',
       time: '2.5h',
+      cost: '850,000 VND',
+      fuel: '62L',
       color: '#f59e0b',
-      waypoints: ['QL50', 'QL57']
+      coordinates: {
+        origin: [10.7829, 106.6919],
+        destination: [10.3500, 106.3600],
+        waypoints: [
+          [10.6500, 106.5500],
+          [10.5000, 106.4500]
+        ]
+      },
+      waypoints: ['QL50', 'QL57'],
+      traffic: 'Light',
+      efficiency: 88
     },
     'chim-en-rico-hau-giang': {
       name: 'Chim Én → Rico Hậu Giang',
@@ -39,531 +103,378 @@ export default function EnhancedRouteOptimizationPage() {
       destination: 'Rico Hậu Giang',
       distance: '180 km',
       time: '5.0h',
+      cost: '1,800,000 VND',
+      fuel: '125L',
       color: '#ef4444',
-      waypoints: ['QL1A', 'QL80']
+      coordinates: {
+        origin: [10.7829, 106.6919],
+        destination: [9.7570, 105.6420],
+        waypoints: [
+          [10.5000, 106.4000],
+          [10.0000, 106.0000]
+        ]
+      },
+      waypoints: ['QL1A', 'QL80'],
+      traffic: 'Moderate',
+      efficiency: 85
     }
   }
 
   const currentRoute = routes[selectedRoute as keyof typeof routes]
 
+  // Create polyline path
+  const getPolylinePath = () => {
+    const path = [
+      currentRoute.coordinates.origin,
+      ...currentRoute.coordinates.waypoints,
+      currentRoute.coordinates.destination
+    ]
+    return path
+  }
+
+  const handleOptimizeRoute = () => {
+    if (onRouteOptimized) {
+      onRouteOptimized({
+        route: currentRoute,
+        optimizationScore: currentRoute.efficiency,
+        estimatedSavings: '15%'
+      })
+    }
+  }
+
+  const handleError = (errorMessage: string) => {
+    if (onError) {
+      onError(errorMessage)
+    }
+  }
+
   return (
-    <div style={{ 
-      minHeight: '100vh',
-      backgroundColor: '#0f172a',
-      color: 'white',
-      fontFamily: 'system-ui, -apple-system, sans-serif'
-    }}>
+    <div className="container mx-auto px-4 py-8 space-y-8">
       {/* Header */}
-      <div style={{
-        background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
-        padding: '40px 20px',
-        textAlign: 'center',
-        borderBottom: '3px solid #22c55e'
-      }}>
-        <h1 style={{ 
-          fontSize: '48px', 
-          marginBottom: '15px',
-          background: 'linear-gradient(135deg, #22c55e, #3b82f6)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          fontWeight: 'bold'
-        }}>
-          🗺️ LogiAI Route Optimizer
-        </h1>
-        <p style={{ 
-          fontSize: '20px', 
-          color: '#94a3b8',
-          maxWidth: '800px',
-          margin: '0 auto'
-        }}>
-          Advanced AI-powered route optimization with interactive map visualization for Vietnamese truck logistics
-        </p>
-        
-        {/* Feature badges */}
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          gap: '15px', 
-          marginTop: '25px',
-          flexWrap: 'wrap'
-        }}>
-          {[
-            { icon: '🚛', text: 'Truck Optimized', color: '#22c55e' },
-            { icon: '🗺️', text: 'Interactive Map', color: '#3b82f6' },
-            { icon: '🇻🇳', text: 'Vietnam Routes', color: '#f59e0b' },
-            { icon: '⚡', text: 'Real-time', color: '#ef4444' }
-          ].map((badge, index) => (
-            <div key={index} style={{
-              backgroundColor: badge.color + '20',
-              border: `2px solid ${badge.color}`,
-              borderRadius: '25px',
-              padding: '8px 16px',
-              fontSize: '14px',
-              fontWeight: 'bold',
-              color: badge.color
-            }}>
-              {badge.icon} {badge.text}
-            </div>
-          ))}
+      <div className="text-center space-y-4">
+        <div className="flex items-center justify-center space-x-2 mb-4">
+          <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
+            <Navigation className="w-6 h-6 text-white" />
+          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            Enhanced Route Optimization
+          </h1>
         </div>
+        <p className="text-xl text-slate-400 max-w-3xl mx-auto">
+          Advanced AI-powered route optimization with real-time interactive mapping for Vietnamese logistics operations
+        </p>
       </div>
 
-      <div style={{ padding: '30px 20px', maxWidth: '1400px', margin: '0 auto' }}>
-        {/* Main Grid */}
-        <div style={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'minmax(350px, 1fr) 2fr', 
-          gap: '30px',
-          marginBottom: '30px'
-        }}>
-          {/* Route Selection Panel */}
-          <div style={{
-            backgroundColor: '#1e293b',
-            borderRadius: '15px',
-            padding: '25px',
-            border: '2px solid #334155',
-            height: 'fit-content'
-          }}>
-            <h2 style={{ 
-              fontSize: '24px', 
-              marginBottom: '20px', 
-              color: '#22c55e',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px'
-            }}>
-              🚛 Chọn Tuyến Đường
-            </h2>
-            
-            <div style={{ marginBottom: '20px' }}>
-              {Object.entries(routes).map(([key, route]) => (
-                <button
-                  key={key}
-                  onClick={() => setSelectedRoute(key)}
-                  style={{
-                    display: 'block',
-                    width: '100%',
-                    padding: '18px',
-                    marginBottom: '12px',
-                    backgroundColor: selectedRoute === key ? route.color : '#374151',
-                    color: 'white',
-                    border: selectedRoute === key ? `3px solid ${route.color}` : '2px solid #4b5563',
-                    borderRadius: '12px',
-                    cursor: 'pointer',
-                    fontSize: '16px',
-                    fontWeight: selectedRoute === key ? 'bold' : 'normal',
-                    transition: 'all 0.3s ease',
-                    textAlign: 'left'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (selectedRoute !== key) {
-                      e.currentTarget.style.backgroundColor = '#4b5563'
-                      e.currentTarget.style.transform = 'translateY(-2px)'
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (selectedRoute !== key) {
-                      e.currentTarget.style.backgroundColor = '#374151'
-                      e.currentTarget.style.transform = 'translateY(0)'
-                    }
-                  }}
-                >
-                  <div style={{ fontWeight: 'bold', marginBottom: '5px' }}>
-                    {route.name}
-                  </div>
-                  <div style={{ fontSize: '14px', opacity: 0.8 }}>
-                    📍 {route.origin} → {route.destination}
-                  </div>
-                  <div style={{ fontSize: '14px', opacity: 0.8, marginTop: '3px' }}>
-                    📏 {route.distance} • ⏱️ {route.time}
-                  </div>
-                </button>
-              ))}
-            </div>
-
-            {/* Route Stats */}
-            <div style={{
-              backgroundColor: '#0f172a',
-              borderRadius: '10px',
-              padding: '15px',
-              border: `2px solid ${currentRoute.color}`
-            }}>
-              <h3 style={{ color: currentRoute.color, marginBottom: '10px', fontSize: '16px' }}>
-                📊 Current Route Stats
-              </h3>
-              <div style={{ fontSize: '14px', lineHeight: '1.6' }}>
-                <div>🎯 <strong>Route:</strong> {currentRoute.name}</div>
-                <div>📏 <strong>Distance:</strong> {currentRoute.distance}</div>
-                <div>⏱️ <strong>Time:</strong> {currentRoute.time}</div>
-                <div>🛣️ <strong>Waypoints:</strong> {currentRoute.waypoints.length}</div>
+      {/* Feature Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[
+          {
+            icon: <MapPin className="w-6 h-6" />,
+            title: "Interactive Mapping",
+            description: "Real-time Leaflet maps with GPS coordinates",
+            color: "from-green-500 to-emerald-500"
+          },
+          {
+            icon: <Navigation className="w-6 h-6" />,
+            title: "Route Intelligence",
+            description: "AI-powered route optimization algorithms",
+            color: "from-blue-500 to-cyan-500"
+          },
+          {
+            icon: <Globe className="w-6 h-6" />,
+            title: "Vietnam Coverage",
+            description: "Comprehensive Vietnamese logistics network",
+            color: "from-purple-500 to-pink-500"
+          },
+          {
+            icon: <Zap className="w-6 h-6" />,
+            title: "Real-time Updates",
+            description: "Live traffic and route condition monitoring",
+            color: "from-orange-500 to-red-500"
+          }
+        ].map((feature, index) => (
+          <Card key={index} className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50 hover:border-slate-600/50 transition-all duration-300">
+            <CardContent className="p-6">
+              <div className={`w-12 h-12 bg-gradient-to-r ${feature.color} rounded-lg flex items-center justify-center mb-4`}>
+                {feature.icon}
               </div>
-            </div>
-          </div>
+              <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
+              <p className="text-slate-400 text-sm">{feature.description}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
-          {/* Map Visualization Panel */}
-          <div style={{
-            backgroundColor: '#1e293b',
-            borderRadius: '15px',
-            padding: '25px',
-            border: '2px solid #334155'
-          }}>
-            <h2 style={{ 
-              fontSize: '24px', 
-              marginBottom: '20px', 
-              color: '#3b82f6',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px'
-            }}>
-              🗺️ Interactive Route Map
-            </h2>
-            
-            {/* Map Container */}
-            <div style={{
-              backgroundColor: '#0f172a',
-              border: `4px solid ${currentRoute.color}`,
-              borderRadius: '12px',
-              padding: '25px',
-              minHeight: '500px',
-              position: 'relative'
-            }}>
-              {/* Map Header */}
-              <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-                <h3 style={{ 
-                  color: currentRoute.color, 
-                  fontSize: '22px', 
-                  marginBottom: '8px',
-                  fontWeight: 'bold'
-                }}>
-                  {currentRoute.name}
-                </h3>
-                <div style={{ 
-                  fontSize: '16px', 
-                  color: '#94a3b8',
-                  display: 'flex',
-                  justifyContent: 'center',
-                  gap: '20px'
-                }}>
-                  <span>📏 {currentRoute.distance}</span>
-                  <span>⏱️ {currentRoute.time}</span>
-                  <span>🛣️ {currentRoute.waypoints.length} stops</span>
-                </div>
-              </div>
+      {/* Main Content Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4 bg-slate-800/50 backdrop-blur-sm">
+          <TabsTrigger value="overview" className="data-[state=active]:bg-blue-500/20 data-[state=active]:text-blue-400">
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="interactive-map" className="data-[state=active]:bg-green-500/20 data-[state=active]:text-green-400">
+            Interactive Map
+          </TabsTrigger>
+          <TabsTrigger value="analytics" className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400">
+            Analytics
+          </TabsTrigger>
+          <TabsTrigger value="optimization" className="data-[state=active]:bg-orange-500/20 data-[state=active]:text-orange-400">
+            Optimization
+          </TabsTrigger>
+        </TabsList>
 
-              {/* Visual Route Path */}
-              <div style={{ 
-                display: 'flex', 
-                flexDirection: 'column', 
-                alignItems: 'center', 
-                gap: '18px',
-                maxWidth: '600px',
-                margin: '0 auto'
-              }}>
-                {/* Origin */}
-                <div style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  width: '100%',
-                  backgroundColor: '#22c55e15',
-                  padding: '18px',
-                  borderRadius: '12px',
-                  border: '2px solid #22c55e',
-                  position: 'relative'
-                }}>
-                  <div style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: '#22c55e',
-                    borderRadius: '50%',
-                    marginRight: '18px',
-                    border: '4px solid white',
-                    boxShadow: '0 0 0 2px #22c55e',
-                    flexShrink: 0
-                  }}></div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ 
-                      color: '#22c55e', 
-                      fontWeight: 'bold', 
-                      fontSize: '14px',
-                      marginBottom: '3px'
-                    }}>
-                      🟢 ĐIỂM XUẤT PHÁT
-                    </div>
-                    <div style={{ color: 'white', fontSize: '16px', fontWeight: '500' }}>
-                      {currentRoute.origin}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Connecting Line */}
-                <div style={{
-                  width: '4px',
-                  height: '20px',
-                  background: `linear-gradient(to bottom, #22c55e, #3b82f6)`,
-                  borderRadius: '2px'
-                }}></div>
-
-                {/* Waypoints */}
-                {currentRoute.waypoints.map((waypoint, index) => (
-                  <React.Fragment key={index}>
-                    <div style={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      width: '100%',
-                      backgroundColor: '#3b82f615',
-                      padding: '15px',
-                      borderRadius: '10px',
-                      border: '2px solid #3b82f6'
-                    }}>
-                      <div style={{
-                        width: '24px',
-                        height: '24px',
-                        backgroundColor: '#3b82f6',
-                        borderRadius: '50%',
-                        marginRight: '15px',
-                        border: '3px solid white',
-                        boxShadow: '0 0 0 1px #3b82f6',
-                        flexShrink: 0,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '10px',
-                        fontWeight: 'bold',
-                        color: 'white'
-                      }}>
-                        {index + 1}
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ 
-                          color: '#3b82f6', 
-                          fontWeight: 'bold', 
-                          fontSize: '12px',
-                          marginBottom: '2px'
-                        }}>
-                          🔵 ĐIỂM TRUNG GIAN {index + 1}
-                        </div>
-                        <div style={{ color: '#94a3b8', fontSize: '14px' }}>
-                          {waypoint}
-                        </div>
+        {/* Overview Tab */}
+        <TabsContent value="overview" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Route Selection */}
+            <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2 text-green-400">
+                  <Truck className="w-5 h-5" />
+                  <span>Route Selection</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {Object.entries(routes).map(([key, route]) => (
+                  <Button
+                    key={key}
+                    variant={selectedRoute === key ? "default" : "outline"}
+                    className={`w-full justify-start text-left h-auto p-4 ${
+                      selectedRoute === key 
+                        ? `bg-gradient-to-r from-${route.color.slice(1)}/20 to-${route.color.slice(1)}/10 border-${route.color.slice(1)}/50` 
+                        : 'bg-slate-700/30 border-slate-600/50 hover:bg-slate-600/30'
+                    }`}
+                    onClick={() => setSelectedRoute(key)}
+                  >
+                    <div className="space-y-1">
+                      <div className="font-semibold">{route.name}</div>
+                      <div className="text-sm opacity-70">
+                        {route.distance} • {route.time} • {route.cost}
                       </div>
                     </div>
-                    {index < currentRoute.waypoints.length - 1 && (
-                      <div style={{
-                        width: '4px',
-                        height: '15px',
-                        background: `linear-gradient(to bottom, #3b82f6, #3b82f6)`,
-                        borderRadius: '2px'
-                      }}></div>
-                    )}
-                  </React.Fragment>
+                  </Button>
                 ))}
+              </CardContent>
+            </Card>
 
-                {/* Final connecting line */}
-                <div style={{
-                  width: '4px',
-                  height: '20px',
-                  background: `linear-gradient(to bottom, #3b82f6, #ef4444)`,
-                  borderRadius: '2px'
-                }}></div>
+            {/* Route Details */}
+            <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2 text-blue-400">
+                  <MapPin className="w-5 h-5" />
+                  <span>Route Details</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Origin:</span>
+                    <span className="text-green-400">{currentRoute.origin}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Destination:</span>
+                    <span className="text-red-400">{currentRoute.destination}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Distance:</span>
+                    <span className="text-white">{currentRoute.distance}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Time:</span>
+                    <span className="text-white">{currentRoute.time}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Cost:</span>
+                    <span className="text-white">{currentRoute.cost}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Fuel:</span>
+                    <span className="text-white">{currentRoute.fuel}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Traffic:</span>
+                    <Badge variant={currentRoute.traffic === 'Light' ? 'default' : currentRoute.traffic === 'Moderate' ? 'secondary' : 'destructive'}>
+                      {currentRoute.traffic}
+                    </Badge>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
-                {/* Destination */}
-                <div style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  width: '100%',
-                  backgroundColor: '#ef444415',
-                  padding: '18px',
-                  borderRadius: '12px',
-                  border: '2px solid #ef4444'
-                }}>
-                  <div style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: '#ef4444',
-                    borderRadius: '50%',
-                    marginRight: '18px',
-                    border: '4px solid white',
-                    boxShadow: '0 0 0 2px #ef4444',
-                    flexShrink: 0
-                  }}></div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ 
-                      color: '#ef4444', 
-                      fontWeight: 'bold', 
-                      fontSize: '14px',
-                      marginBottom: '3px'
-                    }}>
-                      🔴 ĐIỂM ĐẾN
+            {/* Performance Metrics */}
+            <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2 text-purple-400">
+                  <Zap className="w-5 h-5" />
+                  <span>Performance</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-slate-400">Efficiency</span>
+                      <span className="text-white">{currentRoute.efficiency}%</span>
                     </div>
-                    <div style={{ color: 'white', fontSize: '16px', fontWeight: '500' }}>
-                      {currentRoute.destination}
+                    <div className="w-full bg-slate-700 rounded-full h-2">
+                      <div 
+                        className="bg-gradient-to-r from-green-500 to-blue-500 h-2 rounded-full transition-all duration-500"
+                        style={{ width: `${currentRoute.efficiency}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 pt-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-green-400">15%</div>
+                      <div className="text-xs text-slate-400">Cost Savings</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-blue-400">{currentRoute.waypoints.length}</div>
+                      <div className="text-xs text-slate-400">Waypoints</div>
                     </div>
                   </div>
                 </div>
-              </div>
-
-              {/* Route Status */}
-              <div style={{
-                position: 'absolute',
-                bottom: '20px',
-                right: '20px',
-                backgroundColor: '#374151',
-                padding: '12px 16px',
-                borderRadius: '8px',
-                border: '1px solid #4b5563'
-              }}>
-                <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '5px' }}>
-                  Trạng thái tuyến đường
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <div style={{
-                    width: '10px',
-                    height: '10px',
-                    backgroundColor: '#22c55e',
-                    borderRadius: '50%',
-                    animation: 'pulse 2s infinite'
-                  }}></div>
-                  <span style={{ color: '#22c55e', fontSize: '14px', fontWeight: 'bold' }}>
-                    Tối ưu
-                  </span>
-                </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
-        </div>
+        </TabsContent>
 
-        {/* Route Analysis */}
-        <div style={{
-          backgroundColor: '#1e293b',
-          borderRadius: '15px',
-          padding: '25px',
-          border: '2px solid #334155'
-        }}>
-          <h2 style={{ 
-            fontSize: '24px', 
-            marginBottom: '20px', 
-            color: '#f59e0b',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px'
-          }}>
-            📊 Route Analysis & Performance
-          </h2>
-          
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
-            gap: '20px' 
-          }}>
-            {[
-              { 
-                value: currentRoute.distance, 
-                label: 'Total Distance', 
-                sublabel: 'Khoảng cách tổng',
-                color: '#22c55e',
-                icon: '📏'
-              },
-              { 
-                value: currentRoute.time, 
-                label: 'Estimated Time', 
-                sublabel: 'Thời gian ước tính',
-                color: '#3b82f6',
-                icon: '⏱️'
-              },
-              { 
-                value: currentRoute.waypoints.length, 
-                label: 'Waypoints', 
-                sublabel: 'Điểm trung gian',
-                color: '#f59e0b',
-                icon: '🛣️'
-              },
-              { 
-                value: '15%', 
-                label: 'Cost Savings', 
-                sublabel: 'Tiết kiệm chi phí',
-                color: '#ef4444',
-                icon: '💰'
-              }
-            ].map((stat, index) => (
-              <div key={index} style={{
-                backgroundColor: stat.color + '15',
-                padding: '20px',
-                borderRadius: '12px',
-                border: `2px solid ${stat.color}`,
-                textAlign: 'center',
-                transition: 'transform 0.2s ease'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
-              onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-              >
-                <div style={{ fontSize: '32px', marginBottom: '8px' }}>
-                  {stat.icon}
-                </div>
-                <div style={{ 
-                  fontSize: '28px', 
-                  fontWeight: 'bold', 
-                  color: stat.color,
-                  marginBottom: '5px'
-                }}>
-                  {stat.value}
-                </div>
-                <div style={{ 
-                  fontSize: '14px', 
-                  color: 'white',
-                  fontWeight: '500',
-                  marginBottom: '3px'
-                }}>
-                  {stat.label}
-                </div>
-                <div style={{ fontSize: '12px', color: '#94a3b8' }}>
-                  {stat.sublabel}
-                </div>
+        {/* Interactive Map Tab */}
+        <TabsContent value="interactive-map" className="space-y-6">
+          <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2 text-green-400">
+                <Globe className="w-5 h-5" />
+                <span>Real-time Interactive Map - {currentRoute.name}</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="h-[600px] rounded-b-lg overflow-hidden">
+                {mapReady ? (
+                  <MapContainer
+                    center={currentRoute.coordinates.origin as [number, number]}
+                    zoom={11}
+                    style={{ height: '100%', width: '100%' }}
+                    zoomControl={true}
+                  >
+                    <TileLayer
+                      attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                    
+                    {/* Origin Marker */}
+                    <Marker position={currentRoute.coordinates.origin as [number, number]}>
+                      <Popup>
+                        <div style={{ color: '#000', fontWeight: 'bold' }}>
+                          🟢 {currentRoute.origin}
+                          <br />
+                          <small>Điểm xuất phát</small>
+                        </div>
+                      </Popup>
+                    </Marker>
+
+                    {/* Waypoint Markers */}
+                    {currentRoute.coordinates.waypoints.map((waypoint, index) => (
+                      <Marker key={index} position={waypoint as [number, number]}>
+                        <Popup>
+                          <div style={{ color: '#000', fontWeight: 'bold' }}>
+                            🔵 {currentRoute.waypoints[index]}
+                            <br />
+                            <small>Điểm trung gian {index + 1}</small>
+                          </div>
+                        </Popup>
+                      </Marker>
+                    ))}
+
+                    {/* Destination Marker */}
+                    <Marker position={currentRoute.coordinates.destination as [number, number]}>
+                      <Popup>
+                        <div style={{ color: '#000', fontWeight: 'bold' }}>
+                          🔴 {currentRoute.destination}
+                          <br />
+                          <small>Điểm đến</small>
+                        </div>
+                      </Popup>
+                    </Marker>
+
+                    {/* Route Polyline */}
+                    <Polyline
+                      positions={getPolylinePath() as [number, number][]}
+                      color={currentRoute.color}
+                      weight={4}
+                      opacity={0.8}
+                    />
+                  </MapContainer>
+                ) : (
+                  <div className="h-full flex items-center justify-center bg-slate-900/50">
+                    <div className="text-center">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-400 mx-auto mb-4"></div>
+                      <p className="text-slate-400">Loading interactive map...</p>
+                    </div>
+                  </div>
+                )}
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Analytics Tab */}
+        <TabsContent value="analytics" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              { icon: <Clock className="w-6 h-6" />, label: 'Time', value: currentRoute.time, color: 'text-blue-400' },
+              { icon: <MapPin className="w-6 h-6" />, label: 'Distance', value: currentRoute.distance, color: 'text-green-400' },
+              { icon: <DollarSign className="w-6 h-6" />, label: 'Cost', value: currentRoute.cost, color: 'text-yellow-400' },
+              { icon: <Truck className="w-6 h-6" />, label: 'Fuel', value: currentRoute.fuel, color: 'text-red-400' }
+            ].map((stat, index) => (
+              <Card key={index} className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50">
+                <CardContent className="p-6 text-center">
+                  <div className={`${stat.color} mb-2`}>{stat.icon}</div>
+                  <div className="text-2xl font-bold text-white mb-1">{stat.value}</div>
+                  <div className="text-sm text-slate-400">{stat.label}</div>
+                </CardContent>
+              </Card>
             ))}
           </div>
-        </div>
+        </TabsContent>
 
-        {/* Success Footer */}
-        <div style={{
-          backgroundColor: '#22c55e15',
-          border: '2px solid #22c55e',
-          borderRadius: '15px',
-          padding: '25px',
-          textAlign: 'center',
-          marginTop: '30px'
-        }}>
-          <div style={{ 
-            fontSize: '24px', 
-            fontWeight: 'bold', 
-            color: '#22c55e',
-            marginBottom: '10px'
-          }}>
-            ✅ LogiAI Route Optimizer Working Perfectly!
-          </div>
-          <div style={{ fontSize: '16px', color: '#94a3b8', lineHeight: '1.6' }}>
-            Interactive map visualization for Vietnamese logistics routes is now fully operational.
-            <br />
-            Click different routes above to see real-time map updates and route analysis.
-          </div>
-        </div>
-      </div>
-
-      <style jsx>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
-        }
-        
-        @media (max-width: 768px) {
-          div[style*="gridTemplateColumns: minmax(350px, 1fr) 2fr"] {
-            grid-template-columns: 1fr !important;
-          }
-          
-          div[style*="gridTemplateColumns: repeat(auto-fit, minmax(250px, 1fr))"] {
-            grid-template-columns: repeat(2, 1fr) !important;
-          }
-        }
-      `}</style>
+        {/* Optimization Tab */}
+        <TabsContent value="optimization" className="space-y-6">
+          <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2 text-orange-400">
+                <Zap className="w-5 h-5" />
+                <span>Route Optimization</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="text-center">
+                <Button 
+                  onClick={handleOptimizeRoute}
+                  className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-8 py-3 text-lg"
+                >
+                  <Zap className="w-5 h-5 mr-2" />
+                  Optimize Current Route
+                </Button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-green-400 mb-2">{currentRoute.efficiency}%</div>
+                  <div className="text-slate-400">Current Efficiency</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-blue-400 mb-2">15%</div>
+                  <div className="text-slate-400">Potential Savings</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-purple-400 mb-2">A+</div>
+                  <div className="text-slate-400">Optimization Grade</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
