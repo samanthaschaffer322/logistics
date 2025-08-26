@@ -45,7 +45,7 @@ export default function CombinedRouteOptimizerPage() {
     ).slice(0, 5)
   }
 
-  // Calculate route
+  // Calculate route with realistic container truck parameters
   const calculateRoute = async () => {
     if (!originQuery || !destinationQuery) return
     
@@ -62,17 +62,36 @@ export default function CombinedRouteOptimizerPage() {
     )
 
     if (originLoc && destLoc) {
-      const distance = Math.round(Math.random() * 200 + 50)
-      const time = (distance / 60).toFixed(1)
-      const cost = (distance * 15000).toLocaleString('vi-VN')
+      // Realistic container truck calculations
+      const distance = Math.round(Math.random() * 150 + 80) // 80-230km realistic range
+      
+      // Container trucks: 40-50 km/h average including stops, traffic, loading/unloading
+      const avgSpeed = 45 + Math.random() * 5 // 45-50 km/h
+      const timeHours = distance / avgSpeed
+      const timeFormatted = timeHours >= 1 
+        ? `${Math.floor(timeHours)}h ${Math.round((timeHours % 1) * 60)}min`
+        : `${Math.round(timeHours * 60)}min`
+      
+      // Realistic container truck costs (Vietnam 2025)
+      // Base: 25,000-35,000 VND per km + fuel + tolls + driver
+      const costPerKm = 28000 + Math.random() * 7000 // 28,000-35,000 VND/km
+      const totalCost = Math.round(distance * costPerKm)
+      
+      // Container truck efficiency: 65-85% (lower due to weight, traffic, regulations)
+      const efficiency = Math.round(65 + Math.random() * 20) // 65-85%
       
       setSelectedRoute({
         origin: originLoc,
         destination: destLoc,
         distance: `${distance} km`,
-        time: `${time}h`,
-        cost: `${cost} VND`,
-        efficiency: Math.round(Math.random() * 30 + 70)
+        time: timeFormatted,
+        cost: `${totalCost.toLocaleString('vi-VN')} VND`,
+        efficiency: `${efficiency}%`,
+        // Additional container truck metrics
+        fuelConsumption: `${(distance * 0.35).toFixed(1)}L`, // ~35L/100km for loaded container truck
+        avgSpeed: `${avgSpeed.toFixed(0)} km/h`,
+        truckType: 'Container Truck (40ft)',
+        loadCapacity: '28-30 tons'
       })
     }
     
@@ -316,39 +335,62 @@ export default function CombinedRouteOptimizerPage() {
                 border: '1px solid rgba(34, 197, 94, 0.3)'
               }}>
                 <h2 style={{ color: '#22c55e', marginBottom: '20px', fontSize: '20px' }}>
-                  🚛 Optimized Route
+                  🚛 Container Truck Route
                 </h2>
                 
+                {/* Main Metrics */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '20px' }}>
                   <div style={{ textAlign: 'center', padding: '15px', background: 'rgba(34, 197, 94, 0.2)', borderRadius: '10px' }}>
                     <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#22c55e' }}>{selectedRoute.time}</div>
-                    <div style={{ fontSize: '12px', color: '#94a3b8' }}>Estimated Time</div>
+                    <div style={{ fontSize: '12px', color: '#94a3b8' }}>Travel Time</div>
                   </div>
                   <div style={{ textAlign: 'center', padding: '15px', background: 'rgba(59, 130, 246, 0.2)', borderRadius: '10px' }}>
                     <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#3b82f6' }}>{selectedRoute.distance}</div>
                     <div style={{ fontSize: '12px', color: '#94a3b8' }}>Total Distance</div>
                   </div>
                   <div style={{ textAlign: 'center', padding: '15px', background: 'rgba(245, 158, 11, 0.2)', borderRadius: '10px' }}>
-                    <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#f59e0b' }}>{selectedRoute.cost}</div>
-                    <div style={{ fontSize: '12px', color: '#94a3b8' }}>Estimated Cost</div>
+                    <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#f59e0b' }}>{selectedRoute.cost}</div>
+                    <div style={{ fontSize: '12px', color: '#94a3b8' }}>Total Cost</div>
                   </div>
                   <div style={{ textAlign: 'center', padding: '15px', background: 'rgba(139, 92, 246, 0.2)', borderRadius: '10px' }}>
-                    <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#8b5cf6' }}>{selectedRoute.efficiency}%</div>
+                    <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#8b5cf6' }}>{selectedRoute.efficiency}</div>
                     <div style={{ fontSize: '12px', color: '#94a3b8' }}>Route Efficiency</div>
                   </div>
                 </div>
 
+                {/* Container Truck Details */}
                 <div style={{ 
                   padding: '15px', 
                   background: 'rgba(34, 197, 94, 0.1)', 
                   borderRadius: '10px',
-                  border: '1px solid rgba(34, 197, 94, 0.3)'
+                  border: '1px solid rgba(34, 197, 94, 0.3)',
+                  marginBottom: '15px'
                 }}>
                   <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#22c55e', marginBottom: '10px' }}>
                     📍 {selectedRoute.origin.name} → {selectedRoute.destination.name}
                   </div>
                   <div style={{ fontSize: '14px', color: '#94a3b8' }}>
                     From: {selectedRoute.origin.province} | To: {selectedRoute.destination.province}
+                  </div>
+                </div>
+
+                {/* Additional Container Truck Metrics */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
+                  <div style={{ textAlign: 'center', padding: '12px', background: 'rgba(239, 68, 68, 0.2)', borderRadius: '8px' }}>
+                    <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#ef4444' }}>{selectedRoute.fuelConsumption}</div>
+                    <div style={{ fontSize: '11px', color: '#94a3b8' }}>Fuel Consumption</div>
+                  </div>
+                  <div style={{ textAlign: 'center', padding: '12px', background: 'rgba(168, 85, 247, 0.2)', borderRadius: '8px' }}>
+                    <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#a855f7' }}>{selectedRoute.avgSpeed}</div>
+                    <div style={{ fontSize: '11px', color: '#94a3b8' }}>Average Speed</div>
+                  </div>
+                  <div style={{ textAlign: 'center', padding: '12px', background: 'rgba(6, 182, 212, 0.2)', borderRadius: '8px' }}>
+                    <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#06b6d4' }}>{selectedRoute.truckType}</div>
+                    <div style={{ fontSize: '11px', color: '#94a3b8' }}>Vehicle Type</div>
+                  </div>
+                  <div style={{ textAlign: 'center', padding: '12px', background: 'rgba(34, 197, 94, 0.2)', borderRadius: '8px' }}>
+                    <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#22c55e' }}>{selectedRoute.loadCapacity}</div>
+                    <div style={{ fontSize: '11px', color: '#94a3b8' }}>Load Capacity</div>
                   </div>
                 </div>
               </div>
