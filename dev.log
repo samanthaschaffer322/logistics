@@ -12,19 +12,12 @@
    - Environments: .env.local
 
  ✓ Starting...
- ✓ Ready in 1516ms
+ ✓ Ready in 1461ms
  ○ Compiling / ...
- ✓ Compiled / in 1376ms (767 modules)
- HEAD / 200 in 1617ms
- ✓ Compiled in 493ms (313 modules)
- ✓ Compiled /enhanced-route-optimization in 394ms (814 modules)
- GET /enhanced-route-optimization 200 in 582ms
- ✓ Compiled in 198ms (343 modules)
- ✓ Compiled in 107ms (814 modules)
- ✓ Compiled /debug-test in 145ms (821 modules)
- GET /debug-test 200 in 248ms
- ✓ Compiled in 154ms (345 modules)
- ✓ Compiled in 93ms (821 modules)
- ✓ Compiled /simple-test in 137ms (823 modules)
- GET /simple-test 200 in 218ms
-[?25h
+ ✓ Compiled / in 1311ms (773 modules)
+ GET / 200 in 1609ms
+ ✓ Compiled in 492ms (316 modules)
+ ✓ Compiled in 317ms (302 modules)
+ ✓ Compiled in 473ms (322 modules)
+ ✓ Compiled in 460ms (322 modules)
+ ✓ Compiled in 339ms (322 modules)

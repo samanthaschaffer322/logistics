@@ -113,6 +113,42 @@ export default function HomePage() {
           ✅ DEPLOYMENT SUCCESSFUL! You can now see the working map below! ✅
         </div>
 
+        {/* INTERACTIVE MAP LINK */}
+        <div style={{
+          backgroundColor: '#3b82f6',
+          color: 'white',
+          padding: '25px',
+          borderRadius: '15px',
+          textAlign: 'center',
+          marginBottom: '30px',
+          border: '3px solid #ffffff',
+          boxShadow: '0 0 30px rgba(59, 130, 246, 0.3)'
+        }}>
+          <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '15px' }}>
+            🌍 WANT REAL INTERACTIVE GOOGLE MAPS-LIKE EXPERIENCE?
+          </div>
+          <a 
+            href="/interactive-map-pro" 
+            style={{
+              display: 'inline-block',
+              backgroundColor: '#ffffff',
+              color: '#3b82f6',
+              padding: '15px 30px',
+              borderRadius: '12px',
+              textDecoration: 'none',
+              fontSize: '18px',
+              fontWeight: 'bold',
+              boxShadow: '0 4px 15px rgba(0, 0, 0, 0.2)',
+              transition: 'all 0.3s ease'
+            }}
+          >
+            🗺️ CLICK HERE FOR REAL INTERACTIVE MAP! 🗺️
+          </a>
+          <div style={{ fontSize: '16px', marginTop: '15px', opacity: 0.9 }}>
+            Features: Live Leaflet Maps • GPS Coordinates • Real Routes • Zoom & Pan
+          </div>
+        </div>
+
         {/* Main Grid */}
         <div style={{ 
           display: 'grid', 
