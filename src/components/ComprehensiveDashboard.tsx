@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useLanguage } from '@/contexts/LanguageContext'
 import LanguageSelector from '@/components/LanguageSelector'
 import FunctionalQuickActions from './FunctionalQuickActions'
+import ComprehensiveMappingSystem from './ComprehensiveMappingSystem'
 import { 
   Brain, 
   BarChart3, 
@@ -243,7 +244,7 @@ const ComprehensiveDashboard = () => {
       {/* Enhanced Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full grid-cols-5 bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-2 h-14">
+          <TabsList className="grid w-full grid-cols-6 bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-2 h-14">
             <TabsTrigger 
               value="overview" 
               className="text-slate-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-xl font-semibold transition-all duration-300 h-10"
@@ -271,6 +272,13 @@ const ComprehensiveDashboard = () => {
             >
               <Truck className="w-4 h-4 mr-2" />
               {language === 'vi' ? 'Đội xe' : 'Fleet'}
+            </TabsTrigger>
+            <TabsTrigger 
+              value="mapping" 
+              className="text-slate-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-xl font-semibold transition-all duration-300 h-10"
+            >
+              <MapPin className="w-4 h-4 mr-2" />
+              {language === 'vi' ? 'Bản đồ' : 'Mapping'}
             </TabsTrigger>
             <TabsTrigger 
               value="system" 
@@ -901,6 +909,30 @@ const ComprehensiveDashboard = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Comprehensive Mapping Tab */}
+          <TabsContent value="mapping" className="space-y-8">
+            <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm rounded-2xl p-6 text-white border border-blue-500/20 shadow-xl">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center">
+                  <MapPin className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold">
+                    {language === 'vi' ? 'Hệ thống Bản đồ Tổng hợp LogiAI' : 'LogiAI Comprehensive Mapping System'}
+                  </h3>
+                  <p className="text-blue-100 opacity-90">
+                    {language === 'vi' 
+                      ? 'Tối ưu hóa tuyến đường thông minh với AI cho logistics Việt Nam'
+                      : 'AI-powered smart route optimization for Vietnamese logistics'
+                    }
+                  </p>
+                </div>
+              </div>
+            </div>
+            
+            <ComprehensiveMappingSystem />
           </TabsContent>
         </Tabs>
       </main>
