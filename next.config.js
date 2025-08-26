@@ -20,6 +20,29 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   
+  // Add Content Security Policy headers
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com https://cdnjs.cloudflare.com",
+              "font-src 'self' https://fonts.gstatic.com",
+              "img-src 'self' data: https: http:",
+              "connect-src 'self' https:",
+              "frame-src 'self'",
+            ].join('; '),
+          },
+        ],
+      },
+    ]
+  },
+  
   // Webpack configuration
   webpack: (config, { dev }) => {
     if (!dev) {
