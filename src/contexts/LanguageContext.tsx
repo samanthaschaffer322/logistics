@@ -60,6 +60,14 @@ const translations = {
     'automation.performance': 'Hiệu suất hoạt động',
     'automation.kpi': 'Chỉ số KPI',
     'automation.analytics': 'Phân tích dữ liệu',
+
+    // Payment Tracking
+    'payment.tracking': 'Trợ lý Theo dõi Thanh toán',
+    'payment.subtitle': 'Quản lý thanh toán thông minh',
+    'payment.calendar': 'Lịch Thanh toán',
+    'payment.clients': 'Khách hàng',
+    'payment.payments': 'Thanh toán',
+    'payment.analytics': 'Phân tích Thu tiền',
     'route.time': 'Thời gian',
     'route.distance': 'Khoảng cách',
     'route.calculate': 'Tính toán',
@@ -226,6 +234,14 @@ const translations = {
     'automation.performance': 'Operational Performance',
     'automation.kpi': 'Key Performance Indicators',
     'automation.analytics': 'Data Analytics',
+
+    // Payment Tracking
+    'payment.tracking': 'Payment Tracking Assistant',
+    'payment.subtitle': 'Smart payment management',
+    'payment.calendar': 'Payment Calendar',
+    'payment.clients': 'Clients',
+    'payment.payments': 'Payments',
+    'payment.analytics': 'Collection Analytics',
   }
 };
 
