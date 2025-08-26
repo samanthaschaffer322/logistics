@@ -125,16 +125,16 @@ const ComprehensiveDashboard = () => {
           color: 'bg-gradient-to-r from-teal-600 to-cyan-600' 
         },
         { 
-          title: language === 'vi' ? 'Theo dõi lô hàng' : 'Shipment Tracking', 
-          description: language === 'vi' ? 'Giám sát lô hàng thời gian thực' : 'Real-time shipment monitoring', 
+          title: language === 'vi' ? '📦 Theo dõi Lô hàng' : '📦 Shipment Tracking', 
+          description: language === 'vi' ? 'Giám sát lô hàng với giao diện đẹp' : 'Beautiful shipment monitoring interface', 
           icon: Package, 
           href: '/shipments', 
           color: 'bg-gradient-to-r from-blue-600 to-indigo-600' 
         },
         { 
-          title: language === 'vi' ? 'Theo dõi thời gian thực' : 'Real-time Tracking', 
-          description: language === 'vi' ? 'Hệ thống theo dõi GPS trực tiếp' : 'Live GPS tracking system', 
-          icon: MapPin, 
+          title: language === 'vi' ? 'Trợ lý Theo dõi Thanh toán' : 'Payment Tracking Assistant', 
+          description: language === 'vi' ? 'Quản lý thanh toán thông minh với AI' : 'Smart AI-powered payment management', 
+          icon: DollarSign, 
           href: '/real-time-tracking', 
           color: 'bg-gradient-to-r from-green-600 to-teal-600' 
         }
