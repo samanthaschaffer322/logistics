@@ -10,8 +10,9 @@ export default function CombinedRouteOptimizerPage() {
   const [selectedRoute, setSelectedRoute] = useState(null)
   const [isCalculating, setIsCalculating] = useState(false)
 
-  // Ensure client-side hydration
+  // Ensure client-side hydration - FIXED: Immediate mounting
   useEffect(() => {
+    // Set mounted immediately to prevent loading screen
     setMounted(true)
   }, [])
 
@@ -82,28 +83,7 @@ export default function CombinedRouteOptimizerPage() {
     setIsCalculating(false)
   }
 
-  // Show loading until mounted
-  if (!mounted) {
-    return (
-      <div style={{ 
-        minHeight: '100vh',
-        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)',
-        color: 'white',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: 'system-ui, -apple-system, sans-serif'
-      }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '48px', marginBottom: '20px' }}>🗺️</div>
-          <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#22c55e' }}>
-            Loading LogiAI Route Optimizer...
-          </div>
-        </div>
-      </div>
-    )
-  }
-
+  // FIXED: Always render content, no loading screen
   return (
     <div style={{ 
       minHeight: '100vh',
@@ -138,6 +118,37 @@ export default function CombinedRouteOptimizerPage() {
             </div>
             <div style={{ color: '#94a3b8' }}>
               Client-side hydrated • Real-time input • Vietnamese search • Route calculation
+            </div>
+            <div style={{ marginTop: '15px' }}>
+              <a 
+                href="/dashboard" 
+                style={{
+                  display: 'inline-block',
+                  padding: '12px 24px',
+                  background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+                  color: 'white',
+                  textDecoration: 'none',
+                  borderRadius: '10px',
+                  fontWeight: 'bold',
+                  marginRight: '15px'
+                }}
+              >
+                🏠 Go to Main Dashboard
+              </a>
+              <a 
+                href="/login" 
+                style={{
+                  display: 'inline-block',
+                  padding: '12px 24px',
+                  background: 'linear-gradient(135deg, #22c55e, #3b82f6)',
+                  color: 'white',
+                  textDecoration: 'none',
+                  borderRadius: '10px',
+                  fontWeight: 'bold'
+                }}
+              >
+                🔐 Login to Access Full Features
+              </a>
             </div>
           </div>
         </div>
