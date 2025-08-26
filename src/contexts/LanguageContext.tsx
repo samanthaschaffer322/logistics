@@ -48,6 +48,18 @@ const translations = {
     'route.vehicle-type': 'Loại xe',
     'route.optimize-for': 'Tối ưu cho',
     'route.cost': 'Chi phí',
+
+    // Automation & Operations
+    'automation.title': 'Bảng điều khiển phân tích',
+    'automation.subtitle': 'Số liệu hiệu suất & KPI',
+    'automation.exportPDF': 'Xuất PDF',
+    'automation.exportExcel': 'Xuất Excel',
+    'automation.summary': 'Tóm tắt Điều hành',
+    'automation.tracking': 'Theo dõi lô hàng',
+    'automation.monitoring': 'Giám sát lô hàng thời gian thực',
+    'automation.performance': 'Hiệu suất hoạt động',
+    'automation.kpi': 'Chỉ số KPI',
+    'automation.analytics': 'Phân tích dữ liệu',
     'route.time': 'Thời gian',
     'route.distance': 'Khoảng cách',
     'route.calculate': 'Tính toán',
@@ -202,6 +214,18 @@ const translations = {
     'ai.learning': 'Learning...',
     'ai.analyzing': 'Analyzing...',
     'ai.generating': 'Generating...',
+
+    // Automation & Operations
+    'automation.title': 'Analytics Dashboard',
+    'automation.subtitle': 'Performance Metrics & KPIs',
+    'automation.exportPDF': 'Export PDF',
+    'automation.exportExcel': 'Export Excel',
+    'automation.summary': 'Operations Summary',
+    'automation.tracking': 'Shipment Tracking',
+    'automation.monitoring': 'Real-time Shipment Monitoring',
+    'automation.performance': 'Operational Performance',
+    'automation.kpi': 'Key Performance Indicators',
+    'automation.analytics': 'Data Analytics',
   }
 };
 

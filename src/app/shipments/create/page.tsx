@@ -83,7 +83,7 @@ export default function CreateDocketPage() {
   })
 
   useEffect(() => {
-    if (isSupabaseConfigured()) {
+    if (isSupabaseConfigured) {
       fetchData()
     } else {
       setCustomers([])
@@ -102,7 +102,7 @@ export default function CreateDocketPage() {
   ])
 
   const fetchData = async () => {
-    if (!isSupabaseConfigured()) {
+    if (!isSupabaseConfigured) {
       setCustomers([])
       setVehicles([])
       return

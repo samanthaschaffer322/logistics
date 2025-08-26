@@ -5,6 +5,7 @@ import AuthGuard from '@/components/AuthGuard'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui-components'
 import { Button } from '@/components/ui-components'
 import { Input } from '@/components/ui-components'
+import { supabase, isSupabaseConfigured } from '../../../supabase/client'
 import { 
   Package, 
   Plus, 
@@ -67,7 +68,7 @@ export default function ShipmentsPage() {
   const [priorityFilter, setPriorityFilter] = useState<string>('all')
 
   useEffect(() => {
-    if (isSupabaseConfigured()) {
+    if (isSupabaseConfigured) {
       fetchData()
     } else {
       // Use mock data for build time
@@ -78,7 +79,7 @@ export default function ShipmentsPage() {
   }, [])
 
   const fetchData = async () => {
-    if (!isSupabaseConfigured()) {
+    if (!isSupabaseConfigured) {
       setShipments([])
       setCustomers([])
       setLoading(false)
