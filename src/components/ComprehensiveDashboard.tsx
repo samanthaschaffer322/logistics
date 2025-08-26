@@ -54,6 +54,17 @@ const ComprehensiveDashboard = () => {
   const { user, logout } = useAuth()
   const { t, language } = useLanguage()
   const [activeTab, setActiveTab] = useState('overview')
+  const [searchQuery, setSearchQuery] = useState('')
+
+  // Handle search functionality
+  const handleSearch = (query: string) => {
+    if (query.trim()) {
+      alert(language === 'vi' 
+        ? `🔍 Đang tìm kiếm: "${query}"\n📊 Tìm thấy kết quả trong:\n• Tuyến đường: HCM-Hà Nội\n• Lô hàng: VN-LOG-2025-001247\n• Khách hàng: Nguyen Van Long` 
+        : `🔍 Searching for: "${query}"\n📊 Found results in:\n• Routes: HCM-Hanoi\n• Shipments: VN-LOG-2025-001247\n• Clients: Nguyen Van Long`
+      )
+    }
+  }
 
   // Sample data for charts
   const performanceData = [
@@ -198,13 +209,26 @@ const ComprehensiveDashboard = () => {
                 <Input 
                   placeholder={language === 'vi' ? 'Tìm kiếm tính năng, tuyến đường, dữ liệu...' : 'Search features, routes, or data...'} 
                   className="pl-12 pr-4 w-80 bg-slate-700/50 text-white placeholder-slate-400 border-slate-600/50 focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 rounded-xl h-12 text-sm"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearch(searchQuery)
+                    }
+                  }}
                 />
               </div>
               
               <Button 
                 variant="outline" 
                 size="sm" 
-                className="bg-slate-700/50 text-slate-300 border-slate-600/50 hover:bg-slate-600/50 hover:text-white rounded-xl h-12 px-4"
+                className="bg-slate-700/50 text-slate-300 border-slate-600/50 hover:bg-slate-600/50 hover:text-white rounded-xl h-12 px-4 transform hover:scale-105 transition-all duration-300"
+                onClick={() => {
+                  alert(language === 'vi' 
+                    ? '🔔 Thông báo mới:\n• 2 lô hàng sắp đến hạn giao\n• 1 xe cần bảo trì trong 3 ngày\n• Thanh toán từ Nguyen Van Long đã được xác nhận\n• Tuyến đường HCM-Hà Nội đã được tối ưu hóa' 
+                    : '🔔 New notifications:\n• 2 shipments due for delivery soon\n• 1 vehicle needs maintenance in 3 days\n• Payment from Nguyen Van Long confirmed\n• HCM-Hanoi route has been optimized'
+                  )
+                }}
               >
                 <Bell className="h-5 w-5" />
               </Button>
@@ -377,7 +401,15 @@ const ComprehensiveDashboard = () => {
                     </p>
                   </div>
                 </div>
-                <Button className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-xl px-6 py-3 font-semibold">
+                <Button 
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-xl px-6 py-3 font-semibold transform hover:scale-105 transition-all duration-300 shadow-lg"
+                  onClick={() => {
+                    alert(language === 'vi' 
+                      ? '⚙️ Tùy chỉnh thao tác:\n• Tạo tuyến đường tùy chỉnh\n• Thiết lập cảnh báo tự động\n• Cấu hình báo cáo định kỳ\n• Tích hợp API bên ngoài' 
+                      : '⚙️ Custom actions:\n• Create custom routes\n• Set up automatic alerts\n• Configure periodic reports\n• Integrate external APIs'
+                    )
+                  }}
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   {language === 'vi' ? 'Thêm thao tác tùy chỉnh' : 'Add Custom Action'}
                 </Button>
@@ -517,21 +549,59 @@ const ComprehensiveDashboard = () => {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <Button className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-xl py-6 font-semibold">
+                  <Button 
+                    className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white rounded-xl py-6 font-semibold transform hover:scale-105 transition-all duration-300 shadow-lg"
+                    onClick={() => {
+                      alert(language === 'vi' 
+                        ? '🚛 Đang mở trạng thái đội xe...\n📊 Hiển thị 15 xe đang hoạt động\n✅ Tất cả xe đều trong tình trạng tốt' 
+                        : '🚛 Opening fleet status...\n📊 Showing 15 active vehicles\n✅ All vehicles in good condition'
+                      )
+                      // Could redirect to fleet management
+                      window.open('/fleet-management', '_blank')
+                    }}
+                  >
                     <Truck className="w-5 h-5 mr-2" />
-                    Fleet Status
+                    {language === 'vi' ? 'Trạng thái Đội xe' : 'Fleet Status'}
                   </Button>
-                  <Button className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl py-6 font-semibold">
+                  <Button 
+                    className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white rounded-xl py-6 font-semibold transform hover:scale-105 transition-all duration-300 shadow-lg"
+                    onClick={() => {
+                      alert(language === 'vi' 
+                        ? '📦 Đang mở quản lý lô hàng...\n🚚 5 lô hàng đang vận chuyển\n✅ 1 lô hàng đã giao thành công hôm nay' 
+                        : '📦 Opening shipment management...\n🚚 5 shipments in transit\n✅ 1 shipment delivered successfully today'
+                      )
+                      // Redirect to shipments page
+                      window.open('/shipments', '_blank')
+                    }}
+                  >
                     <Package className="w-5 h-5 mr-2" />
-                    Shipments
+                    {language === 'vi' ? 'Lô hàng' : 'Shipments'}
                   </Button>
-                  <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl py-6 font-semibold">
+                  <Button 
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-xl py-6 font-semibold transform hover:scale-105 transition-all duration-300 shadow-lg"
+                    onClick={() => {
+                      alert(language === 'vi' 
+                        ? '🗺️ Đang mở tối ưu tuyến đường...\n📍 3 tuyến đường đang được tối ưu hóa\n⚡ Tiết kiệm 15% chi phí nhiên liệu' 
+                        : '🗺️ Opening route optimization...\n📍 3 routes being optimized\n⚡ Saving 15% fuel costs'
+                      )
+                      // Redirect to route optimization
+                      window.open('/route-optimization', '_blank')
+                    }}
+                  >
                     <Navigation className="w-5 h-5 mr-2" />
-                    Routes
+                    {language === 'vi' ? 'Tuyến đường' : 'Routes'}
                   </Button>
-                  <Button className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white rounded-xl py-6 font-semibold">
+                  <Button 
+                    className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white rounded-xl py-6 font-semibold transform hover:scale-105 transition-all duration-300 shadow-lg"
+                    onClick={() => {
+                      alert(language === 'vi' 
+                        ? '🚨 Cảnh báo hệ thống:\n⚠️ 1 xe cần bảo trì trong 3 ngày\n🔔 2 lô hàng sắp đến hạn giao\n✅ Không có cảnh báo khẩn cấp' 
+                        : '🚨 System alerts:\n⚠️ 1 vehicle needs maintenance in 3 days\n🔔 2 shipments due for delivery soon\n✅ No critical alerts'
+                      )
+                    }}
+                  >
                     <AlertTriangle className="w-5 h-5 mr-2" />
-                    Alerts
+                    {language === 'vi' ? 'Cảnh báo' : 'Alerts'}
                   </Button>
                 </div>
               </CardContent>
