@@ -297,15 +297,35 @@ const ShipmentManagementPage: React.FC = () => {
                     placeholder={language === 'vi' ? 'Tìm kiếm theo mã vận đơn, khách hàng...' : 'Search by tracking number, client...'}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        alert(language === 'vi' 
+                          ? `🔍 Đang tìm kiếm: "${searchQuery}"\n📦 Tìm thấy kết quả:\n• VN-LOG-2025-001247 - Nguyen Van Long\n• VN-LOG-2025-001248 - AO Shipping Vietnam\n• VN-LOG-2025-001249 - Bao Giao Express` 
+                          : `🔍 Searching for: "${searchQuery}"\n📦 Found results:\n• VN-LOG-2025-001247 - Nguyen Van Long\n• VN-LOG-2025-001248 - AO Shipping Vietnam\n• VN-LOG-2025-001249 - Bao Giao Express`
+                        )
+                      }
+                    }}
                     className="pl-10 h-12 text-lg border-2 border-blue-200 focus:border-blue-500"
                   />
                 </div>
                 <div className="flex gap-3">
-                  <Button className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 shadow-lg h-12 px-6">
+                  <Button 
+                    onClick={() => alert(language === 'vi' 
+                      ? '🔽 Bộ lọc lô hàng:\n📅 Theo ngày: Hôm nay, Tuần này, Tháng này\n📍 Theo tuyến: HCM-Hà Nội, HCM-Đà Nẵng\n📦 Theo trạng thái: Đang vận chuyển, Đã giao, Chờ xử lý\n🚛 Theo loại xe: Container 20ft, 40ft, Flatbed' 
+                      : '🔽 Shipment filters:\n📅 By date: Today, This week, This month\n📍 By route: HCM-Hanoi, HCM-Da Nang\n📦 By status: In transit, Delivered, Pending\n🚛 By vehicle: Container 20ft, 40ft, Flatbed'
+                    )}
+                    className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 shadow-lg h-12 px-6 transform hover:scale-105 transition-all duration-300"
+                  >
                     <Filter className="h-5 w-5 mr-2" />
                     {language === 'vi' ? 'Lọc' : 'Filter'}
                   </Button>
-                  <Button className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg h-12 px-6">
+                  <Button 
+                    onClick={() => alert(language === 'vi' 
+                      ? '➕ Tạo lô hàng mới:\n📝 Thông tin khách hàng: Tên, SĐT, địa chỉ\n📍 Điểm đi: Cảng Cát Lái, TP.HCM\n📍 Điểm đến: Cảng Hải Phòng\n📦 Loại hàng: Container 40ft\n💰 Giá cước: 25,000,000 VND\n📅 Ngày giao: 2025-08-30' 
+                      : '➕ Create new shipment:\n📝 Customer info: Name, phone, address\n📍 Origin: Cat Lai Port, HCM\n📍 Destination: Hai Phong Port\n📦 Cargo type: Container 40ft\n💰 Rate: 25,000,000 VND\n📅 Delivery date: 2025-08-30'
+                    )}
+                    className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg h-12 px-6 transform hover:scale-105 transition-all duration-300"
+                  >
                     <Plus className="h-5 w-5 mr-2" />
                     {language === 'vi' ? 'Tạo mới' : 'Create New'}
                   </Button>

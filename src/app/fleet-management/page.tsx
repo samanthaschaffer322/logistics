@@ -346,36 +346,36 @@ const FleetManagementPage: React.FC = () => {
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                        <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl">
+                        <div className="p-4 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl border border-blue-300">
                           <div className="flex items-center gap-2 mb-2">
-                            <MapPin className="h-5 w-5 text-blue-600" />
-                            <span className="font-semibold text-gray-700">{language === 'vi' ? 'Vị trí' : 'Location'}</span>
+                            <MapPin className="h-5 w-5 text-blue-700" />
+                            <span className="font-bold text-gray-900">{language === 'vi' ? 'Vị trí' : 'Location'}</span>
                           </div>
-                          <p className="text-gray-800 font-medium">{vehicle.location}</p>
+                          <p className="text-gray-900 font-semibold">{vehicle.location}</p>
                         </div>
 
-                        <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl">
+                        <div className="p-4 bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl border border-green-300">
                           <div className="flex items-center gap-2 mb-2">
-                            <Fuel className="h-5 w-5 text-green-600" />
-                            <span className="font-semibold text-gray-700">{language === 'vi' ? 'Nhiên liệu' : 'Fuel'}</span>
+                            <Fuel className="h-5 w-5 text-green-700" />
+                            <span className="font-bold text-gray-900">{language === 'vi' ? 'Nhiên liệu' : 'Fuel'}</span>
                           </div>
-                          <p className="text-gray-800 font-bold text-lg">{vehicle.fuelLevel}%</p>
+                          <p className="text-gray-900 font-bold text-lg">{vehicle.fuelLevel}%</p>
                         </div>
 
-                        <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl">
+                        <div className="p-4 bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl border border-purple-300">
                           <div className="flex items-center gap-2 mb-2">
-                            <Activity className="h-5 w-5 text-purple-600" />
-                            <span className="font-semibold text-gray-700">{language === 'vi' ? 'Quãng đường' : 'Mileage'}</span>
+                            <Activity className="h-5 w-5 text-purple-700" />
+                            <span className="font-bold text-gray-900">{language === 'vi' ? 'Quãng đường' : 'Mileage'}</span>
                           </div>
-                          <p className="text-gray-800 font-bold text-lg">{vehicle.mileage.toLocaleString()} km</p>
+                          <p className="text-gray-900 font-bold text-lg">{vehicle.mileage.toLocaleString()} km</p>
                         </div>
 
-                        <div className="p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-xl">
+                        <div className="p-4 bg-gradient-to-r from-orange-100 to-red-100 rounded-xl border border-orange-300">
                           <div className="flex items-center gap-2 mb-2">
-                            <Wrench className="h-5 w-5 text-orange-600" />
-                            <span className="font-semibold text-gray-700">{language === 'vi' ? 'Bảo dưỡng tiếp theo' : 'Next Service'}</span>
+                            <Wrench className="h-5 w-5 text-orange-700" />
+                            <span className="font-bold text-gray-900">{language === 'vi' ? 'Bảo dưỡng tiếp theo' : 'Next Service'}</span>
                           </div>
-                          <p className="text-gray-800 font-bold">{new Date(vehicle.nextService).toLocaleDateString('vi-VN')}</p>
+                          <p className="text-gray-900 font-bold">{new Date(vehicle.nextService).toLocaleDateString('vi-VN')}</p>
                         </div>
                       </div>
 
@@ -385,48 +385,64 @@ const FleetManagementPage: React.FC = () => {
                           {language === 'vi' ? 'Thông tin Bảo dưỡng Chi tiết' : 'Detailed Maintenance Info'}
                         </h4>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                          <div className="p-3 bg-gray-50 rounded-lg">
-                            <span className="text-sm text-gray-600">{language === 'vi' ? 'Giờ máy:' : 'Engine Hours:'}</span>
-                            <p className="font-bold text-gray-800">{vehicle.engineHours.toLocaleString()}h</p>
+                          <div className="p-4 bg-white rounded-lg border border-gray-300 shadow-sm">
+                            <span className="text-sm font-bold text-gray-900">{language === 'vi' ? 'Giờ máy:' : 'Engine Hours:'}</span>
+                            <p className="font-bold text-gray-900 text-lg">{vehicle.engineHours.toLocaleString()}h</p>
                           </div>
-                          <div className="p-3 bg-gray-50 rounded-lg">
-                            <span className="text-sm text-gray-600">{language === 'vi' ? 'Tình trạng lốp:' : 'Tire Condition:'}</span>
-                            <p className={`font-bold ${getConditionColor(vehicle.tireCondition)}`}>
+                          <div className="p-4 bg-white rounded-lg border border-gray-300 shadow-sm">
+                            <span className="text-sm font-bold text-gray-900">{language === 'vi' ? 'Tình trạng lốp:' : 'Tire Condition:'}</span>
+                            <p className={`font-bold text-lg ${getConditionColor(vehicle.tireCondition)}`}>
                               {getConditionText(vehicle.tireCondition)}
                             </p>
                           </div>
-                          <div className="p-3 bg-gray-50 rounded-lg">
-                            <span className="text-sm text-gray-600">{language === 'vi' ? 'Tình trạng phanh:' : 'Brake Condition:'}</span>
-                            <p className={`font-bold ${getConditionColor(vehicle.brakeCondition)}`}>
+                          <div className="p-4 bg-white rounded-lg border border-gray-300 shadow-sm">
+                            <span className="text-sm font-bold text-gray-900">{language === 'vi' ? 'Tình trạng phanh:' : 'Brake Condition:'}</span>
+                            <p className={`font-bold text-lg ${getConditionColor(vehicle.brakeCondition)}`}>
                               {getConditionText(vehicle.brakeCondition)}
                             </p>
                           </div>
                         </div>
 
                         {/* Maintenance Cost */}
-                        <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl mb-4">
-                          <h5 className="font-bold text-gray-800 mb-2">{language === 'vi' ? 'Chi phí bảo dưỡng gần nhất:' : 'Latest Maintenance Cost:'}</h5>
-                          <div className="text-2xl font-bold text-blue-600">{formatCurrency(vehicle.maintenanceCost)}</div>
-                          <div className="text-sm text-gray-600 mt-1">
+                        <div className="p-6 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl mb-4 border border-blue-300">
+                          <h5 className="font-bold text-gray-900 mb-3 text-lg">{language === 'vi' ? 'Chi phí bảo dưỡng gần nhất:' : 'Latest Maintenance Cost:'}</h5>
+                          <div className="text-3xl font-bold text-blue-700">{formatCurrency(vehicle.maintenanceCost)}</div>
+                          <div className="text-sm font-semibold text-gray-800 mt-2">
                             {language === 'vi' ? 'Bảo dưỡng cuối:' : 'Last Service:'} {new Date(vehicle.lastService).toLocaleDateString('vi-VN')}
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex gap-4 mt-4">
+                      <div className="flex gap-4 mt-6">
                         <Button 
-                          onClick={() => alert(language === 'vi' ? `Xem chi tiết xe ${vehicle.licensePlate}` : `View details for ${vehicle.licensePlate}`)}
-                          className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 shadow-lg"
+                          onClick={() => alert(language === 'vi' 
+                            ? `🚛 Chi tiết xe ${vehicle.licensePlate}:\n📍 Vị trí: ${vehicle.location}\n⛽ Nhiên liệu: ${vehicle.fuelLevel}%\n🔧 Giờ máy: ${vehicle.engineHours.toLocaleString()}h\n💰 Chi phí bảo dưỡng: ${formatCurrency(vehicle.maintenanceCost)}\n👨‍💼 Tài xế: ${vehicle.driver}` 
+                            : `🚛 Vehicle Details ${vehicle.licensePlate}:\n📍 Location: ${vehicle.location}\n⛽ Fuel: ${vehicle.fuelLevel}%\n🔧 Engine Hours: ${vehicle.engineHours.toLocaleString()}h\n💰 Maintenance Cost: ${formatCurrency(vehicle.maintenanceCost)}\n👨‍💼 Driver: ${vehicle.driver}`
+                          )}
+                          className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 shadow-lg transform hover:scale-105 transition-all duration-300"
                         >
                           <Eye className="h-4 w-4 mr-2" />
                           {language === 'vi' ? 'Chi tiết' : 'Details'}
                         </Button>
                         <Button 
-                          onClick={() => alert(language === 'vi' ? `Lên lịch bảo dưỡng cho xe ${vehicle.licensePlate}` : `Schedule maintenance for ${vehicle.licensePlate}`)}
-                          className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg"
+                          onClick={() => alert(language === 'vi' 
+                            ? `📅 Lên lịch bảo dưỡng cho xe ${vehicle.licensePlate}:\n🔧 Bảo dưỡng tiếp theo: ${new Date(vehicle.nextService).toLocaleDateString('vi-VN')}\n⚠️ Tình trạng lốp: ${getConditionText(vehicle.tireCondition)}\n⚠️ Tình trạng phanh: ${getConditionText(vehicle.brakeCondition)}\n💰 Chi phí ước tính: 2,500,000 VND` 
+                            : `📅 Schedule maintenance for ${vehicle.licensePlate}:\n🔧 Next Service: ${new Date(vehicle.nextService).toLocaleDateString('vi-VN')}\n⚠️ Tire Condition: ${getConditionText(vehicle.tireCondition)}\n⚠️ Brake Condition: ${getConditionText(vehicle.brakeCondition)}\n💰 Estimated Cost: 2,500,000 VND`
+                          )}
+                          className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg transform hover:scale-105 transition-all duration-300"
                         >
                           <Calendar className="h-4 w-4 mr-2" />
                           {language === 'vi' ? 'Lên lịch bảo dưỡng' : 'Schedule Maintenance'}
+                        </Button>
+                        <Button 
+                          onClick={() => alert(language === 'vi' 
+                            ? `📍 Theo dõi xe ${vehicle.licensePlate}:\n🗺️ Vị trí hiện tại: ${vehicle.location}\n🚛 Trạng thái: ${getStatusText(vehicle.status)}\n👨‍💼 Tài xế: ${vehicle.driver}\n📱 Liên hệ tài xế: 0901234567` 
+                            : `📍 Track vehicle ${vehicle.licensePlate}:\n🗺️ Current Location: ${vehicle.location}\n🚛 Status: ${getStatusText(vehicle.status)}\n👨‍💼 Driver: ${vehicle.driver}\n📱 Contact Driver: 0901234567`
+                          )}
+                          className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg transform hover:scale-105 transition-all duration-300"
+                        >
+                          <MapPin className="h-4 w-4 mr-2" />
+                          {language === 'vi' ? 'Theo dõi' : 'Track'}
                         </Button>
                       </div>
                     </CardContent>
