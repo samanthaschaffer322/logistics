@@ -31,18 +31,96 @@ export default function CombinedRouteOptimizerPage() {
   const [selectedRoute, setSelectedRoute] = useState(null)
   const [isCalculating, setIsCalculating] = useState(false)
 
-  // Vietnamese locations
+  // Comprehensive Vietnamese locations from Da Nang to Ca Mau
   const locations = [
-    { id: 'cat-lai', name: 'Cảng Cát Lái', nameEn: 'Cat Lai Port', province: 'Ho Chi Minh City' },
-    { id: 'cai-mep', name: 'Cảng Cái Mép', nameEn: 'Cai Mep Port', province: 'Ba Ria - Vung Tau' },
-    { id: 'phu-huu', name: 'Phú Hữu', nameEn: 'Phu Huu', province: 'Ho Chi Minh City' },
-    { id: 'vung-tau', name: 'Cảng Vũng Tàu', nameEn: 'Vung Tau Port', province: 'Ba Ria - Vung Tau' },
-    { id: 'saigon', name: 'Cảng Sài Gòn', nameEn: 'Saigon Port', province: 'Ho Chi Minh City' },
-    { id: 'long-an', name: 'Long An', nameEn: 'Long An', province: 'Long An' },
-    { id: 'can-tho', name: 'Cần Thơ', nameEn: 'Can Tho', province: 'Can Tho' },
-    { id: 'hanoi', name: 'Hà Nội', nameEn: 'Hanoi', province: 'Hanoi' },
-    { id: 'hai-phong', name: 'Hải Phòng', nameEn: 'Hai Phong', province: 'Hai Phong' },
-    { id: 'da-nang', name: 'Đà Nẵng', nameEn: 'Da Nang', province: 'Da Nang' }
+    // Central Vietnam - Da Nang Region
+    { id: 'da-nang', name: 'Cảng Đà Nẵng', nameEn: 'Da Nang Port', province: 'Da Nang', lat: 16.0544, lng: 108.2022 },
+    { id: 'hoi-an', name: 'Hội An', nameEn: 'Hoi An', province: 'Quang Nam', lat: 15.8801, lng: 108.3380 },
+    { id: 'chu-lai', name: 'Cảng Chu Lai', nameEn: 'Chu Lai Port', province: 'Quang Nam', lat: 15.4000, lng: 108.7000 },
+    { id: 'quy-nhon', name: 'Cảng Quy Nhon', nameEn: 'Quy Nhon Port', province: 'Binh Dinh', lat: 13.7563, lng: 109.2297 },
+    
+    // South Central Coast
+    { id: 'nha-trang', name: 'Cảng Nha Trang', nameEn: 'Nha Trang Port', province: 'Khanh Hoa', lat: 12.2388, lng: 109.1967 },
+    { id: 'cam-ranh', name: 'Cảng Cam Ranh', nameEn: 'Cam Ranh Port', province: 'Khanh Hoa', lat: 11.9214, lng: 109.1593 },
+    { id: 'phan-rang', name: 'Phan Rang', nameEn: 'Phan Rang', province: 'Ninh Thuan', lat: 11.5752, lng: 108.9847 },
+    { id: 'phan-thiet', name: 'Cảng Phan Thiết', nameEn: 'Phan Thiet Port', province: 'Binh Thuan', lat: 10.9280, lng: 108.1020 },
+    
+    // Southeast Region - Phu My Area and Surroundings (16 ports)
+    { id: 'phu-my', name: 'Cảng Phú Mỹ', nameEn: 'Phu My Port', province: 'Ba Ria - Vung Tau', lat: 10.6167, lng: 107.0833 },
+    { id: 'cai-mep', name: 'Cảng Cái Mép', nameEn: 'Cai Mep Port', province: 'Ba Ria - Vung Tau', lat: 10.5833, lng: 107.0500 },
+    { id: 'thi-vai', name: 'Cảng Thị Vải', nameEn: 'Thi Vai Port', province: 'Ba Ria - Vung Tau', lat: 10.6000, lng: 107.0667 },
+    { id: 'vung-tau', name: 'Cảng Vũng Tàu', nameEn: 'Vung Tau Port', province: 'Ba Ria - Vung Tau', lat: 10.3460, lng: 107.0843 },
+    { id: 'ben-dinh', name: 'Cảng Bến Đình', nameEn: 'Ben Dinh Port', province: 'Ba Ria - Vung Tau', lat: 10.5500, lng: 107.1000 },
+    { id: 'long-son', name: 'Cảng Long Sơn', nameEn: 'Long Son Port', province: 'Ba Ria - Vung Tau', lat: 10.5800, lng: 107.0900 },
+    { id: 'go-dang', name: 'Cảng Gò Dầng', nameEn: 'Go Dang Port', province: 'Ba Ria - Vung Tau', lat: 10.5700, lng: 107.0800 },
+    { id: 'phuoc-an', name: 'Cảng Phước An', nameEn: 'Phuoc An Port', province: 'Ba Ria - Vung Tau', lat: 10.5900, lng: 107.0700 },
+    { id: 'tan-cang-cai-mep', name: 'Tân Cảng Cái Mép', nameEn: 'Tan Cang Cai Mep', province: 'Ba Ria - Vung Tau', lat: 10.5750, lng: 107.0550 },
+    { id: 'ssit', name: 'SSIT Cái Mép', nameEn: 'SSIT Cai Mep', province: 'Ba Ria - Vung Tau', lat: 10.5850, lng: 107.0450 },
+    { id: 'tcit', name: 'TCIT Cái Mép', nameEn: 'TCIT Cai Mep', province: 'Ba Ria - Vung Tau', lat: 10.5780, lng: 107.0480 },
+    { id: 'cmit', name: 'CMIT Cái Mép', nameEn: 'CMIT Cai Mep', province: 'Ba Ria - Vung Tau', lat: 10.5820, lng: 107.0520 },
+    { id: 'spct', name: 'SPCT Cái Mép', nameEn: 'SPCT Cai Mep', province: 'Ba Ria - Vung Tau', lat: 10.5790, lng: 107.0490 },
+    { id: 'vict', name: 'VICT Cái Mép', nameEn: 'VICT Cai Mep', province: 'Ba Ria - Vung Tau', lat: 10.5810, lng: 107.0510 },
+    { id: 'lotus', name: 'Lotus Cái Mép', nameEn: 'Lotus Cai Mep', province: 'Ba Ria - Vung Tau', lat: 10.5760, lng: 107.0460 },
+    { id: 'gemadept', name: 'Gemadept Cái Mép', nameEn: 'Gemadept Cai Mep', province: 'Ba Ria - Vung Tau', lat: 10.5840, lng: 107.0540 },
+    
+    // Ho Chi Minh City Area
+    { id: 'cat-lai', name: 'Cảng Cát Lái', nameEn: 'Cat Lai Port', province: 'Ho Chi Minh City', lat: 10.8231, lng: 106.7397 },
+    { id: 'saigon', name: 'Cảng Sài Gòn', nameEn: 'Saigon Port', province: 'Ho Chi Minh City', lat: 10.7769, lng: 106.7009 },
+    { id: 'phu-huu', name: 'Phú Hữu', nameEn: 'Phu Huu', province: 'Ho Chi Minh City', lat: 10.8000, lng: 106.7500 },
+    { id: 'hiep-phuoc', name: 'Cảng Hiệp Phước', nameEn: 'Hiep Phuoc Port', province: 'Ho Chi Minh City', lat: 10.7200, lng: 106.6800 },
+    { id: 'ben-nghe', name: 'Cảng Bến Nghé', nameEn: 'Ben Nghe Port', province: 'Ho Chi Minh City', lat: 10.7700, lng: 106.7000 },
+    
+    // Dong Nai Province
+    { id: 'dong-nai', name: 'Cảng Đồng Nai', nameEn: 'Dong Nai Port', province: 'Dong Nai', lat: 10.8142, lng: 107.0098 },
+    { id: 'long-thanh', name: 'Long Thành', nameEn: 'Long Thanh', province: 'Dong Nai', lat: 10.8167, lng: 107.0167 },
+    
+    // Long An Province
+    { id: 'long-an', name: 'Long An', nameEn: 'Long An', province: 'Long An', lat: 10.6956, lng: 106.2431 },
+    { id: 'tan-an', name: 'Tân An', nameEn: 'Tan An', province: 'Long An', lat: 10.5364, lng: 106.4169 },
+    
+    // Tien Giang Province
+    { id: 'my-tho', name: 'Cảng Mỹ Tho', nameEn: 'My Tho Port', province: 'Tien Giang', lat: 10.3600, lng: 106.3600 },
+    { id: 'go-cong', name: 'Cảng Gò Công', nameEn: 'Go Cong Port', province: 'Tien Giang', lat: 10.3667, lng: 106.6667 },
+    
+    // Ben Tre Province
+    { id: 'ben-tre', name: 'Cảng Bến Tre', nameEn: 'Ben Tre Port', province: 'Ben Tre', lat: 10.2431, lng: 106.3756 },
+    
+    // Vinh Long Province
+    { id: 'vinh-long', name: 'Cảng Vĩnh Long', nameEn: 'Vinh Long Port', province: 'Vinh Long', lat: 10.2397, lng: 105.9572 },
+    
+    // Can Tho City
+    { id: 'can-tho', name: 'Cảng Cần Thơ', nameEn: 'Can Tho Port', province: 'Can Tho', lat: 10.0452, lng: 105.7469 },
+    { id: 'cai-cui', name: 'Cảng Cái Cui', nameEn: 'Cai Cui Port', province: 'Can Tho', lat: 10.0300, lng: 105.7800 },
+    
+    // An Giang Province
+    { id: 'long-xuyen', name: 'Cảng Long Xuyên', nameEn: 'Long Xuyen Port', province: 'An Giang', lat: 10.3811, lng: 105.4358 },
+    { id: 'chau-doc', name: 'Cảng Châu Đốc', nameEn: 'Chau Doc Port', province: 'An Giang', lat: 10.7008, lng: 105.1167 },
+    
+    // Dong Thap Province
+    { id: 'cao-lanh', name: 'Cảng Cao Lãnh', nameEn: 'Cao Lanh Port', province: 'Dong Thap', lat: 10.4583, lng: 105.6333 },
+    { id: 'sa-dec', name: 'Cảng Sa Đéc', nameEn: 'Sa Dec Port', province: 'Dong Thap', lat: 10.2958, lng: 105.7575 },
+    
+    // Kien Giang Province
+    { id: 'rach-gia', name: 'Cảng Rạch Giá', nameEn: 'Rach Gia Port', province: 'Kien Giang', lat: 10.0128, lng: 105.0808 },
+    { id: 'ha-tien', name: 'Cảng Hà Tiên', nameEn: 'Ha Tien Port', province: 'Kien Giang', lat: 10.3833, lng: 104.4833 },
+    { id: 'phu-quoc', name: 'Cảng Phú Quốc', nameEn: 'Phu Quoc Port', province: 'Kien Giang', lat: 10.2897, lng: 103.9839 },
+    
+    // Ca Mau Province - Southern End of Vietnam
+    { id: 'ca-mau', name: 'Cảng Cà Mau', nameEn: 'Ca Mau Port', province: 'Ca Mau', lat: 9.1767, lng: 105.1524 },
+    { id: 'nam-can', name: 'Cảng Năm Căn', nameEn: 'Nam Can Port', province: 'Ca Mau', lat: 8.7833, lng: 104.9833 },
+    { id: 'cai-nuoc', name: 'Cảng Cái Nước', nameEn: 'Cai Nuoc Port', province: 'Ca Mau', lat: 9.0000, lng: 105.1167 },
+    
+    // Bac Lieu Province
+    { id: 'bac-lieu', name: 'Cảng Bạc Liêu', nameEn: 'Bac Lieu Port', province: 'Bac Lieu', lat: 9.2945, lng: 105.7244 },
+    { id: 'gia-rai', name: 'Cảng Giá Rai', nameEn: 'Gia Rai Port', province: 'Bac Lieu', lat: 9.2500, lng: 105.7000 },
+    
+    // Soc Trang Province
+    { id: 'soc-trang', name: 'Cảng Sóc Trăng', nameEn: 'Soc Trang Port', province: 'Soc Trang', lat: 9.6003, lng: 105.9800 },
+    { id: 'tran-de', name: 'Cảng Trần Đề', nameEn: 'Tran De Port', province: 'Soc Trang', lat: 9.5167, lng: 106.0500 },
+    
+    // Hau Giang Province
+    { id: 'vi-thanh', name: 'Cảng Vị Thanh', nameEn: 'Vi Thanh Port', province: 'Hau Giang', lat: 9.7833, lng: 105.4667 },
+    { id: 'nga-bay', name: 'Cảng Ngã Bảy', nameEn: 'Nga Bay Port', province: 'Hau Giang', lat: 9.8167, lng: 105.8167 }
   ]
 
   // Normalize Vietnamese text

@@ -29,7 +29,8 @@ import {
   SortDesc,
   Check,
   Plus,
-  CalendarDays
+  CalendarDays,
+  Mail
 } from 'lucide-react'
 
 const PaymentTrackingAssistant: React.FC = () => {
