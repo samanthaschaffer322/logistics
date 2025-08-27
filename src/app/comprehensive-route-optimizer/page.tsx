@@ -7,16 +7,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { 
   MapPin,
   Navigation,
   Truck,
   Clock,
   DollarSign,
-  Route,
   Plus,
   Minus,
   Download,
@@ -58,18 +54,16 @@ interface RouteOptimization {
 
 const ComprehensiveRouteOptimizer: React.FC = () => {
   const { language } = useLanguage()
-  const [activeTab, setActiveTab] = useState('create')
   const [locations, setLocations] = useState<Location[]>([])
   const [optimizations, setOptimizations] = useState<RouteOptimization[]>([])
   const [optimizationType, setOptimizationType] = useState<'distance' | 'time' | 'fuel'>('distance')
-  const [showAddLocationDialog, setShowAddLocationDialog] = useState(false)
+  const [showAddForm, setShowAddForm] = useState(false)
   const [newLocation, setNewLocation] = useState({
     name: '',
     address: '',
     lat: 0,
     lng: 0,
-    type: 'origin' as 'origin' | 'destination' | 'depot' | 'warehouse',
-    priority: 'medium' as 'low' | 'medium' | 'high'
+    type: 'origin' as 'origin' | 'destination' | 'depot' | 'warehouse'
   })
 
   // Vietnamese depot/warehouse network with realistic coordinates
@@ -229,10 +223,9 @@ const ComprehensiveRouteOptimizer: React.FC = () => {
         address: '',
         lat: 0,
         lng: 0,
-        type: 'origin',
-        priority: 'medium'
+        type: 'origin'
       })
-      setShowAddLocationDialog(false)
+      setShowAddForm(false)
       
       alert(language === 'vi' 
         ? `✅ Đã thêm địa điểm: ${location.name}` 
@@ -343,62 +336,59 @@ const ComprehensiveRouteOptimizer: React.FC = () => {
                     <h3 className="text-2xl font-bold text-gray-800">
                       {language === 'vi' ? 'Thêm địa điểm mới' : 'Add New Location'}
                     </h3>
-                    <Dialog open={showAddLocationDialog} onOpenChange={setShowAddLocationDialog}>
-                      <DialogTrigger asChild>
-                        <Button className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg">
-                          <Plus className="h-4 w-4 mr-2" />
-                          {language === 'vi' ? 'Thêm' : 'Add'}
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-md">
-                        <DialogHeader>
-                          <DialogTitle>{language === 'vi' ? 'Thêm địa điểm mới' : 'Add New Location'}</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                          <Input
-                            placeholder={language === 'vi' ? 'Tên địa điểm (VD: Cảng Cát Lái)' : 'Location name (e.g., Cat Lai Port)'}
-                            value={newLocation.name}
-                            onChange={(e) => setNewLocation(prev => ({ ...prev, name: e.target.value }))}
-                          />
-                          <Input
-                            placeholder={language === 'vi' ? 'Địa chỉ đầy đủ' : 'Full address'}
-                            value={newLocation.address}
-                            onChange={(e) => setNewLocation(prev => ({ ...prev, address: e.target.value }))}
-                          />
-                          <div className="grid grid-cols-2 gap-4">
-                            <Input
-                              type="number"
-                              step="0.000001"
-                              placeholder="Latitude (VD: 10.8231)"
-                              value={newLocation.lat || ''}
-                              onChange={(e) => setNewLocation(prev => ({ ...prev, lat: parseFloat(e.target.value) || 0 }))}
-                            />
-                            <Input
-                              type="number"
-                              step="0.000001"
-                              placeholder="Longitude (VD: 106.7397)"
-                              value={newLocation.lng || ''}
-                              onChange={(e) => setNewLocation(prev => ({ ...prev, lng: parseFloat(e.target.value) || 0 }))}
-                            />
-                          </div>
-                          <Select value={newLocation.type} onValueChange={(value: any) => setNewLocation(prev => ({ ...prev, type: value }))}>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="origin">{language === 'vi' ? '🚀 Điểm xuất phát' : '🚀 Origin Point'}</SelectItem>
-                              <SelectItem value="destination">{language === 'vi' ? '🎯 Điểm đến' : '🎯 Destination'}</SelectItem>
-                              <SelectItem value="depot">{language === 'vi' ? '🏭 Kho bãi' : '🏭 Depot'}</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <Button onClick={handleAddLocation} className="w-full bg-gradient-to-r from-blue-500 to-indigo-500">
-                            <Plus className="h-4 w-4 mr-2" />
-                            {language === 'vi' ? 'Thêm địa điểm' : 'Add Location'}
-                          </Button>
-                        </div>
-                      </DialogContent>
-                    </Dialog>
+                    <Button 
+                      onClick={() => setShowAddForm(!showAddForm)}
+                      className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      {language === 'vi' ? 'Thêm' : 'Add'}
+                    </Button>
                   </div>
+
+                  {/* Simple Add Form */}
+                  {showAddForm && (
+                    <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 space-y-4">
+                      <Input
+                        placeholder={language === 'vi' ? 'Tên địa điểm (VD: Cảng Cát Lái)' : 'Location name (e.g., Cat Lai Port)'}
+                        value={newLocation.name}
+                        onChange={(e) => setNewLocation(prev => ({ ...prev, name: e.target.value }))}
+                      />
+                      <Input
+                        placeholder={language === 'vi' ? 'Địa chỉ đầy đủ' : 'Full address'}
+                        value={newLocation.address}
+                        onChange={(e) => setNewLocation(prev => ({ ...prev, address: e.target.value }))}
+                      />
+                      <div className="grid grid-cols-2 gap-4">
+                        <Input
+                          type="number"
+                          step="0.000001"
+                          placeholder="Latitude (VD: 10.8231)"
+                          value={newLocation.lat || ''}
+                          onChange={(e) => setNewLocation(prev => ({ ...prev, lat: parseFloat(e.target.value) || 0 }))}
+                        />
+                        <Input
+                          type="number"
+                          step="0.000001"
+                          placeholder="Longitude (VD: 106.7397)"
+                          value={newLocation.lng || ''}
+                          onChange={(e) => setNewLocation(prev => ({ ...prev, lng: parseFloat(e.target.value) || 0 }))}
+                        />
+                      </div>
+                      <select 
+                        value={newLocation.type} 
+                        onChange={(e) => setNewLocation(prev => ({ ...prev, type: e.target.value as any }))}
+                        className="w-full p-3 border border-gray-300 rounded-lg"
+                      >
+                        <option value="origin">{language === 'vi' ? '🚀 Điểm xuất phát' : '🚀 Origin Point'}</option>
+                        <option value="destination">{language === 'vi' ? '🎯 Điểm đến' : '🎯 Destination'}</option>
+                        <option value="depot">{language === 'vi' ? '🏭 Kho bãi' : '🏭 Depot'}</option>
+                      </select>
+                      <Button onClick={handleAddLocation} className="w-full bg-gradient-to-r from-blue-500 to-indigo-500">
+                        <Plus className="h-4 w-4 mr-2" />
+                        {language === 'vi' ? 'Thêm địa điểm' : 'Add Location'}
+                      </Button>
+                    </div>
+                  )}
 
                   {/* Current Locations */}
                   <div className="space-y-4">
@@ -503,31 +493,21 @@ const ComprehensiveRouteOptimizer: React.FC = () => {
                   <h3 className="text-xl font-bold text-gray-800">
                     ⚙️ {language === 'vi' ? 'Tối ưu hóa theo:' : 'Optimize for:'}
                   </h3>
-                  <Select value={optimizationType} onValueChange={(value: any) => setOptimizationType(value)}>
-                    <SelectTrigger className="w-64">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="distance">
-                        <div className="flex items-center gap-2">
-                          <Route className="h-4 w-4 text-blue-500" />
-                          {language === 'vi' ? '🛣️ Khoảng cách ngắn nhất' : '🛣️ Shortest Distance'}
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="time">
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-green-500" />
-                          {language === 'vi' ? '⚡ Thời gian nhanh nhất' : '⚡ Fastest Time'}
-                        </div>
-                      </SelectItem>
-                      <SelectItem value="fuel">
-                        <div className="flex items-center gap-2">
-                          <DollarSign className="h-4 w-4 text-orange-500" />
-                          {language === 'vi' ? '⛽ Tiết kiệm nhiên liệu' : '⛽ Fuel Efficient'}
-                        </div>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <select 
+                    value={optimizationType} 
+                    onChange={(e) => setOptimizationType(e.target.value as any)}
+                    className="p-3 border border-gray-300 rounded-lg w-64"
+                  >
+                    <option value="distance">
+                      {language === 'vi' ? '🛣️ Khoảng cách ngắn nhất' : '🛣️ Shortest Distance'}
+                    </option>
+                    <option value="time">
+                      {language === 'vi' ? '⚡ Thời gian nhanh nhất' : '⚡ Fastest Time'}
+                    </option>
+                    <option value="fuel">
+                      {language === 'vi' ? '⛽ Tiết kiệm nhiên liệu' : '⛽ Fuel Efficient'}
+                    </option>
+                  </select>
                 </div>
                 
                 <Button 
