@@ -226,10 +226,10 @@ const PaymentTrackingAssistant: React.FC = () => {
   }
 
   const handleMarkPaid = (clientName: string) => {
-    setClients(prev => prev.map(client => 
-      client.name === clientName 
-        ? { ...client, status: 'paid' as const }
-        : client
+    setPayments(prev => prev.map(payment => 
+      payment.name === clientName 
+        ? { ...payment, status: 'paid' as const }
+        : payment
     ))
     alert(language === 'vi' 
       ? `✅ Đã đánh dấu thanh toán của ${clientName} hoàn tất!\n💰 Số tiền đã được ghi nhận vào hệ thống.` 
@@ -275,10 +275,10 @@ const PaymentTrackingAssistant: React.FC = () => {
   }
 
   const handleSaveAmount = (clientName: string) => {
-    setClients(prev => prev.map(client => 
-      client.name === clientName 
-        ? { ...client, amount: editAmount }
-        : client
+    setPayments(prev => prev.map(payment => 
+      payment.name === clientName 
+        ? { ...payment, amount: editAmount }
+        : payment
     ))
     setEditingClient(null)
     alert(language === 'vi' 
@@ -293,10 +293,10 @@ const PaymentTrackingAssistant: React.FC = () => {
   }
 
   const handleSaveCompany = (clientName: string) => {
-    setClients(prev => prev.map(client => 
-      client.name === clientName 
-        ? { ...client, company: editCompanyName }
-        : client
+    setPayments(prev => prev.map(payment => 
+      payment.name === clientName 
+        ? { ...payment, company: editCompanyName }
+        : payment
     ))
     setEditingCompany(null)
     alert(language === 'vi' 
@@ -469,9 +469,9 @@ const PaymentTrackingAssistant: React.FC = () => {
           </CardHeader>
           <CardContent className="p-6">
             <div className="space-y-4">
-              {clients.map((client, index) => (
+              {payments.map((payment, index) => (
                 <Card key={index} className={`border-l-4 transition-all duration-300 hover:shadow-lg ${
-                  client.status === 'overdue' ? 'border-l-red-500 bg-gradient-to-r from-red-50 to-red-100' :
+                  payment.status === 'overdue' ? 'border-l-red-500 bg-gradient-to-r from-red-50 to-red-100' :
                   'border-l-yellow-500 bg-gradient-to-r from-yellow-50 to-orange-100'
                 }`}>
                   <CardContent className="p-6">
@@ -479,8 +479,8 @@ const PaymentTrackingAssistant: React.FC = () => {
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-3">
                           <div className="flex flex-col">
-                            <h3 className="font-bold text-xl text-gray-800">{client.name}</h3>
-                            {editingCompany === client.name ? (
+                            <h3 className="font-bold text-xl text-gray-800">{payment.name}</h3>
+                            {editingCompany === payment.name ? (
                               <div className="flex items-center gap-2">
                                 <Input
                                   type="text"
@@ -491,7 +491,7 @@ const PaymentTrackingAssistant: React.FC = () => {
                                 />
                                 <Button 
                                   size="sm" 
-                                  onClick={() => handleSaveCompany(client.name)}
+                                  onClick={() => handleSaveCompany(payment.name)}
                                   className="bg-green-500 hover:bg-green-600 h-8"
                                 >
                                   <Save className="h-3 w-3" />
@@ -500,33 +500,34 @@ const PaymentTrackingAssistant: React.FC = () => {
                             ) : (
                               <h4 
                                 className="font-semibold text-lg text-blue-600 cursor-pointer hover:text-blue-800 transition-colors flex items-center gap-2"
-                                onClick={() => handleEditCompany(client.name, client.company)}
+                                onClick={() => handleEditCompany(payment.name, payment.company)}
                               >
-                                {client.company}
+                                {payment.company}
                                 <Edit className="h-4 w-4 text-gray-400 hover:text-blue-600" />
                               </h4>
                             )}
                           </div>
-                          <Badge className={getStatusColor(client.status)}>
-                            {client.status === 'overdue' ? (language === 'vi' ? 'Quá hạn' : 'Overdue') :
-                             (language === 'vi' ? 'Sắp đến hạn' : 'Upcoming')}
+                          <Badge className={getStatusColor(payment.status)}>
+                            {payment.status === 'overdue' ? (language === 'vi' ? 'Quá hạn' : 'Overdue') :
+                             payment.status === 'paid' ? (language === 'vi' ? 'Đã trả' : 'Paid') :
+                             (language === 'vi' ? 'Chờ thanh toán' : 'Pending')}
                           </Badge>
                         </div>
                         
                         <div className="grid grid-cols-2 gap-4 text-sm mb-4">
                           <div>
-                            <span className="text-gray-600 font-medium">{language === 'vi' ? 'Email:' : 'Email:'}</span>
-                            <p className="font-semibold text-gray-800">{client.email}</p>
+                            <span className="text-gray-600 font-medium">{language === 'vi' ? 'Ngày tạo:' : 'Created:'}</span>
+                            <p className="font-semibold text-gray-800">{new Date(payment.createdDate).toLocaleDateString('vi-VN')}</p>
                           </div>
                           <div>
                             <span className="text-gray-600 font-medium">{language === 'vi' ? 'Hạn thanh toán:' : 'Due Date:'}</span>
-                            <p className="font-semibold text-gray-800">{new Date(client.dueDate).toLocaleDateString('vi-VN')}</p>
+                            <p className="font-semibold text-gray-800">{new Date(payment.dueDate).toLocaleDateString('vi-VN')}</p>
                           </div>
                         </div>
                         
                         <div className="flex items-center gap-3 mb-3">
                           <span className="text-gray-600 font-medium">{language === 'vi' ? 'Số tiền:' : 'Amount:'}</span>
-                          {editingClient === client.name ? (
+                          {editingClient === payment.name ? (
                             <div className="flex items-center gap-2">
                               <Input
                                 type="number"
@@ -537,7 +538,7 @@ const PaymentTrackingAssistant: React.FC = () => {
                               />
                               <Button 
                                 size="sm" 
-                                onClick={() => handleSaveAmount(client.name)}
+                                onClick={() => handleSaveAmount(payment.name)}
                                 className="bg-green-500 hover:bg-green-600 h-10"
                               >
                                 <Save className="h-4 w-4" />
@@ -546,9 +547,9 @@ const PaymentTrackingAssistant: React.FC = () => {
                           ) : (
                             <div 
                               className="text-3xl font-bold text-blue-600 cursor-pointer hover:text-blue-800 transition-colors flex items-center gap-2"
-                              onClick={() => handleEditAmount(client.name, client.amount)}
+                              onClick={() => handleEditAmount(payment.name, payment.amount)}
                             >
-                              {formatCurrency(client.amount)}
+                              {formatCurrency(payment.amount)}
                               <Edit className="h-5 w-5 text-gray-400 hover:text-blue-600" />
                             </div>
                           )}
@@ -557,7 +558,7 @@ const PaymentTrackingAssistant: React.FC = () => {
                       
                       <div className="flex flex-col gap-3 ml-6">
                         <Button 
-                          onClick={() => handleMarkPaid(client.name)}
+                          onClick={() => handleMarkPaid(payment.name)}
                           className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-lg transform hover:scale-105 transition-all duration-300 px-6 py-3"
                         >
                           <CheckCircle className="h-5 w-5 mr-2" />
@@ -565,7 +566,7 @@ const PaymentTrackingAssistant: React.FC = () => {
                         </Button>
                         <Button 
                           className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white shadow-lg transform hover:scale-105 transition-all duration-300 px-6 py-3"
-                          onClick={() => handleSendReminder(client.name, client.email)}
+                          onClick={() => alert(language === 'vi' ? '📧 Tính năng email đang được phát triển' : '📧 Email feature in development')}
                         >
                           <Mail className="h-5 w-5 mr-2" />
                           {language === 'vi' ? '📧 Email' : '📧 Email'}
