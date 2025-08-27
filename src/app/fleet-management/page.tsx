@@ -33,6 +33,16 @@ interface Vehicle {
   tireCondition: 'good' | 'fair' | 'poor'
   brakeCondition: 'good' | 'fair' | 'poor'
   maintenanceCost: number
+  detailedMaintenance: {
+    thayNhot: { lastDate: string, nextDate: string, cost: number, status: 'due' | 'overdue' | 'completed' }
+    dangKiem: { lastDate: string, nextDate: string, cost: number, status: 'due' | 'overdue' | 'completed' }
+    kiemTraPhanh: { lastDate: string, nextDate: string, cost: number, status: 'due' | 'overdue' | 'completed' }
+    thayLop: { lastDate: string, nextDate: string, cost: number, status: 'due' | 'overdue' | 'completed' }
+    baoTriDongCo: { lastDate: string, nextDate: string, cost: number, status: 'due' | 'overdue' | 'completed' }
+    kiemTraDieuHoa: { lastDate: string, nextDate: string, cost: number, status: 'due' | 'overdue' | 'completed' }
+    thayLocDau: { lastDate: string, nextDate: string, cost: number, status: 'due' | 'overdue' | 'completed' }
+    kiemTraHopSo: { lastDate: string, nextDate: string, cost: number, status: 'due' | 'overdue' | 'completed' }
+  }
 }
 
 const FleetManagementPage: React.FC = () => {
@@ -54,7 +64,17 @@ const FleetManagementPage: React.FC = () => {
       engineHours: 8450,
       tireCondition: 'good',
       brakeCondition: 'good',
-      maintenanceCost: 2500000
+      maintenanceCost: 2500000,
+      detailedMaintenance: {
+        thayNhot: { lastDate: '2025-08-15', nextDate: '2025-11-15', cost: 800000, status: 'completed' },
+        dangKiem: { lastDate: '2025-02-15', nextDate: '2026-02-15', cost: 1200000, status: 'completed' },
+        kiemTraPhanh: { lastDate: '2025-08-15', nextDate: '2025-12-15', cost: 600000, status: 'completed' },
+        thayLop: { lastDate: '2025-06-10', nextDate: '2026-06-10', cost: 4500000, status: 'completed' },
+        baoTriDongCo: { lastDate: '2025-08-15', nextDate: '2025-12-15', cost: 1500000, status: 'completed' },
+        kiemTraDieuHoa: { lastDate: '2025-07-20', nextDate: '2025-10-20', cost: 900000, status: 'due' },
+        thayLocDau: { lastDate: '2025-08-15', nextDate: '2025-11-15', cost: 300000, status: 'completed' },
+        kiemTraHopSo: { lastDate: '2025-05-15', nextDate: '2025-11-15', cost: 2000000, status: 'completed' }
+      }
     },
     {
       id: '2',
@@ -70,7 +90,17 @@ const FleetManagementPage: React.FC = () => {
       engineHours: 12340,
       tireCondition: 'fair',
       brakeCondition: 'good',
-      maintenanceCost: 3200000
+      maintenanceCost: 3200000,
+      detailedMaintenance: {
+        thayNhot: { lastDate: '2025-08-10', nextDate: '2025-11-10', cost: 850000, status: 'completed' },
+        dangKiem: { lastDate: '2025-01-10', nextDate: '2026-01-10', cost: 1200000, status: 'completed' },
+        kiemTraPhanh: { lastDate: '2025-08-10', nextDate: '2025-12-10', cost: 700000, status: 'completed' },
+        thayLop: { lastDate: '2025-08-25', nextDate: '2026-08-25', cost: 3200000, status: 'completed' },
+        baoTriDongCo: { lastDate: '2025-07-10', nextDate: '2025-11-10', cost: 1800000, status: 'due' },
+        kiemTraDieuHoa: { lastDate: '2025-06-15', nextDate: '2025-09-15', cost: 1100000, status: 'overdue' },
+        thayLocDau: { lastDate: '2025-08-10', nextDate: '2025-11-10', cost: 320000, status: 'completed' },
+        kiemTraHopSo: { lastDate: '2025-04-10', nextDate: '2025-10-10', cost: 2200000, status: 'due' }
+      }
     },
     {
       id: '3',
@@ -327,55 +357,55 @@ const FleetManagementPage: React.FC = () => {
             <CardContent className="p-8">
               <div className="space-y-6">
                 {vehicles.map((vehicle) => (
-                  <Card key={vehicle.id} className="shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-300">
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-4">
-                          <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg">
-                            <Truck className="h-8 w-8 text-white" />
+                  <Card key={vehicle.id} className="shadow-xl border-2 border-blue-200 hover:shadow-2xl transition-all duration-300 bg-white">
+                    <CardContent className="p-8 bg-gradient-to-r from-white via-blue-25 to-indigo-25">
+                      <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-6">
+                          <div className="w-20 h-20 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-3xl flex items-center justify-center shadow-2xl">
+                            <Truck className="h-10 w-10 text-white" />
                           </div>
                           <div>
-                            <h3 className="text-2xl font-bold text-gray-800">{vehicle.licensePlate}</h3>
-                            <p className="text-lg text-blue-600 font-semibold">{vehicle.type}</p>
-                            <p className="text-gray-600">{language === 'vi' ? 'Tài xế:' : 'Driver:'} {vehicle.driver}</p>
+                            <h3 className="text-3xl font-bold text-gray-900 mb-2">{vehicle.licensePlate}</h3>
+                            <p className="text-xl text-blue-700 font-bold mb-1">{vehicle.type}</p>
+                            <p className="text-gray-800 font-semibold">{language === 'vi' ? 'Tài xế:' : 'Driver:'} <span className="text-blue-600">{vehicle.driver}</span></p>
                           </div>
                         </div>
-                        <Badge className={`${getStatusColor(vehicle.status)} text-white shadow-lg text-lg px-4 py-2`}>
+                        <Badge className={`${getStatusColor(vehicle.status)} text-white shadow-xl text-xl px-6 py-3 font-bold`}>
                           {getStatusText(vehicle.status)}
                         </Badge>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                        <div className="p-4 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-xl border border-blue-300">
-                          <div className="flex items-center gap-2 mb-2">
-                            <MapPin className="h-5 w-5 text-blue-700" />
-                            <span className="font-bold text-gray-900">{language === 'vi' ? 'Vị trí' : 'Location'}</span>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div className="p-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl border-2 border-blue-300 shadow-xl text-white">
+                          <div className="flex items-center gap-3 mb-3">
+                            <MapPin className="h-6 w-6 text-white" />
+                            <span className="font-bold text-white text-lg">{language === 'vi' ? 'Vị trí' : 'Location'}</span>
                           </div>
-                          <p className="text-gray-900 font-semibold">{vehicle.location}</p>
+                          <p className="text-white font-bold text-lg">{vehicle.location}</p>
                         </div>
 
-                        <div className="p-4 bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl border border-green-300">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Fuel className="h-5 w-5 text-green-700" />
-                            <span className="font-bold text-gray-900">{language === 'vi' ? 'Nhiên liệu' : 'Fuel'}</span>
+                        <div className="p-6 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl border-2 border-green-300 shadow-xl text-white">
+                          <div className="flex items-center gap-3 mb-3">
+                            <Fuel className="h-6 w-6 text-white" />
+                            <span className="font-bold text-white text-lg">{language === 'vi' ? 'Nhiên liệu' : 'Fuel'}</span>
                           </div>
-                          <p className="text-gray-900 font-bold text-lg">{vehicle.fuelLevel}%</p>
+                          <p className="text-white font-bold text-2xl">{vehicle.fuelLevel}%</p>
                         </div>
 
-                        <div className="p-4 bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl border border-purple-300">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Activity className="h-5 w-5 text-purple-700" />
-                            <span className="font-bold text-gray-900">{language === 'vi' ? 'Quãng đường' : 'Mileage'}</span>
+                        <div className="p-6 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl border-2 border-purple-300 shadow-xl text-white">
+                          <div className="flex items-center gap-3 mb-3">
+                            <Activity className="h-6 w-6 text-white" />
+                            <span className="font-bold text-white text-lg">{language === 'vi' ? 'Quãng đường' : 'Mileage'}</span>
                           </div>
-                          <p className="text-gray-900 font-bold text-lg">{vehicle.mileage.toLocaleString()} km</p>
+                          <p className="text-white font-bold text-2xl">{vehicle.mileage.toLocaleString()} km</p>
                         </div>
 
-                        <div className="p-4 bg-gradient-to-r from-orange-100 to-red-100 rounded-xl border border-orange-300">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Wrench className="h-5 w-5 text-orange-700" />
-                            <span className="font-bold text-gray-900">{language === 'vi' ? 'Bảo dưỡng tiếp theo' : 'Next Service'}</span>
+                        <div className="p-6 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl border-2 border-orange-300 shadow-xl text-white">
+                          <div className="flex items-center gap-3 mb-3">
+                            <Wrench className="h-6 w-6 text-white" />
+                            <span className="font-bold text-white text-lg">{language === 'vi' ? 'Bảo dưỡng tiếp theo' : 'Next Service'}</span>
                           </div>
-                          <p className="text-gray-900 font-bold">{new Date(vehicle.nextService).toLocaleDateString('vi-VN')}</p>
+                          <p className="text-white font-bold text-lg">{new Date(vehicle.nextService).toLocaleDateString('vi-VN')}</p>
                         </div>
                       </div>
 

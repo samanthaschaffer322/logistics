@@ -41,6 +41,8 @@ const PaymentTrackingAssistant: React.FC = () => {
   const [editAmount, setEditAmount] = useState<number>(0)
   const [editingCompany, setEditingCompany] = useState<string | null>(null)
   const [editCompanyName, setEditCompanyName] = useState<string>('')
+  const [editingDueDate, setEditingDueDate] = useState<string | null>(null)
+  const [editDueDate, setEditDueDate] = useState<string>('')
   const [sortBy, setSortBy] = useState<'dueDate' | 'amount' | 'company'>('dueDate')
   const [showAddForm, setShowAddForm] = useState(false)
   const [newPayment, setNewPayment] = useState({
@@ -330,6 +332,24 @@ const PaymentTrackingAssistant: React.FC = () => {
     alert(language === 'vi' 
       ? `🏢 Đã cập nhật tên công ty cho ${clientName}: ${editCompanyName}` 
       : `🏢 Updated company name for ${clientName}: ${editCompanyName}`
+    )
+  }
+
+  const handleEditDueDate = (clientName: string, currentDueDate: string) => {
+    setEditingDueDate(clientName)
+    setEditDueDate(currentDueDate)
+  }
+
+  const handleSaveDueDate = (clientName: string) => {
+    setPayments(prev => prev.map(payment => 
+      payment.name === clientName 
+        ? { ...payment, dueDate: editDueDate }
+        : payment
+    ))
+    setEditingDueDate(null)
+    alert(language === 'vi' 
+      ? `📅 Đã cập nhật hạn thanh toán cho ${clientName}: ${new Date(editDueDate).toLocaleDateString('vi-VN')}` 
+      : `📅 Updated due date for ${clientName}: ${new Date(editDueDate).toLocaleDateString()}`
     )
   }
 
@@ -639,7 +659,31 @@ const PaymentTrackingAssistant: React.FC = () => {
                           </div>
                           <div>
                             <span className="text-gray-600 font-medium">{language === 'vi' ? 'Hạn thanh toán:' : 'Due Date:'}</span>
-                            <p className="font-semibold text-gray-800">{new Date(payment.dueDate).toLocaleDateString('vi-VN')}</p>
+                            {editingDueDate === payment.name ? (
+                              <div className="flex items-center gap-2">
+                                <Input
+                                  type="date"
+                                  value={editDueDate}
+                                  onChange={(e) => setEditDueDate(e.target.value)}
+                                  className="w-40 h-8 text-sm"
+                                />
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => handleSaveDueDate(payment.name)}
+                                  className="bg-green-500 hover:bg-green-600 h-8"
+                                >
+                                  <Save className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <p 
+                                className="font-semibold text-gray-800 cursor-pointer hover:text-blue-600 transition-colors flex items-center gap-2"
+                                onClick={() => handleEditDueDate(payment.name, payment.dueDate)}
+                              >
+                                {new Date(payment.dueDate).toLocaleDateString('vi-VN')}
+                                <Edit className="h-4 w-4 text-gray-400 hover:text-blue-600" />
+                              </p>
+                            )}
                           </div>
                         </div>
                         
@@ -676,7 +720,13 @@ const PaymentTrackingAssistant: React.FC = () => {
                       
                       <div className="flex flex-col gap-3 ml-6">
                         <Button 
-                          onClick={() => handleMarkPaid(payment.name)}
+                          onClick={() => {
+                            handleMarkPaid(payment.name)
+                            alert(language === 'vi' 
+                              ? `✅ Đã đánh dấu thanh toán hoàn tất!\n👤 Khách hàng: ${payment.name}\n🏢 Công ty: ${payment.company}\n💰 Số tiền: ${formatCurrency(payment.amount)}\n📅 Ngày thanh toán: ${new Date().toLocaleDateString('vi-VN')}\n🎉 Cảm ơn quý khách đã thanh toán đúng hạn!` 
+                              : `✅ Payment marked as completed!\n👤 Customer: ${payment.name}\n🏢 Company: ${payment.company}\n💰 Amount: ${formatCurrency(payment.amount)}\n📅 Payment Date: ${new Date().toLocaleDateString()}\n🎉 Thank you for timely payment!`
+                            )
+                          }}
                           className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 shadow-lg transform hover:scale-105 transition-all duration-300 px-6 py-3"
                         >
                           <CheckCircle className="h-5 w-5 mr-2" />
@@ -684,13 +734,36 @@ const PaymentTrackingAssistant: React.FC = () => {
                         </Button>
                         <Button 
                           className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white shadow-lg transform hover:scale-105 transition-all duration-300 px-6 py-3"
-                          onClick={() => alert(language === 'vi' 
-                            ? `📧 Gửi email nhắc nhở thanh toán:\n👤 Khách hàng: ${payment.name}\n🏢 Công ty: ${payment.company}\n💰 Số tiền: ${formatCurrency(payment.amount)}\n📅 Hạn thanh toán: ${new Date(payment.dueDate).toLocaleDateString('vi-VN')}\n📨 Email đã được gửi thành công!` 
-                            : `📧 Send payment reminder email:\n👤 Customer: ${payment.name}\n🏢 Company: ${payment.company}\n💰 Amount: ${formatCurrency(payment.amount)}\n📅 Due Date: ${new Date(payment.dueDate).toLocaleDateString('vi-VN')}\n📨 Email sent successfully!`
-                          )}
+                          onClick={() => {
+                            // Simulate sending email
+                            setTimeout(() => {
+                              alert(language === 'vi' 
+                                ? `📧 Email nhắc nhở đã được gửi thành công!\n👤 Khách hàng: ${payment.name}\n🏢 Công ty: ${payment.company}\n💰 Số tiền: ${formatCurrency(payment.amount)}\n📅 Hạn thanh toán: ${new Date(payment.dueDate).toLocaleDateString('vi-VN')}\n📨 Email đã được gửi đến: ${payment.name.toLowerCase().replace(' ', '.')}@${payment.company.toLowerCase().replace(' ', '')}.com\n⏰ Thời gian gửi: ${new Date().toLocaleString('vi-VN')}` 
+                                : `📧 Payment reminder email sent successfully!\n👤 Customer: ${payment.name}\n🏢 Company: ${payment.company}\n💰 Amount: ${formatCurrency(payment.amount)}\n📅 Due Date: ${new Date(payment.dueDate).toLocaleDateString()}\n📨 Email sent to: ${payment.name.toLowerCase().replace(' ', '.')}@${payment.company.toLowerCase().replace(' ', '')}.com\n⏰ Sent at: ${new Date().toLocaleString()}`
+                              )
+                            }, 1500)
+                            
+                            // Show immediate feedback
+                            alert(language === 'vi' 
+                              ? `📤 Đang gửi email nhắc nhở thanh toán...\n👤 Khách hàng: ${payment.name}\n🏢 Công ty: ${payment.company}\n💰 Số tiền: ${formatCurrency(payment.amount)}\n📧 Vui lòng chờ trong giây lát...` 
+                              : `📤 Sending payment reminder email...\n👤 Customer: ${payment.name}\n🏢 Company: ${payment.company}\n💰 Amount: ${formatCurrency(payment.amount)}\n📧 Please wait a moment...`
+                            )
+                          }}
                         >
                           <Mail className="h-5 w-5 mr-2" />
                           {language === 'vi' ? '📧 Email' : '📧 Email'}
+                        </Button>
+                        <Button 
+                          className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg transform hover:scale-105 transition-all duration-300 px-6 py-3"
+                          onClick={() => {
+                            alert(language === 'vi' 
+                              ? `📧 Gửi email theo dõi thành công!\n👤 Khách hàng: ${payment.name}\n🏢 Công ty: ${payment.company}\n💰 Số tiền: ${formatCurrency(payment.amount)}\n📅 Quá hạn: ${Math.ceil((new Date().getTime() - new Date(payment.dueDate).getTime()) / (1000 * 60 * 60 * 24))} ngày\n📨 Email theo dõi đã được gửi với mức độ ưu tiên cao\n⚠️ Yêu cầu thanh toán khẩn cấp` 
+                              : `📧 Follow-up email sent successfully!\n👤 Customer: ${payment.name}\n🏢 Company: ${payment.company}\n💰 Amount: ${formatCurrency(payment.amount)}\n📅 Overdue: ${Math.ceil((new Date().getTime() - new Date(payment.dueDate).getTime()) / (1000 * 60 * 60 * 24))} days\n📨 Follow-up email sent with high priority\n⚠️ Urgent payment request`
+                            )
+                          }}
+                        >
+                          <Mail className="h-4 w-4 mr-2" />
+                          {language === 'vi' ? '📧 Gửi theo dõi' : '📧 Send Follow-up'}
                         </Button>
                       </div>
                     </div>
