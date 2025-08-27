@@ -43,6 +43,8 @@ const PaymentTrackingAssistant: React.FC = () => {
   const [editCompanyName, setEditCompanyName] = useState<string>('')
   const [editingDueDate, setEditingDueDate] = useState<string | null>(null)
   const [editDueDate, setEditDueDate] = useState<string>('')
+  const [editingCustomerName, setEditingCustomerName] = useState<string | null>(null)
+  const [editCustomerName, setEditCustomerName] = useState<string>('')
   const [sortBy, setSortBy] = useState<'dueDate' | 'amount' | 'company'>('dueDate')
   const [showAddForm, setShowAddForm] = useState(false)
   const [newPayment, setNewPayment] = useState({
@@ -335,6 +337,24 @@ const PaymentTrackingAssistant: React.FC = () => {
     )
   }
 
+  const handleEditCustomerName = (currentName: string) => {
+    setEditingCustomerName(currentName)
+    setEditCustomerName(currentName)
+  }
+
+  const handleSaveCustomerName = (oldName: string) => {
+    setPayments(prev => prev.map(payment => 
+      payment.name === oldName 
+        ? { ...payment, name: editCustomerName }
+        : payment
+    ))
+    setEditingCustomerName(null)
+    alert(language === 'vi' 
+      ? `👤 Đã cập nhật tên khách hàng: ${oldName} → ${editCustomerName}` 
+      : `👤 Updated customer name: ${oldName} → ${editCustomerName}`
+    )
+  }
+
   const handleEditDueDate = (clientName: string, currentDueDate: string) => {
     setEditingDueDate(clientName)
     setEditDueDate(currentDueDate)
@@ -617,7 +637,32 @@ const PaymentTrackingAssistant: React.FC = () => {
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-3">
                           <div className="flex flex-col">
-                            <h3 className="font-bold text-xl text-gray-800">{payment.name}</h3>
+                            {editingCustomerName === payment.name ? (
+                              <div className="flex items-center gap-2 mb-2">
+                                <Input
+                                  type="text"
+                                  value={editCustomerName}
+                                  onChange={(e) => setEditCustomerName(e.target.value)}
+                                  className="w-60 h-10 text-xl font-bold"
+                                  placeholder="Enter customer name"
+                                />
+                                <Button 
+                                  size="sm" 
+                                  onClick={() => handleSaveCustomerName(payment.name)}
+                                  className="bg-green-500 hover:bg-green-600 h-10"
+                                >
+                                  <Save className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <h3 
+                                className="font-bold text-xl text-gray-800 cursor-pointer hover:text-blue-600 transition-colors flex items-center gap-2"
+                                onClick={() => handleEditCustomerName(payment.name)}
+                              >
+                                {payment.name}
+                                <Edit className="h-4 w-4 text-gray-400 hover:text-blue-600" />
+                              </h3>
+                            )}
                             {editingCompany === payment.name ? (
                               <div className="flex items-center gap-2">
                                 <Input
@@ -655,7 +700,7 @@ const PaymentTrackingAssistant: React.FC = () => {
                         <div className="grid grid-cols-2 gap-4 text-sm mb-4">
                           <div>
                             <span className="text-gray-600 font-medium">{language === 'vi' ? 'Ngày tạo:' : 'Created:'}</span>
-                            <p className="font-semibold text-gray-800">{new Date(payment.createdDate).toLocaleDateString('vi-VN')}</p>
+                            <p className="font-semibold text-gray-800">{new Date(payment.createdDate).toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US')}</p>
                           </div>
                           <div>
                             <span className="text-gray-600 font-medium">{language === 'vi' ? 'Hạn thanh toán:' : 'Due Date:'}</span>
@@ -680,7 +725,7 @@ const PaymentTrackingAssistant: React.FC = () => {
                                 className="font-semibold text-gray-800 cursor-pointer hover:text-blue-600 transition-colors flex items-center gap-2"
                                 onClick={() => handleEditDueDate(payment.name, payment.dueDate)}
                               >
-                                {new Date(payment.dueDate).toLocaleDateString('vi-VN')}
+                                {new Date(payment.dueDate).toLocaleDateString(language === 'vi' ? 'vi-VN' : 'en-US')}
                                 <Edit className="h-4 w-4 text-gray-400 hover:text-blue-600" />
                               </p>
                             )}
