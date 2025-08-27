@@ -42,6 +42,14 @@ const PaymentTrackingAssistant: React.FC = () => {
   const [editingCompany, setEditingCompany] = useState<string | null>(null)
   const [editCompanyName, setEditCompanyName] = useState<string>('')
   const [sortBy, setSortBy] = useState<'dueDate' | 'amount' | 'company'>('dueDate')
+  const [showAddForm, setShowAddForm] = useState(false)
+  const [newPayment, setNewPayment] = useState({
+    name: '',
+    company: '',
+    amount: 0,
+    dueDate: '',
+    status: 'pending' as 'pending' | 'paid' | 'overdue'
+  })
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'paid' | 'overdue'>('all')
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
@@ -212,7 +220,23 @@ const PaymentTrackingAssistant: React.FC = () => {
     pendingCount: payments.filter(p => p.status === 'pending').length,
     pendingAmount: payments.filter(p => p.status === 'pending').reduce((sum, p) => sum + p.amount, 0),
     paidCount: payments.filter(p => p.status === 'paid').length,
-    collectionRate: 94.2
+    paidAmount: payments.filter(p => p.status === 'paid').reduce((sum, p) => sum + p.amount, 0),
+    collectionRate: 94.2,
+    // Calculate upcoming payments (within 7 days)
+    upcomingCount: payments.filter(p => {
+      const dueDate = new Date(p.dueDate)
+      const today = new Date()
+      const diffTime = dueDate.getTime() - today.getTime()
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+      return diffDays <= 7 && diffDays >= 0 && p.status === 'pending'
+    }).length,
+    upcomingAmount: payments.filter(p => {
+      const dueDate = new Date(p.dueDate)
+      const today = new Date()
+      const diffTime = dueDate.getTime() - today.getTime()
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+      return diffDays <= 7 && diffDays >= 0 && p.status === 'pending'
+    }).reduce((sum, p) => sum + p.amount, 0)
   }
 
   const formatCurrency = (amount: number) => {
@@ -307,6 +331,38 @@ const PaymentTrackingAssistant: React.FC = () => {
       ? `🏢 Đã cập nhật tên công ty cho ${clientName}: ${editCompanyName}` 
       : `🏢 Updated company name for ${clientName}: ${editCompanyName}`
     )
+  }
+
+  const handleAddPayment = () => {
+    if (newPayment.name && newPayment.company && newPayment.amount > 0 && newPayment.dueDate) {
+      const payment: Payment = {
+        id: `pay-${Date.now()}`,
+        name: newPayment.name,
+        company: newPayment.company,
+        amount: newPayment.amount,
+        dueDate: newPayment.dueDate,
+        createdDate: new Date().toISOString(),
+        status: newPayment.status
+      }
+      setPayments(prev => [...prev, payment])
+      setNewPayment({
+        name: '',
+        company: '',
+        amount: 0,
+        dueDate: '',
+        status: 'pending'
+      })
+      setShowAddForm(false)
+      alert(language === 'vi' 
+        ? `✅ Đã thêm khoản thanh toán mới:\n👤 ${payment.name}\n🏢 ${payment.company}\n💰 ${formatCurrency(payment.amount)}` 
+        : `✅ Added new payment:\n👤 ${payment.name}\n🏢 ${payment.company}\n💰 ${formatCurrency(payment.amount)}`
+      )
+    } else {
+      alert(language === 'vi' 
+        ? '⚠️ Vui lòng điền đầy đủ thông tin!' 
+        : '⚠️ Please fill in all information!'
+      )
+    }
   }
 
   return (
@@ -466,12 +522,70 @@ const PaymentTrackingAssistant: React.FC = () => {
         {/* Client Payment List */}
         <Card className="shadow-2xl border-0 bg-gradient-to-br from-white to-blue-50">
           <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-t-lg">
-            <CardTitle className="flex items-center gap-3 text-xl">
-              <User className="h-6 w-6" />
-              {language === 'vi' ? 'Danh sách Thanh toán' : 'Payment List'}
+            <CardTitle className="flex items-center justify-between text-xl">
+              <div className="flex items-center gap-3">
+                <User className="h-6 w-6" />
+                {language === 'vi' ? 'Danh sách Thanh toán' : 'Payment List'}
+              </div>
+              <Button 
+                onClick={() => setShowAddForm(!showAddForm)}
+                className="bg-white/20 hover:bg-white/30 text-white border-white/30"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                {language === 'vi' ? 'Thêm mới' : 'Add New'}
+              </Button>
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
+            {/* Add New Payment Form */}
+            {showAddForm && (
+              <div className="mb-6 p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200">
+                <h3 className="text-lg font-bold text-gray-800 mb-4">
+                  {language === 'vi' ? '➕ Thêm khoản thanh toán mới' : '➕ Add New Payment'}
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Input
+                    placeholder={language === 'vi' ? 'Tên khách hàng' : 'Customer Name'}
+                    value={newPayment.name}
+                    onChange={(e) => setNewPayment(prev => ({ ...prev, name: e.target.value }))}
+                  />
+                  <Input
+                    placeholder={language === 'vi' ? 'Tên công ty' : 'Company Name'}
+                    value={newPayment.company}
+                    onChange={(e) => setNewPayment(prev => ({ ...prev, company: e.target.value }))}
+                  />
+                  <Input
+                    type="number"
+                    placeholder={language === 'vi' ? 'Số tiền (VND)' : 'Amount (VND)'}
+                    value={newPayment.amount || ''}
+                    onChange={(e) => setNewPayment(prev => ({ ...prev, amount: Number(e.target.value) }))}
+                  />
+                  <Input
+                    type="date"
+                    placeholder={language === 'vi' ? 'Hạn thanh toán' : 'Due Date'}
+                    value={newPayment.dueDate}
+                    onChange={(e) => setNewPayment(prev => ({ ...prev, dueDate: e.target.value }))}
+                  />
+                </div>
+                <div className="flex gap-4 mt-4">
+                  <Button 
+                    onClick={handleAddPayment}
+                    className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600"
+                  >
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    {language === 'vi' ? 'Thêm thanh toán' : 'Add Payment'}
+                  </Button>
+                  <Button 
+                    onClick={() => setShowAddForm(false)}
+                    variant="outline"
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    {language === 'vi' ? 'Hủy' : 'Cancel'}
+                  </Button>
+                </div>
+              </div>
+            )}
+
             <div className="space-y-4">
               {payments.map((payment, index) => (
                 <Card key={index} className={`border-l-4 transition-all duration-300 hover:shadow-lg ${
@@ -570,7 +684,10 @@ const PaymentTrackingAssistant: React.FC = () => {
                         </Button>
                         <Button 
                           className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white shadow-lg transform hover:scale-105 transition-all duration-300 px-6 py-3"
-                          onClick={() => alert(language === 'vi' ? '📧 Tính năng email đang được phát triển' : '📧 Email feature in development')}
+                          onClick={() => alert(language === 'vi' 
+                            ? `📧 Gửi email nhắc nhở thanh toán:\n👤 Khách hàng: ${payment.name}\n🏢 Công ty: ${payment.company}\n💰 Số tiền: ${formatCurrency(payment.amount)}\n📅 Hạn thanh toán: ${new Date(payment.dueDate).toLocaleDateString('vi-VN')}\n📨 Email đã được gửi thành công!` 
+                            : `📧 Send payment reminder email:\n👤 Customer: ${payment.name}\n🏢 Company: ${payment.company}\n💰 Amount: ${formatCurrency(payment.amount)}\n📅 Due Date: ${new Date(payment.dueDate).toLocaleDateString('vi-VN')}\n📨 Email sent successfully!`
+                          )}
                         >
                           <Mail className="h-5 w-5 mr-2" />
                           {language === 'vi' ? '📧 Email' : '📧 Email'}

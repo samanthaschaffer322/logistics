@@ -61,22 +61,25 @@ const generateAnalyticsData = () => {
     
     monthlyData.push({
       date: date.toISOString().split('T')[0],
-      revenue: Math.floor(Math.random() * 50000000) + 20000000, // 20-70M VND
-      shipments: Math.floor(Math.random() * 50) + 20,
-      distance: Math.floor(Math.random() * 2000) + 500,
-      fuelCost: Math.floor(Math.random() * 5000000) + 2000000,
-      onTimeDelivery: Math.floor(Math.random() * 20) + 80 // 80-100%
+      revenue: Math.floor(Math.random() * 30000000) + 45000000, // 45-75M VND realistic for Vietnamese logistics
+      shipments: Math.floor(Math.random() * 25) + 35, // 35-60 shipments per day
+      distance: Math.floor(Math.random() * 1500) + 800, // 800-2300 km realistic Vietnamese routes
+      fuelCost: Math.floor(Math.random() * 8000000) + 12000000, // 12-20M VND fuel costs
+      onTimeDelivery: Math.floor(Math.random() * 15) + 85 // 85-100% on-time delivery
     })
   }
   
-  // Generate route performance data
+  // Generate realistic Vietnamese route performance data
   const routePerformance = routes.map(route => ({
     route,
-    shipments: Math.floor(Math.random() * 100) + 50,
-    avgDistance: Math.floor(Math.random() * 1000) + 200,
-    avgCost: Math.floor(Math.random() * 10000000) + 5000000,
-    onTimeRate: Math.floor(Math.random() * 20) + 80,
-    efficiency: Math.floor(Math.random() * 30) + 70
+    shipments: Math.floor(Math.random() * 40) + 25, // 25-65 shipments per route
+    avgDistance: route.includes('Hà Nội') ? Math.floor(Math.random() * 200) + 1700 : // HCM-Hanoi ~1700-1900km
+                 route.includes('Đà Nẵng') ? Math.floor(Math.random() * 100) + 950 : // HCM-Da Nang ~950-1050km
+                 route.includes('Cần Thơ') ? Math.floor(Math.random() * 50) + 170 : // HCM-Can Tho ~170-220km
+                 Math.floor(Math.random() * 300) + 200, // Other routes 200-500km
+    avgCost: Math.floor(Math.random() * 15000000) + 20000000, // 20-35M VND realistic Vietnamese logistics costs
+    onTimeRate: Math.floor(Math.random() * 15) + 85, // 85-100% on-time rate
+    efficiency: Math.floor(Math.random() * 20) + 80 // 80-100% efficiency
   }))
   
   // Generate vehicle utilization data
