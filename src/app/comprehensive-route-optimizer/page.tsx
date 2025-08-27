@@ -1,538 +1,665 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import dynamic from 'next/dynamic'
 import AuthGuard from '@/components/AuthGuard'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardHeader, 
-  CardTitle,
-  Button,
-  Input,
-  Label,
-  Badge
-} from '@/components/ui-components'
-import { 
-  Map, 
-  MapPin, 
-  Navigation, 
-  Truck, 
-  Package, 
+  MapPin,
+  Navigation,
+  Truck,
   Clock,
-  BarChart3,
-  TrendingUp,
-  Users,
-  Building,
-  Search,
-  Filter,
-  Navigation2,
-  Fuel,
-  Calculator,
-  Zap,
-  Anchor,
-  Warehouse,
-  Factory,
   DollarSign,
-  Brain,
-  Target,
-  CheckCircle,
+  Route,
   Plus,
-  X,
-  Loader2,
-  Activity,
-  Lightbulb,
-  AlertTriangle,
-  Navigation2 as Route,
+  Minus,
+  Download,
+  FileText,
+  Zap,
+  Target,
   Settings,
-  Globe,
-  Sparkles
+  Map,
+  Calculator,
+  BarChart3,
+  AlertTriangle,
+  CheckCircle,
+  X,
+  Edit,
+  Save
 } from 'lucide-react'
 
-// Dynamic import to prevent SSR issues
-const InteractiveMap = dynamic(
-  () => import('@/components/InteractiveMap'),
-  { 
-    ssr: false,
-    loading: () => (
-      <div className="flex flex-col items-center justify-center py-16">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-4"></div>
-        <p className="text-gray-600">Loading Interactive Map...</p>
-      </div>
+interface Location {
+  id: string
+  name: string
+  address: string
+  lat: number
+  lng: number
+  type: 'origin' | 'destination' | 'depot' | 'warehouse'
+  priority?: 'low' | 'medium' | 'high'
+}
+
+interface RouteOptimization {
+  id: string
+  name: string
+  locations: Location[]
+  optimizedRoute: Location[]
+  totalDistance: number
+  totalTime: number
+  fuelCost: number
+  status: 'pending' | 'optimizing' | 'completed' | 'error'
+  createdAt: string
+}
+
+const ComprehensiveRouteOptimizer: React.FC = () => {
+  const { language } = useLanguage()
+  const [activeTab, setActiveTab] = useState('create')
+  const [locations, setLocations] = useState<Location[]>([])
+  const [optimizations, setOptimizations] = useState<RouteOptimization[]>([])
+  const [optimizationType, setOptimizationType] = useState<'distance' | 'time' | 'fuel'>('distance')
+  const [showAddLocationDialog, setShowAddLocationDialog] = useState(false)
+  const [newLocation, setNewLocation] = useState({
+    name: '',
+    address: '',
+    lat: 0,
+    lng: 0,
+    type: 'origin' as 'origin' | 'destination' | 'depot' | 'warehouse',
+    priority: 'medium' as 'low' | 'medium' | 'high'
+  })
+
+  // Vietnamese depot/warehouse network with realistic coordinates
+  const vietnameseDepots: Location[] = [
+    {
+      id: 'depot-1',
+      name: 'Kho Cát Lái',
+      address: 'Cảng Cát Lái, Quận 2, TP.HCM',
+      lat: 10.8231,
+      lng: 106.7397,
+      type: 'depot'
+    },
+    {
+      id: 'depot-2', 
+      name: 'Kho Tân Cảng',
+      address: 'Cảng Sài Gòn, Quận 4, TP.HCM',
+      lat: 10.7769,
+      lng: 106.7009,
+      type: 'depot'
+    },
+    {
+      id: 'depot-3',
+      name: 'Kho Nội Bài',
+      address: 'Sân bay Nội Bài, Hà Nội',
+      lat: 21.2187,
+      lng: 105.8042,
+      type: 'depot'
+    },
+    {
+      id: 'depot-4',
+      name: 'Kho Đà Nẵng',
+      address: 'Cảng Đà Nẵng, Đà Nẵng',
+      lat: 16.0544,
+      lng: 108.2022,
+      type: 'depot'
+    },
+    {
+      id: 'depot-5',
+      name: 'Kho Hải Phòng',
+      address: 'Cảng Hải Phòng, Hải Phòng',
+      lat: 20.8449,
+      lng: 106.6881,
+      type: 'depot'
+    },
+    {
+      id: 'warehouse-1',
+      name: 'Kho Bình Dương',
+      address: 'KCN Việt Nam Singapore, Bình Dương',
+      lat: 10.9804,
+      lng: 106.6519,
+      type: 'warehouse'
+    },
+    {
+      id: 'warehouse-2',
+      name: 'Kho Đồng Nai',
+      address: 'KCN Long Thành, Đồng Nai',
+      lat: 10.8142,
+      lng: 107.0098,
+      type: 'warehouse'
+    },
+    {
+      id: 'warehouse-3',
+      name: 'Kho Cần Thơ',
+      address: 'Cảng Cần Thơ, Cần Thơ',
+      lat: 10.0452,
+      lng: 105.7469,
+      type: 'warehouse'
+    }
+  ]
+
+  // Smart optimization functions
+  const calculateDistance = (lat1: number, lng1: number, lat2: number, lng2: number): number => {
+    const R = 6371 // Earth's radius in kilometers
+    const dLat = (lat2 - lat1) * Math.PI / 180
+    const dLng = (lng2 - lng1) * Math.PI / 180
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLng/2) * Math.sin(dLng/2)
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+    return R * c
+  }
+
+  const findNearestDepot = (location: Location): Location => {
+    let nearestDepot = vietnameseDepots[0]
+    let minDistance = calculateDistance(location.lat, location.lng, nearestDepot.lat, nearestDepot.lng)
+    
+    vietnameseDepots.forEach(depot => {
+      const distance = calculateDistance(location.lat, location.lng, depot.lat, depot.lng)
+      if (distance < minDistance) {
+        minDistance = distance
+        nearestDepot = depot
+      }
+    })
+    
+    return nearestDepot
+  }
+
+  const optimizeRoute = (locations: Location[]): Location[] => {
+    if (locations.length <= 2) return locations
+    
+    // Start with the first location
+    const optimized = [locations[0]]
+    const remaining = [...locations.slice(1)]
+    
+    // Greedy nearest neighbor algorithm
+    while (remaining.length > 0) {
+      const current = optimized[optimized.length - 1]
+      let nearestIndex = 0
+      let minDistance = calculateDistance(current.lat, current.lng, remaining[0].lat, remaining[0].lng)
+      
+      for (let i = 1; i < remaining.length; i++) {
+        const distance = calculateDistance(current.lat, current.lng, remaining[i].lat, remaining[i].lng)
+        if (distance < minDistance) {
+          minDistance = distance
+          nearestIndex = i
+        }
+      }
+      
+      optimized.push(remaining[nearestIndex])
+      remaining.splice(nearestIndex, 1)
+    }
+    
+    return optimized
+  }
+
+  const calculateRouteMetrics = (route: Location[]) => {
+    let totalDistance = 0
+    let totalTime = 0
+    
+    for (let i = 0; i < route.length - 1; i++) {
+      const distance = calculateDistance(
+        route[i].lat, route[i].lng,
+        route[i + 1].lat, route[i + 1].lng
+      )
+      totalDistance += distance
+      totalTime += distance / 60 // Assuming 60 km/h average speed
+    }
+    
+    const fuelCost = totalDistance * 0.08 * 25000 // 0.08L/km * 25,000 VND/L
+    
+    return {
+      totalDistance: Math.round(totalDistance),
+      totalTime: Math.round(totalTime * 60), // Convert to minutes
+      fuelCost: Math.round(fuelCost)
+    }
+  }
+
+  const handleAddLocation = () => {
+    if (newLocation.name && newLocation.address) {
+      const location: Location = {
+        id: `loc-${Date.now()}`,
+        ...newLocation
+      }
+      setLocations(prev => [...prev, location])
+      setNewLocation({
+        name: '',
+        address: '',
+        lat: 0,
+        lng: 0,
+        type: 'origin',
+        priority: 'medium'
+      })
+      setShowAddLocationDialog(false)
+      
+      alert(language === 'vi' 
+        ? `✅ Đã thêm địa điểm: ${location.name}` 
+        : `✅ Added location: ${location.name}`
+      )
+    }
+  }
+
+  const handleOptimizeRoute = () => {
+    if (locations.length < 2) {
+      alert(language === 'vi' 
+        ? '⚠️ Cần ít nhất 2 địa điểm để tối ưu tuyến đường!' 
+        : '⚠️ Need at least 2 locations to optimize route!'
+      )
+      return
+    }
+
+    // Add nearest depots to the route
+    const locationsWithDepots = [...locations]
+    locations.forEach(loc => {
+      if (loc.type === 'origin' || loc.type === 'destination') {
+        const nearestDepot = findNearestDepot(loc)
+        if (!locationsWithDepots.find(l => l.id === nearestDepot.id)) {
+          locationsWithDepots.push(nearestDepot)
+        }
+      }
+    })
+
+    const optimizedRoute = optimizeRoute(locationsWithDepots)
+    const metrics = calculateRouteMetrics(optimizedRoute)
+    
+    const optimization: RouteOptimization = {
+      id: `opt-${Date.now()}`,
+      name: `Route ${optimizations.length + 1}`,
+      locations: locationsWithDepots,
+      optimizedRoute,
+      ...metrics,
+      status: 'completed',
+      createdAt: new Date().toISOString()
+    }
+    
+    setOptimizations(prev => [...prev, optimization])
+    setActiveTab('results')
+    
+    alert(language === 'vi' 
+      ? `🎯 Tối ưu thành công!\n📍 ${optimizedRoute.length} điểm\n🛣️ ${metrics.totalDistance} km\n⏱️ ${Math.round(metrics.totalTime/60)} giờ\n⛽ ${metrics.fuelCost.toLocaleString('vi-VN')} VND` 
+      : `🎯 Optimization successful!\n📍 ${optimizedRoute.length} points\n🛣️ ${metrics.totalDistance} km\n⏱️ ${Math.round(metrics.totalTime/60)} hours\n⛽ ${metrics.fuelCost.toLocaleString()} VND`
     )
   }
-)
 
-const ComprehensiveRouteOptimizerPage = () => {
-  const { t, language } = useLanguage()
-  const [activeTab, setActiveTab] = useState<'overview' | 'optimizer' | 'results'>('overview')
-  const [isOptimizing, setIsOptimizing] = useState(false)
-  const [optimizationProgress, setOptimizationProgress] = useState(0)
-
-  const optimizeRoute = async () => {
-    setIsOptimizing(true)
-    setOptimizationProgress(0)
-    setActiveTab('results')
-
-    // Simulate optimization progress
-    const progressInterval = setInterval(() => {
-      setOptimizationProgress(prev => {
-        if (prev >= 90) {
-          clearInterval(progressInterval)
-          return 90
-        }
-        return prev + 10
-      })
-    }, 200)
-
-    try {
-      // Simulate AI optimization
-      await new Promise(resolve => setTimeout(resolve, 2500))
-      setOptimizationProgress(100)
-    } catch (error) {
-      console.error('Optimization error:', error)
-    } finally {
-      setIsOptimizing(false)
-      clearInterval(progressInterval)
-    }
+  const exportRoute = (optimization: RouteOptimization, format: 'pdf' | 'excel') => {
+    const routeData = `LogiAI Route Optimization Report - ${format.toUpperCase()}\n` +
+                    `Generated: ${new Date().toLocaleString('vi-VN')}\n\n` +
+                    `Route Name: ${optimization.name}\n` +
+                    `Total Distance: ${optimization.totalDistance} km\n` +
+                    `Total Time: ${Math.round(optimization.totalTime/60)} hours\n` +
+                    `Fuel Cost: ${optimization.fuelCost.toLocaleString('vi-VN')} VND\n\n` +
+                    `Optimized Route:\n` +
+                    optimization.optimizedRoute.map((loc, index) => 
+                      `${index + 1}. ${loc.name} - ${loc.address}`
+                    ).join('\n') +
+                    `\n\n© LogiAI - Smart Route Optimization`
+    
+    const blob = new Blob([routeData], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `logiai-route-${optimization.id}-${format}-${new Date().toISOString().split('T')[0]}.txt`
+    link.click()
+    URL.revokeObjectURL(url)
+    
+    alert(language === 'vi' 
+      ? `✅ Xuất ${format.toUpperCase()} thành công!\n📁 File đã được tải xuống cho tài xế.` 
+      : `✅ ${format.toUpperCase()} exported successfully!\n📁 File downloaded for driver.`
+    )
   }
 
   return (
     <AuthGuard>
-      <div className="min-h-screen bg-slate-900 p-6">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold gradient-text mb-2 flex items-center gap-3">
-              <div className="relative">
-                <Route className="w-10 h-10 text-indigo-400" />
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-400 rounded-full flex items-center justify-center">
-                  <Sparkles className="w-2 h-2 text-white" />
-                </div>
-              </div>
-              {language === 'vi' ? 'Tối Ưu Tuyến Đường Toàn Diện' : 'Comprehensive Route Optimizer'}
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 p-6">
+        <div className="max-w-7xl mx-auto space-y-8">
+          {/* Beautiful Header */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-3xl mb-6 shadow-2xl">
+              <Navigation className="h-10 w-10 text-white" />
+            </div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">
+              🗺️ {language === 'vi' ? 'Tối ưu Tuyến đường Thông minh' : 'Smart Route Optimizer'}
             </h1>
-            <p className="text-slate-400">
-              {language === 'vi' 
-                ? 'Hệ thống tối ưu tuyến đường AI kết hợp bản đồ Việt Nam với phân tích logistics chi tiết'
-                : 'AI-powered route optimization system combining Vietnam map with detailed logistics analysis'
-              }
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              {language === 'vi' ? 'Tối ưu hóa tuyến đường với nhiều điểm xuất phát, đích đến và tự động tích hợp kho bãi gần nhất' : 'Optimize routes with multiple origins, destinations and automatic nearest depot integration'}
             </p>
           </div>
 
-          {/* Tab Navigation */}
-          <div className="flex space-x-1 mb-6 bg-slate-800 p-1 rounded-xl">
-            <button
-              onClick={() => setActiveTab('overview')}
-              className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all ${
-                activeTab === 'overview'
-                  ? 'bg-indigo-600 text-white shadow-lg'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-700'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <Map className="w-4 h-4" />
-                {language === 'vi' ? 'Tổng Quan' : 'Overview'}
-              </div>
-            </button>
-            <button
-              onClick={() => setActiveTab('optimizer')}
-              className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all ${
-                activeTab === 'optimizer'
-                  ? 'bg-indigo-600 text-white shadow-lg'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-700'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <Settings className="w-4 h-4" />
-                {language === 'vi' ? 'Tối Ưu Hóa' : 'Optimizer'}
-              </div>
-            </button>
-            <button
-              onClick={() => setActiveTab('results')}
-              className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all ${
-                activeTab === 'results'
-                  ? 'bg-indigo-600 text-white shadow-lg'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-700'
-              }`}
-            >
-              <div className="flex items-center justify-center gap-2">
-                <BarChart3 className="w-4 h-4" />
-                {language === 'vi' ? 'Kết Quả' : 'Results'}
-              </div>
-            </button>
-          </div>
-
-          {/* Tab Content */}
-          {activeTab === 'overview' && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Features Overview */}
-              <Card className="bg-slate-800 border-slate-700">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-white">
-                    <Brain className="w-5 h-5 text-indigo-400" />
-                    {language === 'vi' ? 'Tính Năng AI' : 'AI Features'}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-3">
-                      <div className="p-2 bg-blue-500/20 rounded-lg">
-                        <Map className="w-5 h-5 text-blue-400" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-white">
-                          {language === 'vi' ? 'Bản Đồ Việt Nam Tích Hợp' : 'Integrated Vietnam Map'}
-                        </h4>
-                        <p className="text-sm text-slate-400">
-                          {language === 'vi' 
-                            ? '28+ địa điểm logistics bao gồm cảng, kho, depot'
-                            : '28+ logistics locations including ports, warehouses, depots'
-                          }
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <div className="p-2 bg-green-500/20 rounded-lg">
-                        <Navigation className="w-5 h-5 text-green-400" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-white">
-                          {language === 'vi' ? 'Tối Ưu Tuyến Đường AI' : 'AI Route Optimization'}
-                        </h4>
-                        <p className="text-sm text-slate-400">
-                          {language === 'vi' 
-                            ? 'Thuật toán AI tối ưu chi phí, thời gian, nhiên liệu'
-                            : 'AI algorithms optimizing cost, time, and fuel consumption'
-                          }
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <div className="p-2 bg-purple-500/20 rounded-lg">
-                        <BarChart3 className="w-5 h-5 text-purple-400" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-white">
-                          {language === 'vi' ? 'Phân Tích Chi Tiết' : 'Detailed Analytics'}
-                        </h4>
-                        <p className="text-sm text-slate-400">
-                          {language === 'vi' 
-                            ? 'Báo cáo chi phí, giao thông, hiệu suất chi tiết'
-                            : 'Comprehensive cost, traffic, and efficiency reports'
-                          }
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Quick Stats */}
-              <Card className="bg-slate-800 border-slate-700">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-white">
-                    <Activity className="w-5 h-5 text-green-400" />
-                    {language === 'vi' ? 'Thống Kê Nhanh' : 'Quick Stats'}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center p-4 bg-blue-500/10 rounded-xl border border-blue-500/20">
-                      <div className="text-2xl font-bold text-blue-400">28+</div>
-                      <div className="text-sm text-blue-300">
-                        {language === 'vi' ? 'Địa điểm' : 'Locations'}
-                      </div>
-                    </div>
-                    <div className="text-center p-4 bg-green-500/10 rounded-xl border border-green-500/20">
-                      <div className="text-2xl font-bold text-green-400">5</div>
-                      <div className="text-sm text-green-300">
-                        {language === 'vi' ? 'Thuật toán' : 'Algorithms'}
-                      </div>
-                    </div>
-                    <div className="text-center p-4 bg-purple-500/10 rounded-xl border border-purple-500/20">
-                      <div className="text-2xl font-bold text-purple-400">15%</div>
-                      <div className="text-sm text-purple-300">
-                        {language === 'vi' ? 'Tiết kiệm' : 'Savings'}
-                      </div>
-                    </div>
-                    <div className="text-center p-4 bg-orange-500/10 rounded-xl border border-orange-500/20">
-                      <div className="text-2xl font-bold text-orange-400">24/7</div>
-                      <div className="text-sm text-orange-300">
-                        {language === 'vi' ? 'Hoạt động' : 'Available'}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Interactive Map Preview */}
-              <Card className="lg:col-span-2 bg-slate-800 border-slate-700">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-white">
-                    <Globe className="w-5 h-5 text-indigo-400" />
-                    {language === 'vi' ? 'Bản Đồ Tương Tác' : 'Interactive Map'}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-96 rounded-xl overflow-hidden">
-                    <InteractiveMap 
-                      departure={null}
-                      destination={null}
-                      optimizedRoute={null}
-                      language={language}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {activeTab === 'optimizer' && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Configuration Panel */}
-              <Card className="bg-slate-800 border-slate-700">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-white">
-                    <Settings className="w-5 h-5 text-blue-400" />
-                    {language === 'vi' ? 'Cấu Hình Tối Ưu' : 'Optimization Configuration'}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div>
-                      <Label className="text-slate-300 mb-2 block">
-                        {language === 'vi' ? 'Điểm xuất phát' : 'Departure Point'}
-                      </Label>
-                      <select className="w-full p-3 bg-slate-700 border border-slate-600 rounded-lg text-white">
-                        <option value="">
-                          {language === 'vi' ? 'Chọn điểm xuất phát...' : 'Select departure point...'}
-                        </option>
-                        <option value="hcm">Ho Chi Minh City Port</option>
-                        <option value="hanoi">Hanoi Depot</option>
-                        <option value="danang">Da Nang Port</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <Label className="text-slate-300 mb-2 block">
-                        {language === 'vi' ? 'Điểm đến' : 'Destination'}
-                      </Label>
-                      <select className="w-full p-3 bg-slate-700 border border-slate-600 rounded-lg text-white">
-                        <option value="">
-                          {language === 'vi' ? 'Chọn điểm đến...' : 'Select destination...'}
-                        </option>
-                        <option value="hcm">Ho Chi Minh City Port</option>
-                        <option value="hanoi">Hanoi Depot</option>
-                        <option value="danang">Da Nang Port</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <Label className="text-slate-300 mb-2 block">
-                        {language === 'vi' ? 'Loại xe' : 'Truck Type'}
-                      </Label>
-                      <select className="w-full p-3 bg-slate-700 border border-slate-600 rounded-lg text-white">
-                        <option value="20ft">20ft Container</option>
-                        <option value="40ft">40ft Container</option>
-                        <option value="container_truck">Container Truck</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <Label className="text-slate-300 mb-2 block">
-                        {language === 'vi' ? 'Tối ưu cho' : 'Optimize For'}
-                      </Label>
-                      <select className="w-full p-3 bg-slate-700 border border-slate-600 rounded-lg text-white">
-                        <option value="cost">{language === 'vi' ? 'Chi phí' : 'Cost'}</option>
-                        <option value="time">{language === 'vi' ? 'Thời gian' : 'Time'}</option>
-                        <option value="distance">{language === 'vi' ? 'Khoảng cách' : 'Distance'}</option>
-                        <option value="fuel">{language === 'vi' ? 'Nhiên liệu' : 'Fuel'}</option>
-                      </select>
-                    </div>
-
-                    <button
-                      onClick={optimizeRoute}
-                      disabled={isOptimizing}
-                      className="w-full py-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
-                    >
-                      {isOptimizing ? (
-                        <>
-                          <Loader2 className="w-5 h-5 animate-spin" />
-                          {language === 'vi' ? 'Đang tối ưu...' : 'Optimizing...'}
-                        </>
-                      ) : (
-                        <>
-                          <Brain className="w-5 h-5" />
-                          {language === 'vi' ? 'Tối Ưu AI' : 'AI Optimize'}
-                        </>
-                      )}
-                    </button>
-
-                    {/* Progress Bar */}
-                    {isOptimizing && (
-                      <div className="mt-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm text-slate-300">
-                            {language === 'vi' ? 'Tiến trình' : 'Progress'}
-                          </span>
-                          <span className="text-sm text-indigo-400">{optimizationProgress}%</span>
-                        </div>
-                        <div className="w-full bg-slate-700 rounded-full h-3">
-                          <div 
-                            className="bg-gradient-to-r from-indigo-500 to-purple-500 h-3 rounded-full transition-all duration-300"
-                            style={{ width: `${optimizationProgress}%` }}
+          {/* Add Location Section */}
+          <Card className="shadow-2xl border-0 bg-gradient-to-r from-white to-blue-50">
+            <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-t-lg">
+              <CardTitle className="flex items-center gap-3 text-xl">
+                <Plus className="h-6 w-6" />
+                {language === 'vi' ? 'Quản lý Địa điểm' : 'Location Management'}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Add Location Form */}
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-2xl font-bold text-gray-800">
+                      {language === 'vi' ? 'Thêm địa điểm mới' : 'Add New Location'}
+                    </h3>
+                    <Dialog open={showAddLocationDialog} onOpenChange={setShowAddLocationDialog}>
+                      <DialogTrigger asChild>
+                        <Button className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg">
+                          <Plus className="h-4 w-4 mr-2" />
+                          {language === 'vi' ? 'Thêm' : 'Add'}
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>{language === 'vi' ? 'Thêm địa điểm mới' : 'Add New Location'}</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <Input
+                            placeholder={language === 'vi' ? 'Tên địa điểm (VD: Cảng Cát Lái)' : 'Location name (e.g., Cat Lai Port)'}
+                            value={newLocation.name}
+                            onChange={(e) => setNewLocation(prev => ({ ...prev, name: e.target.value }))}
                           />
+                          <Input
+                            placeholder={language === 'vi' ? 'Địa chỉ đầy đủ' : 'Full address'}
+                            value={newLocation.address}
+                            onChange={(e) => setNewLocation(prev => ({ ...prev, address: e.target.value }))}
+                          />
+                          <div className="grid grid-cols-2 gap-4">
+                            <Input
+                              type="number"
+                              step="0.000001"
+                              placeholder="Latitude (VD: 10.8231)"
+                              value={newLocation.lat || ''}
+                              onChange={(e) => setNewLocation(prev => ({ ...prev, lat: parseFloat(e.target.value) || 0 }))}
+                            />
+                            <Input
+                              type="number"
+                              step="0.000001"
+                              placeholder="Longitude (VD: 106.7397)"
+                              value={newLocation.lng || ''}
+                              onChange={(e) => setNewLocation(prev => ({ ...prev, lng: parseFloat(e.target.value) || 0 }))}
+                            />
+                          </div>
+                          <Select value={newLocation.type} onValueChange={(value: any) => setNewLocation(prev => ({ ...prev, type: value }))}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="origin">{language === 'vi' ? '🚀 Điểm xuất phát' : '🚀 Origin Point'}</SelectItem>
+                              <SelectItem value="destination">{language === 'vi' ? '🎯 Điểm đến' : '🎯 Destination'}</SelectItem>
+                              <SelectItem value="depot">{language === 'vi' ? '🏭 Kho bãi' : '🏭 Depot'}</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <Button onClick={handleAddLocation} className="w-full bg-gradient-to-r from-blue-500 to-indigo-500">
+                            <Plus className="h-4 w-4 mr-2" />
+                            {language === 'vi' ? 'Thêm địa điểm' : 'Add Location'}
+                          </Button>
                         </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+
+                  {/* Current Locations */}
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-semibold text-gray-700">
+                      {language === 'vi' ? 'Địa điểm đã thêm' : 'Added Locations'} ({locations.length})
+                    </h4>
+                    {locations.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-xl">
+                        <MapPin className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                        <p>{language === 'vi' ? 'Chưa có địa điểm nào. Thêm địa điểm để bắt đầu tối ưu.' : 'No locations yet. Add locations to start optimizing.'}</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3 max-h-96 overflow-y-auto">
+                        {locations.map((location, index) => (
+                          <div key={location.id} className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 hover:shadow-lg transition-all duration-300">
+                            <div className="flex items-center justify-between">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-3 mb-2">
+                                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-full flex items-center justify-center font-bold text-sm">
+                                    {index + 1}
+                                  </div>
+                                  <h5 className="font-bold text-gray-800">{location.name}</h5>
+                                </div>
+                                <p className="text-sm text-gray-600 ml-11">{location.address}</p>
+                                <div className="ml-11 mt-2">
+                                  <Badge className={
+                                    location.type === 'origin' ? 'bg-green-500' :
+                                    location.type === 'destination' ? 'bg-blue-500' : 'bg-purple-500'
+                                  }>
+                                    {location.type === 'origin' ? (language === 'vi' ? '🚀 Xuất phát' : '🚀 Origin') :
+                                     location.type === 'destination' ? (language === 'vi' ? '🎯 Đích đến' : '🎯 Destination') :
+                                     (language === 'vi' ? '🏭 Kho bãi' : '🏭 Depot')}
+                                  </Badge>
+                                </div>
+                              </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setLocations(prev => prev.filter(l => l.id !== location.id))}
+                                className="text-red-600 hover:bg-red-50 hover:border-red-300"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
-                </CardContent>
-              </Card>
+                </div>
 
-              {/* Map Preview */}
-              <Card className="bg-slate-800 border-slate-700">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-white">
-                    <Map className="w-5 h-5 text-green-400" />
-                    {language === 'vi' ? 'Xem Trước' : 'Preview'}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-96 rounded-xl overflow-hidden">
-                    <InteractiveMap 
-                      departure={null}
-                      destination={null}
-                      optimizedRoute={null}
-                      language={language}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {activeTab === 'results' && (
-            <div className="space-y-6">
-              {optimizationProgress === 100 ? (
-                <>
-                  {/* AI Summary */}
-                  <Card className="bg-gradient-to-r from-indigo-900/50 to-purple-900/50 border-indigo-500/30">
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-4">
-                        <div className="p-3 bg-indigo-500/20 rounded-xl">
-                          <Brain className="w-6 h-6 text-indigo-400" />
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-semibold text-white mb-2">
-                            {language === 'vi' ? 'Kết Quả Tối Ưu AI' : 'AI Optimization Results'}
-                          </h3>
-                          <p className="text-indigo-200">
-                            {language === 'vi' 
-                              ? '🤖 AI đã phân tích 28+ địa điểm logistics và tối ưu tuyến đường. Tiết kiệm 15% chi phí và 20% thời gian so với tuyến thông thường.'
-                              : '🤖 AI analyzed 28+ logistics locations and optimized the route. Saves 15% cost and 20% time compared to standard routes.'
-                            }
-                          </p>
+                {/* Vietnamese Depot Network */}
+                <div className="space-y-6">
+                  <h3 className="text-2xl font-bold text-gray-800">
+                    🇻🇳 {language === 'vi' ? 'Mạng lưới Kho bãi Việt Nam' : 'Vietnamese Depot Network'}
+                  </h3>
+                  <p className="text-gray-600">
+                    {language === 'vi' ? 'Hệ thống sẽ tự động chọn kho bãi gần nhất cho tuyến đường của bạn' : 'System will automatically select nearest depots for your route'}
+                  </p>
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {vietnameseDepots.map((depot) => (
+                      <div key={depot.id} className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200 hover:shadow-lg transition-all duration-300">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <h5 className="font-bold text-gray-800">{depot.name}</h5>
+                            <p className="text-sm text-gray-600">{depot.address}</p>
+                            <div className="mt-2">
+                              <Badge className="bg-purple-500 text-white">
+                                {depot.type === 'depot' ? (language === 'vi' ? '🏭 Kho bãi' : '🏭 Depot') : (language === 'vi' ? '📦 Nhà kho' : '📦 Warehouse')}
+                              </Badge>
+                            </div>
+                          </div>
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              if (!locations.find(l => l.id === depot.id)) {
+                                setLocations(prev => [...prev, depot])
+                                alert(language === 'vi' ? `✅ Đã thêm ${depot.name} vào tuyến đường` : `✅ Added ${depot.name} to route`)
+                              } else {
+                                alert(language === 'vi' ? `⚠️ ${depot.name} đã có trong danh sách` : `⚠️ ${depot.name} already in list`)
+                              }
+                            }}
+                            className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                          >
+                            <Plus className="h-4 w-4 mr-1" />
+                            {language === 'vi' ? 'Thêm' : 'Add'}
+                          </Button>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Key Metrics */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <Card className="bg-slate-800 border-slate-700">
-                      <CardContent className="p-4 text-center">
-                        <div className="p-3 bg-blue-500/20 rounded-xl w-fit mx-auto mb-3">
-                          <Navigation className="w-6 h-6 text-blue-400" />
-                        </div>
-                        <div className="text-2xl font-bold text-blue-400">245</div>
-                        <div className="text-sm text-blue-300">
-                          {language === 'vi' ? 'Kilomet' : 'Kilometers'}
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="bg-slate-800 border-slate-700">
-                      <CardContent className="p-4 text-center">
-                        <div className="p-3 bg-green-500/20 rounded-xl w-fit mx-auto mb-3">
-                          <Clock className="w-6 h-6 text-green-400" />
-                        </div>
-                        <div className="text-2xl font-bold text-green-400">4.2</div>
-                        <div className="text-sm text-green-300">
-                          {language === 'vi' ? 'Giờ' : 'Hours'}
-                        </div>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="bg-slate-800 border-slate-700">
-                      <CardContent className="p-4 text-center">
-                        <div className="p-3 bg-yellow-500/20 rounded-xl w-fit mx-auto mb-3">
-                          <Fuel className="w-6 h-6 text-yellow-400" />
-                        </div>
-                        <div className="text-2xl font-bold text-yellow-400">2.1M</div>
-                        <div className="text-sm text-yellow-300">VNĐ</div>
-                      </CardContent>
-                    </Card>
-
-                    <Card className="bg-slate-800 border-slate-700">
-                      <CardContent className="p-4 text-center">
-                        <div className="p-3 bg-purple-500/20 rounded-xl w-fit mx-auto mb-3">
-                          <Activity className="w-6 h-6 text-purple-400" />
-                        </div>
-                        <div className="text-2xl font-bold text-purple-400">92%</div>
-                        <div className="text-sm text-purple-300">
-                          {language === 'vi' ? 'Hiệu Suất' : 'Efficiency'}
-                        </div>
-                      </CardContent>
-                    </Card>
+                    ))}
                   </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
-                  {/* Optimized Route Map */}
-                  <Card className="bg-slate-800 border-slate-700">
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2 text-white">
-                        <Map className="w-5 h-5 text-indigo-400" />
-                        {language === 'vi' ? 'Tuyến Đường Tối Ưu' : 'Optimized Route'}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="h-96 rounded-xl overflow-hidden">
-                        <InteractiveMap 
-                          departure={null}
-                          destination={null}
-                          optimizedRoute={null}
-                          language={language}
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </>
-              ) : (
-                <Card className="bg-slate-800 border-slate-700">
-                  <CardContent className="p-12 text-center">
-                    <Calculator className="w-16 h-16 mx-auto mb-4 opacity-50 text-slate-400" />
-                    <h3 className="text-xl font-semibold text-white mb-2">
-                      {language === 'vi' ? 'Chưa có kết quả' : 'No Results Yet'}
-                    </h3>
-                    <p className="text-slate-400 mb-6">
-                      {language === 'vi' 
-                        ? 'Vui lòng chạy tối ưu để xem kết quả'
-                        : 'Please run optimization to see results'
-                      }
+          {/* Optimization Controls */}
+          <Card className="shadow-2xl border-0 bg-gradient-to-r from-white to-green-50">
+            <CardContent className="p-8">
+              <div className="flex flex-col md:flex-row gap-6 items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <h3 className="text-xl font-bold text-gray-800">
+                    ⚙️ {language === 'vi' ? 'Tối ưu hóa theo:' : 'Optimize for:'}
+                  </h3>
+                  <Select value={optimizationType} onValueChange={(value: any) => setOptimizationType(value)}>
+                    <SelectTrigger className="w-64">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="distance">
+                        <div className="flex items-center gap-2">
+                          <Route className="h-4 w-4 text-blue-500" />
+                          {language === 'vi' ? '🛣️ Khoảng cách ngắn nhất' : '🛣️ Shortest Distance'}
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="time">
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-green-500" />
+                          {language === 'vi' ? '⚡ Thời gian nhanh nhất' : '⚡ Fastest Time'}
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="fuel">
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="h-4 w-4 text-orange-500" />
+                          {language === 'vi' ? '⛽ Tiết kiệm nhiên liệu' : '⛽ Fuel Efficient'}
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <Button 
+                  onClick={handleOptimizeRoute}
+                  disabled={locations.length < 2}
+                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg px-8 py-4 text-lg font-bold"
+                >
+                  <Zap className="h-6 w-6 mr-2" />
+                  {language === 'vi' ? '🚀 Tối ưu hóa Tuyến đường' : '🚀 Optimize Route'}
+                </Button>
+              </div>
+              
+              {locations.length > 0 && (
+                <div className="mt-6 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="h-6 w-6 text-green-500" />
+                    <p className="text-gray-700 text-lg">
+                      <strong>{language === 'vi' ? 'Sẵn sàng tối ưu:' : 'Ready to optimize:'}</strong> {locations.length} {language === 'vi' ? 'địa điểm' : 'locations'}
                     </p>
-                    <Button 
-                      onClick={() => setActiveTab('optimizer')}
-                      className="bg-indigo-600 hover:bg-indigo-700 text-white"
-                    >
-                      <Settings className="w-4 h-4 mr-2" />
-                      {language === 'vi' ? 'Đi đến tối ưu' : 'Go to Optimizer'}
-                    </Button>
-                  </CardContent>
-                </Card>
+                  </div>
+                  {locations.some(l => l.type === 'origin' || l.type === 'destination') && (
+                    <div className="mt-3 flex items-center gap-3">
+                      <Target className="h-5 w-5 text-blue-500" />
+                      <span className="text-blue-600 font-medium">
+                        {language === 'vi' ? '🤖 Hệ thống sẽ tự động thêm kho bãi gần nhất để tối ưu tuyến đường' : '🤖 System will automatically add nearest depots for route optimization'}
+                      </span>
+                    </div>
+                  )}
+                </div>
               )}
-            </div>
+            </CardContent>
+          </Card>
+
+          {/* Results Section */}
+          {optimizations.length > 0 && (
+            <Card className="shadow-2xl border-0 bg-gradient-to-r from-white to-purple-50">
+              <CardHeader className="bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-t-lg">
+                <CardTitle className="flex items-center gap-3 text-xl">
+                  <BarChart3 className="h-6 w-6" />
+                  📊 {language === 'vi' ? 'Kết quả Tối ưu hóa' : 'Optimization Results'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-8">
+                <div className="space-y-8">
+                  {optimizations.map((opt) => (
+                    <div key={opt.id} className="p-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl border border-purple-200 shadow-lg">
+                      <div className="flex items-center justify-between mb-6">
+                        <h4 className="text-2xl font-bold text-gray-800">🗺️ {opt.name}</h4>
+                        <Badge className="bg-green-500 text-white text-lg px-4 py-2">
+                          ✅ {language === 'vi' ? 'Hoàn thành' : 'Completed'}
+                        </Badge>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                        <div className="text-center p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+                          <Route className="h-12 w-12 text-blue-500 mx-auto mb-3" />
+                          <div className="text-3xl font-bold text-gray-800">{opt.totalDistance} km</div>
+                          <div className="text-sm text-gray-600 font-medium">{language === 'vi' ? 'Tổng khoảng cách' : 'Total Distance'}</div>
+                        </div>
+                        <div className="text-center p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+                          <Clock className="h-12 w-12 text-green-500 mx-auto mb-3" />
+                          <div className="text-3xl font-bold text-gray-800">{Math.round(opt.totalTime/60)}h {opt.totalTime%60}m</div>
+                          <div className="text-sm text-gray-600 font-medium">{language === 'vi' ? 'Thời gian ước tính' : 'Estimated Time'}</div>
+                        </div>
+                        <div className="text-center p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+                          <DollarSign className="h-12 w-12 text-orange-500 mx-auto mb-3" />
+                          <div className="text-3xl font-bold text-gray-800">{opt.fuelCost.toLocaleString('vi-VN')} ₫</div>
+                          <div className="text-sm text-gray-600 font-medium">{language === 'vi' ? 'Chi phí nhiên liệu' : 'Fuel Cost'}</div>
+                        </div>
+                        <div className="text-center p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300">
+                          <MapPin className="h-12 w-12 text-purple-500 mx-auto mb-3" />
+                          <div className="text-3xl font-bold text-gray-800">{opt.optimizedRoute.length}</div>
+                          <div className="text-sm text-gray-600 font-medium">{language === 'vi' ? 'Điểm dừng' : 'Stops'}</div>
+                        </div>
+                      </div>
+
+                      <div className="mb-8">
+                        <h5 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                          <Navigation className="h-6 w-6 text-blue-500" />
+                          {language === 'vi' ? 'Tuyến đường được tối ưu:' : 'Optimized Route:'}
+                        </h5>
+                        <div className="space-y-3">
+                          {opt.optimizedRoute.map((location, index) => (
+                            <div key={location.id} className="flex items-center gap-4 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
+                              <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-lg">
+                                {index + 1}
+                              </div>
+                              <div className="flex-1">
+                                <div className="font-bold text-gray-800 text-lg">{location.name}</div>
+                                <div className="text-gray-600">{location.address}</div>
+                              </div>
+                              <Badge className={
+                                location.type === 'origin' ? 'bg-green-500 text-white' :
+                                location.type === 'destination' ? 'bg-blue-500 text-white' : 
+                                location.type === 'depot' ? 'bg-purple-500 text-white' : 'bg-orange-500 text-white'
+                              }>
+                                {location.type === 'origin' ? (language === 'vi' ? '🚀 Xuất phát' : '🚀 Origin') :
+                                 location.type === 'destination' ? (language === 'vi' ? '🎯 Đích đến' : '🎯 Destination') :
+                                 location.type === 'depot' ? (language === 'vi' ? '🏭 Kho bãi' : '🏭 Depot') :
+                                 (language === 'vi' ? '📦 Nhà kho' : '📦 Warehouse')}
+                              </Badge>
+                              {index < opt.optimizedRoute.length - 1 && (
+                                <div className="text-gray-400">
+                                  <Navigation className="h-5 w-5" />
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="flex gap-4">
+                        <Button 
+                          onClick={() => exportRoute(opt, 'pdf')}
+                          className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 shadow-lg px-6 py-3"
+                        >
+                          <FileText className="h-5 w-5 mr-2" />
+                          📄 {language === 'vi' ? 'Xuất PDF cho Tài xế' : 'Export PDF for Driver'}
+                        </Button>
+                        <Button 
+                          onClick={() => exportRoute(opt, 'excel')}
+                          className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg px-6 py-3"
+                        >
+                          <Download className="h-5 w-5 mr-2" />
+                          📊 {language === 'vi' ? 'Xuất Excel' : 'Export Excel'}
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           )}
         </div>
       </div>
@@ -540,4 +667,4 @@ const ComprehensiveRouteOptimizerPage = () => {
   )
 }
 
-export default ComprehensiveRouteOptimizerPage
+export default ComprehensiveRouteOptimizer

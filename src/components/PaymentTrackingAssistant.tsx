@@ -1,11 +1,15 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Calendar as CalendarComponent } from '@/components/ui/calendar'
 import { 
   Calendar,
   DollarSign,
@@ -15,72 +19,194 @@ import {
   User,
   Bell,
   TrendingUp,
-  Mail,
   Target,
   Activity,
   Edit,
-  Save
+  Save,
+  X,
+  Filter,
+  SortAsc,
+  SortDesc,
+  Check,
+  Plus,
+  CalendarDays
 } from 'lucide-react'
 
 const PaymentTrackingAssistant: React.FC = () => {
   const { language } = useLanguage()
-  const [activeTab, setActiveTab] = useState('overview')
-  const [editingClient, setEditingClient] = useState<string | null>(null)
-  const [editAmount, setEditAmount] = useState<number>(0)
-  const [editingCompany, setEditingCompany] = useState<string | null>(null)
-  const [editCompanyName, setEditCompanyName] = useState<string>('')
+  const [activeTab, setActiveTab] = useState('list')
+  const [editingPayment, setEditingPayment] = useState<string | null>(null)
+  const [sortBy, setSortBy] = useState<'dueDate' | 'amount' | 'company'>('dueDate')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+  const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'paid' | 'overdue'>('all')
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
+  const [showEditDialog, setShowEditDialog] = useState(false)
+  const [editFormData, setEditFormData] = useState({
+    id: '',
+    name: '',
+    company: '',
+    amount: 0,
+    dueDate: '',
+    status: 'pending' as 'pending' | 'paid' | 'overdue'
+  })
 
-  // Simple, safe data structure with editable amounts - REALISTIC VIETNAMESE LOGISTICS AMOUNTS
-  const [clients, setClients] = useState([
+  // Smart payment data structure with IDs and better status management
+  const [payments, setPayments] = useState([
     {
+      id: '1',
       name: 'Nguyen Van Long',
       company: 'Long Transport & Logistics Co., Ltd',
-      amount: 45000000, // 45 million VND - realistic for container transport HCM-Hanoi
-      status: 'upcoming',
+      amount: 45000000,
+      status: 'pending' as 'pending' | 'paid' | 'overdue',
       dueDate: '2025-08-28',
-      email: 'accounting@longtransport.vn'
+      createdDate: '2025-08-15',
+      priority: 'medium' as 'low' | 'medium' | 'high'
     },
     {
+      id: '2',
       name: 'Ngo Minh Gia',
       company: 'Gia Logistics & Freight Services',
-      amount: 28500000, // 28.5 million VND - realistic for port handling + customs
-      status: 'overdue',
+      amount: 28500000,
+      status: 'overdue' as 'pending' | 'paid' | 'overdue',
       dueDate: '2025-08-15',
-      email: 'finance@gialogistics.vn'
+      createdDate: '2025-08-01',
+      priority: 'high' as 'low' | 'medium' | 'high'
     },
     {
+      id: '3',
       name: 'AO Shipping Vietnam',
       company: 'AO International Shipping Co., Ltd',
-      amount: 67200000, // 67.2 million VND - realistic for international shipping
-      status: 'upcoming',
+      amount: 67200000,
+      status: 'pending' as 'pending' | 'paid' | 'overdue',
       dueDate: '2025-08-30',
-      email: 'payments@aoshipping.vn'
+      createdDate: '2025-08-16',
+      priority: 'medium' as 'low' | 'medium' | 'high'
     },
     {
+      id: '4',
       name: 'Bao Giao Express',
       company: 'Bao Giao Express Delivery Services',
-      amount: 52800000, // 52.8 million VND - realistic for express delivery network
-      status: 'upcoming',
+      amount: 52800000,
+      status: 'pending' as 'pending' | 'paid' | 'overdue',
       dueDate: '2025-08-27',
-      email: 'billing@baogiao-express.vn'
+      createdDate: '2025-08-13',
+      priority: 'medium' as 'low' | 'medium' | 'high'
     },
     {
+      id: '5',
       name: 'CNL Logistics',
       company: 'CNL Supply Chain Solutions Vietnam',
-      amount: 89400000, // 89.4 million VND - realistic for comprehensive logistics
-      status: 'upcoming',
+      amount: 89400000,
+      status: 'paid' as 'pending' | 'paid' | 'overdue',
       dueDate: '2025-09-02',
-      email: 'accounts@cnl-logistics.vn'
+      createdDate: '2025-08-18',
+      priority: 'low' as 'low' | 'medium' | 'high'
     }
   ])
 
-  // Calculate totals from current client data
+  // Smart functions for payment management
+  
+  // Edit payment function
+  const handleEditPayment = (payment: any) => {
+    setEditFormData({
+      id: payment.id,
+      name: payment.name,
+      company: payment.company,
+      amount: payment.amount,
+      dueDate: payment.dueDate,
+      status: payment.status
+    })
+    setShowEditDialog(true)
+  }
+
+  // Save edited payment
+  const handleSavePayment = () => {
+    setPayments(prev => prev.map(payment => 
+      payment.id === editFormData.id 
+        ? { ...payment, ...editFormData }
+        : payment
+    ))
+    setShowEditDialog(false)
+    alert(language === 'vi' 
+      ? `✅ Đã cập nhật thanh toán cho ${editFormData.name}!` 
+      : `✅ Updated payment for ${editFormData.name}!`
+    )
+  }
+
+  // Toggle payment status
+  const togglePaymentStatus = (id: string) => {
+    setPayments(prev => prev.map(payment => 
+      payment.id === id 
+        ? { ...payment, status: payment.status === 'paid' ? 'pending' : 'paid' }
+        : payment
+    ))
+  }
+
+  // Sort and filter payments
+  const getSortedAndFilteredPayments = () => {
+    let filtered = payments
+    
+    if (filterStatus !== 'all') {
+      filtered = filtered.filter(p => p.status === filterStatus)
+    }
+    
+    return filtered.sort((a, b) => {
+      let aValue, bValue
+      
+      switch (sortBy) {
+        case 'dueDate':
+          aValue = new Date(a.dueDate).getTime()
+          bValue = new Date(b.dueDate).getTime()
+          break
+        case 'amount':
+          aValue = a.amount
+          bValue = b.amount
+          break
+        case 'company':
+          aValue = a.company.toLowerCase()
+          bValue = b.company.toLowerCase()
+          break
+        default:
+          return 0
+      }
+      
+      if (sortOrder === 'asc') {
+        return aValue > bValue ? 1 : -1
+      } else {
+        return aValue < bValue ? 1 : -1
+      }
+    })
+  }
+
+  // Check for overdue notifications
+  useEffect(() => {
+    const overduePayments = payments.filter(p => {
+      const dueDate = new Date(p.dueDate)
+      const today = new Date()
+      return dueDate < today && p.status !== 'paid'
+    })
+    
+    if (overduePayments.length > 0) {
+      // Update status to overdue
+      setPayments(prev => prev.map(payment => {
+        const dueDate = new Date(payment.dueDate)
+        const today = new Date()
+        if (dueDate < today && payment.status === 'pending') {
+          return { ...payment, status: 'overdue' as 'overdue' }
+        }
+        return payment
+      }))
+    }
+  }, [payments])
+  
+  // Calculate totals from current payment data
   const paymentData = {
-    totalOutstanding: clients.filter(c => c.status !== 'paid').reduce((sum, c) => sum + c.amount, 0),
-    overdueCount: clients.filter(c => c.status === 'overdue').length,
-    overdueAmount: clients.filter(c => c.status === 'overdue').reduce((sum, c) => sum + c.amount, 0),
-    upcomingCount: clients.filter(c => c.status === 'upcoming').length,
-    upcomingAmount: clients.filter(c => c.status === 'upcoming').reduce((sum, c) => sum + c.amount, 0),
+    totalOutstanding: payments.filter(p => p.status !== 'paid').reduce((sum, p) => sum + p.amount, 0),
+    overdueCount: payments.filter(p => p.status === 'overdue').length,
+    overdueAmount: payments.filter(p => p.status === 'overdue').reduce((sum, p) => sum + p.amount, 0),
+    pendingCount: payments.filter(p => p.status === 'pending').length,
+    pendingAmount: payments.filter(p => p.status === 'pending').reduce((sum, p) => sum + p.amount, 0),
+    paidCount: payments.filter(p => p.status === 'paid').length,
     collectionRate: 94.2
   }
 
