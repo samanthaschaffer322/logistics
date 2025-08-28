@@ -159,15 +159,19 @@ const LeafletRouteMap: React.FC<LeafletRouteMapProps> = ({ selectedRoute, classN
             
             // Find matching route pattern
             let selectedPattern = null
+            console.log('🗺️ Routing from:', origin.name, 'to:', destination.name)
+            
             for (const [key, pattern] of Object.entries(routePatterns)) {
               if (pattern.condition(origin, destination)) {
                 selectedPattern = pattern
+                console.log('✅ Using route pattern:', key)
                 break
               }
             }
             
             if (selectedPattern) {
               // Use predefined realistic waypoints
+              console.log('🛣️ Adding', selectedPattern.waypoints.length, 'waypoints')
               waypoints.push(...selectedPattern.waypoints)
               // Adjust last waypoint to actual destination
               waypoints[waypoints.length - 1] = [destination.lat, destination.lng]
@@ -298,3 +302,4 @@ const LeafletRouteMap: React.FC<LeafletRouteMapProps> = ({ selectedRoute, classN
 }
 
 export default LeafletRouteMap
+// Cache bust Thu 28 Aug 2025 11:17:19 +07
