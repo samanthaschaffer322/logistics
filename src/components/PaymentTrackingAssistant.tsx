@@ -67,8 +67,24 @@ const PaymentTrackingAssistant: React.FC = () => {
     status: 'pending' as 'pending' | 'paid' | 'overdue'
   })
 
-  // Smart payment data structure with IDs and better status management
-  const [payments, setPayments] = useState([
+  // Smart payment data structure with localStorage persistence
+  const [payments, setPayments] = useState(() => {
+    // Load from localStorage first
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('truckInsightPayments')
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved)
+          console.log('📂 Loaded payment data from localStorage:', parsed.length, 'companies')
+          return parsed
+        } catch (e) {
+          console.log('⚠️ Error loading saved data, using defaults')
+        }
+      }
+    }
+    
+    // Default data with your companies
+    return [
     {
       id: '1',
       name: 'Nguyen Van Long',
@@ -119,7 +135,16 @@ const PaymentTrackingAssistant: React.FC = () => {
       createdDate: '2025-08-18',
       priority: 'low' as 'low' | 'medium' | 'high'
     }
-  ])
+  ]
+  })
+
+  // Auto-save to localStorage whenever payments change
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('truckInsightPayments', JSON.stringify(payments))
+      console.log('💾 Auto-saved payment data:', payments.length, 'companies')
+    }
+  }, [payments])
 
   // Smart functions for payment management
   
