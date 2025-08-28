@@ -172,29 +172,29 @@ export default function CombinedRouteOptimizerPage() {
     const roadFactor = 1.3 // Roads are typically 30% longer than straight line
     const distance = Math.round(straightDistance * roadFactor)
     
-    // Calculate realistic travel time based on Vietnamese road conditions
-    let avgSpeed = 25 // km/h average for trucks in Vietnam cities
-    if (distance < 10) avgSpeed = 20 // Heavy city traffic
-    if (distance > 50) avgSpeed = 45 // Highway portions
-    if (distance > 200) avgSpeed = 55 // Long haul highway
+    // Calculate realistic travel time based on Vietnamese road conditions (match Google Maps for trucks)
+    let avgSpeed = 15 // km/h average for trucks in Vietnam cities (much slower than cars)
+    if (distance < 5) avgSpeed = 12 // Heavy city traffic
+    if (distance > 20) avgSpeed = 25 // Some highway portions
+    if (distance > 100) avgSpeed = 40 // Long haul highway
     
     const timeInMinutes = Math.round((distance / avgSpeed) * 60)
     const hours = Math.floor(timeInMinutes / 60)
     const minutes = timeInMinutes % 60
     
     // Calculate realistic costs (Vietnamese logistics rates)
-    const fuelCostPerKm = 12000 // VND per km (higher for city routes)
-    const driverCostPerKm = 5000 // VND per km  
-    const tollsAndFees = distance > 50 ? 150000 : 30000 // VND
+    const fuelCostPerKm = 15000 // VND per km (higher for city routes)
+    const driverCostPerKm = 8000 // VND per km  
+    const tollsAndFees = distance > 20 ? 100000 : 20000 // VND
     const totalCost = (fuelCostPerKm + driverCostPerKm) * distance + tollsAndFees
     
-    // Calculate fuel consumption (realistic for Vietnamese trucks)
-    const fuelConsumption = (distance * 0.35).toFixed(1) // 35L per 100km for city routes
+    // Calculate fuel consumption (realistic for Vietnamese trucks in city)
+    const fuelConsumption = (distance * 0.45).toFixed(1) // 45L per 100km for city routes with traffic
     
     // Calculate efficiency based on distance and route type
-    let efficiency = 80
-    if (distance < 10) efficiency = 65 // City routes less efficient
-    if (distance > 50) efficiency = 85 // Highway routes more efficient
+    let efficiency = 70
+    if (distance < 5) efficiency = 60 // City routes less efficient
+    if (distance > 20) efficiency = 75 // Highway routes more efficient
 
     // Enhanced calculations with Vietnamese logistics factors
     const factors = EnhancedRouteCalculator.getCurrentConditions()
@@ -215,7 +215,7 @@ export default function CombinedRouteOptimizerPage() {
       fuelConsumption: `${fuelConsumption}L`,
       avgSpeed: `${avgSpeed} km/h`,
       truckType: 'Container Truck (20ft)',
-      loadCapacity: `${Math.round(15 + (efficiency * 0.1))} tons` // More realistic 15-25 tons
+      loadCapacity: `${Math.round(12 + (efficiency * 0.08))} tons` // More realistic 12-18 tons for 20ft container
     })
 
     setIsCalculating(false)
