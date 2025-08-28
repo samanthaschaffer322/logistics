@@ -243,8 +243,8 @@ export default function CombinedRouteOptimizerPage() {
       efficiency: `${efficiency}%`,
       fuelConsumption: `${fuelConsumption}L`,
       avgSpeed: `${avgSpeed} km/h`,
-      truckType: 'Container Truck (20ft)',
-      loadCapacity: `${Math.round(12 + (efficiency * 0.08))} tons` // More realistic 12-18 tons for 20ft container
+      truckType: 'Container Truck (40ft)',
+      loadCapacity: `${Math.round(20 + (efficiency * 0.12))} tons` // More realistic 20-28 tons for 40ft container
     })
 
     setIsCalculating(false)

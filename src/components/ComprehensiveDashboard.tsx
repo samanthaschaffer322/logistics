@@ -18,6 +18,7 @@ import {
   AlertTriangle,
   Zap,
   FileSpreadsheet,
+  Mail,
   Navigation,
   Map,
   Globe,
@@ -109,6 +110,13 @@ const ComprehensiveDashboard = () => {
     {
       category: language === 'vi' ? 'AI & Phân tích' : 'AI & Analytics',
       items: [
+        { 
+          title: language === 'vi' ? 'Trợ lý Theo dõi Thanh toán' : 'Payment Tracking Assistant', 
+          description: language === 'vi' ? '📧 Theo dõi thanh toán và gửi báo cáo qua email' : '📧 Track payments and send email reports', 
+          icon: Mail, 
+          href: '/payment-tracking', 
+          color: 'bg-gradient-to-r from-green-600 to-emerald-600' 
+        },
         { 
           title: language === 'vi' ? 'Trợ lý AI siêu thông minh' : 'Super AI Assistant', 
           description: language === 'vi' ? 'Thông tin logistics thông minh với AI' : 'Intelligent logistics insights', 
