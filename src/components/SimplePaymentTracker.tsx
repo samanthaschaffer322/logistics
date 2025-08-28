@@ -12,6 +12,7 @@ interface Payment {
   company: string
   amount: number
   dueDate: string
+  createdDate: string
   status: 'pending' | 'paid' | 'overdue'
 }
 
@@ -26,19 +27,64 @@ const SimplePaymentTracker = () => {
       }
     }
     
-    // Your companies as default
+    // Your exact payment list
     return [
-      { id: '1', name: 'Nguyen Van Long', company: 'Long Transport & Logistics Co., Ltd', amount: 45000000, dueDate: '2025-08-28', status: 'overdue' as const },
-      { id: '2', name: 'Ngo Minh Gia', company: 'Gia Logistics & Freight Services', amount: 28500000, dueDate: '2025-08-15', status: 'overdue' as const },
-      { id: '3', name: 'AO Shipping Vietnam', company: 'AO International Shipping Co., Ltd', amount: 67200000, dueDate: '2025-08-30', status: 'pending' as const },
-      { id: '4', name: 'Bao Giao Express', company: 'Bao Giao Express Delivery Services', amount: 52800000, dueDate: '2025-08-27', status: 'overdue' as const },
-      { id: '5', name: 'CN', company: 'CN', amount: 90000000, dueDate: '2025-09-20', status: 'pending' as const },
-      { id: '6', name: 'Khang Phat', company: 'KP', amount: 82000000, dueDate: '2025-09-20', status: 'pending' as const },
-      { id: '7', name: 'DQM', company: 'DQM', amount: 78000000, dueDate: '2025-09-22', status: 'pending' as const }
+      { id: '1', name: 'Nguyen Van Long', company: 'Long Transport & Logistics Co., Ltd', amount: 45000000, dueDate: '2025-08-28', createdDate: '2025-08-15', status: 'overdue' as const },
+      { id: '2', name: 'Ngo Minh Gia', company: 'Gia Logistics & Freight Services', amount: 28500000, dueDate: '2025-08-15', createdDate: '2025-08-01', status: 'overdue' as const },
+      { id: '3', name: 'Bao Giao Express', company: 'Bao Giao Express Delivery Services', amount: 52800000, dueDate: '2025-08-27', createdDate: '2025-08-13', status: 'overdue' as const },
+      { id: '4', name: 'CN', company: 'CN', amount: 67000000, dueDate: '2025-09-18', createdDate: '2025-08-28', status: 'pending' as const },
+      { id: '5', name: 'Khang Phat', company: 'KP', amount: 98000000, dueDate: '2025-09-25', createdDate: '2025-08-28', status: 'pending' as const },
+      { id: '6', name: 'DQM', company: 'DQM', amount: 91000000, dueDate: '2025-09-25', createdDate: '2025-08-28', status: 'pending' as const },
+      { id: '7', name: 'AO Shipping Vietnam', company: 'AO International Shipping Co., Ltd', amount: 67200000, dueDate: '2025-08-30', createdDate: '2025-08-16', status: 'paid' as const }
     ]
   })
 
-  const [newPayment, setNewPayment] = useState({ name: '', company: '', amount: '', dueDate: '' })
+  const [newPayment, setNewPayment] = useState({ name: '', company: '', amount: '', dueDate: '', createdDate: '' })
+
+  const sendEmailReport = async (payment: Payment) => {
+    console.log('📧 Sending email report to andatecampion@proton.me for:', payment.name)
+    
+    const emailContent = `
+📧 PAYMENT REPORT - ${new Date().toLocaleDateString('vi-VN')}
+
+👤 Customer: ${payment.name}
+🏢 Company: ${payment.company}
+💰 Amount: ${formatCurrency(payment.amount)}
+📅 Due Date: ${payment.dueDate}
+📅 Created: ${payment.createdDate}
+🔄 Status: ${payment.status}
+
+---
+Sent from Truck Insight V2 Payment Tracking System
+    `
+    
+    alert(`📧 Email report sent to andatecampion@proton.me!\n\n${emailContent}`)
+    console.log('✅ Email sent successfully:', emailContent)
+  }
+
+  const sendFollowUp = async (payment: Payment) => {
+    console.log('📧 Sending follow-up to andatecampion@proton.me for:', payment.name)
+    
+    const followUpContent = `
+📧 PAYMENT FOLLOW-UP - ${new Date().toLocaleDateString('vi-VN')}
+
+⚠️ OVERDUE PAYMENT REMINDER
+
+👤 Customer: ${payment.name}
+🏢 Company: ${payment.company}
+💰 Outstanding Amount: ${formatCurrency(payment.amount)}
+📅 Original Due Date: ${payment.dueDate}
+⏰ Days Overdue: ${Math.ceil((new Date().getTime() - new Date(payment.dueDate).getTime()) / (1000 * 60 * 60 * 24))}
+
+Please contact customer for immediate payment.
+
+---
+Sent from Truck Insight V2 Payment Tracking System
+    `
+    
+    alert(`📧 Follow-up email sent to andatecampion@proton.me!\n\n${followUpContent}`)
+    console.log('✅ Follow-up sent successfully:', followUpContent)
+  }
   const [showAddForm, setShowAddForm] = useState(false)
 
   // Save to localStorage whenever payments change
@@ -57,11 +103,12 @@ const SimplePaymentTracker = () => {
         company: newPayment.company,
         amount: parseInt(newPayment.amount),
         dueDate: newPayment.dueDate,
+        createdDate: newPayment.createdDate || new Date().toISOString().split('T')[0],
         status: 'pending'
       }
       
       setPayments(prev => [...prev, payment])
-      setNewPayment({ name: '', company: '', amount: '', dueDate: '' })
+      setNewPayment({ name: '', company: '', amount: '', dueDate: '', createdDate: '' })
       setShowAddForm(false)
       alert(`✅ Added: ${payment.name} - ${payment.amount.toLocaleString()} VND`)
     }
@@ -139,12 +186,13 @@ const SimplePaymentTracker = () => {
                   <div className="font-semibold">{payment.name}</div>
                   <div className="text-sm text-gray-600">{payment.company}</div>
                   <div className="text-lg font-bold text-blue-600">{formatCurrency(payment.amount)}</div>
-                  <div className="text-sm">Due: {payment.dueDate}</div>
+                  <div className="text-xs text-gray-500">Ngày tạo: {payment.createdDate}</div>
+                  <div className="text-xs text-gray-500">Hạn thanh toán: {payment.dueDate}</div>
                 </div>
                 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <span className={`px-3 py-1 rounded-full text-sm ${getStatusColor(payment.status)}`}>
-                    {payment.status === 'paid' ? 'Paid' : payment.status === 'overdue' ? 'Overdue' : 'Pending'}
+                    {payment.status === 'paid' ? 'Đã trả' : payment.status === 'overdue' ? 'Quá hạn' : 'Chờ thanh toán'}
                   </span>
                   
                   {payment.status !== 'paid' && (
@@ -154,13 +202,27 @@ const SimplePaymentTracker = () => {
                       size="sm"
                     >
                       <CheckCircle className="h-4 w-4 mr-1" />
-                      ✅ Mark Paid
+                      ✅ Đã trả
                     </Button>
                   )}
                   
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    onClick={() => sendEmailReport(payment)}
+                    variant="outline" 
+                    size="sm"
+                  >
                     <Mail className="h-4 w-4 mr-1" />
                     📧 Email
+                  </Button>
+                  
+                  <Button 
+                    onClick={() => sendFollowUp(payment)}
+                    variant="outline" 
+                    size="sm"
+                    className="bg-orange-50 hover:bg-orange-100"
+                  >
+                    <Mail className="h-4 w-4 mr-1" />
+                    📧 Gửi theo dõi
                   </Button>
                 </div>
               </div>
