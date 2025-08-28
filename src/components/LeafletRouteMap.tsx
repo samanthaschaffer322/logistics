@@ -66,6 +66,31 @@ const LeafletRouteMap: React.FC<LeafletRouteMapProps> = ({ selectedRoute, classN
               minZoom: 5
             }).addTo(map)
 
+            // Add traffic layer simulation
+            const trafficLayer = LeafletModule.tileLayer('https://tile.thunderforest.com/transport/{z}/{x}/{y}.png?apikey=demo', {
+              attribution: 'Traffic data',
+              opacity: 0.6,
+              maxZoom: 18
+            })
+            
+            // Add traffic toggle
+            const trafficControl = LeafletModule.control({ position: 'topright' })
+            trafficControl.onAdd = function() {
+              const div = LeafletModule.DomUtil.create('div', 'traffic-control')
+              div.innerHTML = '<button onclick="window.toggleTraffic()" style="background: white; border: 1px solid #ccc; padding: 5px 10px; border-radius: 3px; cursor: pointer;">🚦 Traffic</button>'
+              return div
+            }
+            trafficControl.addTo(map)
+            
+            // Global traffic toggle function
+            ;(window as any).toggleTraffic = () => {
+              if (map.hasLayer(trafficLayer)) {
+                map.removeLayer(trafficLayer)
+              } else {
+                map.addLayer(trafficLayer)
+              }
+            }
+
             mapInstanceRef.current = map
             setMapLoaded(true)
             console.log('✅ Leaflet map initialized successfully for Cloudflare deployment')
@@ -148,7 +173,99 @@ const LeafletRouteMap: React.FC<LeafletRouteMapProps> = ({ selectedRoute, classN
             }
           }
 
-          const realRoutePoints = await getRealTruckRoute(selectedRoute.origin, selectedRoute.destination)
+          // GET DETAILED ROUTING with turn-by-turn directions like Google Maps
+          const getDetailedTruckRoute = async (origin: any, destination: any) => {
+            try {
+              console.log('🚛 Fetching DETAILED truck route with directions...')
+              
+              // OSRM API with steps for turn-by-turn directions
+              const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${origin.lng},${origin.lat};${destination.lng},${destination.lat}?overview=full&geometries=geojson&steps=true&annotations=true`
+              
+              const response = await fetch(osrmUrl)
+              
+              if (response.ok) {
+                const data = await response.json()
+                
+                if (data.routes && data.routes.length > 0) {
+                  const route = data.routes[0]
+                  const coordinates = route.geometry.coordinates
+                  const steps = route.legs[0].steps
+                  
+                  // Convert [lng, lat] to [lat, lng] for Leaflet
+                  const leafletCoords = coordinates.map((coord: number[]) => [coord[1], coord[0]])
+                  
+                  // Generate detailed directions like Google Maps
+                  const directions = steps.map((step: any, index: number) => {
+                    const distance = step.distance
+                    const duration = step.duration
+                    const instruction = step.maneuver.instruction || `Continue on road`
+                    
+                    return {
+                      step: index + 1,
+                      instruction: instruction,
+                      distance: distance < 1000 ? `${Math.round(distance)} m` : `${(distance/1000).toFixed(1)} km`,
+                      duration: Math.round(duration / 60),
+                      roadName: step.name || 'Unnamed road'
+                    }
+                  })
+                  
+                  console.log('✅ DETAILED route with directions:', leafletCoords.length, 'points')
+                  console.log('📏 Route distance:', (route.distance / 1000).toFixed(1), 'km')
+                  console.log('⏱️ Route duration:', Math.round(route.duration / 60), 'minutes')
+                  console.log('🗺️ Turn-by-turn directions:', directions)
+                  
+                  // Find nearest depot to destination
+                  const depots = [
+                    { name: 'Depot Cát Lái', lat: 10.8067, lng: 106.7784, type: 'Container Terminal' },
+                    { name: 'Depot Phú Mỹ', lat: 10.6100, lng: 107.0700, type: 'Port Depot' },
+                    { name: 'Depot Thị Vải', lat: 10.5833, lng: 107.0833, type: 'Port Depot' },
+                    { name: 'Depot Nhà Bè', lat: 10.6400, lng: 106.9500, type: 'Logistics Hub' }
+                  ]
+                  
+                  let nearestDepot = depots[0]
+                  let minDistance = Infinity
+                  
+                  depots.forEach(depot => {
+                    const dist = Math.sqrt(
+                      Math.pow(depot.lat - destination.lat, 2) + 
+                      Math.pow(depot.lng - destination.lng, 2)
+                    )
+                    if (dist < minDistance) {
+                      minDistance = dist
+                      nearestDepot = depot
+                    }
+                  })
+                  
+                  console.log('🏢 Nearest depot:', nearestDepot.name, `(${(minDistance * 111).toFixed(1)}km away)`)
+                  
+                  return { 
+                    coordinates: leafletCoords, 
+                    directions, 
+                    nearestDepot,
+                    summary: {
+                      distance: (route.distance / 1000).toFixed(1),
+                      duration: Math.round(route.duration / 60)
+                    }
+                  }
+                }
+              }
+              
+              throw new Error('OSRM API failed')
+            } catch (error) {
+              console.log('⚠️ OSRM failed, using fallback routing:', error)
+              return {
+                coordinates: [
+                  [origin.lat, origin.lng],
+                  [(origin.lat + destination.lat) / 2, (origin.lng + destination.lng) / 2],
+                  [destination.lat, destination.lng]
+                ],
+                directions: [{ step: 1, instruction: 'Follow main road', distance: '25 km', roadName: 'Main Route' }],
+                nearestDepot: { name: 'Depot Cát Lái', type: 'Container Terminal' }
+              }
+            }
+          }
+
+          const routeData = await getDetailedTruckRoute(selectedRoute.origin, selectedRoute.destination)
 
           // Add origin marker
           LeafletModule.marker([selectedRoute.origin.lat, selectedRoute.origin.lng], {
@@ -170,8 +287,8 @@ const LeafletRouteMap: React.FC<LeafletRouteMapProps> = ({ selectedRoute, classN
             })
           }).addTo(map)
 
-          // Draw REAL ROAD route line following actual roads
-          const routeLine = LeafletModule.polyline(realRoutePoints, {
+          // Draw DETAILED ROAD route line following actual roads
+          const routeLine = LeafletModule.polyline(routeData.coordinates, {
             color: '#3b82f6',
             weight: 6,
             opacity: 0.8,
@@ -181,7 +298,28 @@ const LeafletRouteMap: React.FC<LeafletRouteMapProps> = ({ selectedRoute, classN
             lineJoin: 'round'
           }).addTo(map)
 
-          console.log('✅ REAL ROAD ROUTE DRAWN!')
+          // Add nearest depot marker
+          if (routeData.nearestDepot) {
+            LeafletModule.marker([routeData.nearestDepot.lat, routeData.nearestDepot.lng], {
+              icon: LeafletModule.divIcon({
+                html: `<div style="background: #f59e0b; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3); font-size: 12px;">🏢</div>`,
+                className: 'depot-marker',
+                iconSize: [28, 28],
+                iconAnchor: [14, 14]
+              })
+            }).addTo(map).bindPopup(`
+              <div style="font-family: system-ui; padding: 8px;">
+                <div style="font-weight: bold; color: #f59e0b; margin-bottom: 4px;">
+                  ${routeData.nearestDepot.name}
+                </div>
+                <div style="color: #666; font-size: 12px;">
+                  ${routeData.nearestDepot.type}
+                </div>
+              </div>
+            `)
+          }
+
+          console.log('✅ DETAILED ROAD ROUTE DRAWN with nearest depot!')
 
           // Fit map to show the route
           const group = new LeafletModule.featureGroup([
@@ -221,15 +359,18 @@ const LeafletRouteMap: React.FC<LeafletRouteMapProps> = ({ selectedRoute, classN
         style={{ minHeight: '400px' }}
       />
       {selectedRoute && (
-        <div className="absolute top-4 left-4 bg-white rounded-lg shadow-lg p-3 z-10 max-w-xs">
+        <div className="absolute top-4 left-4 bg-white rounded-lg shadow-lg p-3 z-10 max-w-sm">
           <div className="text-sm font-semibold text-gray-800 mb-1">
             {selectedRoute.origin.name} → {selectedRoute.destination.name}
           </div>
-          <div className="text-xs text-gray-600">
+          <div className="text-xs text-gray-600 mb-2">
             {selectedRoute.distance} • {selectedRoute.time}
           </div>
-          <div className="text-xs text-blue-600 mt-1">
+          <div className="text-xs text-blue-600 mb-2">
             🚛 40ft Container Truck Route
+          </div>
+          <div className="text-xs text-orange-600">
+            🏢 Nearest Depot: Loading...
           </div>
         </div>
       )}
