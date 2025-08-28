@@ -101,7 +101,7 @@ const ComprehensiveDashboard = () => {
           title: language === 'vi' ? 'Combined Route Optimizer Pro' : 'Combined Route Optimizer Pro', 
           description: language === 'vi' ? '🚛 Tối ưu tuyến đường thông minh cho logistics Việt Nam' : '🚛 Smart route optimization for Vietnamese logistics', 
           icon: Navigation, 
-          href: '/fleetbase-route-optimizer', 
+          href: '/combined-route-optimizer', 
           color: 'bg-gradient-to-r from-purple-600 to-indigo-600' 
         },
         { 
