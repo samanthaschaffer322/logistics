@@ -39,41 +39,56 @@ const LeafletRouteMap = dynamic(() => import('@/components/LeafletRouteMap'), {
   )
 })
 
-interface FleetbaseRoute {
-  id: string
-  name: string
-  origin: { name: string; lat: number; lng: number; address: string; province: string }
-  destination: { name: string; lat: number; lng: number; address: string; province: string }
-  distance: number
-  duration: number
-  cost: number
-  efficiency: number
-  status: 'active' | 'completed' | 'pending' | 'cancelled'
-  driver?: string
-  vehicle?: string
-  cargo?: string
-  priority: 'low' | 'medium' | 'high' | 'urgent'
-  weather: 'clear' | 'rain' | 'storm' | 'fog'
-  traffic: 'light' | 'moderate' | 'heavy' | 'severe'
-}
-
 export default function CombinedRouteOptimizerPage() {
   const { language } = useLanguage()
   const [activeView, setActiveView] = useState('optimizer')
   const [originQuery, setOriginQuery] = useState('')
   const [destinationQuery, setDestinationQuery] = useState('')
-  const [routes, setRoutes] = useState<FleetbaseRoute[]>([])
   const [selectedRoute, setSelectedRoute] = useState<any>(null)
-  const [optimizing, setOptimizing] = useState(false)
   const [isCalculating, setIsCalculating] = useState(false)
 
-  // Comprehensive Vietnamese locations
+  // Comprehensive Vietnamese locations database
   const vietnameseLocations = [
     // Major Ports
     { name: 'Cảng Cát Lái', lat: 10.8100, lng: 106.7800, province: 'Ho Chi Minh City', type: 'port' },
     { name: 'Cảng Thị Vải', lat: 10.6100, lng: 107.0700, province: 'Ba Ria - Vung Tau', type: 'port' },
     { name: 'Cảng Phú Mỹ', lat: 10.6200, lng: 107.0900, province: 'Ba Ria - Vung Tau', type: 'port' },
     { name: 'Cảng Đà Nẵng', lat: 16.0544, lng: 108.2022, province: 'Da Nang', type: 'port' },
+    { name: 'Cảng Hải Phòng', lat: 20.8449, lng: 106.6881, province: 'Hai Phong', type: 'port' },
+    { name: 'Cảng Quy Nhon', lat: 13.7563, lng: 109.2297, province: 'Binh Dinh', type: 'port' },
+    
+    // Ho Chi Minh City Districts & Areas
+    { name: 'Quận 1', lat: 10.7769, lng: 106.7009, province: 'Ho Chi Minh City', type: 'district' },
+    { name: 'Quận 3', lat: 10.7756, lng: 106.6878, province: 'Ho Chi Minh City', type: 'district' },
+    { name: 'Quận 7', lat: 10.7379, lng: 106.7197, province: 'Ho Chi Minh City', type: 'district' },
+    { name: 'Quận Bình Thạnh', lat: 10.8017, lng: 106.7148, province: 'Ho Chi Minh City', type: 'district' },
+    { name: 'Quận Tân Bình', lat: 10.8008, lng: 106.6530, province: 'Ho Chi Minh City', type: 'district' },
+    { name: 'Khu Chế Xuất Tân Thuận', lat: 10.7379, lng: 106.7197, province: 'Ho Chi Minh City', type: 'industrial' },
+    { name: 'Kho Chim Én', lat: 10.7500, lng: 106.6800, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Cat Lai', lat: 10.8100, lng: 106.7800, province: 'Ho Chi Minh City', type: 'port' },
+    
+    // Hanoi Areas
+    { name: 'Hà Nội', lat: 21.0285, lng: 105.8542, province: 'Hanoi', type: 'city' },
+    { name: 'Quận Ba Đình', lat: 21.0341, lng: 105.8372, province: 'Hanoi', type: 'district' },
+    { name: 'Quận Hoàn Kiếm', lat: 21.0285, lng: 105.8542, province: 'Hanoi', type: 'district' },
+    { name: 'Sân bay Nội Bài', lat: 21.2187, lng: 105.8067, province: 'Hanoi', type: 'airport' },
+    
+    // Major Cities
+    { name: 'Đà Nẵng', lat: 16.0544, lng: 108.2022, province: 'Da Nang', type: 'city' },
+    { name: 'Cần Thơ', lat: 10.0452, lng: 105.7469, province: 'Can Tho', type: 'city' },
+    { name: 'Hải Phòng', lat: 20.8449, lng: 106.6881, province: 'Hai Phong', type: 'city' },
+    { name: 'Nha Trang', lat: 12.2388, lng: 109.1967, province: 'Khanh Hoa', type: 'city' },
+    { name: 'Huế', lat: 16.4637, lng: 107.5909, province: 'Thua Thien Hue', type: 'city' },
+    { name: 'Vũng Tàu', lat: 10.4113, lng: 107.1365, province: 'Ba Ria - Vung Tau', type: 'city' },
+    
+    // Industrial Zones
+    { name: 'KCN Biên Hòa', lat: 10.9408, lng: 106.8228, province: 'Dong Nai', type: 'industrial' },
+    { name: 'KCN Long Thành', lat: 10.8167, lng: 107.0000, province: 'Dong Nai', type: 'industrial' },
+    { name: 'KCN Vsip Bình Dương', lat: 11.1271, lng: 106.6504, province: 'Binh Duong', type: 'industrial' },
+    
+    // Warehouses & Logistics Centers
+    { name: 'Kho Hiệp Phước', lat: 10.7200, lng: 106.7500, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Trung tâm Logistics Sóng Thần', lat: 10.8800, lng: 106.6200, province: 'Binh Duong', type: 'logistics' },
     { name: 'Cảng Hải Phòng', lat: 20.8449, lng: 106.6881, province: 'Hai Phong', type: 'port' },
     
     // Major Cities
@@ -133,15 +148,42 @@ export default function CombinedRouteOptimizerPage() {
     const originLoc = originResults[0]
     const destLoc = destResults[0]
 
-    // Calculate distance using Haversine formula
-    const R = 6371
+    // Calculate realistic distance and time
+    const R = 6371 // Earth's radius in km
     const dLat = (destLoc.lat - originLoc.lat) * Math.PI / 180
     const dLon = (destLoc.lng - originLoc.lng) * Math.PI / 180
     const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
               Math.cos(originLoc.lat * Math.PI / 180) * Math.cos(destLoc.lat * Math.PI / 180) *
               Math.sin(dLon/2) * Math.sin(dLon/2)
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
-    const distance = Math.round(R * c)
+    const straightDistance = R * c
+    
+    // Add realistic road factor (roads are not straight)
+    const roadFactor = 1.3 // Roads are typically 30% longer than straight line
+    const distance = Math.round(straightDistance * roadFactor)
+    
+    // Calculate realistic travel time based on Vietnamese road conditions
+    let avgSpeed = 45 // km/h average for trucks in Vietnam
+    if (distance < 50) avgSpeed = 35 // City traffic
+    if (distance > 200) avgSpeed = 55 // Highway portions
+    
+    const timeInMinutes = Math.round((distance / avgSpeed) * 60)
+    const hours = Math.floor(timeInMinutes / 60)
+    const minutes = timeInMinutes % 60
+    
+    // Calculate realistic costs (Vietnamese logistics rates)
+    const fuelCostPerKm = 8000 // VND per km
+    const driverCostPerKm = 3000 // VND per km  
+    const tollsAndFees = distance > 100 ? 200000 : 50000 // VND
+    const totalCost = (fuelCostPerKm + driverCostPerKm) * distance + tollsAndFees
+    
+    // Calculate fuel consumption (realistic for Vietnamese trucks)
+    const fuelConsumption = (distance * 0.25).toFixed(1) // 25L per 100km average
+    
+    // Calculate efficiency based on distance and route type
+    let efficiency = 85
+    if (distance < 30) efficiency = 75 // City routes less efficient
+    if (distance > 200) efficiency = 90 // Long haul more efficient
 
     // Enhanced calculations with Vietnamese logistics factors
     const factors = EnhancedRouteCalculator.getCurrentConditions()
@@ -155,14 +197,14 @@ export default function CombinedRouteOptimizerPage() {
     setSelectedRoute({
       origin: { ...originLoc, province: originLoc.province },
       destination: { ...destLoc, province: destLoc.province },
-      distance: `${optimizedResult.actualDistance} km`,
-      time: `${Math.round(optimizedResult.actualTime/60)}h ${optimizedResult.actualTime%60}min`,
-      cost: `${(optimizedResult.actualCost / 1000000).toFixed(3)} triệu VND`,
-      efficiency: `${optimizedResult.efficiency}%`,
-      fuelConsumption: `${optimizedResult.actualFuelConsumption.toFixed(1)}L`,
-      avgSpeed: `${Math.round(distance / (optimizedResult.actualTime/60))} km/h`,
-      truckType: 'Container Truck (40ft)',
-      loadCapacity: '33 tons'
+      distance: `${distance} km`,
+      time: hours > 0 ? `${hours}h ${minutes}min` : `${minutes}min`,
+      cost: `${(totalCost/1000000).toFixed(2)} triệu VND`,
+      efficiency: `${efficiency}%`,
+      fuelConsumption: `${fuelConsumption}L`,
+      avgSpeed: `${avgSpeed} km/h`,
+      truckType: 'Container Truck (20ft)',
+      loadCapacity: `${Math.round(efficiency * 0.3)} tons`
     })
 
     setIsCalculating(false)
@@ -318,17 +360,6 @@ export default function CombinedRouteOptimizerPage() {
               >
                 <BarChart3 className="h-4 w-4 mr-2" />
                 {language === 'vi' ? 'Dashboard' : 'Dashboard'}
-              </Button>
-              <Button
-                onClick={() => setActiveView('routes')}
-                className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
-                  activeView === 'routes'
-                    ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-lg'
-                    : 'bg-transparent text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                <Truck className="h-4 w-4 mr-2" />
-                {language === 'vi' ? 'Quản lý Tuyến' : 'Route Management'}
               </Button>
               <Button
                 onClick={() => setActiveView('map')}
@@ -525,164 +556,6 @@ export default function CombinedRouteOptimizerPage() {
                 </CardContent>
               </Card>
             </div>
-          </div>
-        )}
-
-        {/* Route Management View */}
-        {activeView === 'routes' && (
-          <div className="space-y-6">
-            <Card className="shadow-2xl border-0">
-              <CardHeader className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-t-lg">
-                <CardTitle className="flex items-center gap-3 text-xl">
-                  <Truck className="h-6 w-6" />
-                  {language === 'vi' ? 'Quản lý Tuyến đường' : 'Route Management'}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-8">
-                <div className="space-y-6">
-                  {routes.map((route) => (
-                    <Card key={route.id} className="border-2 border-gray-200 hover:shadow-xl transition-all duration-300">
-                      <CardContent className="p-6">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg">
-                              <Navigation className="h-8 w-8 text-white" />
-                            </div>
-                            <div>
-                              <h3 className="text-xl font-bold text-gray-800">{route.name}</h3>
-                              <p className="text-gray-600">{route.origin.name} → {route.destination.name}</p>
-                              <div className="flex gap-2 mt-2">
-                                <Badge className={`${getStatusColor(route.status)} text-white`}>
-                                  {route.status}
-                                </Badge>
-                                <Badge className={`${getPriorityColor(route.priority)} text-white`}>
-                                  {route.priority}
-                                </Badge>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                          <div className="p-4 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl shadow-lg">
-                            <div className="flex items-center gap-2 mb-2">
-                              <MapPin className="h-5 w-5 text-white" />
-                              <span className="font-semibold text-blue-100">{language === 'vi' ? 'Quãng đường' : 'Distance'}</span>
-                            </div>
-                            <p className="text-white font-bold text-lg">{route.distance} km</p>
-                          </div>
-
-                          <div className="p-4 bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl shadow-lg">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Clock className="h-5 w-5 text-white" />
-                              <span className="font-semibold text-green-100">{language === 'vi' ? 'Thời gian' : 'Duration'}</span>
-                            </div>
-                            <p className="text-white font-bold text-lg">{Math.round(route.duration/60)}h {route.duration%60}m</p>
-                          </div>
-
-                          <div className="p-4 bg-gradient-to-br from-yellow-500 to-yellow-600 text-white rounded-xl shadow-lg">
-                            <div className="flex items-center gap-2 mb-2">
-                              <DollarSign className="h-5 w-5 text-white" />
-                              <span className="font-semibold text-yellow-100">{language === 'vi' ? 'Chi phí' : 'Cost'}</span>
-                            </div>
-                            <p className="text-white font-bold text-lg">{(route.cost/1000000).toFixed(1)}M ₫</p>
-                          </div>
-
-                          <div className="p-4 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl shadow-lg">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Target className="h-5 w-5 text-white" />
-                              <span className="font-semibold text-purple-100">{language === 'vi' ? 'Hiệu quả' : 'Efficiency'}</span>
-                            </div>
-                            <p className="text-white font-bold text-lg">{route.efficiency}%</p>
-                          </div>
-                        </div>
-
-                        {/* Additional Metrics - Red, Indigo, Cyan, Emerald gradients */}
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-                          <div className="p-4 bg-gradient-to-br from-red-500 to-red-600 text-white rounded-xl shadow-lg">
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="text-sm font-semibold text-red-100">{language === 'vi' ? 'Nhiên liệu' : 'Fuel'}</span>
-                            </div>
-                            <p className="text-white font-bold text-lg">{(route.distance * 0.08).toFixed(1)}L</p>
-                          </div>
-                          <div className="p-4 bg-gradient-to-br from-indigo-500 to-indigo-600 text-white rounded-xl shadow-lg">
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="text-sm font-semibold text-indigo-100">{language === 'vi' ? 'Tốc độ TB' : 'Avg Speed'}</span>
-                            </div>
-                            <p className="text-white font-bold text-lg">{Math.round(route.distance / (route.duration/60))} km/h</p>
-                          </div>
-                          <div className="p-4 bg-gradient-to-br from-cyan-500 to-cyan-600 text-white rounded-xl shadow-lg">
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="text-sm font-semibold text-cyan-100">{language === 'vi' ? 'Phương tiện' : 'Vehicle'}</span>
-                            </div>
-                            <p className="text-white font-bold text-lg">{route.vehicle}</p>
-                          </div>
-                          <div className="p-4 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-xl shadow-lg">
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="text-sm font-semibold text-emerald-100">{language === 'vi' ? 'Tải trọng' : 'Capacity'}</span>
-                            </div>
-                            <p className="text-white font-bold text-lg">85%</p>
-                          </div>
-                        </div>
-
-                        <div className="border-t pt-4">
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                            <div className="p-3 bg-white rounded-lg border border-gray-300 shadow-sm">
-                              <span className="text-sm font-bold text-gray-900">{language === 'vi' ? 'Tài xế:' : 'Driver:'}</span>
-                              <p className="font-bold text-gray-900 text-lg">{route.driver}</p>
-                            </div>
-                            <div className="p-3 bg-white rounded-lg border border-gray-300 shadow-sm">
-                              <span className="text-sm font-bold text-gray-900">{language === 'vi' ? 'Xe:' : 'Vehicle:'}</span>
-                              <p className="font-bold text-gray-900 text-lg">{route.vehicle}</p>
-                            </div>
-                            <div className="p-3 bg-white rounded-lg border border-gray-300 shadow-sm">
-                              <span className="text-sm font-bold text-gray-900">{language === 'vi' ? 'Hàng hóa:' : 'Cargo:'}</span>
-                              <p className="font-bold text-gray-900 text-lg">{route.cargo}</p>
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
-                              <span className="text-sm font-bold text-blue-800">{language === 'vi' ? 'Thời tiết:' : 'Weather:'}</span>
-                              <p className="font-bold text-blue-900 text-lg capitalize">{route.weather}</p>
-                            </div>
-                            <div className="p-3 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg border border-orange-200">
-                              <span className="text-sm font-bold text-orange-800">{language === 'vi' ? 'Giao thông:' : 'Traffic:'}</span>
-                              <p className="font-bold text-orange-900 text-lg capitalize">{route.traffic}</p>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex gap-2 mt-4">
-                          <Button 
-                            onClick={() => optimizeRoute(route)}
-                            disabled={optimizing}
-                            className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 shadow-lg"
-                          >
-                            <Zap className="h-4 w-4 mr-2" />
-                            {optimizing ? (language === 'vi' ? 'Đang tối ưu...' : 'Optimizing...') : (language === 'vi' ? 'Tối ưu tuyến đường' : 'Optimize Route')}
-                          </Button>
-                          <Button 
-                            onClick={() => {
-                              setSelectedRoute({
-                                origin: route.origin,
-                                destination: route.destination,
-                                distance: `${route.distance}km`,
-                                time: `${Math.round(route.duration/60)}h ${route.duration%60}m`
-                              })
-                              setActiveView('map')
-                            }}
-                            className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 shadow-lg"
-                          >
-                            <MapPin className="h-4 w-4 mr-2" />
-                            {language === 'vi' ? 'Xem bản đồ' : 'View Map'}
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
           </div>
         )}
 
