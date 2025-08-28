@@ -91,7 +91,7 @@ const LeafletRouteMap: React.FC<LeafletRouteMapProps> = ({ selectedRoute, classN
     }
   }, [isClient])
 
-  // Update map when route changes - with realistic Vietnamese routing
+  // Update map when route changes - FORCED CURVED ROUTING
   useEffect(() => {
     if (selectedRoute && mapInstanceRef.current && mapLoaded) {
       const updateRoute = async () => {
@@ -100,6 +100,8 @@ const LeafletRouteMap: React.FC<LeafletRouteMapProps> = ({ selectedRoute, classN
           const LeafletModule = L.default
           const map = mapInstanceRef.current
 
+          console.log('🗺️ UPDATING ROUTE:', selectedRoute.origin.name, '→', selectedRoute.destination.name)
+
           // Clear existing route layers
           map.eachLayer((layer: any) => {
             if (layer.options && (layer.options.className === 'route-line' || layer.options.className === 'route-marker')) {
@@ -107,45 +109,36 @@ const LeafletRouteMap: React.FC<LeafletRouteMapProps> = ({ selectedRoute, classN
             }
           })
 
-          // Generate realistic Vietnamese highway route with detailed waypoints
-          const generateRealisticRoute = (origin: any, destination: any) => {
-            console.log('🗺️ Generating route from:', origin.name, 'to:', destination.name)
+          // FORCE CURVED ROUTE - NO STRAIGHT LINES!
+          const createCurvedRoute = (origin: any, destination: any) => {
+            const points = []
+            const steps = 12 // More points = smoother curve
             
-            // Always start with origin
-            const waypoints = [[origin.lat, origin.lng]]
-            
-            // Add multiple intermediate points for realistic curved routing
-            const originLat = origin.lat
-            const originLng = origin.lng
-            const destLat = destination.lat
-            const destLng = destination.lng
-            
-            // Calculate intermediate points along a curved path
-            const numPoints = 8 // More points for smoother curves
-            
-            for (let i = 1; i < numPoints; i++) {
-              const t = i / numPoints
+            for (let i = 0; i <= steps; i++) {
+              const t = i / steps
               
-              // Create a curved path instead of straight line
-              const midLat = originLat + (destLat - originLat) * t
-              const midLng = originLng + (destLng - originLng) * t
+              // Linear interpolation
+              const lat = origin.lat + (destination.lat - origin.lat) * t
+              const lng = origin.lng + (destination.lng - origin.lng) * t
               
-              // Add curve offset to simulate highway routing
-              const curveOffset = Math.sin(t * Math.PI) * 0.02 // Curve amplitude
-              const perpLat = -(destLng - originLng) * curveOffset
-              const perpLng = (destLat - originLat) * curveOffset
+              // Add STRONG curve offset
+              const curveStrength = 0.08 // Very visible curve
+              const curve = Math.sin(t * Math.PI) * curveStrength
               
-              waypoints.push([midLat + perpLat, midLng + perpLng])
+              // Apply curve perpendicular to the route
+              const deltaLat = destination.lat - origin.lat
+              const deltaLng = destination.lng - origin.lng
+              const perpLat = -deltaLng * curve
+              const perpLng = deltaLat * curve
+              
+              points.push([lat + perpLat, lng + perpLng])
             }
             
-            // End with destination
-            waypoints.push([destLat, destLng])
-            
-            console.log('🛣️ Generated', waypoints.length, 'waypoints:', waypoints)
-            return waypoints
+            console.log('🛣️ CURVED ROUTE POINTS:', points.length, points)
+            return points
           }
 
-          const routePoints = generateRealisticRoute(selectedRoute.origin, selectedRoute.destination)
+          const curvedPoints = createCurvedRoute(selectedRoute.origin, selectedRoute.destination)
 
           // Add origin marker
           LeafletModule.marker([selectedRoute.origin.lat, selectedRoute.origin.lng], {
@@ -167,16 +160,18 @@ const LeafletRouteMap: React.FC<LeafletRouteMapProps> = ({ selectedRoute, classN
             })
           }).addTo(map)
 
-          // Draw realistic route line
-          LeafletModule.polyline(routePoints, {
+          // Draw CURVED route line
+          const routeLine = LeafletModule.polyline(curvedPoints, {
             color: '#3b82f6',
-            weight: 6,
-            opacity: 0.8,
+            weight: 8,
+            opacity: 0.9,
             className: 'route-line',
-            smoothFactor: 2.0,
+            smoothFactor: 1.0,
             lineCap: 'round',
             lineJoin: 'round'
           }).addTo(map)
+
+          console.log('✅ CURVED ROUTE DRAWN!')
 
           // Fit map to show the route
           const group = new LeafletModule.featureGroup([
@@ -186,7 +181,7 @@ const LeafletRouteMap: React.FC<LeafletRouteMapProps> = ({ selectedRoute, classN
           map.fitBounds(group.getBounds().pad(0.1))
 
         } catch (error) {
-          console.error('Error updating route:', error)
+          console.error('❌ Error updating route:', error)
         }
       }
 
@@ -230,4 +225,3 @@ const LeafletRouteMap: React.FC<LeafletRouteMapProps> = ({ selectedRoute, classN
 }
 
 export default LeafletRouteMap
-// Cache bust Thu 28 Aug 2025 11:17:19 +07
