@@ -173,27 +173,28 @@ export default function CombinedRouteOptimizerPage() {
     const distance = Math.round(straightDistance * roadFactor)
     
     // Calculate realistic travel time based on Vietnamese road conditions
-    let avgSpeed = 45 // km/h average for trucks in Vietnam
-    if (distance < 50) avgSpeed = 35 // City traffic
-    if (distance > 200) avgSpeed = 55 // Highway portions
+    let avgSpeed = 25 // km/h average for trucks in Vietnam cities
+    if (distance < 10) avgSpeed = 20 // Heavy city traffic
+    if (distance > 50) avgSpeed = 45 // Highway portions
+    if (distance > 200) avgSpeed = 55 // Long haul highway
     
     const timeInMinutes = Math.round((distance / avgSpeed) * 60)
     const hours = Math.floor(timeInMinutes / 60)
     const minutes = timeInMinutes % 60
     
     // Calculate realistic costs (Vietnamese logistics rates)
-    const fuelCostPerKm = 8000 // VND per km
-    const driverCostPerKm = 3000 // VND per km  
-    const tollsAndFees = distance > 100 ? 200000 : 50000 // VND
+    const fuelCostPerKm = 12000 // VND per km (higher for city routes)
+    const driverCostPerKm = 5000 // VND per km  
+    const tollsAndFees = distance > 50 ? 150000 : 30000 // VND
     const totalCost = (fuelCostPerKm + driverCostPerKm) * distance + tollsAndFees
     
     // Calculate fuel consumption (realistic for Vietnamese trucks)
-    const fuelConsumption = (distance * 0.25).toFixed(1) // 25L per 100km average
+    const fuelConsumption = (distance * 0.35).toFixed(1) // 35L per 100km for city routes
     
     // Calculate efficiency based on distance and route type
-    let efficiency = 85
-    if (distance < 30) efficiency = 75 // City routes less efficient
-    if (distance > 200) efficiency = 90 // Long haul more efficient
+    let efficiency = 80
+    if (distance < 10) efficiency = 65 // City routes less efficient
+    if (distance > 50) efficiency = 85 // Highway routes more efficient
 
     // Enhanced calculations with Vietnamese logistics factors
     const factors = EnhancedRouteCalculator.getCurrentConditions()
@@ -214,7 +215,7 @@ export default function CombinedRouteOptimizerPage() {
       fuelConsumption: `${fuelConsumption}L`,
       avgSpeed: `${avgSpeed} km/h`,
       truckType: 'Container Truck (20ft)',
-      loadCapacity: `${Math.round(efficiency * 0.3)} tons`
+      loadCapacity: `${Math.round(15 + (efficiency * 0.1))} tons` // More realistic 15-25 tons
     })
 
     setIsCalculating(false)
@@ -250,17 +251,6 @@ export default function CombinedRouteOptimizerPage() {
               >
                 <Zap className="h-4 w-4 mr-2" />
                 {language === 'vi' ? 'Tối ưu tuyến' : 'Route Optimizer'}
-              </Button>
-              <Button
-                onClick={() => setActiveView('dashboard')}
-                className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
-                  activeView === 'dashboard'
-                    ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-lg'
-                    : 'bg-transparent text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                <BarChart3 className="h-4 w-4 mr-2" />
-                {language === 'vi' ? 'Dashboard' : 'Dashboard'}
               </Button>
               <Button
                 onClick={() => setActiveView('map')}
