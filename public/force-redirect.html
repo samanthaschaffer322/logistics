@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Force Redirect</title>
+    <meta charset="utf-8">
+</head>
+<body>
+    <script>
+        // Force clear all payment-related localStorage
+        Object.keys(localStorage).forEach(key => {
+            if (key.toLowerCase().includes('payment') || 
+                key.toLowerCase().includes('truck') || 
+                key.toLowerCase().includes('company')) {
+                localStorage.removeItem(key);
+                console.log('🗑️ Cleared:', key);
+            }
+        });
+        
+        // Force redirect with cache buster
+        const timestamp = Date.now();
+        window.location.href = '/test-cache?t=' + timestamp;
+    </script>
+    
+    <div style="text-align: center; margin-top: 50px; font-family: Arial;">
+        <h1>🔄 Clearing cache and redirecting...</h1>
+        <p>If not redirected automatically, <a href="/test-cache">click here</a></p>
+    </div>
+</body>
+</html>
