@@ -234,6 +234,61 @@ const FleetManagementPage: React.FC = () => {
     }
   }
 
+  // Container truck (40ft) specific maintenance categories
+  const containerTruckMaintenance = {
+    engine: {
+      name: language === 'vi' ? 'Động cơ Container' : 'Container Engine',
+      items: [
+        { name: 'Thay dầu động cơ', interval: '10,000 km', cost: 1500000 },
+        { name: 'Kiểm tra turbo', interval: '20,000 km', cost: 2500000 },
+        { name: 'Thay lọc nhiên liệu', interval: '15,000 km', cost: 800000 },
+        { name: 'Kiểm tra hệ thống làm mát', interval: '25,000 km', cost: 1200000 }
+      ]
+    },
+    transmission: {
+      name: language === 'vi' ? 'Hộp số Container' : 'Container Transmission', 
+      items: [
+        { name: 'Thay dầu hộp số', interval: '40,000 km', cost: 3000000 },
+        { name: 'Kiểm tra ly hợp', interval: '50,000 km', cost: 4500000 },
+        { name: 'Bảo dưỡng hộp số tự động', interval: '60,000 km', cost: 6000000 }
+      ]
+    },
+    brakes: {
+      name: language === 'vi' ? 'Hệ thống phanh Container' : 'Container Brake System',
+      items: [
+        { name: 'Thay má phanh trước', interval: '30,000 km', cost: 2200000 },
+        { name: 'Thay má phanh sau', interval: '35,000 km', cost: 2800000 },
+        { name: 'Kiểm tra phanh khí nén', interval: '15,000 km', cost: 1500000 },
+        { name: 'Thay dầu phanh', interval: '25,000 km', cost: 600000 }
+      ]
+    },
+    suspension: {
+      name: language === 'vi' ? 'Hệ thống treo Container' : 'Container Suspension',
+      items: [
+        { name: 'Kiểm tra lò xo lá', interval: '40,000 km', cost: 3500000 },
+        { name: 'Thay amortisseur', interval: '60,000 km', cost: 4000000 },
+        { name: 'Bảo dưỡng hệ thống khí nén', interval: '30,000 km', cost: 2500000 }
+      ]
+    },
+    tires: {
+      name: language === 'vi' ? 'Lốp xe Container 40ft' : 'Container 40ft Tires',
+      items: [
+        { name: 'Thay lốp trước (295/80R22.5)', interval: '80,000 km', cost: 8000000 },
+        { name: 'Thay lốp sau (295/80R22.5)', interval: '100,000 km', cost: 16000000 },
+        { name: 'Cân bằng động lốp', interval: '20,000 km', cost: 500000 },
+        { name: 'Kiểm tra áp suất lốp', interval: '5,000 km', cost: 100000 }
+      ]
+    },
+    hydraulic: {
+      name: language === 'vi' ? 'Hệ thống thủy lực Container' : 'Container Hydraulic System',
+      items: [
+        { name: 'Thay dầu thủy lực', interval: '50,000 km', cost: 2000000 },
+        { name: 'Kiểm tra xi lanh nâng', interval: '30,000 km', cost: 1800000 },
+        { name: 'Bảo dưỡng hệ thống nghiêng', interval: '40,000 km', cost: 3000000 }
+      ]
+    }
+  }
+
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
@@ -455,10 +510,14 @@ const FleetManagementPage: React.FC = () => {
                           {language === 'vi' ? 'Chi tiết' : 'Details'}
                         </Button>
                         <Button 
-                          onClick={() => alert(language === 'vi' 
-                            ? `📅 Lên lịch bảo dưỡng cho xe ${vehicle.licensePlate}:\n🔧 Bảo dưỡng tiếp theo: ${new Date(vehicle.nextService).toLocaleDateString('vi-VN')}\n⚠️ Tình trạng lốp: ${getConditionText(vehicle.tireCondition)}\n⚠️ Tình trạng phanh: ${getConditionText(vehicle.brakeCondition)}\n💰 Chi phí ước tính: 2,500,000 VND` 
-                            : `📅 Schedule maintenance for ${vehicle.licensePlate}:\n🔧 Next Service: ${new Date(vehicle.nextService).toLocaleDateString('vi-VN')}\n⚠️ Tire Condition: ${getConditionText(vehicle.tireCondition)}\n⚠️ Brake Condition: ${getConditionText(vehicle.brakeCondition)}\n💰 Estimated Cost: 2,500,000 VND`
-                          )}
+                          onClick={() => {
+                            const maintenanceInfo = language === 'vi' 
+                              ? `📅 Lên lịch bảo dưỡng cho xe ${vehicle.licensePlate}:\n🔧 Bảo dưỡng tiếp theo: ${new Date(vehicle.nextService).toLocaleDateString('vi-VN')}\n⚠️ Tình trạng lốp: ${getConditionText(vehicle.tireCondition)}\n⚠️ Tình trạng phanh: ${getConditionText(vehicle.brakeCondition)}\n💰 Chi phí ước tính: 2,500,000 VND\n\n🚛 CONTAINER 40FT MAINTENANCE:\n• Động cơ: Thay dầu (1.5M VND)\n• Phanh khí nén: Kiểm tra (1.5M VND)\n• Lốp 295/80R22.5: Thay lốp (8M VND)\n• Hệ thống thủy lực: Bảo dưỡng (2M VND)` 
+                              : `📅 Schedule maintenance for ${vehicle.licensePlate}:\n🔧 Next Service: ${new Date(vehicle.nextService).toLocaleDateString('vi-VN')}\n⚠️ Tire Condition: ${getConditionText(vehicle.tireCondition)}\n⚠️ Brake Condition: ${getConditionText(vehicle.brakeCondition)}\n💰 Estimated Cost: 2,500,000 VND\n\n🚛 CONTAINER 40FT MAINTENANCE:\n• Engine: Oil change (1.5M VND)\n• Air brakes: Check (1.5M VND)\n• Tires 295/80R22.5: Replace (8M VND)\n• Hydraulic system: Service (2M VND)`
+                            
+                            alert(maintenanceInfo)
+                            console.log('✅ Lên lịch bảo dưỡng button clicked for:', vehicle.licensePlate)
+                          }}
                           className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 shadow-lg transform hover:scale-105 transition-all duration-300"
                         >
                           <Calendar className="h-4 w-4 mr-2" />
