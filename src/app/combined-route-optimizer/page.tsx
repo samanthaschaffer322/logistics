@@ -355,32 +355,32 @@ export default function CombinedRouteOptimizerPage() {
                   {language === 'vi' ? 'Tối ưu Tuyến đường Thông minh' : 'Smart Route Optimization'}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="p-8">
+              <CardContent className="p-8 bg-white">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                   <div className="space-y-4">
-                    <label className="text-gray-700 font-semibold text-lg">{language === 'vi' ? 'Điểm xuất phát' : 'Origin Point'}</label>
+                    <label className="text-gray-800 font-bold text-lg">{language === 'vi' ? 'Điểm xuất phát' : 'Origin Point'}</label>
                     <input
                       type="text"
                       placeholder={language === 'vi' ? 'Nhập điểm xuất phát...' : 'Enter origin location...'}
                       value={originQuery}
                       onChange={(e) => setOriginQuery(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 text-gray-800"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 text-gray-800 bg-white shadow-sm"
                     />
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-gray-700 font-medium">
                       {language === 'vi' ? 'Ví dụ: Cảng Cát Lái, TP.HCM, Hà Nội' : 'Example: Cat Lai Port, Ho Chi Minh City, Hanoi'}
                     </div>
                   </div>
 
                   <div className="space-y-4">
-                    <label className="text-gray-700 font-semibold text-lg">{language === 'vi' ? 'Điểm đến' : 'Destination Point'}</label>
+                    <label className="text-gray-800 font-bold text-lg">{language === 'vi' ? 'Điểm đến' : 'Destination Point'}</label>
                     <input
                       type="text"
                       placeholder={language === 'vi' ? 'Nhập điểm đến...' : 'Enter destination location...'}
                       value={destinationQuery}
                       onChange={(e) => setDestinationQuery(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 text-gray-800"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 text-gray-800 bg-white shadow-sm"
                     />
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-gray-700 font-medium">
                       {language === 'vi' ? 'Ví dụ: Cảng Thị Vải, Đà Nẵng, Cần Thơ' : 'Example: Thi Vai Port, Da Nang, Can Tho'}
                     </div>
                   </div>
