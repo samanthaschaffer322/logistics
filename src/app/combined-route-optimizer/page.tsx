@@ -51,7 +51,9 @@ export default function CombinedRouteOptimizerPage() {
   const vietnameseLocations = [
     // Major Ports
     { name: 'Cảng Cát Lái', lat: 10.8100, lng: 106.7800, province: 'Ho Chi Minh City', type: 'port' },
+    { name: 'Cat Lai', lat: 10.8100, lng: 106.7800, province: 'Ho Chi Minh City', type: 'port' },
     { name: 'Cảng Thị Vải', lat: 10.6100, lng: 107.0700, province: 'Ba Ria - Vung Tau', type: 'port' },
+    { name: 'Thi Vai', lat: 10.6100, lng: 107.0700, province: 'Ba Ria - Vung Tau', type: 'port' },
     { name: 'Cảng Phú Mỹ', lat: 10.6200, lng: 107.0900, province: 'Ba Ria - Vung Tau', type: 'port' },
     { name: 'Cảng Đà Nẵng', lat: 16.0544, lng: 108.2022, province: 'Da Nang', type: 'port' },
     { name: 'Cảng Hải Phòng', lat: 20.8449, lng: 106.6881, province: 'Hai Phong', type: 'port' },
@@ -65,21 +67,30 @@ export default function CombinedRouteOptimizerPage() {
     { name: 'Quận Tân Bình', lat: 10.8008, lng: 106.6530, province: 'Ho Chi Minh City', type: 'district' },
     { name: 'Khu Chế Xuất Tân Thuận', lat: 10.7379, lng: 106.7197, province: 'Ho Chi Minh City', type: 'industrial' },
     { name: 'Kho Chim Én', lat: 10.7500, lng: 106.6800, province: 'Ho Chi Minh City', type: 'warehouse' },
-    { name: 'Cat Lai', lat: 10.8100, lng: 106.7800, province: 'Ho Chi Minh City', type: 'port' },
+    { name: 'Phú Hữu', lat: 10.7800, lng: 106.7900, province: 'Ho Chi Minh City', type: 'district' },
+    { name: 'Phu Huu', lat: 10.7800, lng: 106.7900, province: 'Ho Chi Minh City', type: 'district' },
+    { name: 'SITC', lat: 10.8050, lng: 106.7750, province: 'Ho Chi Minh City', type: 'logistics' },
+    { name: 'Sitc', lat: 10.8050, lng: 106.7750, province: 'Ho Chi Minh City', type: 'logistics' },
     
     // Hanoi Areas
     { name: 'Hà Nội', lat: 21.0285, lng: 105.8542, province: 'Hanoi', type: 'city' },
+    { name: 'Hanoi', lat: 21.0285, lng: 105.8542, province: 'Hanoi', type: 'city' },
     { name: 'Quận Ba Đình', lat: 21.0341, lng: 105.8372, province: 'Hanoi', type: 'district' },
     { name: 'Quận Hoàn Kiếm', lat: 21.0285, lng: 105.8542, province: 'Hanoi', type: 'district' },
     { name: 'Sân bay Nội Bài', lat: 21.2187, lng: 105.8067, province: 'Hanoi', type: 'airport' },
     
     // Major Cities
     { name: 'Đà Nẵng', lat: 16.0544, lng: 108.2022, province: 'Da Nang', type: 'city' },
+    { name: 'Da Nang', lat: 16.0544, lng: 108.2022, province: 'Da Nang', type: 'city' },
     { name: 'Cần Thơ', lat: 10.0452, lng: 105.7469, province: 'Can Tho', type: 'city' },
+    { name: 'Can Tho', lat: 10.0452, lng: 105.7469, province: 'Can Tho', type: 'city' },
     { name: 'Hải Phòng', lat: 20.8449, lng: 106.6881, province: 'Hai Phong', type: 'city' },
+    { name: 'Hai Phong', lat: 20.8449, lng: 106.6881, province: 'Hai Phong', type: 'city' },
     { name: 'Nha Trang', lat: 12.2388, lng: 109.1967, province: 'Khanh Hoa', type: 'city' },
     { name: 'Huế', lat: 16.4637, lng: 107.5909, province: 'Thua Thien Hue', type: 'city' },
+    { name: 'Hue', lat: 16.4637, lng: 107.5909, province: 'Thua Thien Hue', type: 'city' },
     { name: 'Vũng Tàu', lat: 10.4113, lng: 107.1365, province: 'Ba Ria - Vung Tau', type: 'city' },
+    { name: 'Vung Tau', lat: 10.4113, lng: 107.1365, province: 'Ba Ria - Vung Tau', type: 'city' },
     
     // Industrial Zones
     { name: 'KCN Biên Hòa', lat: 10.9408, lng: 106.8228, province: 'Dong Nai', type: 'industrial' },
@@ -89,15 +100,14 @@ export default function CombinedRouteOptimizerPage() {
     // Warehouses & Logistics Centers
     { name: 'Kho Hiệp Phước', lat: 10.7200, lng: 106.7500, province: 'Ho Chi Minh City', type: 'warehouse' },
     { name: 'Trung tâm Logistics Sóng Thần', lat: 10.8800, lng: 106.6200, province: 'Binh Duong', type: 'logistics' },
-    { name: 'Cảng Hải Phòng', lat: 20.8449, lng: 106.6881, province: 'Hai Phong', type: 'port' },
     
-    // Major Cities
+    // Additional common locations
     { name: 'TP. Hồ Chí Minh', lat: 10.8231, lng: 106.6297, province: 'Ho Chi Minh City', type: 'city' },
-    { name: 'Hà Nội', lat: 21.0285, lng: 105.8542, province: 'Hanoi', type: 'city' },
-    { name: 'Đà Nẵng', lat: 16.0544, lng: 108.2022, province: 'Da Nang', type: 'city' },
-    { name: 'Cần Thơ', lat: 10.0452, lng: 105.7469, province: 'Can Tho', type: 'city' },
+    { name: 'Ho Chi Minh City', lat: 10.8231, lng: 106.6297, province: 'Ho Chi Minh City', type: 'city' },
+    { name: 'HCMC', lat: 10.8231, lng: 106.6297, province: 'Ho Chi Minh City', type: 'city' },
+    { name: 'Saigon', lat: 10.8231, lng: 106.6297, province: 'Ho Chi Minh City', type: 'city' },
     { name: 'Biên Hòa', lat: 10.9460, lng: 106.8234, province: 'Dong Nai', type: 'city' },
-    { name: 'Nha Trang', lat: 12.2388, lng: 109.1967, province: 'Khanh Hoa', type: 'city' }
+    { name: 'Bien Hoa', lat: 10.9460, lng: 106.8234, province: 'Dong Nai', type: 'city' }
   ]
 
   const searchLocations = (query: string) => {
@@ -222,7 +232,7 @@ export default function CombinedRouteOptimizerPage() {
             🚛 {language === 'vi' ? 'Combined Route Optimizer Pro' : 'Combined Route Optimizer Pro'}
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            {language === 'vi' ? 'Tối ưu tuyến đường thông minh với công nghệ Fleetbase cho logistics Việt Nam' : 'Smart route optimization with Fleetbase technology for Vietnamese logistics'}
+            {language === 'vi' ? 'Tối ưu tuyến đường thông minh cho logistics Việt Nam' : 'Smart route optimization for Vietnamese logistics'}
           </p>
         </div>
 
