@@ -183,46 +183,47 @@ export default function CombinedRouteOptimizerPage() {
       distance = 30 // Realistic ~30km
     }
     
-    // More precise speed calculations based on Vietnamese road types
-    let avgSpeed = 18 // km/h for dense urban areas
-    if (distance < 5) avgSpeed = 15 // Heavy city traffic (HCMC center)
-    if (distance >= 5 && distance < 15) avgSpeed = 22 // City outskirts
-    if (distance >= 15 && distance < 30) avgSpeed = 28 // Mixed city/highway
-    if (distance >= 30 && distance < 100) avgSpeed = 35 // Mostly highway
-    if (distance >= 100) avgSpeed = 45 // Long haul highway
+    // More precise CONTAINER TRUCK speed calculations (not car speeds)
+    let avgSpeed = 15 // km/h for container trucks in dense urban areas
+    if (distance < 5) avgSpeed = 12 // Heavy city traffic with container truck
+    if (distance >= 5 && distance < 15) avgSpeed = 18 // City outskirts with truck
+    if (distance >= 15 && distance < 30) avgSpeed = 22 // Mixed city/highway for trucks
+    if (distance >= 30 && distance < 100) avgSpeed = 28 // Mostly highway for trucks
+    if (distance >= 100) avgSpeed = 35 // Long haul highway for trucks
     
-    // Account for Vietnamese traffic patterns
+    // Account for Vietnamese traffic patterns + CONTAINER TRUCK restrictions
     const currentHour = new Date().getHours()
-    if (currentHour >= 7 && currentHour <= 9) avgSpeed *= 0.7 // Morning rush
-    if (currentHour >= 17 && currentHour <= 19) avgSpeed *= 0.75 // Evening rush
+    if (currentHour >= 7 && currentHour <= 9) avgSpeed *= 0.6 // Morning rush + truck restrictions
+    if (currentHour >= 17 && currentHour <= 19) avgSpeed *= 0.65 // Evening rush + truck restrictions
+    if (currentHour >= 22 || currentHour <= 5) avgSpeed *= 1.1 // Night driving allowed for trucks
     
     const timeInMinutes = Math.round((distance / avgSpeed) * 60)
     const hours = Math.floor(timeInMinutes / 60)
     const minutes = timeInMinutes % 60
     
-    // More accurate Vietnamese logistics costs
-    let fuelCostPerKm = 18000 // VND per km (urban)
-    let driverCostPerKm = 10000 // VND per km
+    // More accurate Vietnamese CONTAINER TRUCK logistics costs
+    let fuelCostPerKm = 20000 // VND per km (container trucks use more fuel)
+    let driverCostPerKm = 12000 // VND per km (specialized container truck drivers)
     if (distance > 30) {
-      fuelCostPerKm = 15000 // Highway efficiency
-      driverCostPerKm = 8000
+      fuelCostPerKm = 18000 // Highway efficiency for trucks
+      driverCostPerKm = 10000
     }
     
-    const tollsAndFees = distance > 30 ? Math.round(distance * 2000) : 25000 // VND
+    const tollsAndFees = distance > 30 ? Math.round(distance * 3000) : 35000 // VND (higher tolls for trucks)
     const totalCost = (fuelCostPerKm + driverCostPerKm) * distance + tollsAndFees
     
-    // More accurate fuel consumption based on route type
-    let fuelPer100km = 50 // L/100km for city routes
-    if (distance > 15) fuelPer100km = 42 // Mixed routes
-    if (distance > 30) fuelPer100km = 38 // Highway routes
+    // More accurate CONTAINER TRUCK fuel consumption
+    let fuelPer100km = 55 // L/100km for container trucks in city (much higher than cars)
+    if (distance > 15) fuelPer100km = 48 // Mixed routes for trucks
+    if (distance > 30) fuelPer100km = 42 // Highway routes for trucks
     
     const fuelConsumption = (distance * fuelPer100km / 100).toFixed(1)
     
-    // More realistic efficiency calculation
-    let efficiency = 65
-    if (distance < 5) efficiency = 55 // City congestion
-    if (distance >= 5 && distance < 30) efficiency = 70 // Mixed routes
-    if (distance >= 30) efficiency = 80 // Highway efficiency
+    // More realistic CONTAINER TRUCK efficiency calculation
+    let efficiency = 70
+    if (distance < 5) efficiency = 55 // City congestion bad for trucks
+    if (distance >= 5 && distance < 30) efficiency = 65 // Mixed routes for trucks
+    if (distance >= 30) efficiency = 75 // Highway efficiency for trucks
 
     // Enhanced calculations with Vietnamese logistics factors
     const factors = EnhancedRouteCalculator.getCurrentConditions()
