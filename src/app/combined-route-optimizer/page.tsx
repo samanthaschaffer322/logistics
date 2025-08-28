@@ -54,6 +54,8 @@ export default function CombinedRouteOptimizerPage() {
     { name: 'Cat Lai', lat: 10.8100, lng: 106.7800, province: 'Ho Chi Minh City', type: 'port' },
     { name: 'Cảng Thị Vải', lat: 10.6100, lng: 107.0700, province: 'Ba Ria - Vung Tau', type: 'port' },
     { name: 'Thi Vai', lat: 10.6100, lng: 107.0700, province: 'Ba Ria - Vung Tau', type: 'port' },
+    { name: 'Cảng Cái Mép', lat: 10.5800, lng: 107.0500, province: 'Ba Ria - Vung Tau', type: 'port' },
+    { name: 'Cai Mep', lat: 10.5800, lng: 107.0500, province: 'Ba Ria - Vung Tau', type: 'port' },
     { name: 'Cảng Phú Mỹ', lat: 10.6200, lng: 107.0900, province: 'Ba Ria - Vung Tau', type: 'port' },
     { name: 'Cảng Đà Nẵng', lat: 16.0544, lng: 108.2022, province: 'Da Nang', type: 'port' },
     { name: 'Cảng Hải Phòng', lat: 20.8449, lng: 106.6881, province: 'Hai Phong', type: 'port' },

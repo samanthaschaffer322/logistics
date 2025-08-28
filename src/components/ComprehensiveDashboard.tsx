@@ -98,8 +98,8 @@ const ComprehensiveDashboard = () => {
       category: language === 'vi' ? 'Tối ưu hóa tuyến đường' : 'Route Optimization',
       items: [
         { 
-          title: language === 'vi' ? 'Fleetbase Route Optimizer' : 'Fleetbase Route Optimizer', 
-          description: language === 'vi' ? '🚀 Tối ưu tuyến đường thông minh với công nghệ Fleetbase' : '🚀 Smart route optimization with Fleetbase technology', 
+          title: language === 'vi' ? 'Combined Route Optimizer Pro' : 'Combined Route Optimizer Pro', 
+          description: language === 'vi' ? '🚛 Tối ưu tuyến đường thông minh cho logistics Việt Nam' : '🚛 Smart route optimization for Vietnamese logistics', 
           icon: Navigation, 
           href: '/fleetbase-route-optimizer', 
           color: 'bg-gradient-to-r from-purple-600 to-indigo-600' 
