@@ -59,10 +59,114 @@ interface FleetbaseRoute {
 
 export default function CombinedRouteOptimizerPage() {
   const { language } = useLanguage()
-  const [activeView, setActiveView] = useState('dashboard')
+  const [activeView, setActiveView] = useState('optimizer')
+  const [originQuery, setOriginQuery] = useState('')
+  const [destinationQuery, setDestinationQuery] = useState('')
   const [routes, setRoutes] = useState<FleetbaseRoute[]>([])
   const [selectedRoute, setSelectedRoute] = useState<any>(null)
   const [optimizing, setOptimizing] = useState(false)
+  const [isCalculating, setIsCalculating] = useState(false)
+
+  // Comprehensive Vietnamese locations
+  const vietnameseLocations = [
+    // Major Ports
+    { name: 'Cảng Cát Lái', lat: 10.8100, lng: 106.7800, province: 'Ho Chi Minh City', type: 'port' },
+    { name: 'Cảng Thị Vải', lat: 10.6100, lng: 107.0700, province: 'Ba Ria - Vung Tau', type: 'port' },
+    { name: 'Cảng Phú Mỹ', lat: 10.6200, lng: 107.0900, province: 'Ba Ria - Vung Tau', type: 'port' },
+    { name: 'Cảng Đà Nẵng', lat: 16.0544, lng: 108.2022, province: 'Da Nang', type: 'port' },
+    { name: 'Cảng Hải Phòng', lat: 20.8449, lng: 106.6881, province: 'Hai Phong', type: 'port' },
+    
+    // Major Cities
+    { name: 'TP. Hồ Chí Minh', lat: 10.8231, lng: 106.6297, province: 'Ho Chi Minh City', type: 'city' },
+    { name: 'Hà Nội', lat: 21.0285, lng: 105.8542, province: 'Hanoi', type: 'city' },
+    { name: 'Đà Nẵng', lat: 16.0544, lng: 108.2022, province: 'Da Nang', type: 'city' },
+    { name: 'Cần Thơ', lat: 10.0452, lng: 105.7469, province: 'Can Tho', type: 'city' },
+    { name: 'Biên Hòa', lat: 10.9460, lng: 106.8234, province: 'Dong Nai', type: 'city' },
+    { name: 'Nha Trang', lat: 12.2388, lng: 109.1967, province: 'Khanh Hoa', type: 'city' }
+  ]
+
+  const searchLocations = (query: string) => {
+    if (!query.trim()) return []
+    
+    const normalizedQuery = query.toLowerCase()
+      .replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, 'a')
+      .replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, 'e')
+      .replace(/ì|í|ị|ỉ|ĩ/g, 'i')
+      .replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, 'o')
+      .replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, 'u')
+      .replace(/ỳ|ý|ỵ|ỷ|ỹ/g, 'y')
+      .replace(/đ/g, 'd')
+    
+    return vietnameseLocations.filter(location => {
+      const normalizedName = location.name.toLowerCase()
+        .replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, 'a')
+        .replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, 'e')
+        .replace(/ì|í|ị|ỉ|ĩ/g, 'i')
+        .replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, 'o')
+        .replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, 'u')
+        .replace(/ỳ|ý|ỵ|ỷ|ỹ/g, 'y')
+        .replace(/đ/g, 'd')
+      
+      return normalizedName.includes(normalizedQuery) || 
+             location.province.toLowerCase().includes(normalizedQuery)
+    }).slice(0, 5)
+  }
+
+  const calculateRoute = async () => {
+    if (!originQuery.trim() || !destinationQuery.trim()) {
+      alert(language === 'vi' ? 'Vui lòng nhập điểm xuất phát và điểm đến' : 'Please enter both origin and destination locations')
+      return
+    }
+
+    setIsCalculating(true)
+    await new Promise(resolve => setTimeout(resolve, 2000))
+
+    const originResults = searchLocations(originQuery)
+    const destResults = searchLocations(destinationQuery)
+
+    if (originResults.length === 0 || destResults.length === 0) {
+      alert(language === 'vi' ? 'Không tìm thấy địa điểm. Vui lòng thử lại.' : 'Could not find locations. Please try again.')
+      setIsCalculating(false)
+      return
+    }
+
+    const originLoc = originResults[0]
+    const destLoc = destResults[0]
+
+    // Calculate distance using Haversine formula
+    const R = 6371
+    const dLat = (destLoc.lat - originLoc.lat) * Math.PI / 180
+    const dLon = (destLoc.lng - originLoc.lng) * Math.PI / 180
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(originLoc.lat * Math.PI / 180) * Math.cos(destLoc.lat * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2)
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+    const distance = Math.round(R * c)
+
+    // Enhanced calculations with Vietnamese logistics factors
+    const factors = EnhancedRouteCalculator.getCurrentConditions()
+    const optimizedResult = EnhancedRouteCalculator.calculateEnhancedRoute(
+      originLoc.name,
+      destLoc.name,
+      distance,
+      factors
+    )
+
+    setSelectedRoute({
+      origin: originLoc,
+      destination: destLoc,
+      distance: `${optimizedResult.actualDistance} km`,
+      time: `${Math.round(optimizedResult.actualTime/60)}h ${optimizedResult.actualTime%60}min`,
+      cost: `${(optimizedResult.actualCost / 1000000).toFixed(3)} triệu VND`,
+      efficiency: `${optimizedResult.efficiency}%`,
+      fuelConsumption: `${optimizedResult.actualFuelConsumption.toFixed(1)}L`,
+      avgSpeed: `${Math.round(distance / (optimizedResult.actualTime/60))} km/h`,
+      truckType: 'Container Truck (40ft)',
+      loadCapacity: '33 tons'
+    })
+
+    setIsCalculating(false)
+  }
 
   // Vietnamese ports and locations
   const vietnamesePorts = [
@@ -194,6 +298,17 @@ export default function CombinedRouteOptimizerPage() {
           <div className="bg-white rounded-2xl p-2 shadow-xl border border-gray-200">
             <div className="flex gap-2">
               <Button
+                onClick={() => setActiveView('optimizer')}
+                className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
+                  activeView === 'optimizer'
+                    ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-lg'
+                    : 'bg-transparent text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <Zap className="h-4 w-4 mr-2" />
+                {language === 'vi' ? 'Tối ưu tuyến' : 'Route Optimizer'}
+              </Button>
+              <Button
                 onClick={() => setActiveView('dashboard')}
                 className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
                   activeView === 'dashboard'
@@ -229,6 +344,134 @@ export default function CombinedRouteOptimizerPage() {
             </div>
           </div>
         </div>
+
+        {/* Route Optimizer View */}
+        {activeView === 'optimizer' && (
+          <div className="space-y-8">
+            <Card className="shadow-2xl border-0">
+              <CardHeader className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-t-lg">
+                <CardTitle className="flex items-center gap-3 text-xl">
+                  <Zap className="h-6 w-6" />
+                  {language === 'vi' ? 'Tối ưu Tuyến đường Thông minh' : 'Smart Route Optimization'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-8">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                  <div className="space-y-4">
+                    <label className="text-gray-700 font-semibold text-lg">{language === 'vi' ? 'Điểm xuất phát' : 'Origin Point'}</label>
+                    <input
+                      type="text"
+                      placeholder={language === 'vi' ? 'Nhập điểm xuất phát...' : 'Enter origin location...'}
+                      value={originQuery}
+                      onChange={(e) => setOriginQuery(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 text-gray-800"
+                    />
+                    <div className="text-sm text-gray-600">
+                      {language === 'vi' ? 'Ví dụ: Cảng Cát Lái, TP.HCM, Hà Nội' : 'Example: Cat Lai Port, Ho Chi Minh City, Hanoi'}
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <label className="text-gray-700 font-semibold text-lg">{language === 'vi' ? 'Điểm đến' : 'Destination Point'}</label>
+                    <input
+                      type="text"
+                      placeholder={language === 'vi' ? 'Nhập điểm đến...' : 'Enter destination location...'}
+                      value={destinationQuery}
+                      onChange={(e) => setDestinationQuery(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 text-gray-800"
+                    />
+                    <div className="text-sm text-gray-600">
+                      {language === 'vi' ? 'Ví dụ: Cảng Thị Vải, Đà Nẵng, Cần Thơ' : 'Example: Thi Vai Port, Da Nang, Can Tho'}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-center mb-8">
+                  <Button 
+                    onClick={calculateRoute}
+                    disabled={isCalculating}
+                    className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-2xl transform hover:scale-105 transition-all duration-300"
+                  >
+                    <Zap className="h-5 w-5 mr-3" />
+                    {isCalculating ? (language === 'vi' ? 'Đang tính toán...' : 'Calculating...') : (language === 'vi' ? 'Tối ưu Tuyến đường' : 'Optimize Route')}
+                  </Button>
+                </div>
+
+                {/* Route Results */}
+                {selectedRoute && (
+                  <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-8 text-white">
+                    <h3 className="text-2xl font-bold mb-6 text-center">🚛 {language === 'vi' ? 'Kết quả Tối ưu' : 'Optimization Results'}</h3>
+                    
+                    {/* Main Metrics */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                      <div className="text-center p-4 bg-green-500/20 rounded-xl">
+                        <div className="text-2xl font-bold text-green-400">{selectedRoute.time}</div>
+                        <div className="text-sm text-gray-300">{language === 'vi' ? 'Thời gian' : 'Travel Time'}</div>
+                      </div>
+                      <div className="text-center p-4 bg-blue-500/20 rounded-xl">
+                        <div className="text-2xl font-bold text-blue-400">{selectedRoute.distance}</div>
+                        <div className="text-sm text-gray-300">{language === 'vi' ? 'Quãng đường' : 'Distance'}</div>
+                      </div>
+                      <div className="text-center p-4 bg-yellow-500/20 rounded-xl">
+                        <div className="text-xl font-bold text-yellow-400">{selectedRoute.cost}</div>
+                        <div className="text-sm text-gray-300">{language === 'vi' ? 'Chi phí' : 'Total Cost'}</div>
+                      </div>
+                      <div className="text-center p-4 bg-purple-500/20 rounded-xl">
+                        <div className="text-2xl font-bold text-purple-400">{selectedRoute.efficiency}</div>
+                        <div className="text-sm text-gray-300">{language === 'vi' ? 'Hiệu quả' : 'Efficiency'}</div>
+                      </div>
+                    </div>
+
+                    {/* Route Details */}
+                    <div className="bg-slate-700/50 rounded-xl p-4 mb-6">
+                      <div className="text-lg font-bold text-green-400 mb-2">
+                        📍 {selectedRoute.origin.name} → {selectedRoute.destination.name}
+                      </div>
+                      <div className="text-sm text-gray-300">
+                        {language === 'vi' ? 'Từ' : 'From'}: {selectedRoute.origin.province} | {language === 'vi' ? 'Đến' : 'To'}: {selectedRoute.destination.province}
+                      </div>
+                    </div>
+
+                    {/* Additional Metrics */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <div className="text-center p-3 bg-red-500/20 rounded-lg">
+                        <div className="text-lg font-bold text-red-400">{selectedRoute.fuelConsumption}</div>
+                        <div className="text-xs text-gray-300">{language === 'vi' ? 'Nhiên liệu' : 'Fuel'}</div>
+                      </div>
+                      <div className="text-center p-3 bg-purple-500/20 rounded-lg">
+                        <div className="text-lg font-bold text-purple-400">{selectedRoute.avgSpeed}</div>
+                        <div className="text-xs text-gray-300">{language === 'vi' ? 'Tốc độ TB' : 'Avg Speed'}</div>
+                      </div>
+                      <div className="text-center p-3 bg-cyan-500/20 rounded-lg">
+                        <div className="text-sm font-bold text-cyan-400">{selectedRoute.truckType}</div>
+                        <div className="text-xs text-gray-300">{language === 'vi' ? 'Loại xe' : 'Vehicle'}</div>
+                      </div>
+                      <div className="text-center p-3 bg-green-500/20 rounded-lg">
+                        <div className="text-lg font-bold text-green-400">{selectedRoute.loadCapacity}</div>
+                        <div className="text-xs text-gray-300">{language === 'vi' ? 'Tải trọng' : 'Capacity'}</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Interactive Map */}
+            {selectedRoute && (
+              <Card className="shadow-2xl border-0">
+                <CardHeader className="bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-t-lg">
+                  <CardTitle className="flex items-center gap-3 text-xl">
+                    <MapPin className="h-6 w-6" />
+                    {language === 'vi' ? 'Bản đồ Tuyến đường' : 'Route Map'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <LeafletRouteMap selectedRoute={selectedRoute} />
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        )}
 
         {/* Dashboard View */}
         {activeView === 'dashboard' && (
