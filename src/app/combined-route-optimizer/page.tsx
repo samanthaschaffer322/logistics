@@ -160,7 +160,7 @@ export default function CombinedRouteOptimizerPage() {
     const originLoc = originResults[0]
     const destLoc = destResults[0]
 
-    // Calculate realistic distance and time
+    // More accurate distance calculation with Vietnamese road network factors
     const R = 6371 // Earth's radius in km
     const dLat = (destLoc.lat - originLoc.lat) * Math.PI / 180
     const dLon = (destLoc.lng - originLoc.lng) * Math.PI / 180
@@ -170,33 +170,54 @@ export default function CombinedRouteOptimizerPage() {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
     const straightDistance = R * c
     
-    // Add realistic road factor (roads are not straight)
-    const roadFactor = 1.3 // Roads are typically 30% longer than straight line
+    // Vietnamese road network factors (more accurate than simple 1.3x)
+    let roadFactor = 1.2 // Urban routes
+    if (straightDistance > 10) roadFactor = 1.35 // Inter-city routes
+    if (straightDistance > 50) roadFactor = 1.25 // Highway routes
+    if (straightDistance > 200) roadFactor = 1.15 // Long highway routes
+    
     const distance = Math.round(straightDistance * roadFactor)
     
-    // Calculate realistic travel time based on Vietnamese road conditions (match Google Maps for trucks)
-    let avgSpeed = 15 // km/h average for trucks in Vietnam cities (much slower than cars)
-    if (distance < 5) avgSpeed = 12 // Heavy city traffic
-    if (distance > 20) avgSpeed = 25 // Some highway portions
-    if (distance > 100) avgSpeed = 40 // Long haul highway
+    // More precise speed calculations based on Vietnamese road types
+    let avgSpeed = 18 // km/h for dense urban areas
+    if (distance < 5) avgSpeed = 15 // Heavy city traffic (HCMC center)
+    if (distance >= 5 && distance < 15) avgSpeed = 22 // City outskirts
+    if (distance >= 15 && distance < 30) avgSpeed = 28 // Mixed city/highway
+    if (distance >= 30 && distance < 100) avgSpeed = 35 // Mostly highway
+    if (distance >= 100) avgSpeed = 45 // Long haul highway
+    
+    // Account for Vietnamese traffic patterns
+    const currentHour = new Date().getHours()
+    if (currentHour >= 7 && currentHour <= 9) avgSpeed *= 0.7 // Morning rush
+    if (currentHour >= 17 && currentHour <= 19) avgSpeed *= 0.75 // Evening rush
     
     const timeInMinutes = Math.round((distance / avgSpeed) * 60)
     const hours = Math.floor(timeInMinutes / 60)
     const minutes = timeInMinutes % 60
     
-    // Calculate realistic costs (Vietnamese logistics rates)
-    const fuelCostPerKm = 15000 // VND per km (higher for city routes)
-    const driverCostPerKm = 8000 // VND per km  
-    const tollsAndFees = distance > 20 ? 100000 : 20000 // VND
+    // More accurate Vietnamese logistics costs
+    let fuelCostPerKm = 18000 // VND per km (urban)
+    let driverCostPerKm = 10000 // VND per km
+    if (distance > 30) {
+      fuelCostPerKm = 15000 // Highway efficiency
+      driverCostPerKm = 8000
+    }
+    
+    const tollsAndFees = distance > 30 ? Math.round(distance * 2000) : 25000 // VND
     const totalCost = (fuelCostPerKm + driverCostPerKm) * distance + tollsAndFees
     
-    // Calculate fuel consumption (realistic for Vietnamese trucks in city)
-    const fuelConsumption = (distance * 0.45).toFixed(1) // 45L per 100km for city routes with traffic
+    // More accurate fuel consumption based on route type
+    let fuelPer100km = 50 // L/100km for city routes
+    if (distance > 15) fuelPer100km = 42 // Mixed routes
+    if (distance > 30) fuelPer100km = 38 // Highway routes
     
-    // Calculate efficiency based on distance and route type
-    let efficiency = 70
-    if (distance < 5) efficiency = 60 // City routes less efficient
-    if (distance > 20) efficiency = 75 // Highway routes more efficient
+    const fuelConsumption = (distance * fuelPer100km / 100).toFixed(1)
+    
+    // More realistic efficiency calculation
+    let efficiency = 65
+    if (distance < 5) efficiency = 55 // City congestion
+    if (distance >= 5 && distance < 30) efficiency = 70 // Mixed routes
+    if (distance >= 30) efficiency = 80 // Highway efficiency
 
     // Enhanced calculations with Vietnamese logistics factors
     const factors = EnhancedRouteCalculator.getCurrentConditions()

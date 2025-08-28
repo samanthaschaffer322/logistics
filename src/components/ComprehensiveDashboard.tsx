@@ -103,13 +103,6 @@ const ComprehensiveDashboard = () => {
           icon: Navigation, 
           href: '/combined-route-optimizer', 
           color: 'bg-gradient-to-r from-purple-600 to-indigo-600' 
-        },
-        { 
-          title: language === 'vi' ? 'Tối ưu tuyến đường tổng hợp' : 'Combined Route Optimizer', 
-          description: language === 'vi' ? 'Tối ưu hóa đa thuật toán nâng cao với bản đồ Việt Nam' : 'Enhanced multi-algorithm optimization with Vietnam map', 
-          icon: Navigation, 
-          href: '/combined-route-optimizer', 
-          color: 'bg-gradient-to-r from-blue-600 to-cyan-600' 
         }
       ]
     },
