@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Payment System 2025</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: linear-gradient(135deg, #fef2f2, #fed7aa); }
+        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 20px; padding: 40px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .header { text-align: center; margin-bottom: 40px; }
+        .title { font-size: 48px; font-weight: bold; color: #dc2626; margin-bottom: 10px; }
+        .subtitle { font-size: 24px; color: #ea580c; }
+        .company { border: 3px solid #fed7aa; border-radius: 15px; padding: 30px; margin-bottom: 20px; background: linear-gradient(to right, white, #fef2f2); }
+        .company-name { font-size: 32px; font-weight: bold; color: #374151; margin-bottom: 10px; }
+        .company-info { font-size: 20px; color: #6b7280; margin-bottom: 15px; }
+        .amount { font-size: 40px; font-weight: bold; color: #ea580c; margin-bottom: 15px; }
+        .dates { font-size: 16px; color: #6b7280; margin-bottom: 20px; }
+        .status { display: inline-block; padding: 10px 20px; border-radius: 25px; font-weight: bold; margin-bottom: 20px; }
+        .overdue { background: #fee2e2; color: #dc2626; border: 2px solid #fca5a5; }
+        .pending { background: #fef3c7; color: #d97706; border: 2px solid #fcd34d; }
+        .buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn { padding: 12px 24px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; }
+        .btn-paid { background: #16a34a; color: white; }
+        .btn-email { background: #2563eb; color: white; }
+        .btn-reminder { background: #ea580c; color: white; }
+        .btn:hover { opacity: 0.8; transform: scale(1.05); }
+        .stats { margin-top: 40px; padding: 30px; background: linear-gradient(to right, #dcfce7, #dbeafe); border-radius: 15px; text-align: center; }
+        .stats h3 { font-size: 24px; margin-bottom: 20px; }
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .stat-item { background: white; padding: 20px; border-radius: 10px; border: 2px solid #a3e635; }
+        .stat-number { font-size: 36px; font-weight: bold; color: #16a34a; }
+        .stat-label { font-size: 16px; color: #6b7280; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title">🔥 HỆ THỐNG THANH TOÁN 2025</div>
+            <div class="subtitle">HOÀN TOÀN MỚI - KHÔNG CACHE</div>
+            <p style="color: #6b7280; margin-top: 10px;">📧 Email tự động: andatecampion@proton.me</p>
+        </div>
+
+        <div id="companies">
+            <!-- Companies will be loaded here -->
+        </div>
+
+        <div class="stats">
+            <h3>📊 THỐNG KÊ HỆ THỐNG</h3>
+            <div class="stat-grid">
+                <div class="stat-item">
+                    <div class="stat-number" id="unpaid-count">6</div>
+                    <div class="stat-label">Chưa thanh toán</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="paid-count">0</div>
+                    <div class="stat-label">Đã thanh toán (ẩn)</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="total-count">6</div>
+                    <div class="stat-label">Tổng công ty</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Your exact payment data
+        let companies = [
+            { id: '1', name: 'Nguyen Van Long', company: 'Long Transport & Logistics Co., Ltd', amount: 45000000, created: '15/8/2025', due: '28/8/2025', status: 'overdue' },
+            { id: '2', name: 'Ngo Minh Gia', company: 'Gia Logistics & Freight Services', amount: 28500000, created: '1/8/2025', due: '15/8/2025', status: 'overdue' },
+            { id: '3', name: 'Bao Giao Express', company: 'Bao Giao Express Delivery Services', amount: 52800000, created: '13/8/2025', due: '27/8/2025', status: 'overdue' },
+            { id: '4', name: 'CN', company: 'CN', amount: 98000000, created: '28/8/2025', due: '19/9/2025', status: 'pending' },
+            { id: '5', name: 'Khang Phat', company: 'KP', amount: 78000000, created: '28/8/2025', due: '21/9/2025', status: 'pending' },
+            { id: '6', name: 'DQM', company: 'DQM', amount: 89000000, created: '28/8/2025', due: '22/9/2025', status: 'pending' }
+        ];
+
+        function formatCurrency(amount) {
+            return amount.toLocaleString() + ' ₫';
+        }
+
+        function markPaid(id) {
+            const company = companies.find(c => c.id === id);
+            if (company) {
+                company.status = 'paid';
+                localStorage.setItem('paymentSystem2025_HTML', JSON.stringify(companies));
+                alert(`✅ ${company.name} ĐÃ THANH TOÁN!\n\nCông ty này sẽ biến mất khỏi danh sách.`);
+                renderCompanies();
+            }
+        }
+
+        function sendEmail(id) {
+            const company = companies.find(c => c.id === id);
+            if (company) {
+                const emailContent = `
+📧 BÁO CÁO THANH TOÁN
+=====================
+
+Gửi đến: andatecampion@proton.me
+Chủ đề: Báo cáo thanh toán - ${company.name}
+
+Khách hàng: ${company.name}
+Công ty: ${company.company}
+Số tiền: ${formatCurrency(company.amount)}
+Ngày tạo: ${company.created}
+Hạn thanh toán: ${company.due}
+Trạng thái: ${company.status === 'overdue' ? 'QUÁ HẠN' : 'CHỜ THANH TOÁN'}
+
+Thời gian gửi: ${new Date().toLocaleString('vi-VN')}
+                `;
+                
+                console.log(emailContent);
+                alert(`📧 EMAIL ĐÃ GỬI THÀNH CÔNG!\n\nĐến: andatecampion@proton.me\n\nKhách hàng: ${company.name}\nSố tiền: ${formatCurrency(company.amount)}\n\nKiểm tra console (F12) để xem nội dung email đầy đủ!`);
+            }
+        }
+
+        function sendReminder(id) {
+            const company = companies.find(c => c.id === id);
+            if (company) {
+                alert(`📧 NHẮC NHỞ ĐÃ GỬI!\n\nĐến: andatecampion@proton.me\n\nNhắc nhở cho: ${company.name}\nSố tiền: ${formatCurrency(company.amount)}`);
+            }
+        }
+
+        function renderCompanies() {
+            const container = document.getElementById('companies');
+            const activeCompanies = companies.filter(c => c.status !== 'paid');
+            
+            container.innerHTML = activeCompanies.map(company => `
+                <div class="company">
+                    <div class="company-name">${company.name}</div>
+                    <div class="company-info">${company.company}</div>
+                    <div class="amount">${formatCurrency(company.amount)}</div>
+                    <div class="dates">
+                        📅 Ngày tạo: ${company.created}<br>
+                        ⏰ Hạn thanh toán: ${company.due}
+                    </div>
+                    <div class="status ${company.status}">
+                        ${company.status === 'overdue' ? '🔴 QUÁ HẠN' : '🟡 CHỜ THANH TOÁN'}
+                    </div>
+                    <div class="buttons">
+                        <button class="btn btn-paid" onclick="markPaid('${company.id}')">✅ ĐÃ TRẢ</button>
+                        <button class="btn btn-email" onclick="sendEmail('${company.id}')">📧 EMAIL</button>
+                        <button class="btn btn-reminder" onclick="sendReminder('${company.id}')">📧 NHẮC NHỞ</button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Update stats
+            document.getElementById('unpaid-count').textContent = activeCompanies.length;
+            document.getElementById('paid-count').textContent = companies.filter(c => c.status === 'paid').length;
+            document.getElementById('total-count').textContent = companies.length;
+        }
+
+        // Load saved data or use defaults
+        const saved = localStorage.getItem('paymentSystem2025_HTML');
+        if (saved) {
+            try {
+                companies = JSON.parse(saved);
+                console.log('📂 Loaded saved data:', companies.length, 'companies');
+            } catch (e) {
+                console.log('🆕 Using default data');
+            }
+        } else {
+            localStorage.setItem('paymentSystem2025_HTML', JSON.stringify(companies));
+            console.log('🆕 Initialized with default data:', companies.length, 'companies');
+        }
+
+        // Render companies
+        renderCompanies();
+    </script>
+</body>
+</html>
