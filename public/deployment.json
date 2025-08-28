@@ -1,0 +1,10 @@
+{
+  "timestamp": "2025-08-28T00:23:04.477Z",
+  "version": "v2.1.0-payment-fixes",
+  "features": [
+    "Payment Tracking - Paid items disappear",
+    "Email reports to andantecampion@proton.me",
+    "Interactive buttons working",
+    "Fleetbase Route Optimizer integration"
+  ]
+}
