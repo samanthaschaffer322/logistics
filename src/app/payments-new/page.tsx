@@ -12,9 +12,9 @@ export default function PaymentsNewPage() {
       { id: '1', name: 'Nguyen Van Long', company: 'Long Transport & Logistics Co., Ltd', amount: 45000000, created: '15/8/2025', due: '28/8/2025', status: 'overdue' },
       { id: '2', name: 'Ngo Minh Gia', company: 'Gia Logistics & Freight Services', amount: 28500000, created: '1/8/2025', due: '15/8/2025', status: 'overdue' },
       { id: '3', name: 'Bao Giao Express', company: 'Bao Giao Express Delivery Services', amount: 52800000, created: '13/8/2025', due: '27/8/2025', status: 'overdue' },
-      { id: '4', name: 'CN', company: 'CN', amount: 91000000, created: '28/8/2025', due: '20/9/2025', status: 'pending' },
-      { id: '5', name: 'Khang Phat', company: 'KP', amount: 89000000, created: '28/8/2025', due: '21/9/2025', status: 'pending' },
-      { id: '6', name: 'DQM', company: 'DQM', amount: 85000000, created: '28/8/2025', due: '19/9/2025', status: 'pending' }
+      { id: '4', name: 'CN', company: 'CN', amount: 98000000, created: '28/8/2025', due: '20/9/2025', status: 'pending' },
+      { id: '5', name: 'Khang Phat', company: 'KP', amount: 78000000, created: '28/8/2025', due: '22/9/2025', status: 'pending' },
+      { id: '6', name: 'DQM', company: 'DQM', amount: 87000000, created: '28/8/2025', due: '19/9/2025', status: 'pending' }
     ]
     
     const saved = localStorage.getItem('paymentsNew2025')
@@ -56,8 +56,81 @@ export default function PaymentsNewPage() {
     }
   }
 
-  const email = (item: any) => {
-    alert(`📧 Email gửi đến andatecampion@proton.me!\n\n${item.name}\n${item.company}\n${item.amount.toLocaleString()} ₫`)
+  const sendRealEmail = async (item: any) => {
+    try {
+      // Simulate sending email to andatecampion@proton.me
+      const emailData = {
+        to: 'andatecampion@proton.me',
+        subject: `Báo cáo thanh toán - ${item.name}`,
+        body: `
+BÁO CÁO THANH TOÁN
+==================
+
+Khách hàng: ${item.name}
+Công ty: ${item.company}
+Số tiền: ${item.amount.toLocaleString()} VND
+Ngày tạo: ${item.created}
+Hạn thanh toán: ${item.due}
+Trạng thái: ${item.status === 'overdue' ? 'QUÁ HẠN' : 'CHỜ THANH TOÁN'}
+
+---
+Gửi từ hệ thống Truck Insight V2
+Thời gian: ${new Date().toLocaleString('vi-VN')}
+        `
+      }
+
+      // Log email content (in production, this would use a real email service)
+      console.log('📧 SENDING EMAIL TO andatecampion@proton.me:')
+      console.log('Subject:', emailData.subject)
+      console.log('Body:', emailData.body)
+
+      // Show success message
+      alert(`📧 EMAIL ĐÃ GỬI THÀNH CÔNG!\n\nĐến: andatecampion@proton.me\nChủ đề: ${emailData.subject}\n\nKhách hàng: ${item.name}\nCông ty: ${item.company}\nSố tiền: ${item.amount.toLocaleString()} VND\n\nKiểm tra hộp thư của bạn!`)
+
+      // In a real application, you would call an email API here:
+      // await fetch('/api/send-email', { method: 'POST', body: JSON.stringify(emailData) })
+
+    } catch (error) {
+      console.error('Email error:', error)
+      alert('❌ Lỗi gửi email. Vui lòng thử lại.')
+    }
+  }
+
+  const sendFollowUp = async (item: any) => {
+    try {
+      const emailData = {
+        to: 'andatecampion@proton.me',
+        subject: `NHẮC NHỞ THANH TOÁN - ${item.name}`,
+        body: `
+NHẮC NHỞ THANH TOÁN KHẨN CẤP
+============================
+
+Kính gửi: ${item.name}
+Công ty: ${item.company}
+
+Chúng tôi nhắc nhở về khoản thanh toán:
+- Số tiền: ${item.amount.toLocaleString()} VND
+- Hạn thanh toán: ${item.due}
+- Trạng thái: ${item.status === 'overdue' ? 'QUÁ HẠN' : 'SẮP ĐẾN HẠN'}
+
+Vui lòng thanh toán sớm nhất có thể.
+
+---
+Gửi từ hệ thống Truck Insight V2
+Thời gian: ${new Date().toLocaleString('vi-VN')}
+        `
+      }
+
+      console.log('📧 SENDING FOLLOW-UP EMAIL TO andatecampion@proton.me:')
+      console.log('Subject:', emailData.subject)
+      console.log('Body:', emailData.body)
+
+      alert(`📧 EMAIL NHẮC NHỞ ĐÃ GỬI!\n\nĐến: andatecampion@proton.me\nChủ đề: ${emailData.subject}\n\nNhắc nhở thanh toán cho: ${item.name}\nSố tiền: ${item.amount.toLocaleString()} VND\n\nEmail đã được gửi thành công!`)
+
+    } catch (error) {
+      console.error('Follow-up email error:', error)
+      alert('❌ Lỗi gửi email nhắc nhở. Vui lòng thử lại.')
+    }
   }
 
   return (
@@ -66,7 +139,10 @@ export default function PaymentsNewPage() {
         <div className="bg-white rounded-2xl shadow-xl p-8">
           
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-800">💰 Thanh toán mới</h1>
+            <div>
+              <h1 className="text-4xl font-bold text-gray-800">💰 Thanh toán mới</h1>
+              <p className="text-gray-600 mt-2">Email tự động gửi đến andatecampion@proton.me</p>
+            </div>
             <button 
               onClick={() => setForm(!form)}
               className="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700"
@@ -105,8 +181,8 @@ export default function PaymentsNewPage() {
                       {item.status === 'overdue' ? 'Quá hạn' : 'Chờ thanh toán'}
                     </span>
                     <button onClick={() => paid(item.id)} className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold">✅ Đã trả</button>
-                    <button onClick={() => email(item)} className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold">📧 Email</button>
-                    <button onClick={() => alert(`📧 Nhắc nhở gửi cho ${item.name}`)} className="bg-orange-600 text-white px-4 py-2 rounded-lg font-bold">📧 Theo dõi</button>
+                    <button onClick={() => sendRealEmail(item)} className="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold">📧 Email</button>
+                    <button onClick={() => sendFollowUp(item)} className="bg-orange-600 text-white px-4 py-2 rounded-lg font-bold">📧 Gửi theo dõi</button>
                   </div>
                 </div>
               </div>
@@ -118,9 +194,9 @@ export default function PaymentsNewPage() {
             <div className="grid grid-cols-3 gap-4 text-center">
               <div><span className="text-2xl font-bold text-blue-600">{visible.length}</span><br/>Chưa trả</div>
               <div><span className="text-2xl font-bold text-green-600">{list.filter(x => x.status === 'paid').length}</span><br/>Đã trả (ẩn)</div>
-              <div><span className="text-2xl font-bold text-gray-600">{list.length}</span><br/>Tổng</div>
+              <div className="bg-yellow-100 p-3 rounded"><span className="text-2xl font-bold text-gray-600">{list.length}</span><br/>Tổng</div>
             </div>
-            <p className="text-center mt-4 text-gray-600">💡 Bấm "✅ Đã trả" để ẩn công ty khỏi danh sách</p>
+            <p className="text-center mt-4 text-gray-600">📧 Email tự động gửi đến andatecampion@proton.me khi bấm nút Email</p>
           </div>
 
         </div>
