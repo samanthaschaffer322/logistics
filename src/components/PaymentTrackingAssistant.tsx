@@ -317,21 +317,33 @@ ${unpaidPayments.map(p => `• ${p.name} (${p.company}) - ${formatCurrency(p.amo
   }
 
   const handleMarkPaid = (clientName: string) => {
-    setPayments(prev => prev.map(payment => 
-      payment.name === clientName 
-        ? { ...payment, status: 'paid' as const }
-        : payment
-    ))
+    console.log('💰 Marking payment as paid for:', clientName)
     
-    // Send email report after marking as paid
-    setTimeout(() => {
-      sendWeeklyReport()
-    }, 2000)
+    setPayments(prev => {
+      const updated = prev.map(payment => 
+        payment.name === clientName || payment.companyName === clientName || payment.id === clientName
+          ? { ...payment, status: 'paid' as const }
+          : payment
+      )
+      
+      // Save to localStorage immediately
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('truckInsightPayments', JSON.stringify(updated))
+        console.log('💾 Payment data saved after marking paid')
+      }
+      
+      return updated
+    })
     
     alert(language === 'vi' 
       ? `✅ Đã đánh dấu thanh toán của ${clientName} hoàn tất!\n💰 Số tiền đã được ghi nhận vào hệ thống.\n📧 Báo cáo email sẽ được gửi đến andantecampion@proton.me trong giây lát...` 
       : `✅ Marked ${clientName} payment as completed!\n💰 Amount has been recorded in the system.\n📧 Email report will be sent to andantecampion@proton.me shortly...`
     )
+    
+    // Send email report after marking as paid
+    setTimeout(() => {
+      sendWeeklyReport()
+    }, 2000)
   }
 
   const handleSendReminder = (clientName: string, clientEmail: string) => {
@@ -449,7 +461,19 @@ ${unpaidPayments.map(p => `• ${p.name} (${p.company}) - ${formatCurrency(p.amo
         createdDate: new Date().toISOString(),
         status: newPayment.status
       }
-      setPayments(prev => [...prev, payment])
+      
+      setPayments(prev => {
+        const updated = [...prev, payment]
+        
+        // Save to localStorage immediately
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('truckInsightPayments', JSON.stringify(updated))
+          console.log('💾 New payment saved to localStorage:', payment.name)
+        }
+        
+        return updated
+      })
+      
       setNewPayment({
         name: '',
         company: '',
