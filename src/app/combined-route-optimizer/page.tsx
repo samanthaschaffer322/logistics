@@ -564,36 +564,64 @@ export default function CombinedRouteOptimizerPage() {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                          <div className="p-4 bg-blue-50 rounded-xl">
+                          <div className="p-4 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl shadow-lg">
                             <div className="flex items-center gap-2 mb-2">
-                              <MapPin className="h-5 w-5 text-blue-600" />
-                              <span className="font-semibold text-gray-700">{language === 'vi' ? 'Quãng đường' : 'Distance'}</span>
+                              <MapPin className="h-5 w-5 text-white" />
+                              <span className="font-semibold text-blue-100">{language === 'vi' ? 'Quãng đường' : 'Distance'}</span>
                             </div>
-                            <p className="text-gray-800 font-bold text-lg">{route.distance} km</p>
+                            <p className="text-white font-bold text-lg">{route.distance} km</p>
                           </div>
 
-                          <div className="p-4 bg-green-50 rounded-xl">
+                          <div className="p-4 bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl shadow-lg">
                             <div className="flex items-center gap-2 mb-2">
-                              <Clock className="h-5 w-5 text-green-600" />
-                              <span className="font-semibold text-gray-700">{language === 'vi' ? 'Thời gian' : 'Duration'}</span>
+                              <Clock className="h-5 w-5 text-white" />
+                              <span className="font-semibold text-green-100">{language === 'vi' ? 'Thời gian' : 'Duration'}</span>
                             </div>
-                            <p className="text-gray-800 font-bold text-lg">{Math.round(route.duration/60)}h {route.duration%60}m</p>
+                            <p className="text-white font-bold text-lg">{Math.round(route.duration/60)}h {route.duration%60}m</p>
                           </div>
 
-                          <div className="p-4 bg-purple-50 rounded-xl">
+                          <div className="p-4 bg-gradient-to-br from-yellow-500 to-yellow-600 text-white rounded-xl shadow-lg">
                             <div className="flex items-center gap-2 mb-2">
-                              <DollarSign className="h-5 w-5 text-purple-600" />
-                              <span className="font-semibold text-gray-700">{language === 'vi' ? 'Chi phí' : 'Cost'}</span>
+                              <DollarSign className="h-5 w-5 text-white" />
+                              <span className="font-semibold text-yellow-100">{language === 'vi' ? 'Chi phí' : 'Cost'}</span>
                             </div>
-                            <p className="text-gray-800 font-bold text-lg">{(route.cost/1000000).toFixed(1)}M ₫</p>
+                            <p className="text-white font-bold text-lg">{(route.cost/1000000).toFixed(1)}M ₫</p>
                           </div>
 
-                          <div className="p-4 bg-orange-50 rounded-xl">
+                          <div className="p-4 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl shadow-lg">
                             <div className="flex items-center gap-2 mb-2">
-                              <Target className="h-5 w-5 text-orange-600" />
-                              <span className="font-semibold text-gray-700">{language === 'vi' ? 'Hiệu quả' : 'Efficiency'}</span>
+                              <Target className="h-5 w-5 text-white" />
+                              <span className="font-semibold text-purple-100">{language === 'vi' ? 'Hiệu quả' : 'Efficiency'}</span>
                             </div>
-                            <p className="text-gray-800 font-bold text-lg">{route.efficiency}%</p>
+                            <p className="text-white font-bold text-lg">{route.efficiency}%</p>
+                          </div>
+                        </div>
+
+                        {/* Additional Metrics - Red, Indigo, Cyan, Emerald gradients */}
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                          <div className="p-4 bg-gradient-to-br from-red-500 to-red-600 text-white rounded-xl shadow-lg">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-sm font-semibold text-red-100">{language === 'vi' ? 'Nhiên liệu' : 'Fuel'}</span>
+                            </div>
+                            <p className="text-white font-bold text-lg">{(route.distance * 0.08).toFixed(1)}L</p>
+                          </div>
+                          <div className="p-4 bg-gradient-to-br from-indigo-500 to-indigo-600 text-white rounded-xl shadow-lg">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-sm font-semibold text-indigo-100">{language === 'vi' ? 'Tốc độ TB' : 'Avg Speed'}</span>
+                            </div>
+                            <p className="text-white font-bold text-lg">{Math.round(route.distance / (route.duration/60))} km/h</p>
+                          </div>
+                          <div className="p-4 bg-gradient-to-br from-cyan-500 to-cyan-600 text-white rounded-xl shadow-lg">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-sm font-semibold text-cyan-100">{language === 'vi' ? 'Phương tiện' : 'Vehicle'}</span>
+                            </div>
+                            <p className="text-white font-bold text-lg">{route.vehicle}</p>
+                          </div>
+                          <div className="p-4 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-xl shadow-lg">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-sm font-semibold text-emerald-100">{language === 'vi' ? 'Tải trọng' : 'Capacity'}</span>
+                            </div>
+                            <p className="text-white font-bold text-lg">85%</p>
                           </div>
                         </div>
 
