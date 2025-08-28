@@ -107,45 +107,109 @@ const LeafletRouteMap: React.FC<LeafletRouteMapProps> = ({ selectedRoute, classN
             }
           })
 
-          // Generate realistic Vietnamese highway route
+          // Generate realistic Vietnamese highway route with detailed waypoints
           const generateRealisticRoute = (origin: any, destination: any) => {
-            const waypoints = [[origin.lat, origin.lng]]
-
-            // Major Vietnamese highway nodes for realistic routing
-            const highwayNodes = [
-              { lat: 10.7769, lng: 106.7009, name: 'HCMC Center' },
-              { lat: 10.8500, lng: 106.7500, name: 'Thu Duc Junction' },
-              { lat: 10.8167, lng: 107.0000, name: 'Long Thanh Junction' },
-              { lat: 10.6500, lng: 107.0200, name: 'Vung Tau Highway' },
-              { lat: 10.7200, lng: 106.9800, name: 'Nha Be Junction' }
-            ]
-
-            const distance = Math.sqrt(
-              Math.pow(destination.lat - origin.lat, 2) + 
-              Math.pow(destination.lng - origin.lng, 2)
-            )
-
-            // Add intermediate waypoints for longer routes
-            if (distance > 0.05) {
-              let bestNode = null
-              let minDetour = Infinity
-
-              highwayNodes.forEach(node => {
-                const detour = Math.sqrt(Math.pow(node.lat - origin.lat, 2) + Math.pow(node.lng - origin.lng, 2)) +
-                              Math.sqrt(Math.pow(destination.lat - node.lat, 2) + Math.pow(destination.lng - node.lng, 2))
-                
-                if (detour < minDetour && detour < distance * 1.4) {
-                  minDetour = detour
-                  bestNode = node
-                }
-              })
-
-              if (bestNode) {
-                waypoints.push([bestNode.lat, bestNode.lng])
+            const waypoints = []
+            
+            // Specific route patterns for major Vietnamese logistics routes
+            const routePatterns = {
+              // Phú Hữu to Phú Mỹ/Cái Mép area
+              'phu_huu_to_phu_my': {
+                condition: (o: any, d: any) => 
+                  (o.name.toLowerCase().includes('phú hữu') || o.name.toLowerCase().includes('phu huu')) &&
+                  (d.name.toLowerCase().includes('phú mỹ') || d.name.toLowerCase().includes('phu my') || 
+                   d.name.toLowerCase().includes('cái mép') || d.name.toLowerCase().includes('cai mep')),
+                waypoints: [
+                  [10.7800, 106.7900], // Phú Hữu start
+                  [10.7600, 106.8200], // Exit to Ring Road 2
+                  [10.7400, 106.8500], // Ring Road 2 south
+                  [10.7200, 106.8800], // Towards Highway 1A
+                  [10.7000, 106.9200], // Highway 1A junction
+                  [10.6800, 106.9600], // Continue on Highway 1A
+                  [10.6600, 107.0000], // Approach Nhà Bè
+                  [10.6400, 107.0300], // Cross Nhà Bè Bridge
+                  [10.6200, 107.0600], // Highway 51 junction
+                  [10.6100, 107.0800], // Final approach to Phú Mỹ
+                ]
+              },
+              
+              // HCMC to Vung Tau area
+              'hcmc_to_vungtau': {
+                condition: (o: any, d: any) => 
+                  o.province === 'Ho Chi Minh City' && d.province === 'Ba Ria - Vung Tau',
+                waypoints: [
+                  [10.7769, 106.7009], // HCMC center
+                  [10.7500, 106.7500], // District 7
+                  [10.7200, 106.8000], // Towards Nhà Bè
+                  [10.6800, 106.8800], // Nhà Bè area
+                  [10.6400, 107.0000], // Highway 51 start
+                  [10.6200, 107.0500], // Highway 51 middle
+                ]
+              },
+              
+              // Inter-city routes
+              'inter_city': {
+                condition: (o: any, d: any) => o.province !== d.province,
+                waypoints: [
+                  [10.7769, 106.7009], // Via HCMC if needed
+                  [10.8167, 107.0000], // Long Thành junction
+                ]
               }
             }
-
-            waypoints.push([destination.lat, destination.lng])
+            
+            // Find matching route pattern
+            let selectedPattern = null
+            for (const [key, pattern] of Object.entries(routePatterns)) {
+              if (pattern.condition(origin, destination)) {
+                selectedPattern = pattern
+                break
+              }
+            }
+            
+            if (selectedPattern) {
+              // Use predefined realistic waypoints
+              waypoints.push(...selectedPattern.waypoints)
+              // Adjust last waypoint to actual destination
+              waypoints[waypoints.length - 1] = [destination.lat, destination.lng]
+            } else {
+              // Fallback: simple route with highway junction
+              waypoints.push([origin.lat, origin.lng])
+              
+              // Add intermediate junction for longer routes
+              const distance = Math.sqrt(
+                Math.pow(destination.lat - origin.lat, 2) + 
+                Math.pow(destination.lng - origin.lng, 2)
+              )
+              
+              if (distance > 0.05) {
+                // Major highway junctions
+                const junctions = [
+                  [10.7769, 106.7009], // HCMC Center
+                  [10.8167, 107.0000], // Long Thành
+                  [10.6400, 107.0200], // Nhà Bè Bridge
+                ]
+                
+                // Find closest junction
+                let bestJunction = junctions[0]
+                let minDistance = Infinity
+                
+                junctions.forEach(junction => {
+                  const dist = Math.sqrt(
+                    Math.pow(junction[0] - (origin.lat + destination.lat) / 2, 2) +
+                    Math.pow(junction[1] - (origin.lng + destination.lng) / 2, 2)
+                  )
+                  if (dist < minDistance) {
+                    minDistance = dist
+                    bestJunction = junction
+                  }
+                })
+                
+                waypoints.push(bestJunction)
+              }
+              
+              waypoints.push([destination.lat, destination.lng])
+            }
+            
             return waypoints
           }
 
