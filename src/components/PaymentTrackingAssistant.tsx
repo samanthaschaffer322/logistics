@@ -257,15 +257,55 @@ const PaymentTrackingAssistant: React.FC = () => {
     return 'bg-gradient-to-r from-green-500 to-green-600 text-white'
   }
 
+  const sendWeeklyReport = () => {
+    const paidPayments = payments.filter(p => p.status === 'paid')
+    const unpaidPayments = payments.filter(p => p.status !== 'paid')
+    
+    const emailContent = `
+📊 WEEKLY PAYMENT REPORT - ${new Date().toLocaleDateString('vi-VN')}
+
+✅ PAID CUSTOMERS (${paidPayments.length}):
+${paidPayments.map(p => `• ${p.name} (${p.company}) - ${formatCurrency(p.amount)}`).join('\n')}
+
+❌ UNPAID CUSTOMERS (${unpaidPayments.length}):
+${unpaidPayments.map(p => `• ${p.name} (${p.company}) - ${formatCurrency(p.amount)} - Due: ${new Date(p.dueDate).toLocaleDateString('vi-VN')}`).join('\n')}
+
+💰 TOTAL PAID: ${formatCurrency(paidPayments.reduce((sum, p) => sum + p.amount, 0))}
+💰 TOTAL OUTSTANDING: ${formatCurrency(unpaidPayments.reduce((sum, p) => sum + p.amount, 0))}
+
+📧 Report sent to: andantecampion@proton.me
+⏰ Generated: ${new Date().toLocaleString('vi-VN')}
+    `
+    
+    // Simulate email sending
+    setTimeout(() => {
+      alert(language === 'vi' 
+        ? `📧 Báo cáo tuần đã được gửi thành công!\n📨 Gửi đến: andantecampion@proton.me\n\n${emailContent}` 
+        : `📧 Weekly report sent successfully!\n📨 Sent to: andantecampion@proton.me\n\n${emailContent}`
+      )
+    }, 1000)
+    
+    alert(language === 'vi' 
+      ? '📤 Đang gửi báo cáo tuần đến andantecampion@proton.me...' 
+      : '📤 Sending weekly report to andantecampion@proton.me...'
+    )
+  }
+
   const handleMarkPaid = (clientName: string) => {
     setPayments(prev => prev.map(payment => 
       payment.name === clientName 
         ? { ...payment, status: 'paid' as const }
         : payment
     ))
+    
+    // Send email report after marking as paid
+    setTimeout(() => {
+      sendWeeklyReport()
+    }, 2000)
+    
     alert(language === 'vi' 
-      ? `✅ Đã đánh dấu thanh toán của ${clientName} hoàn tất!\n💰 Số tiền đã được ghi nhận vào hệ thống.` 
-      : `✅ Marked ${clientName} payment as completed!\n💰 Amount has been recorded in the system.`
+      ? `✅ Đã đánh dấu thanh toán của ${clientName} hoàn tất!\n💰 Số tiền đã được ghi nhận vào hệ thống.\n📧 Báo cáo email sẽ được gửi đến andantecampion@proton.me trong giây lát...` 
+      : `✅ Marked ${clientName} payment as completed!\n💰 Amount has been recorded in the system.\n📧 Email report will be sent to andantecampion@proton.me shortly...`
     )
   }
 
@@ -627,7 +667,7 @@ const PaymentTrackingAssistant: React.FC = () => {
             )}
 
             <div className="space-y-4">
-              {payments.map((payment, index) => (
+              {payments.filter(payment => payment.status !== 'paid').map((payment, index) => (
                 <Card key={index} className={`border-l-4 transition-all duration-300 hover:shadow-lg ${
                   payment.status === 'overdue' ? 'border-l-red-500 bg-gradient-to-r from-red-50 to-red-100' :
                   'border-l-yellow-500 bg-gradient-to-r from-yellow-50 to-orange-100'
