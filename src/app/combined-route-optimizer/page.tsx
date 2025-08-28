@@ -153,8 +153,8 @@ export default function CombinedRouteOptimizerPage() {
     )
 
     setSelectedRoute({
-      origin: originLoc,
-      destination: destLoc,
+      origin: { ...originLoc, province: originLoc.province },
+      destination: { ...destLoc, province: destLoc.province },
       distance: `${optimizedResult.actualDistance} km`,
       time: `${Math.round(optimizedResult.actualTime/60)}h ${optimizedResult.actualTime%60}min`,
       cost: `${(optimizedResult.actualCost / 1000000).toFixed(3)} triệu VND`,
@@ -399,56 +399,56 @@ export default function CombinedRouteOptimizerPage() {
 
                 {/* Route Results */}
                 {selectedRoute && (
-                  <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-8 text-white">
-                    <h3 className="text-2xl font-bold mb-6 text-center">🚛 {language === 'vi' ? 'Kết quả Tối ưu' : 'Optimization Results'}</h3>
+                  <div className="bg-white rounded-2xl p-8 border-2 border-gray-200 shadow-xl">
+                    <h3 className="text-2xl font-bold mb-6 text-center text-gray-800">🚛 {language === 'vi' ? 'Kết quả Tối ưu' : 'Optimization Results'}</h3>
                     
                     {/* Main Metrics */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                      <div className="text-center p-4 bg-green-500/20 rounded-xl">
-                        <div className="text-2xl font-bold text-green-400">{selectedRoute.time}</div>
-                        <div className="text-sm text-gray-300">{language === 'vi' ? 'Thời gian' : 'Travel Time'}</div>
+                      <div className="text-center p-4 bg-gradient-to-br from-green-500 to-green-600 text-white rounded-xl shadow-lg">
+                        <div className="text-2xl font-bold">{selectedRoute.time}</div>
+                        <div className="text-sm text-green-100">{language === 'vi' ? 'Thời gian' : 'Travel Time'}</div>
                       </div>
-                      <div className="text-center p-4 bg-blue-500/20 rounded-xl">
-                        <div className="text-2xl font-bold text-blue-400">{selectedRoute.distance}</div>
-                        <div className="text-sm text-gray-300">{language === 'vi' ? 'Quãng đường' : 'Distance'}</div>
+                      <div className="text-center p-4 bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl shadow-lg">
+                        <div className="text-2xl font-bold">{selectedRoute.distance}</div>
+                        <div className="text-sm text-blue-100">{language === 'vi' ? 'Quãng đường' : 'Distance'}</div>
                       </div>
-                      <div className="text-center p-4 bg-yellow-500/20 rounded-xl">
-                        <div className="text-xl font-bold text-yellow-400">{selectedRoute.cost}</div>
-                        <div className="text-sm text-gray-300">{language === 'vi' ? 'Chi phí' : 'Total Cost'}</div>
+                      <div className="text-center p-4 bg-gradient-to-br from-yellow-500 to-yellow-600 text-white rounded-xl shadow-lg">
+                        <div className="text-xl font-bold">{selectedRoute.cost}</div>
+                        <div className="text-sm text-yellow-100">{language === 'vi' ? 'Chi phí' : 'Total Cost'}</div>
                       </div>
-                      <div className="text-center p-4 bg-purple-500/20 rounded-xl">
-                        <div className="text-2xl font-bold text-purple-400">{selectedRoute.efficiency}</div>
-                        <div className="text-sm text-gray-300">{language === 'vi' ? 'Hiệu quả' : 'Efficiency'}</div>
+                      <div className="text-center p-4 bg-gradient-to-br from-purple-500 to-purple-600 text-white rounded-xl shadow-lg">
+                        <div className="text-2xl font-bold">{selectedRoute.efficiency}</div>
+                        <div className="text-sm text-purple-100">{language === 'vi' ? 'Hiệu quả' : 'Efficiency'}</div>
                       </div>
                     </div>
 
                     {/* Route Details */}
-                    <div className="bg-slate-700/50 rounded-xl p-4 mb-6">
-                      <div className="text-lg font-bold text-green-400 mb-2">
+                    <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-xl p-6 mb-6 border border-gray-200">
+                      <div className="text-xl font-bold text-gray-800 mb-2">
                         📍 {selectedRoute.origin.name} → {selectedRoute.destination.name}
                       </div>
-                      <div className="text-sm text-gray-300">
+                      <div className="text-gray-700 font-medium">
                         {language === 'vi' ? 'Từ' : 'From'}: {selectedRoute.origin.province} | {language === 'vi' ? 'Đến' : 'To'}: {selectedRoute.destination.province}
                       </div>
                     </div>
 
                     {/* Additional Metrics */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                      <div className="text-center p-3 bg-red-500/20 rounded-lg">
-                        <div className="text-lg font-bold text-red-400">{selectedRoute.fuelConsumption}</div>
-                        <div className="text-xs text-gray-300">{language === 'vi' ? 'Nhiên liệu' : 'Fuel'}</div>
+                      <div className="text-center p-4 bg-gradient-to-br from-red-500 to-red-600 text-white rounded-lg shadow-md">
+                        <div className="text-lg font-bold">{selectedRoute.fuelConsumption}</div>
+                        <div className="text-sm text-red-100">{language === 'vi' ? 'Nhiên liệu' : 'Fuel'}</div>
                       </div>
-                      <div className="text-center p-3 bg-purple-500/20 rounded-lg">
-                        <div className="text-lg font-bold text-purple-400">{selectedRoute.avgSpeed}</div>
-                        <div className="text-xs text-gray-300">{language === 'vi' ? 'Tốc độ TB' : 'Avg Speed'}</div>
+                      <div className="text-center p-4 bg-gradient-to-br from-indigo-500 to-indigo-600 text-white rounded-lg shadow-md">
+                        <div className="text-lg font-bold">{selectedRoute.avgSpeed}</div>
+                        <div className="text-sm text-indigo-100">{language === 'vi' ? 'Tốc độ TB' : 'Avg Speed'}</div>
                       </div>
-                      <div className="text-center p-3 bg-cyan-500/20 rounded-lg">
-                        <div className="text-sm font-bold text-cyan-400">{selectedRoute.truckType}</div>
-                        <div className="text-xs text-gray-300">{language === 'vi' ? 'Loại xe' : 'Vehicle'}</div>
+                      <div className="text-center p-4 bg-gradient-to-br from-cyan-500 to-cyan-600 text-white rounded-lg shadow-md">
+                        <div className="text-sm font-bold">{selectedRoute.truckType}</div>
+                        <div className="text-xs text-cyan-100">{language === 'vi' ? 'Loại xe' : 'Vehicle'}</div>
                       </div>
-                      <div className="text-center p-3 bg-green-500/20 rounded-lg">
-                        <div className="text-lg font-bold text-green-400">{selectedRoute.loadCapacity}</div>
-                        <div className="text-xs text-gray-300">{language === 'vi' ? 'Tải trọng' : 'Capacity'}</div>
+                      <div className="text-center p-4 bg-gradient-to-br from-emerald-500 to-emerald-600 text-white rounded-lg shadow-md">
+                        <div className="text-lg font-bold">{selectedRoute.loadCapacity}</div>
+                        <div className="text-sm text-emerald-100">{language === 'vi' ? 'Tải trọng' : 'Capacity'}</div>
                       </div>
                     </div>
                   </div>
@@ -597,7 +597,33 @@ export default function CombinedRouteOptimizerPage() {
                           </div>
                         </div>
 
-                        <div className="flex gap-4 mt-4">
+                        <div className="border-t pt-4">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            <div className="p-3 bg-white rounded-lg border border-gray-300 shadow-sm">
+                              <span className="text-sm font-bold text-gray-900">{language === 'vi' ? 'Tài xế:' : 'Driver:'}</span>
+                              <p className="font-bold text-gray-900 text-lg">{route.driver}</p>
+                            </div>
+                            <div className="p-3 bg-white rounded-lg border border-gray-300 shadow-sm">
+                              <span className="text-sm font-bold text-gray-900">{language === 'vi' ? 'Xe:' : 'Vehicle:'}</span>
+                              <p className="font-bold text-gray-900 text-lg">{route.vehicle}</p>
+                            </div>
+                            <div className="p-3 bg-white rounded-lg border border-gray-300 shadow-sm">
+                              <span className="text-sm font-bold text-gray-900">{language === 'vi' ? 'Hàng hóa:' : 'Cargo:'}</span>
+                              <p className="font-bold text-gray-900 text-lg">{route.cargo}</p>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div className="p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+                              <span className="text-sm font-bold text-blue-800">{language === 'vi' ? 'Thời tiết:' : 'Weather:'}</span>
+                              <p className="font-bold text-blue-900 text-lg capitalize">{route.weather}</p>
+                            </div>
+                            <div className="p-3 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg border border-orange-200">
+                              <span className="text-sm font-bold text-orange-800">{language === 'vi' ? 'Giao thông:' : 'Traffic:'}</span>
+                              <p className="font-bold text-orange-900 text-lg capitalize">{route.traffic}</p>
+                            </div>
+                          </div>
+                        </div>
                           <Button 
                             onClick={() => optimizeRoute(route)}
                             disabled={optimizing}
