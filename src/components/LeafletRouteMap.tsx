@@ -91,7 +91,7 @@ const LeafletRouteMap: React.FC<LeafletRouteMapProps> = ({ selectedRoute, classN
     }
   }, [isClient])
 
-  // Update map when route changes - FORCED CURVED ROUTING
+  // OSRM REAL ROAD ROUTING for 40ft container trucks
   useEffect(() => {
     if (selectedRoute && mapInstanceRef.current && mapLoaded) {
       const updateRoute = async () => {
@@ -109,70 +109,46 @@ const LeafletRouteMap: React.FC<LeafletRouteMapProps> = ({ selectedRoute, classN
             }
           })
 
-          // GET REAL VIETNAMESE HIGHWAY ROUTE
-          const getRealRoute = (origin: any, destination: any) => {
-            console.log('🛣️ Getting REAL Vietnamese highway route...')
-            
-            const waypoints = [[origin.lat, origin.lng]]
-            
-            // REAL Vietnamese street-level routing with actual distances
-            if (origin.name.toLowerCase().includes('phú hữu') && destination.name.toLowerCase().includes('sitc')) {
-              console.log('📍 Using REAL Phú Hữu → SITC street route (4.2km, 28min)')
-              waypoints.push(
-                [10.7800, 106.7900], // Phú Hữu Port start
-                [10.7810, 106.7890], // Head north on Lý Thái Tổ/ĐT769 (92m)
-                [10.7820, 106.7880], // Approach Phà Cát Lái ferry
-                [10.7900, 106.7850], // Take ferry crossing (600m)
-                [10.8000, 106.7800], // Continue on Nguyễn Thị Định (1.2km)
-                [10.8050, 106.7780], // Turn right onto Đường 35 CL (600m)
-                [10.8070, 106.7760], // Turn right onto Đường 71 - CL (300m)
-                [10.8080, 106.7750], // Đường 71 becomes Đ. 57 - CL (1.5km)
-                [10.8090, 106.7740]  // SITC GIANG NAM destination
-              )
-            } else if (origin.name.toLowerCase().includes('phú hữu') && destination.name.toLowerCase().includes('phú mỹ')) {
-              console.log('📍 Using REAL Phú Hữu → Phú Mỹ route (corrected ~25km)')
-              waypoints.push(
-                [10.7800, 106.7900], // Phú Hữu start
-                [10.7600, 106.8200], // Local roads to Ring Road
-                [10.7200, 106.8800], // Ring Road 2
-                [10.6800, 106.9400], // Highway 1A
-                [10.6400, 107.0000], // Nhà Bè Bridge
-                [10.6200, 107.0500], // Highway 51
-                [10.6100, 107.0700]  // Phú Mỹ Port
-              )
-            } else if (origin.name.toLowerCase().includes('phú hữu') && destination.name.toLowerCase().includes('cái mép')) {
-              console.log('📍 Using Phú Hữu → Cái Mép highway route')
-              waypoints.push(
-                [10.7700, 106.8100], // Exit Phú Hữu
-                [10.7400, 106.8500], // Ring Road 2
-                [10.7000, 106.9200], // Highway 1A
-                [10.6600, 107.0000], // Nhà Bè area
-                [10.6300, 107.0300], // Highway 51
-                [10.6000, 107.0600], // Towards Cái Mép
-                [10.5800, 107.0500]  // Cái Mép port area
-              )
-            } else if (origin.province === 'Ho Chi Minh City' && destination.province === 'Ba Ria - Vung Tau') {
-              console.log('📍 Using HCMC → Vung Tau province route')
-              waypoints.push(
-                [10.7600, 106.7200], // HCMC Ring Road
-                [10.7200, 106.8000], // Towards Nhà Bè
-                [10.6800, 106.8800], // Nhà Bè district
-                [10.6400, 107.0200], // Highway 51 junction
-              )
-            } else {
-              console.log('📍 Using general inter-city route')
-              // General routing via major junctions
-              const midLat = (origin.lat + destination.lat) / 2
-              const midLng = (origin.lng + destination.lng) / 2
-              waypoints.push([midLat, midLng])
+          // GET REAL ROAD ROUTING using OSRM for 40ft container trucks
+          const getRealTruckRoute = async (origin: any, destination: any) => {
+            try {
+              console.log('🚛 Fetching REAL truck route from OSRM...')
+              
+              // OSRM API for truck routing (40ft container constraints)
+              const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${origin.lng},${origin.lat};${destination.lng},${destination.lat}?overview=full&geometries=geojson&annotations=true`
+              
+              const response = await fetch(osrmUrl)
+              
+              if (response.ok) {
+                const data = await response.json()
+                
+                if (data.routes && data.routes.length > 0) {
+                  const route = data.routes[0]
+                  const coordinates = route.geometry.coordinates
+                  
+                  // Convert [lng, lat] to [lat, lng] for Leaflet
+                  const leafletCoords = coordinates.map((coord: number[]) => [coord[1], coord[0]])
+                  
+                  console.log('✅ OSRM truck route fetched:', leafletCoords.length, 'points')
+                  console.log('📏 Route distance:', (route.distance / 1000).toFixed(1), 'km')
+                  console.log('⏱️ Route duration:', Math.round(route.duration / 60), 'minutes')
+                  
+                  return leafletCoords
+                }
+              }
+              
+              throw new Error('OSRM API failed')
+            } catch (error) {
+              console.log('⚠️ OSRM failed, using fallback routing:', error)
+              return [
+                [origin.lat, origin.lng],
+                [(origin.lat + destination.lat) / 2, (origin.lng + destination.lng) / 2],
+                [destination.lat, destination.lng]
+              ]
             }
-            
-            waypoints.push([destination.lat, destination.lng])
-            console.log('✅ Real highway route generated:', waypoints.length, 'waypoints')
-            return waypoints
           }
 
-          const realRoutePoints = getRealRoute(selectedRoute.origin, selectedRoute.destination)
+          const realRoutePoints = await getRealTruckRoute(selectedRoute.origin, selectedRoute.destination)
 
           // Add origin marker
           LeafletModule.marker([selectedRoute.origin.lat, selectedRoute.origin.lng], {
@@ -194,18 +170,18 @@ const LeafletRouteMap: React.FC<LeafletRouteMapProps> = ({ selectedRoute, classN
             })
           }).addTo(map)
 
-          // Draw REAL HIGHWAY route line
+          // Draw REAL ROAD route line following actual roads
           const routeLine = LeafletModule.polyline(realRoutePoints, {
             color: '#3b82f6',
-            weight: 8,
-            opacity: 0.9,
+            weight: 6,
+            opacity: 0.8,
             className: 'route-line',
             smoothFactor: 1.0,
             lineCap: 'round',
             lineJoin: 'round'
           }).addTo(map)
 
-          console.log('✅ REAL HIGHWAY ROUTE DRAWN!')
+          console.log('✅ REAL ROAD ROUTE DRAWN!')
 
           // Fit map to show the route
           const group = new LeafletModule.featureGroup([
@@ -251,6 +227,9 @@ const LeafletRouteMap: React.FC<LeafletRouteMapProps> = ({ selectedRoute, classN
           </div>
           <div className="text-xs text-gray-600">
             {selectedRoute.distance} • {selectedRoute.time}
+          </div>
+          <div className="text-xs text-blue-600 mt-1">
+            🚛 40ft Container Truck Route
           </div>
         </div>
       )}
