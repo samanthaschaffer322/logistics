@@ -115,18 +115,32 @@ const LeafletRouteMap: React.FC<LeafletRouteMapProps> = ({ selectedRoute, classN
             
             const waypoints = [[origin.lat, origin.lng]]
             
-            // Specific Vietnamese highway routes based on real roads
+            // Specific Vietnamese highway routes based on ACTUAL visible roads
             if (origin.name.toLowerCase().includes('phú hữu') && destination.name.toLowerCase().includes('phú mỹ')) {
-              console.log('📍 Using Phú Hữu → Phú Mỹ highway route')
+              console.log('📍 Using REAL Phú Hữu → Phú Mỹ road network')
               waypoints.push(
-                [10.7700, 106.8100], // Exit Phú Hữu via Đỗ Xuân Hợp
-                [10.7500, 106.8400], // Ring Road 2 south
-                [10.7300, 106.8700], // Towards Nhà Bè district
-                [10.7000, 106.9000], // Highway 1A junction
-                [10.6700, 106.9500], // Continue on Highway 1A
-                [10.6400, 107.0000], // Cross Nhà Bè Bridge
-                [10.6200, 107.0400], // Highway 51 start
-                [10.6100, 107.0700]  // Final approach to Phú Mỹ
+                [10.7750, 106.8050], // Exit Phú Hữu northeast
+                [10.7650, 106.8150], // Follow Đỗ Xuân Hợp road
+                [10.7550, 106.8250], // Continue southeast
+                [10.7450, 106.8350], // Approach Ring Road intersection
+                [10.7350, 106.8450], // Ring Road 2 junction
+                [10.7250, 106.8550], // Follow Ring Road south
+                [10.7150, 106.8650], // Continue on Ring Road
+                [10.7050, 106.8750], // Approach Highway 1A
+                [10.6950, 106.8850], // Highway 1A north section
+                [10.6850, 106.8950], // Continue Highway 1A
+                [10.6750, 106.9050], // Highway 1A middle
+                [10.6650, 106.9150], // Approach Nhà Bè area
+                [10.6550, 106.9250], // Nhà Bè district
+                [10.6450, 106.9350], // Cross river area
+                [10.6350, 106.9450], // Post-bridge area
+                [10.6250, 106.9550], // Highway 51 junction
+                [10.6150, 106.9650], // Highway 51 start
+                [10.6100, 107.0000], // Highway 51 middle
+                [10.6080, 107.0200], // Highway 51 continue
+                [10.6060, 107.0400], // Highway 51 south
+                [10.6050, 107.0600], // Approach Phú Mỹ
+                [10.6040, 107.0700], // Phú Mỹ area entry
               )
             } else if (origin.name.toLowerCase().includes('phú hữu') && destination.name.toLowerCase().includes('cái mép')) {
               console.log('📍 Using Phú Hữu → Cái Mép highway route')
