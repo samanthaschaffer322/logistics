@@ -69,6 +69,8 @@ export default function CombinedRouteOptimizerPage() {
     { name: 'Quận Tân Bình', lat: 10.8008, lng: 106.6530, province: 'Ho Chi Minh City', type: 'district' },
     { name: 'Khu Chế Xuất Tân Thuận', lat: 10.7379, lng: 106.7197, province: 'Ho Chi Minh City', type: 'industrial' },
     { name: 'Kho Chim Én', lat: 10.5449, lng: 106.4913, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Kho Long An', lat: 10.5449, lng: 106.4100, province: 'Long An', type: 'warehouse' },
+    { name: 'Long An Warehouse', lat: 10.5449, lng: 106.4100, province: 'Long An', type: 'warehouse' },
     { name: 'Phú Hữu', lat: 10.7800, lng: 106.7900, province: 'Ho Chi Minh City', type: 'district' },
     { name: 'Phu Huu', lat: 10.7800, lng: 106.7900, province: 'Ho Chi Minh City', type: 'district' },
     { name: 'SITC', lat: 10.8050, lng: 106.7750, province: 'Ho Chi Minh City', type: 'logistics' },
@@ -184,18 +186,18 @@ export default function CombinedRouteOptimizerPage() {
     }
     
     // More precise CONTAINER TRUCK speed calculations (not car speeds)
-    let avgSpeed = 15 // km/h for container trucks in dense urban areas
-    if (distance < 5) avgSpeed = 12 // Heavy city traffic with container truck
-    if (distance >= 5 && distance < 15) avgSpeed = 18 // City outskirts with truck
-    if (distance >= 15 && distance < 30) avgSpeed = 22 // Mixed city/highway for trucks
-    if (distance >= 30 && distance < 100) avgSpeed = 28 // Mostly highway for trucks
-    if (distance >= 100) avgSpeed = 35 // Long haul highway for trucks
+    let avgSpeed = 25 // km/h for container trucks in dense urban areas (more realistic)
+    if (distance < 5) avgSpeed = 20 // Heavy city traffic with container truck
+    if (distance >= 5 && distance < 15) avgSpeed = 30 // City outskirts with truck
+    if (distance >= 15 && distance < 30) avgSpeed = 40 // Mixed city/highway for trucks
+    if (distance >= 30 && distance < 100) avgSpeed = 50 // Mostly highway for trucks
+    if (distance >= 100) avgSpeed = 60 // Long haul highway for trucks
     
     // Account for Vietnamese traffic patterns + CONTAINER TRUCK restrictions
     const currentHour = new Date().getHours()
-    if (currentHour >= 7 && currentHour <= 9) avgSpeed *= 0.6 // Morning rush + truck restrictions
-    if (currentHour >= 17 && currentHour <= 19) avgSpeed *= 0.65 // Evening rush + truck restrictions
-    if (currentHour >= 22 || currentHour <= 5) avgSpeed *= 1.1 // Night driving allowed for trucks
+    if (currentHour >= 7 && currentHour <= 9) avgSpeed *= 0.5 // Morning rush + truck restrictions
+    if (currentHour >= 17 && currentHour <= 19) avgSpeed *= 0.55 // Evening rush + truck restrictions
+    if (currentHour >= 22 || currentHour <= 5) avgSpeed *= 1.8 // Night driving much faster for trucks
     
     const timeInMinutes = Math.round((distance / avgSpeed) * 60)
     const hours = Math.floor(timeInMinutes / 60)
