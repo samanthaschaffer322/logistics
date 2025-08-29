@@ -150,10 +150,12 @@ Gửi từ hệ thống LogiAI Truck Insight V2
         'service_nmd8xdb',
         'template_blufg7e',
         {
+          to_name: 'Admin',
           to_email: 'andantecampion@proton.me',
+          from_name: 'LogiAI System',
+          reply_to: 'noreply@logiai.com',
           subject: subject,
-          message: emailContent,
-          from_name: 'LogiAI System'
+          message: emailContent
         }
       )
       
