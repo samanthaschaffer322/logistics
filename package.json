@@ -90,8 +90,6 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "^6.5.0",
-    "@testing-library/react": "^16.0.1",
     "@types/js-cookie": "^3.0.6",
     "@types/lodash": "^4.17.10",
     "@types/papaparse": "^5.3.14",
