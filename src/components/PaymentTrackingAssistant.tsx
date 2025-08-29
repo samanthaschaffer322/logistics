@@ -1,7 +1,9 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import emailjs from '@emailjs/browser'
+import * as XLSX from 'xlsx'
+import jsPDF from 'jspdf'
+import 'jspdf-autotable'
 
 export default function PaymentTrackingAssistant() {
   const [payments, setPayments] = useState<any[]>([])
@@ -16,9 +18,6 @@ export default function PaymentTrackingAssistant() {
   })
 
   useEffect(() => {
-    // Initialize EmailJS with your public key
-    emailjs.init("3hoyt_iWoPawHhEN")
-    
     // PRIORITY 1: Always check localStorage first
     const savedData = localStorage.getItem('paymentTrackingUpdated')
     
@@ -144,24 +143,70 @@ Gửi từ hệ thống LogiAI Truck Insight V2
     console.log('Subject:', subject)
     console.log('Content:', emailContent)
     
-    try {
-      // Send real email via EmailJS with minimal template variables
-      const result = await emailjs.send(
-        'service_nmd8xdb',
-        'template_blufg7e',
-        {
-          user_name: 'Admin',
-          user_email: 'andantecampion@proton.me',
-          message: `${subject}\n\n${emailContent}`
-        }
-      )
-      
-      console.log('✅ REAL EMAIL SENT SUCCESSFULLY:', result.text)
-      return true
-    } catch (error) {
-      console.error('❌ Email sending error:', error)
-      return false
-    }
+    console.log('📧 Email notification logged (email functionality disabled)')
+    console.log('Subject:', subject)
+    console.log('Content:', emailContent)
+    
+    // Email functionality removed - data is saved and tracked locally
+    return true
+  }
+
+  // Export to Excel
+  const exportToExcel = () => {
+    const exportData = payments.map(payment => ({
+      'Khách hàng': payment.name,
+      'Công ty': payment.company,
+      'Số tiền (VND)': payment.amount.toLocaleString('vi-VN'),
+      'Ngày tạo': payment.createdDate,
+      'Hạn thanh toán': payment.dueDate,
+      'Trạng thái': payment.status === 'paid' ? 'ĐÃ THANH TOÁN' : 
+                   payment.status === 'overdue' ? 'QUÁ HẠN' : 'CHỜ THANH TOÁN'
+    }))
+
+    const ws = XLSX.utils.json_to_sheet(exportData)
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, 'Payment Tracking')
+    
+    const fileName = `LogiAI_Payment_Report_${new Date().toISOString().split('T')[0]}.xlsx`
+    XLSX.writeFile(wb, fileName)
+    console.log('📊 Excel file exported:', fileName)
+  }
+
+  // Export to PDF
+  const exportToPDF = () => {
+    const doc = new jsPDF()
+    
+    // Title
+    doc.setFontSize(16)
+    doc.text('LogiAI - Báo Cáo Thanh Toán', 20, 20)
+    
+    // Date
+    doc.setFontSize(10)
+    doc.text(`Ngày xuất: ${new Date().toLocaleDateString('vi-VN')}`, 20, 30)
+    
+    // Table data
+    const tableData = payments.map(payment => [
+      payment.name,
+      payment.company,
+      payment.amount.toLocaleString('vi-VN') + ' VND',
+      payment.createdDate,
+      payment.dueDate,
+      payment.status === 'paid' ? 'ĐÃ THANH TOÁN' : 
+      payment.status === 'overdue' ? 'QUÁ HẠN' : 'CHỜ THANH TOÁN'
+    ])
+
+    // Add table
+    doc.autoTable({
+      head: [['Khách hàng', 'Công ty', 'Số tiền', 'Ngày tạo', 'Hạn thanh toán', 'Trạng thái']],
+      body: tableData,
+      startY: 40,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [41, 128, 185] }
+    })
+    
+    const fileName = `LogiAI_Payment_Report_${new Date().toISOString().split('T')[0]}.pdf`
+    doc.save(fileName)
+    console.log('📄 PDF file exported:', fileName)
   }
 
   const markPaid = async (id: string) => {
@@ -192,6 +237,18 @@ Gửi từ hệ thống LogiAI Truck Insight V2
               <p className="text-sm text-gray-500">Paid: {payments.filter(p => p.status === 'paid').length} | Visible: {visiblePayments.length}</p>
             </div>
             <div className="flex gap-3">
+              <button 
+                onClick={exportToExcel}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-green-700 flex items-center gap-2"
+              >
+                📊 Excel
+              </button>
+              <button 
+                onClick={exportToPDF}
+                className="bg-red-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-red-700 flex items-center gap-2"
+              >
+                📄 PDF
+              </button>
               <button 
                 onClick={() => {
                   const saved = localStorage.getItem('paymentTrackingUpdated')
