@@ -15,20 +15,25 @@ export default function PaymentTrackingAssistant() {
   })
 
   useEffect(() => {
-    // ALWAYS load from localStorage first - preserve user changes
+    // PRIORITY 1: Always check localStorage first
     const savedData = localStorage.getItem('paymentTrackingUpdated')
-    if (savedData) {
+    
+    if (savedData && savedData !== 'undefined' && savedData !== 'null') {
       try {
         const parsed = JSON.parse(savedData)
-        setPayments(parsed)
-        console.log('📂 Loaded YOUR saved data:', parsed.length, 'companies')
-        return // Exit early - use saved data
+        if (parsed && Array.isArray(parsed) && parsed.length > 0) {
+          setPayments(parsed)
+          console.log('📂 Loaded YOUR saved data:', parsed.length, 'companies')
+          console.log('✅ Using your changes, NOT default data')
+          return // Exit here - use saved data
+        }
       } catch (e) {
-        console.log('❌ Error loading saved data')
+        console.log('❌ Error parsing saved data:', e)
       }
     }
 
-    // Only use default data if NO saved data exists
+    // ONLY if no valid saved data exists, use defaults
+    console.log('🆕 No saved data found, loading defaults for first time')
     const defaultData = [
       { id: '1', name: 'Nguyen Van Long', company: 'Long Transport & Logistics Co., Ltd', amount: 45000000, createdDate: '15/8/2025', dueDate: '28/8/2025', status: 'overdue' },
       { id: '2', name: 'Ngo Minh Gia', company: 'Gia Logistics & Freight Services', amount: 28500000, createdDate: '1/8/2025', dueDate: '15/8/2025', status: 'overdue' },
@@ -160,12 +165,24 @@ Gửi từ hệ thống LogiAI Truck Insight V2
               <p className="text-xl text-purple-500">Lưu trữ thay đổi của bạn - {payments.length} công ty</p>
               <p className="text-sm text-gray-500">Paid: {payments.filter(p => p.status === 'paid').length} | Visible: {visiblePayments.length}</p>
             </div>
-            <button 
-              onClick={() => setShowAddForm(!showAddForm)}
-              className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-8 py-4 rounded-xl font-bold text-xl hover:from-green-700 hover:to-emerald-700 shadow-lg"
-            >
-              ➕ Thêm mới
-            </button>
+            <div className="flex gap-3">
+              <button 
+                onClick={() => {
+                  const saved = localStorage.getItem('paymentTrackingUpdated')
+                  console.log('🔍 DEBUG localStorage:', saved)
+                  alert(`🔍 localStorage Debug:\n\nKey: paymentTrackingUpdated\nData: ${saved ? 'EXISTS' : 'NOT FOUND'}\nLength: ${saved ? JSON.parse(saved).length : 0} companies`)
+                }}
+                className="bg-gray-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-gray-700"
+              >
+                🔍 Debug
+              </button>
+              <button 
+                onClick={() => setShowAddForm(!showAddForm)}
+                className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-8 py-4 rounded-xl font-bold text-xl hover:from-green-700 hover:to-emerald-700 shadow-lg"
+              >
+                ➕ Thêm mới
+              </button>
+            </div>
           </div>
 
           {showAddForm && (
