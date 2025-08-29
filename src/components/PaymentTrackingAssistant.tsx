@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import emailjs from '@emailjs/browser'
 
 export default function PaymentTrackingAssistant() {
   const [payments, setPayments] = useState<any[]>([])
@@ -15,6 +16,9 @@ export default function PaymentTrackingAssistant() {
   })
 
   useEffect(() => {
+    // Initialize EmailJS with your public key
+    emailjs.init("3hoyt_iWoPawHhEN")
+    
     // PRIORITY 1: Always check localStorage first
     const savedData = localStorage.getItem('paymentTrackingUpdated')
     
@@ -140,15 +144,6 @@ Gửi từ hệ thống LogiAI Truck Insight V2
     console.log('Subject:', subject)
     console.log('Content:', emailContent)
     
-import emailjs from '@emailjs/browser'
-
-// Add this at the top of your component
-useEffect(() => {
-  // Initialize EmailJS with your public key
-  emailjs.init("3hoyt_iWoPawHhEN")
-}, [])
-
-// Replace the email simulation section with:
     try {
       // Send real email via EmailJS
       const result = await emailjs.send(
