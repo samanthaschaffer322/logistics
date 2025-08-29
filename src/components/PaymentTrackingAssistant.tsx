@@ -145,15 +145,15 @@ import emailjs from '@emailjs/browser'
 // Add this at the top of your component
 useEffect(() => {
   // Initialize EmailJS with your public key
-  emailjs.init("YOUR_PUBLIC_KEY") // Get from emailjs.com
+  emailjs.init("3hoyt_iWoPawHhEN")
 }, [])
 
 // Replace the email simulation section with:
     try {
       // Send real email via EmailJS
       const result = await emailjs.send(
-        'YOUR_SERVICE_ID', // Get from emailjs.com
-        'YOUR_TEMPLATE_ID', // Get from emailjs.com
+        'service_nmd8xdb',
+        'template_blufg7e',
         {
           to_email: 'andantecampion@proton.me',
           subject: subject,
