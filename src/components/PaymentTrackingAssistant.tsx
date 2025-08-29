@@ -57,7 +57,7 @@ export default function PaymentTrackingAssistant() {
 
   const visiblePayments = payments.filter(p => p.status !== 'paid')
 
-  const addNewPayment = () => {
+  const addNewPayment = async () => {
     if (newPayment.name && newPayment.company && newPayment.amount) {
       const payment = {
         id: Date.now().toString(),
@@ -73,10 +73,14 @@ export default function PaymentTrackingAssistant() {
       setNewPayment({ name: '', company: '', amount: '', createdDate: '', dueDate: '' })
       setShowAddForm(false)
       
-      // Send email notification for new company
-      sendEmailToAndante('NEW_COMPANY', payment)
+      // Send real email notification for new company
+      const emailSent = await sendEmailToAndante('NEW_COMPANY', payment)
       
-      alert(`✅ Đã thêm công ty mới: ${payment.name}\n\n📧 Email thông báo đã được gửi đến andantecampion@proton.me`)
+      if (emailSent) {
+        alert(`✅ Đã thêm công ty mới: ${payment.name}\n\n📧 Email thông báo đã được GỬI THẬT đến andantecampion@proton.me`)
+      } else {
+        alert(`✅ Đã thêm công ty mới: ${payment.name}\n\n⚠️ Email gửi thất bại, nhưng công ty đã được thêm thành công.`)
+      }
     } else {
       alert('⚠️ Vui lòng điền đầy đủ thông tin!')
     }
@@ -88,16 +92,15 @@ export default function PaymentTrackingAssistant() {
     ))
   }
 
-  const sendEmailToAndante = (type: string, payment: any) => {
+  const sendEmailToAndante = async (type: string, payment: any) => {
     let emailContent = ''
+    let subject = ''
     
     if (type === 'PAID') {
+      subject = `[THANH TOÁN] ${payment.name} đã thanh toán`
       emailContent = `
 📧 THÔNG BÁO THANH TOÁN HOÀN TẤT
 ================================
-
-Gửi đến: andantecampion@proton.me
-Chủ đề: [THANH TOÁN] ${payment.name} đã thanh toán
 
 ✅ THÔNG TIN THANH TOÁN:
 👤 Khách hàng: ${payment.name}
@@ -113,12 +116,10 @@ Thời gian xác nhận: ${new Date().toLocaleString('vi-VN')}
 Gửi từ hệ thống LogiAI Truck Insight V2
       `
     } else if (type === 'NEW_COMPANY') {
+      subject = `[MỚI] Đã thêm công ty ${payment.name}`
       emailContent = `
 📧 THÔNG BÁO CÔNG TY MỚI
 ========================
-
-Gửi đến: andantecampion@proton.me
-Chủ đề: [MỚI] Đã thêm công ty ${payment.name}
 
 ➕ THÔNG TIN CÔNG TY MỚI:
 👤 Khách hàng: ${payment.name}
@@ -135,11 +136,35 @@ Gửi từ hệ thống LogiAI Truck Insight V2
       `
     }
     
-    console.log('📧 EMAIL SENT TO andantecampion@proton.me:')
-    console.log(emailContent)
+    console.log('📧 SENDING REAL EMAIL TO andantecampion@proton.me:')
+    console.log('Subject:', subject)
+    console.log('Content:', emailContent)
     
-    // Email simulation - no actual API call needed
-    console.log('✅ Email simulation completed successfully')
+    try {
+      // Send real email via API
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: 'andantecampion@proton.me',
+          subject: subject,
+          content: emailContent
+        })
+      })
+      
+      const result = await response.json()
+      
+      if (result.success) {
+        console.log('✅ REAL EMAIL SENT SUCCESSFULLY:', result.messageId)
+        return true
+      } else {
+        console.error('❌ Email sending failed:', result.error)
+        return false
+      }
+    } catch (error) {
+      console.error('❌ Email API error:', error)
+      return false
+    }
   }
 
   const markPaid = async (id: string) => {
@@ -147,10 +172,14 @@ Gửi từ hệ thống LogiAI Truck Insight V2
     if (payment) {
       setPayments(prev => prev.map(p => p.id === id ? { ...p, status: 'paid' } : p))
       
-      // Send email notification
-      sendEmailToAndante('PAID', payment)
+      // Send real email notification
+      const emailSent = await sendEmailToAndante('PAID', payment)
       
-      alert(`✅ ${payment.name} đã được đánh dấu là đã thanh toán!\n\n📧 Email thông báo đã được gửi đến andantecampion@proton.me\n\nCông ty này sẽ biến mất khỏi danh sách.`)
+      if (emailSent) {
+        alert(`✅ ${payment.name} đã được đánh dấu là đã thanh toán!\n\n📧 Email thông báo đã được GỬI THẬT đến andantecampion@proton.me\n\nCông ty này sẽ biến mất khỏi danh sách.`)
+      } else {
+        alert(`✅ ${payment.name} đã được đánh dấu là đã thanh toán!\n\n⚠️ Email gửi thất bại, nhưng dữ liệu đã được lưu.\n\nCông ty này sẽ biến mất khỏi danh sách.`)
+      }
     }
   }
 
