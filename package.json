@@ -140,5 +140,8 @@
   "funding": {
     "type": "github",
     "url": "https://github.com/sponsors/logistics"
+  },
+  "overrides": {
+    "picomatch": "2.3.1"
   }
 }
