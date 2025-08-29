@@ -140,17 +140,32 @@ Gửi từ hệ thống LogiAI Truck Insight V2
     console.log('Subject:', subject)
     console.log('Content:', emailContent)
     
+import emailjs from '@emailjs/browser'
+
+// Add this at the top of your component
+useEffect(() => {
+  // Initialize EmailJS with your public key
+  emailjs.init("YOUR_PUBLIC_KEY") // Get from emailjs.com
+}, [])
+
+// Replace the email simulation section with:
     try {
-      // Simulate email sending for static deployment
-      console.log('📧 EMAIL SIMULATION - Would send to: andantecampion@proton.me')
-      console.log('✅ REAL EMAIL SENT SUCCESSFULLY: sim_' + Date.now())
+      // Send real email via EmailJS
+      const result = await emailjs.send(
+        'YOUR_SERVICE_ID', // Get from emailjs.com
+        'YOUR_TEMPLATE_ID', // Get from emailjs.com
+        {
+          to_email: 'andantecampion@proton.me',
+          subject: subject,
+          message: emailContent,
+          from_name: 'LogiAI System'
+        }
+      )
       
-      // For production, integrate with EmailJS or similar client-side service
-      // Example: emailjs.send('service_id', 'template_id', { to: 'andantecampion@proton.me', subject, content: emailContent })
-      
+      console.log('✅ REAL EMAIL SENT SUCCESSFULLY:', result.text)
       return true
     } catch (error) {
-      console.error('❌ Email simulation error:', error)
+      console.error('❌ Email sending error:', error)
       return false
     }
   }
