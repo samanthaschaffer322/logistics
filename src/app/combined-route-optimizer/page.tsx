@@ -17,7 +17,7 @@ import {
   BarChart3,
   CheckCircle
 } from 'lucide-react'
-import { EnhancedRouteCalculator } from '@/utils/enhancedRouteCalculator'
+import FileBasedRouteOptimizer from '@/components/FileBasedRouteOptimizer'
 
 // Dynamic import for Leaflet map to avoid SSR issues
 const LeafletRouteMap = dynamic(() => import('@/components/LeafletRouteMap'), {
@@ -301,6 +301,9 @@ export default function CombinedRouteOptimizerPage() {
         {/* Route Optimizer View */}
         {activeView === 'optimizer' && (
           <div className="space-y-8">
+            {/* File Learning Component */}
+            <FileBasedRouteOptimizer />
+            
             <Card className="shadow-2xl border-0">
               <CardHeader className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-t-lg">
                 <CardTitle className="flex items-center gap-3 text-xl">
