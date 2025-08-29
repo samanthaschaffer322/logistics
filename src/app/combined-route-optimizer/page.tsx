@@ -18,6 +18,7 @@ import {
   CheckCircle
 } from 'lucide-react'
 import FileBasedRouteOptimizer from '@/components/FileBasedRouteOptimizer'
+import { EnhancedRouteCalculator } from '@/utils/enhancedRouteCalculator'
 
 // Dynamic import for Leaflet map to avoid SSR issues
 const LeafletRouteMap = dynamic(() => import('@/components/LeafletRouteMap'), {
