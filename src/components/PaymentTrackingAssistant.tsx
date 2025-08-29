@@ -145,17 +145,14 @@ Gửi từ hệ thống LogiAI Truck Insight V2
     console.log('Content:', emailContent)
     
     try {
-      // Send real email via EmailJS
+      // Send real email via EmailJS with minimal template variables
       const result = await emailjs.send(
         'service_nmd8xdb',
         'template_blufg7e',
         {
-          to_name: 'Admin',
-          to_email: 'andantecampion@proton.me',
-          from_name: 'LogiAI System',
-          reply_to: 'noreply@logiai.com',
-          subject: subject,
-          message: emailContent
+          user_name: 'Admin',
+          user_email: 'andantecampion@proton.me',
+          message: `${subject}\n\n${emailContent}`
         }
       )
       
