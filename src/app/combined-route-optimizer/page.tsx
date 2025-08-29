@@ -50,7 +50,7 @@ export default function CombinedRouteOptimizerPage() {
   // Comprehensive Vietnamese locations database
   const vietnameseLocations = [
     // Major Ports
-    { name: 'Cảng Cát Lái', lat: 10.8100, lng: 106.7800, province: 'Ho Chi Minh City', type: 'port' },
+    { name: 'Cảng Cát Lái', lat: 10.7769, lng: 106.7009, province: 'Ho Chi Minh City', type: 'port' },
     { name: 'Cat Lai', lat: 10.8100, lng: 106.7800, province: 'Ho Chi Minh City', type: 'port' },
     { name: 'Cảng Thị Vải', lat: 10.6100, lng: 107.0700, province: 'Ba Ria - Vung Tau', type: 'port' },
     { name: 'Thi Vai', lat: 10.6100, lng: 107.0700, province: 'Ba Ria - Vung Tau', type: 'port' },
@@ -68,7 +68,7 @@ export default function CombinedRouteOptimizerPage() {
     { name: 'Quận Bình Thạnh', lat: 10.8017, lng: 106.7148, province: 'Ho Chi Minh City', type: 'district' },
     { name: 'Quận Tân Bình', lat: 10.8008, lng: 106.6530, province: 'Ho Chi Minh City', type: 'district' },
     { name: 'Khu Chế Xuất Tân Thuận', lat: 10.7379, lng: 106.7197, province: 'Ho Chi Minh City', type: 'industrial' },
-    { name: 'Kho Chim Én', lat: 10.7500, lng: 106.6800, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Kho Chim Én', lat: 10.5449, lng: 106.4913, province: 'Ho Chi Minh City', type: 'warehouse' },
     { name: 'Phú Hữu', lat: 10.7800, lng: 106.7900, province: 'Ho Chi Minh City', type: 'district' },
     { name: 'Phu Huu', lat: 10.7800, lng: 106.7900, province: 'Ho Chi Minh City', type: 'district' },
     { name: 'SITC', lat: 10.8050, lng: 106.7750, province: 'Ho Chi Minh City', type: 'logistics' },
@@ -202,11 +202,11 @@ export default function CombinedRouteOptimizerPage() {
     const minutes = timeInMinutes % 60
     
     // More accurate Vietnamese CONTAINER TRUCK logistics costs
-    let fuelCostPerKm = 20000 // VND per km (container trucks use more fuel)
-    let driverCostPerKm = 12000 // VND per km (specialized container truck drivers)
+    let fuelCostPerKm = 15000 // VND per km (realistic for container trucks)
+    let driverCostPerKm = 8000 // VND per km (specialized container truck drivers)
     if (distance > 30) {
-      fuelCostPerKm = 18000 // Highway efficiency for trucks
-      driverCostPerKm = 10000
+      fuelCostPerKm = 12000 // Highway efficiency for trucks
+      driverCostPerKm = 6000
     }
     
     const tollsAndFees = distance > 30 ? Math.round(distance * 3000) : 35000 // VND (higher tolls for trucks)

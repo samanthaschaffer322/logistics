@@ -213,7 +213,7 @@ const ComprehensiveRouteOptimizer: React.FC = () => {
       totalTime += distance / 60 // Assuming 60 km/h average speed
     }
     
-    const fuelCost = totalDistance * 0.08 * 25000 // 0.08L/km * 25,000 VND/L
+    const fuelCost = totalDistance * 0.35 * 27000 // 0.35L/km * 27,000 VND/L for container trucks
     
     return {
       totalDistance: Math.round(totalDistance),
