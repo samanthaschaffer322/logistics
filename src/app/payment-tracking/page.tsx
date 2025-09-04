@@ -4,8 +4,8 @@ import { useState, useEffect, useMemo } from 'react'
 import { format, parseISO, differenceInDays, addDays, isAfter, isBefore } from 'date-fns'
 import { vi } from 'date-fns/locale'
 
-// Cache buster timestamp: 2025-09-04T14:54:24.199+07:00
-const CACHE_BUSTER = '20250904145424'
+// Cache buster timestamp: 2025-09-04T15:24:48.725+07:00
+const CACHE_BUSTER = '20250904152448'
 
 interface Company {
   id: string
@@ -191,7 +191,8 @@ export default function PaymentTrackingPageNew() {
       'paymentsNew2025_v3',
       'paymentTrackerData',
       'paySystem2025_FINAL',
-      'paymentSystem_20250828233101'
+      'paymentSystem_20250828233101',
+      'paymentSystem_20250904145424'
     ]
     
     keysToRemove.forEach(key => {
