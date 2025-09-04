@@ -4,7 +4,7 @@
 
  ⚠ Warning: Found multiple lockfiles. Selecting /Users/aelitapham/package-lock.json.
    Consider removing the lockfiles at:
-   * /Users/aelitapham/Development/logistics/package-lock.json
+   * /Users/aelitapham/Desktop/Development/logistics/package-lock.json
 
    ▲ Next.js 15.4.5
    - Local:        http://localhost:3000
@@ -12,32 +12,8 @@
    - Environments: .env.local
 
  ✓ Starting...
- ✓ Ready in 1461ms
- ○ Compiling / ...
- ✓ Compiled / in 1311ms (773 modules)
- GET / 200 in 1609ms
- ✓ Compiled in 492ms (316 modules)
- ✓ Compiled in 317ms (302 modules)
- ✓ Compiled in 473ms (322 modules)
- ✓ Compiled in 460ms (322 modules)
- ✓ Compiled in 339ms (322 modules)
- ✓ Compiled in 278ms (319 modules)
- ✓ Compiled in 198ms (319 modules)
- ✓ Compiled in 190ms (319 modules)
- ✓ Compiled in 180ms (319 modules)
- ✓ Compiled in 273ms (319 modules)
- ✓ Compiled in 273ms (319 modules)
- ✓ Compiled in 219ms (319 modules)
- ✓ Compiled in 262ms (319 modules)
- ✓ Compiled in 220ms (319 modules)
- ✓ Compiled in 256ms (319 modules)
- ✓ Compiled in 270ms (319 modules)
- ✓ Compiled in 274ms (319 modules)
- ✓ Compiled in 263ms (319 modules)
- ✓ Compiled in 213ms (319 modules)
- ✓ Compiled in 213ms (319 modules)
- ✓ Compiled in 198ms (319 modules)
- ✓ Compiled in 196ms (319 modules)
- ✓ Compiled in 210ms (319 modules)
- ✓ Compiled in 249ms (319 modules)
-[?25h
+ ✓ Ready in 1563ms
+ ○ Compiling /payment-tracking ...
+ ✓ Compiled /payment-tracking in 3.6s (1904 modules)
+ GET /payment-tracking 200 in 3941ms
+ ✓ Compiled in 459ms (880 modules)
