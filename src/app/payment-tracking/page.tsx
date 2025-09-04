@@ -3,9 +3,12 @@
 import { useState, useEffect, useMemo } from 'react'
 import { format, parseISO, differenceInDays, addDays, isAfter, isBefore } from 'date-fns'
 import { vi } from 'date-fns/locale'
+import jsPDF from 'jspdf'
+import 'jspdf-autotable'
+import * as XLSX from 'xlsx'
 
-// Cache buster timestamp: 2025-09-04T15:24:48.725+07:00
-const CACHE_BUSTER = '20250904152448'
+// Cache buster timestamp: 2025-09-05T06:40:47.566+07:00
+const CACHE_BUSTER = '20250905064047'
 
 interface Company {
   id: string
@@ -192,7 +195,8 @@ export default function PaymentTrackingPageNew() {
       'paymentTrackerData',
       'paySystem2025_FINAL',
       'paymentSystem_20250828233101',
-      'paymentSystem_20250904145424'
+      'paymentSystem_20250904145424',
+      'paymentSystem_20250904152448'
     ]
     
     keysToRemove.forEach(key => {
@@ -494,6 +498,108 @@ Gửi từ hệ thống LogiAI Truck Insight V2
       sendSmartEmailNotification(company, 'overdue')
     })
     alert(`📧 Đã gửi ${overdueCompanies.length} email nhắc nhở hàng loạt!`)
+  }
+
+  // Real PDF Export Function
+  const exportToPDF = () => {
+    const doc = new jsPDF()
+    const now = new Date()
+    
+    // Header
+    doc.setFontSize(20)
+    doc.text('📊 BÁO CÁO THANH TOÁN LOGIAI', 20, 20)
+    doc.setFontSize(12)
+    doc.text(`Ngày xuất: ${now.toLocaleDateString('vi-VN')} ${now.toLocaleTimeString('vi-VN')}`, 20, 30)
+    doc.text(`Cache: ${CACHE_BUSTER}`, 20, 35)
+    
+    // Statistics
+    const totalAmount = companies.reduce((sum, c) => sum + c.amount, 0)
+    const overdueAmount = companies.filter(c => c.status === 'overdue').reduce((sum, c) => sum + c.amount, 0)
+    const pendingAmount = companies.filter(c => c.status === 'pending').reduce((sum, c) => sum + c.amount, 0)
+    
+    doc.text('THỐNG KÊ TỔNG QUAN:', 20, 50)
+    doc.text(`• Tổng doanh thu: ${totalAmount.toLocaleString()} VND`, 25, 60)
+    doc.text(`• Nợ quá hạn: ${overdueAmount.toLocaleString()} VND`, 25, 70)
+    doc.text(`• Chờ thanh toán: ${pendingAmount.toLocaleString()} VND`, 25, 80)
+    doc.text(`• Tổng công ty: ${companies.length}`, 25, 90)
+    
+    // Table data
+    const tableData = visibleCompanies.map(company => [
+      company.name,
+      company.company,
+      `${company.amount.toLocaleString()} VND`,
+      company.created,
+      company.due,
+      company.status === 'overdue' ? 'QUÁ HẠN' : 'CHỜ THANH TOÁN',
+      company.priority?.toUpperCase() || 'MEDIUM'
+    ])
+    
+    // Add table
+    doc.autoTable({
+      head: [['Khách hàng', 'Công ty', 'Số tiền', 'Ngày tạo', 'Hạn TT', 'Trạng thái', 'Ưu tiên']],
+      body: tableData,
+      startY: 100,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [34, 197, 94] }
+    })
+    
+    // Save PDF
+    const fileName = `logiai-payment-report-${now.toISOString().split('T')[0]}.pdf`
+    doc.save(fileName)
+    
+    console.log(`📄 PDF exported: ${fileName}`)
+    alert(`✅ Đã xuất PDF thành công!\n\nFile: ${fileName}\nVị trí: Downloads folder`)
+  }
+
+  // Real Excel Export Function
+  const exportToExcel = () => {
+    const now = new Date()
+    
+    // Prepare data for Excel
+    const excelData = visibleCompanies.map(company => ({
+      'Khách hàng': company.name,
+      'Công ty': company.company,
+      'Số tiền (VND)': company.amount,
+      'Ngày tạo': company.created,
+      'Hạn thanh toán': company.due,
+      'Trạng thái': company.status === 'overdue' ? 'QUÁ HẠN' : 'CHỜ THANH TOÁN',
+      'Độ ưu tiên': company.priority?.toUpperCase() || 'MEDIUM',
+      'Số điện thoại': company.contactInfo?.phone || '',
+      'Email': company.contactInfo?.email || '',
+      'Ghi chú': company.notes || ''
+    }))
+    
+    // Create workbook
+    const wb = XLSX.utils.book_new()
+    
+    // Main data sheet
+    const ws = XLSX.utils.json_to_sheet(excelData)
+    XLSX.utils.book_append_sheet(wb, ws, 'Danh sách thanh toán')
+    
+    // Statistics sheet
+    const totalAmount = companies.reduce((sum, c) => sum + c.amount, 0)
+    const overdueAmount = companies.filter(c => c.status === 'overdue').reduce((sum, c) => sum + c.amount, 0)
+    const pendingAmount = companies.filter(c => c.status === 'pending').reduce((sum, c) => sum + c.amount, 0)
+    
+    const statsData = [
+      { 'Chỉ số': 'Tổng doanh thu', 'Giá trị': totalAmount, 'Đơn vị': 'VND' },
+      { 'Chỉ số': 'Nợ quá hạn', 'Giá trị': overdueAmount, 'Đơn vị': 'VND' },
+      { 'Chỉ số': 'Chờ thanh toán', 'Giá trị': pendingAmount, 'Đơn vị': 'VND' },
+      { 'Chỉ số': 'Tổng công ty', 'Giá trị': companies.length, 'Đơn vị': 'Công ty' },
+      { 'Chỉ số': 'Công ty quá hạn', 'Giá trị': companies.filter(c => c.status === 'overdue').length, 'Đơn vị': 'Công ty' },
+      { 'Chỉ số': 'Ngày xuất báo cáo', 'Giá trị': now.toLocaleDateString('vi-VN'), 'Đơn vị': '' },
+      { 'Chỉ số': 'Cache buster', 'Giá trị': CACHE_BUSTER, 'Đơn vị': '' }
+    ]
+    
+    const statsWs = XLSX.utils.json_to_sheet(statsData)
+    XLSX.utils.book_append_sheet(wb, statsWs, 'Thống kê')
+    
+    // Save Excel file
+    const fileName = `logiai-payment-data-${now.toISOString().split('T')[0]}.xlsx`
+    XLSX.writeFile(wb, fileName)
+    
+    console.log(`📊 Excel exported: ${fileName}`)
+    alert(`✅ Đã xuất Excel thành công!\n\nFile: ${fileName}\nVị trí: Downloads folder\n\nBao gồm:\n• Sheet 1: Danh sách thanh toán\n• Sheet 2: Thống kê tổng quan`)
   }
 
   const generateAIReport = () => {
@@ -908,14 +1014,14 @@ Tạo bởi LogiAI Truck Insight V2
             {/* Action Buttons */}
             <div className="flex flex-wrap justify-center gap-4 mb-6">
               <button 
-                onClick={() => window.print()}
-                className="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 shadow-lg"
+                onClick={exportToPDF}
+                className="bg-red-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-700 shadow-lg"
               >
-                🖨️ Xuất PDF
+                📄 Xuất PDF
               </button>
               <button 
-                onClick={generateAIReport}
-                className="bg-purple-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-purple-700 shadow-lg"
+                onClick={exportToExcel}
+                className="bg-green-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-green-700 shadow-lg"
               >
                 📊 Xuất Excel
               </button>
