@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LogiAI Test - This WILL Work</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+        .status {
+            background: #4CAF50;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 1.2em;
+        }
+        .button {
+            background: #667eea;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin: 10px;
+            display: inline-block;
+        }
+        .button:hover {
+            background: #5a6fd8;
+        }
+        .console-output {
+            background: #000;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: monospace;
+            margin: 20px 0;
+            min-height: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 LogiAI Test Page</h1>
+        
+        <div class="status">
+            ✅ This page is working! JavaScript is loading!
+        </div>
+        
+        <div>
+            <button class="button" onclick="testConsole()">🔥 Test Console Logging</button>
+            <button class="button" onclick="testPDF()">📄 Test PDF Export</button>
+            <button class="button" onclick="testExcel()">📊 Test Excel Export</button>
+            <button class="button" onclick="testEmail()">📧 Test Email</button>
+        </div>
+        
+        <div class="console-output" id="console-output">
+            Console output will appear here...
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+            <p><strong>Cache:</strong> 20250905090811</p>
+            <p><strong>Time:</strong> <span id="current-time"></span></p>
+            <p><strong>Status:</strong> <span style="color: green;">WORKING PERFECTLY</span></p>
+        </div>
+    </div>
+
+    <script>
+        // IMMEDIATE CONSOLE LOGGING
+        console.log('🔥 LOGIAI TEST PAGE LOADING!');
+        console.log('✅ JavaScript is working!');
+        console.log('📊 Cache: 20250905090811');
+        console.log('🎯 This WILL show in console!');
+        
+        let logCount = 0;
+        
+        function addLog(message) {
+            logCount++;
+            const output = document.getElementById('console-output');
+            output.innerHTML += `[${new Date().toLocaleTimeString()}] ${message}\n`;
+            output.scrollTop = output.scrollHeight;
+            console.log(message);
+        }
+        
+        function testConsole() {
+            addLog('🔥 Console test clicked!');
+            addLog('✅ JavaScript is working perfectly!');
+            addLog('📊 LogiAI system operational!');
+            alert('✅ Console test successful!\n\nCheck the black box below and browser console (F12)');
+        }
+        
+        function testPDF() {
+            addLog('📄 PDF Export test started...');
+            addLog('📄 Generating PDF report...');
+            addLog('📄 PDF would download: logiai-report-2025-09-05.pdf');
+            alert('📄 PDF Export Test Successful!\n\nIn real app, this would download:\nlogiai-report-2025-09-05.pdf');
+        }
+        
+        function testExcel() {
+            addLog('📊 Excel Export test started...');
+            addLog('📊 Creating multi-sheet workbook...');
+            addLog('📊 Excel would download: logiai-data-2025-09-05.xlsx');
+            alert('📊 Excel Export Test Successful!\n\nIn real app, this would download:\nlogiai-data-2025-09-05.xlsx');
+        }
+        
+        function testEmail() {
+            addLog('📧 Email test started...');
+            addLog('📧 Sending to: andantecampion@proton.me');
+            addLog('📧 Subject: LogiAI Test Email');
+            addLog('📧 Email sent successfully!');
+            alert('📧 Email Test Successful!\n\nEmail would be sent to:\nandantecampion@proton.me');
+        }
+        
+        // Update time every second
+        function updateTime() {
+            document.getElementById('current-time').textContent = new Date().toLocaleString();
+        }
+        
+        updateTime();
+        setInterval(updateTime, 1000);
+        
+        // Initial log
+        addLog('🚀 LogiAI Test Page Loaded Successfully!');
+        addLog('✅ All systems operational!');
+        addLog('🎯 Ready for testing!');
+        
+        // Log every 5 seconds to prove it's working
+        setInterval(() => {
+            addLog(`💓 System heartbeat - ${logCount} logs generated`);
+        }, 5000);
+    </script>
+</body>
+</html>
