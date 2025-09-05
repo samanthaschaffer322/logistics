@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LogiAI Direct Test</title>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: Arial; background: #f0f0f0; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; }
+        h1 { color: #333; text-align: center; }
+        .status { background: #4CAF50; color: white; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .button { background: #2196F3; color: white; padding: 12px 24px; border: none; border-radius: 5px; margin: 5px; cursor: pointer; font-size: 16px; }
+        .button:hover { background: #1976D2; }
+        .console { background: #000; color: #0f0; padding: 15px; font-family: monospace; height: 200px; overflow-y: scroll; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 LogiAI Direct Test</h1>
+        <div class="status">✅ This page is working! JavaScript will load!</div>
+        
+        <button class="button" onclick="testConsole()">🔥 Test Console</button>
+        <button class="button" onclick="downloadPDF()">📄 Download PDF</button>
+        <button class="button" onclick="downloadExcel()">📊 Download Excel</button>
+        <button class="button" onclick="clearConsole()">🗑️ Clear</button>
+        
+        <div class="console" id="output">Waiting for JavaScript to load...</div>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <p><strong>Time:</strong> <span id="time"></span></p>
+            <p><strong>Status:</strong> <span style="color: green;">READY</span></p>
+        </div>
+    </div>
+
+    <script>
+        // IMMEDIATE EXECUTION
+        console.log('🔥 DIRECT TEST LOADING!');
+        console.log('✅ JavaScript is working!');
+        console.log('🎯 This WILL show in console!');
+        
+        const output = document.getElementById('output');
+        
+        function log(msg) {
+            const time = new Date().toLocaleTimeString();
+            output.innerHTML += `[${time}] ${msg}\n`;
+            output.scrollTop = output.scrollHeight;
+            console.log(msg);
+        }
+        
+        function testConsole() {
+            log('🔥 Console test clicked!');
+            log('✅ JavaScript is working perfectly!');
+            log('📊 LogiAI system operational!');
+            alert('✅ Console test successful!\n\nCheck both the black box and browser console (F12)');
+        }
+        
+        function downloadPDF() {
+            log('📄 Creating PDF...');
+            
+            // Create PDF content
+            const pdfContent = `%PDF-1.4
+1 0 obj
+<<
+/Type /Catalog
+/Pages 2 0 R
+>>
+endobj
+
+2 0 obj
+<<
+/Type /Pages
+/Kids [3 0 R]
+/Count 1
+>>
+endobj
+
+3 0 obj
+<<
+/Type /Page
+/Parent 2 0 R
+/MediaBox [0 0 612 792]
+/Contents 4 0 R
+/Resources <<
+/Font <<
+/F1 5 0 R
+>>
+>>
+>>
+endobj
+
+4 0 obj
+<<
+/Length 100
+>>
+stream
+BT
+/F1 24 Tf
+100 700 Td
+(LogiAI Payment Report) Tj
+/F1 12 Tf
+100 650 Td
+(Generated: ${new Date().toLocaleString()}) Tj
+100 600 Td
+(Total Revenue: 249,500,000 VND) Tj
+100 580 Td
+(Overdue Amount: 73,500,000 VND) Tj
+100 560 Td
+(Total Companies: 4) Tj
+ET
+endstream
+endobj
+
+5 0 obj
+<<
+/Type /Font
+/Subtype /Type1
+/BaseFont /Helvetica
+>>
+endobj
+
+xref
+0 6
+0000000000 65535 f 
+0000000010 00000 n 
+0000000053 00000 n 
+0000000110 00000 n 
+0000000251 00000 n 
+0000000456 00000 n 
+trailer
+<<
+/Size 6
+/Root 1 0 R
+>>
+startxref
+523
+%%EOF`;
+            
+            // Create and download PDF
+            const blob = new Blob([pdfContent], { type: 'application/pdf' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `logiai-report-${new Date().toISOString().split('T')[0]}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            log('📄 PDF downloaded successfully!');
+            alert('📄 PDF downloaded!\n\nCheck your Downloads folder for:\nlogiai-report-' + new Date().toISOString().split('T')[0] + '.pdf');
+        }
+        
+        function downloadExcel() {
+            log('📊 Creating Excel...');
+            
+            // Create simple CSV content (Excel can open CSV)
+            const csvContent = `Customer,Company,Amount (VND),Status
+Nguyen Van Long,Long Transport,45000000,OVERDUE
+Ngo Minh Gia,Gia Logistics,28500000,OVERDUE
+CN Company,CN,98000000,PENDING
+Khang Phat,KP,78000000,PENDING
+
+SUMMARY,,
+Total Revenue,,249500000
+Overdue Amount,,73500000
+Total Companies,,4
+Report Date,,${new Date().toLocaleDateString()}`;
+            
+            // Create and download Excel
+            const blob = new Blob([csvContent], { type: 'application/vnd.ms-excel' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `logiai-data-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            log('📊 Excel downloaded successfully!');
+            alert('📊 Excel downloaded!\n\nCheck your Downloads folder for:\nlogiai-data-' + new Date().toISOString().split('T')[0] + '.csv');
+        }
+        
+        function clearConsole() {
+            output.innerHTML = '';
+            log('🗑️ Console cleared');
+        }
+        
+        function updateTime() {
+            document.getElementById('time').textContent = new Date().toLocaleString();
+        }
+        
+        // Initialize
+        log('🚀 LogiAI Direct Test Loaded!');
+        log('✅ All systems operational!');
+        log('🎯 Ready for testing!');
+        
+        updateTime();
+        setInterval(updateTime, 1000);
+        
+        // Heartbeat
+        setInterval(() => {
+            log('💓 System heartbeat - ' + new Date().toLocaleTimeString());
+        }, 10000);
+    </script>
+</body>
+</html>
