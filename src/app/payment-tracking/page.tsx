@@ -7,15 +7,15 @@ import jsPDF from 'jspdf'
 import 'jspdf-autotable'
 import * as XLSX from 'xlsx'
 
-// FULL ENHANCED VERSION RESTORED: 2025-09-05T07:44:43.093+07:00
-const CACHE_BUSTER = '20250905074443'
+// INTELLIGENT ANALYTICS FIXED: 2025-09-05T08:03:36.392+07:00
+const CACHE_BUSTER = '20250905080336'
 
 // Force console logging immediately
-console.log('🚀 FULL ENHANCED LOGIAI VERSION LOADING...')
+console.log('🚀 INTELLIGENT ANALYTICS VERSION LOADING...')
 console.log('🔄 Cache Buster:', CACHE_BUSTER)
-console.log('📄📊 Real PDF/Excel Export Ready!')
-console.log('🤖 AI Analytics Dashboard Active!')
-console.log('✨ All Enhanced Features Restored!')
+console.log('📄📊 Real PDF/Excel Export with Smart Data!')
+console.log('🤖 AI Analytics Dashboard with Real KPIs!')
+console.log('✨ Comprehensive Analytics Restored!')
 
 interface Company {
   id: string
