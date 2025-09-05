@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LogiAI - Proper PDF/Excel Exports</title>
+    <meta charset="utf-8">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body { font-family: Arial; background: linear-gradient(135deg, #667eea, #764ba2); margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 30px; border-radius: 20px; }
+        h1 { color: #667eea; text-align: center; font-size: 3em; margin-bottom: 20px; }
+        .status { background: #4CAF50; color: white; padding: 15px; border-radius: 10px; text-align: center; margin: 20px 0; }
+        .dashboard { background: #f8f9fa; padding: 20px; border-radius: 15px; margin: 20px 0; }
+        .buttons { text-align: center; margin: 20px 0; }
+        .btn { padding: 15px 30px; margin: 10px; border: none; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; }
+        .btn-red { background: #f44336; color: white; }
+        .btn-green { background: #4CAF50; color: white; }
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; }
+        .kpi { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px; border-radius: 15px; text-align: center; }
+        .kpi-number { font-size: 2.5em; font-weight: bold; margin-bottom: 5px; }
+        .kpi-label { font-size: 1em; opacity: 0.9; }
+        .company { background: white; border: 2px solid #e0e0e0; border-radius: 10px; padding: 20px; margin: 10px 0; }
+        .company h3 { margin: 0 0 5px 0; color: #333; font-size: 1.5em; }
+        .company p { margin: 0; color: #666; }
+        .amount { color: #2196F3; font-size: 1.8em; font-weight: bold; }
+        .status-badge { padding: 8px 16px; border-radius: 20px; font-weight: bold; margin-top: 10px; display: inline-block; }
+        .overdue { background: #ffebee; color: #c62828; border: 2px solid #ef5350; }
+        .pending { background: #fff3e0; color: #ef6c00; border: 2px solid #ff9800; }
+        .console { background: #000; color: #00ff00; padding: 15px; border-radius: 10px; font-family: monospace; height: 150px; overflow-y: auto; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 LogiAI - Proper Exports</h1>
+        <div class="status">✅ REAL PDF & EXCEL EXPORTS - Proper File Formats!</div>
+        <p style="text-align: center; color: #666; font-size: 1.1em;">
+            📧 Email: andantecampion@proton.me | ⏰ <span id="time"></span>
+        </p>
+
+        <div class="dashboard">
+            <h2 style="text-align: center; color: #333; margin-bottom: 10px;">📊 Bảng điều khiển phân tích</h2>
+            <p style="text-align: center; color: #666; margin-bottom: 20px;">Số liệu hiệu suất & KPI từ dữ liệu thực tế</p>
+            
+            <div class="buttons">
+                <button class="btn btn-red" onclick="exportProperPDF()">📄 Xuất PDF (Real)</button>
+                <button class="btn btn-green" onclick="exportProperExcel()">📊 Xuất Excel (Real)</button>
+            </div>
+
+            <div class="kpi-grid">
+                <div class="kpi">
+                    <div class="kpi-number">249M ₫</div>
+                    <div class="kpi-label">Tổng doanh thu</div>
+                    <div style="font-size: 0.8em; margin-top: 5px;">Từ 4 công ty</div>
+                </div>
+                <div class="kpi">
+                    <div class="kpi-number">73M ₫</div>
+                    <div class="kpi-label">Nợ quá hạn</div>
+                    <div style="font-size: 0.8em; margin-top: 5px;">2 công ty quá hạn</div>
+                </div>
+                <div class="kpi">
+                    <div class="kpi-number">4</div>
+                    <div class="kpi-label">Tổng công ty</div>
+                    <div style="font-size: 0.8em; margin-top: 5px;">Đang theo dõi</div>
+                </div>
+                <div class="kpi">
+                    <div class="kpi-number">50%</div>
+                    <div class="kpi-label">Tỷ lệ đúng hạn</div>
+                    <div style="font-size: 0.8em; margin-top: 5px;">2/4 công ty</div>
+                </div>
+            </div>
+        </div>
+
+        <h2 style="color: #333;">📋 Danh sách công ty</h2>
+        <div id="company-list">
+            <div class="company">
+                <h3>Nguyen Van Long</h3>
+                <p>Long Transport & Logistics Co., Ltd</p>
+                <div class="amount">45,000,000 ₫</div>
+                <div class="status-badge overdue">🔴 QUÁ HẠN</div>
+            </div>
+            <div class="company">
+                <h3>Ngo Minh Gia</h3>
+                <p>Gia Logistics & Freight Services</p>
+                <div class="amount">28,500,000 ₫</div>
+                <div class="status-badge overdue">🔴 QUÁ HẠN</div>
+            </div>
+            <div class="company">
+                <h3>CN Company</h3>
+                <p>CN</p>
+                <div class="amount">98,000,000 ₫</div>
+                <div class="status-badge pending">🟡 CHỜ THANH TOÁN</div>
+            </div>
+            <div class="company">
+                <h3>Khang Phat</h3>
+                <p>KP</p>
+                <div class="amount">78,000,000 ₫</div>
+                <div class="status-badge pending">🟡 CHỜ THANH TOÁN</div>
+            </div>
+        </div>
+
+        <div class="console" id="console">Console output will appear here...</div>
+    </div>
+
+    <script>
+        console.log('🔥 PROPER EXPORTS VERSION LOADING!');
+        console.log('✅ jsPDF and XLSX libraries loaded!');
+        console.log('📊 Real PDF and Excel exports ready!');
+
+        const companies = [
+            { name: 'Nguyen Van Long', company: 'Long Transport & Logistics Co., Ltd', amount: 45000000, status: 'overdue' },
+            { name: 'Ngo Minh Gia', company: 'Gia Logistics & Freight Services', amount: 28500000, status: 'overdue' },
+            { name: 'CN Company', company: 'CN', amount: 98000000, status: 'pending' },
+            { name: 'Khang Phat', company: 'KP', amount: 78000000, status: 'pending' }
+        ];
+
+        function log(message) {
+            const console_el = document.getElementById('console');
+            const time = new Date().toLocaleTimeString();
+            console_el.innerHTML += `[${time}] ${message}\n`;
+            console_el.scrollTop = console_el.scrollHeight;
+            console.log(message);
+        }
+
+        function exportProperPDF() {
+            log('📄 Creating REAL PDF using jsPDF...');
+            
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                const now = new Date();
+                
+                // Header
+                doc.setFontSize(20);
+                doc.setTextColor(34, 197, 94);
+                doc.text('LogiAI Payment Report', 20, 20);
+                
+                doc.setFontSize(12);
+                doc.setTextColor(0, 0, 0);
+                doc.text(`Generated: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}`, 20, 30);
+                doc.text('Email: andantecampion@proton.me', 20, 35);
+                
+                // Summary
+                const totalRevenue = companies.reduce((sum, c) => sum + c.amount, 0);
+                const overdueAmount = companies.filter(c => c.status === 'overdue').reduce((sum, c) => sum + c.amount, 0);
+                
+                doc.setFontSize(14);
+                doc.text('EXECUTIVE SUMMARY:', 20, 50);
+                doc.setFontSize(11);
+                doc.text(`Total Revenue: ${totalRevenue.toLocaleString()} VND`, 25, 60);
+                doc.text(`Overdue Amount: ${overdueAmount.toLocaleString()} VND`, 25, 68);
+                doc.text(`Total Companies: ${companies.length}`, 25, 76);
+                doc.text(`Overdue Companies: ${companies.filter(c => c.status === 'overdue').length}`, 25, 84);
+                
+                // Table
+                const tableData = companies.map(company => [
+                    company.name,
+                    company.company,
+                    company.amount.toLocaleString() + ' VND',
+                    company.status === 'overdue' ? 'OVERDUE' : 'PENDING'
+                ]);
+                
+                doc.autoTable({
+                    head: [['Customer', 'Company', 'Amount', 'Status']],
+                    body: tableData,
+                    startY: 95,
+                    styles: { fontSize: 9 },
+                    headStyles: { fillColor: [34, 197, 94] }
+                });
+                
+                // Footer
+                const finalY = doc.lastAutoTable.finalY + 20;
+                doc.setFontSize(10);
+                doc.text('Generated by LogiAI Truck Insight V2', 20, finalY);
+                doc.text('Contact: andantecampion@proton.me', 20, finalY + 8);
+                
+                // Save
+                const fileName = `LogiAI-Report-${now.toISOString().split('T')[0]}.pdf`;
+                doc.save(fileName);
+                
+                log('📄 REAL PDF downloaded successfully!');
+                alert('📄 REAL PDF Downloaded!\n\nFile: ' + fileName + '\nLocation: Downloads folder\n\nThis is a proper PDF file that can be opened in any PDF viewer!');
+                
+            } catch (error) {
+                log('❌ PDF export error: ' + error.message);
+                alert('❌ PDF export failed: ' + error.message);
+            }
+        }
+
+        function exportProperExcel() {
+            log('📊 Creating REAL EXCEL using XLSX...');
+            
+            try {
+                const now = new Date();
+                const wb = XLSX.utils.book_new();
+                
+                // Sheet 1: Company Data
+                const companyData = companies.map(company => ({
+                    'Customer': company.name,
+                    'Company': company.company,
+                    'Amount (VND)': company.amount,
+                    'Status': company.status.toUpperCase(),
+                    'Priority': company.status === 'overdue' ? 'HIGH' : 'MEDIUM',
+                    'Contact': 'andantecampion@proton.me'
+                }));
+                
+                const ws1 = XLSX.utils.json_to_sheet(companyData);
+                XLSX.utils.book_append_sheet(wb, ws1, 'Company Data');
+                
+                // Sheet 2: Summary
+                const totalRevenue = companies.reduce((sum, c) => sum + c.amount, 0);
+                const overdueAmount = companies.filter(c => c.status === 'overdue').reduce((sum, c) => sum + c.amount, 0);
+                
+                const summaryData = [
+                    { 'Metric': 'Total Revenue', 'Value': totalRevenue, 'Unit': 'VND' },
+                    { 'Metric': 'Overdue Amount', 'Value': overdueAmount, 'Unit': 'VND' },
+                    { 'Metric': 'Total Companies', 'Value': companies.length, 'Unit': 'Count' },
+                    { 'Metric': 'Overdue Companies', 'Value': companies.filter(c => c.status === 'overdue').length, 'Unit': 'Count' },
+                    { 'Metric': 'Success Rate', 'Value': ((companies.filter(c => c.status !== 'overdue').length / companies.length) * 100).toFixed(1), 'Unit': '%' },
+                    { 'Metric': 'Report Date', 'Value': now.toLocaleDateString(), 'Unit': '' },
+                    { 'Metric': 'Contact Email', 'Value': 'andantecampion@proton.me', 'Unit': '' }
+                ];
+                
+                const ws2 = XLSX.utils.json_to_sheet(summaryData);
+                XLSX.utils.book_append_sheet(wb, ws2, 'Summary');
+                
+                // Save
+                const fileName = `LogiAI-Data-${now.toISOString().split('T')[0]}.xlsx`;
+                XLSX.writeFile(wb, fileName);
+                
+                log('📊 REAL EXCEL downloaded successfully!');
+                alert('📊 REAL EXCEL Downloaded!\n\nFile: ' + fileName + '\nLocation: Downloads folder\n\nThis is a proper Excel file (.xlsx) with 2 sheets:\n• Company Data\n• Summary\n\nCan be opened in Excel, Google Sheets, etc.');
+                
+            } catch (error) {
+                log('❌ Excel export error: ' + error.message);
+                alert('❌ Excel export failed: ' + error.message);
+            }
+        }
+
+        function updateTime() {
+            document.getElementById('time').textContent = new Date().toLocaleString();
+        }
+
+        // Initialize
+        log('🚀 Proper Exports version loaded!');
+        log('📄 jsPDF library ready for PDF generation');
+        log('📊 XLSX library ready for Excel generation');
+        log('💾 Real data from 4 companies ready');
+        
+        updateTime();
+        setInterval(updateTime, 1000);
+        
+        setInterval(() => {
+            log('💓 Export libraries ready - PDF & Excel');
+        }, 30000);
+    </script>
+</body>
+</html>
