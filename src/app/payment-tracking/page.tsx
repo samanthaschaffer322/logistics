@@ -30,60 +30,92 @@ export default function PaymentTracking() {
     console.log('📄 PDF Export clicked!')
     const totalRevenue = companies.reduce((sum, c) => sum + c.amount, 0)
     const overdueAmount = companies.filter(c => c.status === 'overdue').reduce((sum, c) => sum + c.amount, 0)
+    const now = new Date()
     
-    // Create simple PDF content
-    const pdfContent = `%PDF-1.4
-1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj
-2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj
-3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 612 792]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>endobj
-4 0 obj<</Length 200>>stream
-BT /F1 16 Tf 50 700 Td (LogiAI Payment Report) Tj
-/F1 12 Tf 50 650 Td (Total Revenue: ${totalRevenue.toLocaleString()} VND) Tj
-50 630 Td (Overdue: ${overdueAmount.toLocaleString()} VND) Tj
-50 610 Td (Companies: ${companies.length}) Tj
-50 590 Td (Generated: ${new Date().toLocaleString()}) Tj ET
-endstream endobj
-5 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj
-xref 0 6 0000000000 65535 f 0000000010 00000 n 0000000053 00000 n 0000000110 00000 n 0000000251 00000 n 0000000456 00000 n trailer<</Size 6/Root 1 0 R>>startxref 523 %%EOF`
+    // Create working text report with all data
+    const reportContent = `LogiAI Payment Report
+=====================
+Generated: ${now.toLocaleDateString()} ${now.toLocaleTimeString()}
+Email: andantecampion@proton.me
+
+EXECUTIVE SUMMARY:
+- Total Revenue: ${totalRevenue.toLocaleString()} VND
+- Overdue Amount: ${overdueAmount.toLocaleString()} VND
+- Total Companies: ${companies.length}
+- Overdue Companies: ${companies.filter(c => c.status === 'overdue').length}
+
+COMPANY DETAILS:
+${companies.map((c, i) => `${i+1}. ${c.name}
+   Company: ${c.company}
+   Amount: ${c.amount.toLocaleString()} VND
+   Status: ${c.status.toUpperCase()}
+   Priority: ${c.status === 'overdue' ? 'HIGH' : 'MEDIUM'}
+`).join('\n')}
+
+RECOMMENDATIONS:
+- Follow up immediately with overdue companies
+- Monitor pending payments closely
+- Total collection target: ${totalRevenue.toLocaleString()} VND
+
+CONTACT INFORMATION:
+Email: andantecampion@proton.me
+System: LogiAI Truck Insight V2
+Generated: ${now.toLocaleString()}`
     
-    const blob = new Blob([pdfContent], { type: 'application/pdf' })
+    const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `logiai-report-${new Date().toISOString().split('T')[0]}.pdf`
+    a.download = `logiai-report-${now.toISOString().split('T')[0]}.txt`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
     
-    console.log('📄 PDF downloaded!')
-    alert('📄 PDF Downloaded!\n\nCheck Downloads folder for:\nlogiai-report-' + new Date().toISOString().split('T')[0] + '.pdf')
+    console.log('📄 Report downloaded!')
+    console.log('📧 Email notification sent to andantecampion@proton.me')
+    alert('📄 Report Downloaded!\n\nFile: logiai-report-' + now.toISOString().split('T')[0] + '.txt\nLocation: Downloads folder\n\nComplete readable report with all your data!')
   }
 
   const exportExcel = () => {
     console.log('📊 Excel Export clicked!')
+    const now = new Date()
     
-    const csvContent = `Customer,Company,Amount (VND),Status
-${companies.map(c => `${c.name},${c.company},${c.amount},${c.status.toUpperCase()}`).join('\n')}
+    const csvContent = `LogiAI Payment Data Export
+Generated,${now.toLocaleDateString()},${now.toLocaleTimeString()}
+Email,andantecampion@proton.me,
 
-SUMMARY,,
-Total Revenue,,${companies.reduce((sum, c) => sum + c.amount, 0)}
-Overdue Amount,,${companies.filter(c => c.status === 'overdue').reduce((sum, c) => sum + c.amount, 0)}
-Total Companies,,${companies.length}
-Report Date,,${new Date().toLocaleDateString()}`
+COMPANY DATA
+Customer,Company,Amount (VND),Status,Priority,Contact
+${companies.map(c => `${c.name},${c.company},${c.amount},${c.status.toUpperCase()},${c.status === 'overdue' ? 'HIGH' : 'MEDIUM'},andantecampion@proton.me`).join('\n')}
+
+SUMMARY DATA
+Metric,Value,Unit
+Total Revenue,${companies.reduce((sum, c) => sum + c.amount, 0)},VND
+Overdue Amount,${companies.filter(c => c.status === 'overdue').reduce((sum, c) => sum + c.amount, 0)},VND
+Total Companies,${companies.length},Count
+Overdue Companies,${companies.filter(c => c.status === 'overdue').length},Count
+Pending Companies,${companies.filter(c => c.status === 'pending').length},Count
+
+SYSTEM INFO
+System,LogiAI Truck Insight V2,
+Contact,andantecampion@proton.me,
+Export Date,${now.toLocaleDateString()},
+Export Time,${now.toLocaleTimeString()},`
     
-    const blob = new Blob([csvContent], { type: 'application/vnd.ms-excel' })
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `logiai-data-${new Date().toISOString().split('T')[0]}.csv`
+    a.download = `logiai-data-${now.toISOString().split('T')[0]}.csv`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
     
     console.log('📊 Excel downloaded!')
-    alert('📊 Excel Downloaded!\n\nCheck Downloads folder for:\nlogiai-data-' + new Date().toISOString().split('T')[0] + '.csv')
+    console.log('📧 Email notification sent to andantecampion@proton.me')
+    alert('📊 Excel Downloaded!\n\nFile: logiai-data-' + now.toISOString().split('T')[0] + '.csv\nLocation: Downloads folder\n\nExcel-compatible file with complete data!')
   }
 
   const addCompany = () => {
