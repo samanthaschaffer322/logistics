@@ -7,8 +7,8 @@ import jsPDF from 'jspdf'
 import 'jspdf-autotable'
 import * as XLSX from 'xlsx'
 
-// Cache buster timestamp: 2025-09-05T06:40:47.566+07:00
-const CACHE_BUSTER = '20250905064047'
+// Cache buster timestamp: 2025-09-05T07:00:28.000+07:00
+const CACHE_BUSTER = '20250905070028'
 
 interface Company {
   id: string
@@ -196,7 +196,8 @@ export default function PaymentTrackingPageNew() {
       'paySystem2025_FINAL',
       'paymentSystem_20250828233101',
       'paymentSystem_20250904145424',
-      'paymentSystem_20250904152448'
+      'paymentSystem_20250904152448',
+      'paymentSystem_20250905064047'
     ]
     
     keysToRemove.forEach(key => {
@@ -221,8 +222,11 @@ export default function PaymentTrackingPageNew() {
           contactInfo: company.contactInfo || {}
         }))
         setCompanies(enhanced)
-        console.log('🆕 No saved data found, loading defaults for first time')
-        console.log('🆕 First time - loaded default data:', enhanced.length, 'companies')
+      console.log('🆕 No saved data found, loading defaults for first time')
+      console.log('🆕 First time - loaded default data:', enhanced.length, 'companies')
+      console.log('🔄 CACHE REFRESH FORCED - New version: 20250905070028')
+      console.log('📄📊 REAL PDF/EXCEL EXPORT NOW AVAILABLE!')
+      console.log('✅ Enhanced LogiAI Analytics Dashboard Loaded!')
       } catch (e) {
         console.log('❌ Error parsing saved data, using defaults')
         initializeDefaultData(storageKey)
@@ -317,6 +321,9 @@ export default function PaymentTrackingPageNew() {
       localStorage.setItem(key, JSON.stringify(defaultCompanies))
       console.log('🆕 No saved data found, loading defaults for first time')
       console.log('🆕 First time - loaded default data:', defaultCompanies.length, 'companies')
+      console.log('🔄 CACHE REFRESH FORCED - New version: 20250905070028')
+      console.log('📄📊 REAL PDF/EXCEL EXPORT NOW AVAILABLE!')
+      console.log('✅ Enhanced LogiAI Analytics Dashboard Loaded!')
     }
   }, [])
 
