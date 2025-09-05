@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react'
 
-// WORKING VERSION - 2025-09-05T09:53:12.174+07:00
+// WORKING VERSION - 2025-09-05T18:12:26.699+07:00
 console.log('🔥 PAYMENT TRACKING LOADING!')
 console.log('✅ This WILL work now!')
-console.log('📊 Cache: 20250905095312')
+console.log('📊 Cache: 20250905181226')
+console.log('🎯 Real analytics dashboard active!')
 
 export default function PaymentTracking() {
   const [companies, setCompanies] = useState([])
@@ -156,10 +157,10 @@ Export Time,${now.toLocaleTimeString()},`
         {/* Analytics Dashboard */}
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
           <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
-            📊 Bảng điều khiển phân tích
+            📊 Bảng điều khiển phân tích - REAL DATA
           </h2>
           <p className="text-center text-lg text-gray-600 mb-6">
-            Số liệu hiệu suất & KPI - WORKING VERSION
+            Số liệu hiệu suất & KPI từ dữ liệu thực tế - Cache: 20250905181226
           </p>
 
           {/* Export Buttons */}
