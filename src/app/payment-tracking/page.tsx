@@ -7,8 +7,14 @@ import jsPDF from 'jspdf'
 import 'jspdf-autotable'
 import * as XLSX from 'xlsx'
 
-// Cache buster timestamp: 2025-09-05T07:00:28.000+07:00
-const CACHE_BUSTER = '20250905070028'
+// FORCE CACHE REFRESH: 2025-09-05T07:06:46.846+07:00
+const CACHE_BUSTER = '20250905070646'
+
+// Force console logging immediately
+console.log('🚀 LOGIAI ENHANCED VERSION LOADING...')
+console.log('🔄 Cache Buster:', CACHE_BUSTER)
+console.log('📄📊 PDF/Excel Export Ready!')
+console.log('🤖 AI Analytics Dashboard Active!')
 
 interface Company {
   id: string
