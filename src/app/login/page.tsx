@@ -33,7 +33,7 @@ import {
   Cpu
 } from 'lucide-react'
 
-// Secure user credentials for LogiAI
+// Secure user credentials for LogiAI V4.0
 const VALID_CREDENTIALS = [
   {
     email: 'admin@trucking.com',
@@ -484,7 +484,7 @@ export default function LoginPage() {
       {/* Enhanced Footer */}
       <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 text-center z-10">
         <p className="text-slate-300 text-sm font-medium">
-          © 2025 LogiAI Platform • Advanced Vietnamese Logistics Intelligence System
+          © 2025 LogiAI V4.0 Platform • Advanced Vietnamese Logistics Intelligence System
         </p>
       </div>
 
