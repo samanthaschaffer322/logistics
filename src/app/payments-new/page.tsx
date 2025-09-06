@@ -93,7 +93,7 @@ Hạn thanh toán: ${item.due}
 Trạng thái: ${item.status === 'overdue' ? 'QUÁ HẠN' : 'CHỜ THANH TOÁN'}
 
 ---
-Gửi từ hệ thống Truck Insight V2
+Gửi từ hệ thống LogiAI V4.0
 Thời gian: ${new Date().toLocaleString('vi-VN')}
       `
     }
@@ -124,7 +124,7 @@ Chúng tôi nhắc nhở về khoản thanh toán:
 Vui lòng thanh toán sớm nhất có thể.
 
 ---
-Gửi từ hệ thống Truck Insight V2
+Gửi từ hệ thống LogiAI V4.0
 Thời gian: ${new Date().toLocaleString('vi-VN')}
       `
     }

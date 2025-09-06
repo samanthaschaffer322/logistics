@@ -1,6 +1,6 @@
-# LogiAI - AI-Powered Logistics Management Platform
+# LogiAI V4.0 - AI-Powered Logistics Management Platform
 
-LogiAI is a unified AI-powered web application that replaces multiple logistics roles (Logistics Manager, Warehouse Manager, Transportation Manager, Distribution Manager, Procurement Manager) with intelligent automation and insights.
+LogiAI V4.0 is a unified AI-powered web application that replaces multiple logistics roles (Logistics Manager, Warehouse Manager, Transportation Manager, Distribution Manager, Procurement Manager) with intelligent automation and insights.
 
 ## 🚀 Features
 

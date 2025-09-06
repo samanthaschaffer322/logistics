@@ -102,7 +102,7 @@ const NextGenDashboard = () => {
                 </div>
                 <div>
                   <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                    LogiAI v3.0
+                    LogiAI v4.0
                   </h1>
                   <p className="text-xs text-slate-400 font-medium">
                     {language === 'vi' ? 'Nền tảng Logistics Thông minh Thế hệ mới' : 'Next-Gen Intelligent Logistics Platform'}
@@ -116,7 +116,7 @@ const NextGenDashboard = () => {
                   AI Active
                 </Badge>
                 <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30 px-3 py-1 font-medium">
-                  Enhanced v3.0
+                  Enhanced v4.0
                 </Badge>
                 <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 px-3 py-1 font-medium">
                   Real-time

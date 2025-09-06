@@ -287,8 +287,8 @@ export default function EnhancedOptimizerPage() {
         <div className="mt-12 text-center text-gray-500">
           <p>
             {language === 'vi' 
-              ? 'Bộ Tối ưu Tuyến đường AI Nâng cao v2.0 - Được hỗ trợ bởi OpenAI, Fleetbase, AWS, Supabase và Cloudflare'
-              : 'Enhanced AI Route Optimizer v2.0 - Powered by OpenAI, Fleetbase, AWS, Supabase, and Cloudflare'
+              ? 'Bộ Tối ưu Tuyến đường AI Nâng cao v4.0 - Được hỗ trợ bởi OpenAI, Fleetbase, AWS, Supabase và Cloudflare'
+              : 'Enhanced AI Route Optimizer v4.0 - Powered by OpenAI, Fleetbase, AWS, Supabase, and Cloudflare'
             }
           </p>
         </div>
