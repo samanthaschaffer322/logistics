@@ -34,6 +34,10 @@ import {
 } from 'lucide-react'
 
 // Secure user credentials for LogiAI V4.0
+console.log('🔐 LogiAI V4.0 Login Page Loaded!');
+console.log('✅ Test Credentials: admin@trucking.com / SecureAdmin2025!');
+console.log('🎯 All V4.0 features available after login');
+
 const VALID_CREDENTIALS = [
   {
     email: 'admin@trucking.com',
@@ -176,7 +180,7 @@ export default function LoginPage() {
             <Truck className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-            LogiAI
+            LogiAI V4.0
           </h1>
         </div>
       </div>
@@ -217,7 +221,7 @@ export default function LoginPage() {
                 </div>
                 <div className="ml-6">
                   <h1 className="text-6xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 bg-clip-text text-transparent">
-                    LogiAI
+                    LogiAI V4.0
                   </h1>
                   <div className="flex items-center mt-3 space-x-3">
                     <div className="bg-slate-800/80 backdrop-blur-sm text-blue-400 border border-blue-400/30 px-3 py-1 rounded-full text-sm font-medium">
