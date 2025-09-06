@@ -1,12 +1,12 @@
 'use client'
 
 import ProtectedRoute from '@/components/ProtectedRoute'
-import ComprehensiveDashboard from '@/components/ComprehensiveDashboard'
+import NextGenDashboard from '@/components/NextGenDashboard'
 
 export default function DashboardPage() {
   return (
     <ProtectedRoute>
-      <ComprehensiveDashboard />
+      <NextGenDashboard />
     </ProtectedRoute>
   )
 }

@@ -1,8 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Essential Next.js configuration
+  // Essential Next.js 15 configuration
   images: {
-    unoptimized: true
+    unoptimized: true,
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+    ],
   },
   
   // Only use static export for production builds
@@ -20,36 +26,40 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   
-  // Add Content Security Policy headers
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'Content-Security-Policy',
-            value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com",
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com https://cdnjs.cloudflare.com",
-              "font-src 'self' https://fonts.gstatic.com",
-              "img-src 'self' data: https: http:",
-              "connect-src 'self' https:",
-              "frame-src 'self'",
-            ].join('; '),
-          },
-        ],
+  // Enable Turbopack for Next.js 15
+  turbopack: {
+    rules: {
+      '*.svg': {
+        loaders: ['@svgr/webpack'],
+        as: '*.js',
       },
-    ]
+    },
   },
   
-  // Webpack configuration
-  webpack: (config, { dev }) => {
+  // Performance optimizations
+  poweredByHeader: false,
+  compress: true,
+  
+  // React 18 compatibility
+  reactStrictMode: true,
+  
+  // Output file tracing root to fix warnings
+  outputFileTracingRoot: __dirname,
+  
+  // Webpack configuration for Next.js 15
+  webpack: (config, { dev, isServer }) => {
     if (!dev) {
       config.cache = false;
     }
+    
+    // Handle SVG files
+    config.module.rules.push({
+      test: /\.svg$/,
+      use: ['@svgr/webpack'],
+    });
+    
     return config;
-  }
+  },
 }
 
 module.exports = nextConfig
