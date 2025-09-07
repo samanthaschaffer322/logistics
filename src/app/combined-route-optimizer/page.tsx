@@ -54,9 +54,7 @@ const LeafletRouteMap = dynamic(() => import('@/components/LeafletRouteMap'), {
 
 export default function CombinedRouteOptimizerPage() {
   const { language } = useLanguage()
-  const [activeView, setActiveView] = useState('simple')
-  const [originQuery, setOriginQuery] = useState('')
-  const [destinationQuery, setDestinationQuery] = useState('')
+  const [activeView, setActiveView] = useState('routing')
   const [selectedRoute, setSelectedRoute] = useState<any>(null)
   const [isCalculating, setIsCalculating] = useState(false)
   const [originSuggestions, setOriginSuggestions] = useState<any[]>([])
@@ -71,12 +69,12 @@ export default function CombinedRouteOptimizerPage() {
   ])
   const [multiRoute, setMultiRoute] = useState<any>(null)
   
-  // Vehicle config
+  // Vehicle config for Advanced tab
   const [vehicleConfig, setVehicleConfig] = useState({
-    type: 'truck',
-    capacity: 10000,
-    fuelConsumption: 0.25,
-    driverCost: 50000
+    type: 'container',
+    capacity: 40000,
+    fuelConsumption: 0.35,
+    driverCost: 30000
   })
 
   // Comprehensive Southern Vietnam logistics locations database
@@ -557,16 +555,12 @@ export default function CombinedRouteOptimizerPage() {
           </Badge>
         </div>
 
-        {/* Enhanced Tabs */}
+        {/* Enhanced Tabs - Combined Simple & Multi-stop */}
         <Tabs value={activeView} onValueChange={setActiveView} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 bg-slate-800/50 border border-slate-700">
-            <TabsTrigger value="simple" className="data-[state=active]:bg-blue-600">
+          <TabsList className="grid w-full grid-cols-4 bg-slate-800/50 border border-slate-700">
+            <TabsTrigger value="routing" className="data-[state=active]:bg-blue-600">
               <Navigation className="w-4 h-4 mr-2" />
-              {language === 'vi' ? 'Đơn giản' : 'Simple'}
-            </TabsTrigger>
-            <TabsTrigger value="multi" className="data-[state=active]:bg-blue-600">
-              <MapPin className="w-4 h-4 mr-2" />
-              {language === 'vi' ? 'Đa điểm' : 'Multi-Stop'}
+              {language === 'vi' ? 'Tối Ưu Tuyến Đường' : 'Route Optimization'}
             </TabsTrigger>
             <TabsTrigger value="advanced" className="data-[state=active]:bg-blue-600">
               <Brain className="w-4 h-4 mr-2" />
@@ -582,103 +576,112 @@ export default function CombinedRouteOptimizerPage() {
             </TabsTrigger>
           </TabsList>
 
-          {/* Simple Route Tab */}
-          <TabsContent value="simple" className="space-y-6">
+          {/* Unified Routing Tab - Simple + Multi-stop Combined */}
+          <TabsContent value="routing" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Route Input Panel */}
+              {/* Combined Route Input Panel */}
               <Card className="bg-slate-800/50 border-slate-700">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2 text-white">
                     <Target className="w-5 h-5" />
-                    {language === 'vi' ? 'Nhập Tuyến Đường' : 'Route Input'}
+                    {language === 'vi' ? 'Tối Ưu Tuyến Đường' : 'Route Optimization'}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {/* Origin Input */}
-                  <div className="relative">
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                      {language === 'vi' ? 'Điểm xuất phát' : 'Origin'}
-                    </label>
-                    <input
-                      type="text"
-                      value={originQuery}
-                      onChange={(e) => handleOriginChange(e.target.value)}
-                      placeholder={language === 'vi' ? 'Nhập điểm xuất phát...' : 'Enter origin location...'}
-                      className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:border-blue-500 focus:outline-none"
-                    />
-                    
-                    {showOriginSuggestions && originSuggestions.length > 0 && (
-                      <div className="absolute z-10 w-full mt-1 bg-slate-700 border border-slate-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                        {originSuggestions.map((location, index) => (
-                          <div
-                            key={index}
-                            onClick={() => {
-                              setOriginQuery(location.name)
-                              setShowOriginSuggestions(false)
-                            }}
-                            className="px-4 py-2 hover:bg-slate-600 cursor-pointer text-white border-b border-slate-600 last:border-b-0"
+                  {/* Multi-stop locations */}
+                  {multiStops.map((stop, index) => (
+                    <div key={stop.id} className="relative">
+                      <label className="block text-sm font-medium text-slate-300 mb-2">
+                        {index === 0 ? (language === 'vi' ? 'Điểm xuất phát' : 'Origin') :
+                         index === multiStops.length - 1 ? (language === 'vi' ? 'Điểm đến' : 'Destination') :
+                         `${language === 'vi' ? 'Điểm dừng' : 'Stop'} ${index}`}
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={stop.name}
+                          onChange={(e) => updateMultiStop(stop.id, e.target.value)}
+                          onFocus={() => {
+                            if (stop.name) {
+                              const suggestions = searchLocations(stop.name)
+                              if (index === 0) {
+                                setOriginSuggestions(suggestions)
+                                setShowOriginSuggestions(true)
+                              } else {
+                                setDestinationSuggestions(suggestions)
+                                setShowDestinationSuggestions(true)
+                              }
+                            }
+                          }}
+                          placeholder={language === 'vi' ? 'Nhập địa điểm...' : 'Enter location...'}
+                          className="flex-1 px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:border-blue-500 focus:outline-none"
+                        />
+                        {multiStops.length > 2 && index > 0 && index < multiStops.length - 1 && (
+                          <Button
+                            onClick={() => removeMultiStop(stop.id)}
+                            size="sm"
+                            variant="outline"
+                            className="h-10 w-10 p-0"
                           >
-                            <div className="font-medium">{location.name}</div>
-                            <div className="text-xs text-slate-400">{location.province}</div>
-                          </div>
-                        ))}
+                            <X className="w-4 h-4" />
+                          </Button>
+                        )}
                       </div>
-                    )}
+                      
+                      {/* Show suggestions for first and last stops */}
+                      {((index === 0 && showOriginSuggestions && originSuggestions.length > 0) ||
+                        (index > 0 && showDestinationSuggestions && destinationSuggestions.length > 0)) && (
+                        <div className="absolute z-10 w-full mt-1 bg-slate-700 border border-slate-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                          {(index === 0 ? originSuggestions : destinationSuggestions).map((location, suggestionIndex) => (
+                            <div
+                              key={suggestionIndex}
+                              onClick={() => {
+                                updateMultiStop(stop.id, location.name)
+                                setShowOriginSuggestions(false)
+                                setShowDestinationSuggestions(false)
+                              }}
+                              className="px-4 py-2 hover:bg-slate-600 cursor-pointer text-white border-b border-slate-600 last:border-b-0"
+                            >
+                              <div className="font-medium">{location.name}</div>
+                              <div className="text-xs text-slate-400">{location.province}</div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  
+                  {/* Add/Remove stops and Calculate buttons */}
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={addMultiStop}
+                      variant="outline"
+                      className="flex items-center gap-2"
+                    >
+                      <Plus className="w-4 h-4" />
+                      {language === 'vi' ? 'Thêm điểm' : 'Add Stop'}
+                    </Button>
+                    <Button
+                      onClick={calculateMultiRoute}
+                      disabled={isCalculating}
+                      className="flex-1 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
+                    >
+                      {isCalculating ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          {language === 'vi' ? 'Đang tính toán...' : 'Calculating...'}
+                        </>
+                      ) : (
+                        <>
+                          <Zap className="w-4 h-4 mr-2" />
+                          {language === 'vi' ? 'Tối Ưu Tuyến Đường' : 'Optimize Route'}
+                        </>
+                      )}
+                    </Button>
                   </div>
-
-                  {/* Destination Input */}
-                  <div className="relative">
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
-                      {language === 'vi' ? 'Điểm đến' : 'Destination'}
-                    </label>
-                    <input
-                      type="text"
-                      value={destinationQuery}
-                      onChange={(e) => handleDestinationChange(e.target.value)}
-                      placeholder={language === 'vi' ? 'Nhập điểm đến...' : 'Enter destination location...'}
-                      className="w-full px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:border-blue-500 focus:outline-none"
-                    />
-                    
-                    {showDestinationSuggestions && destinationSuggestions.length > 0 && (
-                      <div className="absolute z-10 w-full mt-1 bg-slate-700 border border-slate-600 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                        {destinationSuggestions.map((location, index) => (
-                          <div
-                            key={index}
-                            onClick={() => {
-                              setDestinationQuery(location.name)
-                              setShowDestinationSuggestions(false)
-                            }}
-                            className="px-4 py-2 hover:bg-slate-600 cursor-pointer text-white border-b border-slate-600 last:border-b-0"
-                          >
-                            <div className="font-medium">{location.name}</div>
-                            <div className="text-xs text-slate-400">{location.province}</div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Calculate Button */}
-                  <Button
-                    onClick={calculateRoute}
-                    disabled={isCalculating || !originQuery.trim() || !destinationQuery.trim()}
-                    className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600"
-                  >
-                    {isCalculating ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                        {language === 'vi' ? 'Đang tính toán...' : 'Calculating...'}
-                      </>
-                    ) : (
-                      <>
-                        <Zap className="w-4 h-4 mr-2" />
-                        {language === 'vi' ? 'Tính Toán Tuyến Đường' : 'Calculate Route'}
-                      </>
-                    )}
-                  </Button>
 
                   {/* Route Results */}
-                  {selectedRoute && (
+                  {(selectedRoute || multiRoute) && (
                     <div className="mt-6 p-4 bg-slate-700/50 rounded-lg border border-slate-600">
                       <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
                         <CheckCircle className="w-5 h-5 text-green-400" />
@@ -688,19 +691,27 @@ export default function CombinedRouteOptimizerPage() {
                       <div className="grid grid-cols-2 gap-4 text-sm">
                         <div>
                           <span className="text-slate-400">{language === 'vi' ? 'Khoảng cách:' : 'Distance:'}</span>
-                          <div className="text-white font-medium">{selectedRoute.distance?.toFixed(1)} km</div>
+                          <div className="text-white font-medium">
+                            {(selectedRoute?.distance || multiRoute?.distance)?.toFixed(1)} km
+                          </div>
                         </div>
                         <div>
                           <span className="text-slate-400">{language === 'vi' ? 'Thời gian:' : 'Duration:'}</span>
-                          <div className="text-white font-medium">{selectedRoute.duration?.toFixed(1)} giờ</div>
+                          <div className="text-white font-medium">
+                            {(selectedRoute?.duration || multiRoute?.duration)?.toFixed(1)} giờ
+                          </div>
                         </div>
                         <div>
                           <span className="text-slate-400">{language === 'vi' ? 'Chi phí nhiên liệu:' : 'Fuel Cost:'}</span>
-                          <div className="text-white font-medium">₫{selectedRoute.fuelCost?.toLocaleString()}</div>
+                          <div className="text-white font-medium">
+                            ₫{(selectedRoute?.fuelCost || multiRoute?.fuelCost)?.toLocaleString()}
+                          </div>
                         </div>
                         <div>
                           <span className="text-slate-400">{language === 'vi' ? 'Tổng chi phí:' : 'Total Cost:'}</span>
-                          <div className="text-white font-medium">₫{selectedRoute.totalCost?.toLocaleString()}</div>
+                          <div className="text-white font-medium">
+                            ₫{(selectedRoute?.totalCost || multiRoute?.totalCost)?.toLocaleString()}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -718,104 +729,9 @@ export default function CombinedRouteOptimizerPage() {
                 </CardHeader>
                 <CardContent>
                   <LeafletRouteMap
-                    origin={selectedRoute?.origin}
-                    destination={selectedRoute?.destination}
-                    route={selectedRoute}
-                  />
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* Multi-Stop Tab */}
-          <TabsContent value="multi" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="bg-slate-800/50 border-slate-700">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-white">
-                    <MapPin className="w-5 h-5" />
-                    {language === 'vi' ? 'Tối ưu đa điểm' : 'Multi-Stop Optimization'}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {multiStops.map((stop, index) => (
-                    <div key={stop.id} className="flex items-center gap-2">
-                      <div className="flex-1">
-                        <Input
-                          placeholder={`${language === 'vi' ? 'Điểm' : 'Stop'} ${index + 1}`}
-                          value={stop.name}
-                          onChange={(e) => updateMultiStop(stop.id, e.target.value)}
-                          className="bg-slate-700 border-slate-600 text-white"
-                        />
-                      </div>
-                      {multiStops.length > 2 && index > 0 && index < multiStops.length - 1 && (
-                        <Button onClick={() => removeMultiStop(stop.id)} size="sm" variant="outline">
-                          <X className="w-4 h-4" />
-                        </Button>
-                      )}
-                    </div>
-                  ))}
-                  
-                  <div className="flex gap-2">
-                    <Button onClick={addMultiStop} variant="outline" className="flex items-center gap-2">
-                      <Plus className="w-4 h-4" />
-                      {language === 'vi' ? 'Thêm điểm' : 'Add Stop'}
-                    </Button>
-                    <Button 
-                      onClick={calculateMultiRoute} 
-                      disabled={isCalculating}
-                      className="bg-gradient-to-r from-blue-500 to-purple-500"
-                    >
-                      {isCalculating ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      ) : (
-                        <Calculator className="w-4 h-4 mr-2" />
-                      )}
-                      {language === 'vi' ? 'Tối ưu' : 'Optimize'}
-                    </Button>
-                  </div>
-
-                  {multiRoute && (
-                    <div className="p-4 bg-slate-700/50 rounded-lg border border-slate-600">
-                      <h3 className="text-white font-semibold mb-2 flex items-center gap-2">
-                        <CheckCircle className="w-4 h-4 text-green-400" />
-                        {language === 'vi' ? 'Kết quả tối ưu' : 'Optimization Results'}
-                      </h3>
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <span className="text-slate-400">{language === 'vi' ? 'Tổng khoảng cách:' : 'Total Distance:'}</span>
-                          <div className="text-white font-medium">{multiRoute.distance?.toFixed(1)} km</div>
-                        </div>
-                        <div>
-                          <span className="text-slate-400">{language === 'vi' ? 'Tổng thời gian:' : 'Total Time:'}</span>
-                          <div className="text-white font-medium">{multiRoute.duration?.toFixed(1)} h</div>
-                        </div>
-                        <div>
-                          <span className="text-slate-400">{language === 'vi' ? 'Tiết kiệm:' : 'Savings:'}</span>
-                          <div className="text-green-400 font-medium">₫{multiRoute.savings?.cost?.toLocaleString()}</div>
-                        </div>
-                        <div>
-                          <span className="text-slate-400">{language === 'vi' ? 'Tổng chi phí:' : 'Total Cost:'}</span>
-                          <div className="text-white font-medium">₫{multiRoute.totalCost?.toLocaleString()}</div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card className="bg-slate-800/50 border-slate-700">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-white">
-                    <MapPin className="w-5 h-5" />
-                    {language === 'vi' ? 'Bản đồ đa điểm' : 'Multi-Stop Map'}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <LeafletRouteMap
-                    origin={multiRoute?.optimizedRoute?.[0]}
-                    destination={multiRoute?.optimizedRoute?.[multiRoute.optimizedRoute.length - 1]}
-                    route={multiRoute}
+                    origin={(selectedRoute?.origin || multiRoute?.optimizedRoute?.[0])}
+                    destination={(selectedRoute?.destination || multiRoute?.optimizedRoute?.[multiRoute?.optimizedRoute?.length - 1])}
+                    route={(selectedRoute || multiRoute)}
                   />
                 </CardContent>
               </Card>
