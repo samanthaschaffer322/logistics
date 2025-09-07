@@ -13,8 +13,8 @@ import {
 const FeatureNavigation = () => {
   const features = [
     {
-      title: 'Combined Route Optimizer',
-      description: 'Advanced AI route optimization with Vietnamese locations',
+      title: 'Combined Route Optimizer Pro',
+      description: 'Ultimate AI route optimization with maps, multi-stop, and advanced analytics',
       href: '/combined-route-optimizer',
       icon: Navigation,
       color: 'bg-blue-500',
@@ -26,14 +26,6 @@ const FeatureNavigation = () => {
       href: '/payment-tracking',
       icon: DollarSign,
       color: 'bg-green-500',
-      category: 'Core Features'
-    },
-    {
-      title: 'Enhanced Optimizer',
-      description: 'V4.0 AI-powered route optimization with OpenAI',
-      href: '/enhanced-optimizer',
-      icon: Zap,
-      color: 'bg-purple-500',
       category: 'Core Features'
     },
     {
@@ -109,22 +101,6 @@ const FeatureNavigation = () => {
       category: 'AI Tools'
     },
     {
-      title: 'Route Optimization',
-      description: 'Standard route optimization tools',
-      href: '/route-optimization',
-      icon: Target,
-      color: 'bg-blue-600',
-      category: 'Routing'
-    },
-    {
-      title: 'Comprehensive Route Optimizer',
-      description: 'Full-featured route optimization suite',
-      href: '/comprehensive-route-optimizer',
-      icon: Activity,
-      color: 'bg-purple-600',
-      category: 'Routing'
-    },
-    {
       title: 'Shipments',
       description: 'Shipment tracking and management',
       href: '/shipments',
@@ -152,7 +128,7 @@ const FeatureNavigation = () => {
         </h2>
         <p className="text-slate-400">Access all your upgraded logistics management tools</p>
         <Badge className="mt-2 bg-green-500/20 text-green-400 border-green-500/30">
-          {features.length} Features Available
+          {features.length} Features Available • Enhanced Route Optimizer Integrated
         </Badge>
       </div>
 
