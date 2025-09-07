@@ -105,7 +105,20 @@ export default function CombinedRouteOptimizerPage() {
     // Dong Nai Ports
     { name: 'Cảng Đồng Nai', lat: 10.9200, lng: 106.8500, province: 'Dong Nai', type: 'port' },
     { name: 'Cảng Phước An', lat: 10.9100, lng: 106.8600, province: 'Dong Nai', type: 'port' },
+    { name: 'Phước An', lat: 10.9100, lng: 106.8600, province: 'Dong Nai', type: 'port' },
+    { name: 'Phuoc An', lat: 10.9100, lng: 106.8600, province: 'Dong Nai', type: 'port' },
     { name: 'Cảng Long Bình', lat: 10.9000, lng: 106.8400, province: 'Dong Nai', type: 'port' },
+    
+    // Specific Warehouses & Logistics Centers
+    { name: 'Kho Chim En', lat: 10.8500, lng: 106.7800, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Chim En', lat: 10.8500, lng: 106.7800, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Kho Chim Én', lat: 10.8500, lng: 106.7800, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Kho Tân Sơn Nhất', lat: 10.8190, lng: 106.6520, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Kho Bình Tân', lat: 10.7500, lng: 106.6000, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Kho Hóc Môn', lat: 10.8800, lng: 106.5900, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Kho Củ Chi', lat: 10.9700, lng: 106.4900, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Kho Nhà Bè', lat: 10.7000, lng: 106.7200, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Kho Cần Giờ', lat: 10.4000, lng: 106.9500, province: 'Ho Chi Minh City', type: 'warehouse' },
     
     // Ba Ria Vung Tau Ports
     { name: 'Cảng Vũng Tàu', lat: 10.3460, lng: 107.0843, province: 'Ba Ria Vung Tau', type: 'port' },
@@ -143,6 +156,16 @@ export default function CombinedRouteOptimizerPage() {
     { name: 'Kho Tân Cảng', lat: 10.7650, lng: 106.7050, province: 'Ho Chi Minh City', type: 'warehouse' },
     { name: 'Kho Gemadept', lat: 10.7800, lng: 106.8000, province: 'Ho Chi Minh City', type: 'warehouse' },
     { name: 'Kho Saigon Cargo', lat: 10.7750, lng: 106.7900, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Kho Vinalines', lat: 10.7700, lng: 106.7800, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Kho Transimex', lat: 10.7600, lng: 106.7700, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Kho Viconship', lat: 10.7550, lng: 106.7650, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Kho Sotrans', lat: 10.7450, lng: 106.7550, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Kho Hapag Lloyd', lat: 10.7850, lng: 106.8050, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Kho Maersk', lat: 10.7900, lng: 106.8100, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Kho MSC', lat: 10.7950, lng: 106.8150, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Kho CMA CGM', lat: 10.7800, lng: 106.8000, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Kho COSCO', lat: 10.7750, lng: 106.7950, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Kho Evergreen', lat: 10.7700, lng: 106.7900, province: 'Ho Chi Minh City', type: 'warehouse' },
     
     // Dong Nai Industrial Zones & Warehouses
     { name: 'KCN Biên Hòa', lat: 10.9408, lng: 106.8228, province: 'Dong Nai', type: 'industrial' },
@@ -153,6 +176,12 @@ export default function CombinedRouteOptimizerPage() {
     { name: 'Kho Biên Hòa', lat: 10.9408, lng: 106.8228, province: 'Dong Nai', type: 'warehouse' },
     { name: 'Kho Long Thành', lat: 10.8167, lng: 107.0000, province: 'Dong Nai', type: 'warehouse' },
     { name: 'Kho Nhơn Trạch', lat: 10.7500, lng: 106.9000, province: 'Dong Nai', type: 'warehouse' },
+    { name: 'Kho Phước An', lat: 10.9100, lng: 106.8600, province: 'Dong Nai', type: 'warehouse' },
+    { name: 'Kho Long Đức', lat: 10.9200, lng: 106.8800, province: 'Dong Nai', type: 'warehouse' },
+    { name: 'Kho Amata', lat: 10.9300, lng: 106.8500, province: 'Dong Nai', type: 'warehouse' },
+    { name: 'Kho Trảng Bom', lat: 10.9800, lng: 107.0200, province: 'Dong Nai', type: 'warehouse' },
+    { name: 'Kho Xuân Lộc', lat: 10.9200, lng: 107.4200, province: 'Dong Nai', type: 'warehouse' },
+    { name: 'Kho Định Quán', lat: 11.2200, lng: 107.1800, province: 'Dong Nai', type: 'warehouse' },
     
     // Binh Duong Industrial Zones & Warehouses
     { name: 'KCN Vsip Bình Dương', lat: 11.1271, lng: 106.6504, province: 'Binh Duong', type: 'industrial' },
