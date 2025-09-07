@@ -81,20 +81,75 @@ export default function CombinedRouteOptimizerPage() {
 
   // Vietnamese locations database
   const vietnameseLocations = [
+    // Major Cities
     { name: 'Hồ Chí Minh', lat: 10.8231, lng: 106.6297, province: 'Ho Chi Minh City', type: 'city' },
     { name: 'Hà Nội', lat: 21.0285, lng: 105.8542, province: 'Hanoi', type: 'city' },
     { name: 'Đà Nẵng', lat: 16.0471, lng: 108.2068, province: 'Da Nang', type: 'city' },
     { name: 'Cần Thơ', lat: 10.0452, lng: 105.7469, province: 'Can Tho', type: 'city' },
     { name: 'Biên Hòa', lat: 10.9460, lng: 106.8234, province: 'Dong Nai', type: 'city' },
+    
+    // Ports & Logistics Centers
     { name: 'Cảng Sài Gòn', lat: 10.7769, lng: 106.7009, province: 'Ho Chi Minh City', type: 'port' },
-    { name: 'KCN Biên Hòa', lat: 10.9408, lng: 106.8228, province: 'Dong Nai', type: 'industrial' }
+    { name: 'Cảng Cát Lái', lat: 10.7900, lng: 106.8100, province: 'Ho Chi Minh City', type: 'port' },
+    { name: 'Cat Lai', lat: 10.7900, lng: 106.8100, province: 'Ho Chi Minh City', type: 'port' },
+    { name: 'Cát Lái', lat: 10.7900, lng: 106.8100, province: 'Ho Chi Minh City', type: 'port' },
+    { name: 'Phú Hữu', lat: 10.7500, lng: 106.8200, province: 'Ho Chi Minh City', type: 'industrial' },
+    { name: 'Phu Huu', lat: 10.7500, lng: 106.8200, province: 'Ho Chi Minh City', type: 'industrial' },
+    { name: 'KCN Phú Hữu', lat: 10.7500, lng: 106.8200, province: 'Ho Chi Minh City', type: 'industrial' },
+    { name: 'Cảng Hải Phòng', lat: 20.8658, lng: 106.6881, province: 'Hai Phong', type: 'port' },
+    { name: 'Cảng Đà Nẵng', lat: 16.0678, lng: 108.2208, province: 'Da Nang', type: 'port' },
+    
+    // Industrial Zones
+    { name: 'KCN Biên Hòa', lat: 10.9408, lng: 106.8228, province: 'Dong Nai', type: 'industrial' },
+    { name: 'KCN Long Thành', lat: 10.8167, lng: 107.0000, province: 'Dong Nai', type: 'industrial' },
+    { name: 'KCN Vsip Bình Dương', lat: 11.1271, lng: 106.6504, province: 'Binh Duong', type: 'industrial' },
+    { name: 'KCN Tân Thuận', lat: 10.7300, lng: 106.7100, province: 'Ho Chi Minh City', type: 'industrial' },
+    { name: 'KCN Hiệp Phước', lat: 10.7200, lng: 106.7500, province: 'Ho Chi Minh City', type: 'industrial' },
+    
+    // Districts & Areas in HCMC
+    { name: 'Quận 1', lat: 10.7769, lng: 106.7009, province: 'Ho Chi Minh City', type: 'district' },
+    { name: 'Quận 2', lat: 10.7900, lng: 106.8100, province: 'Ho Chi Minh City', type: 'district' },
+    { name: 'Quận 7', lat: 10.7300, lng: 106.7100, province: 'Ho Chi Minh City', type: 'district' },
+    { name: 'Quận 9', lat: 10.7500, lng: 106.8200, province: 'Ho Chi Minh City', type: 'district' },
+    { name: 'Thủ Đức', lat: 10.8500, lng: 106.7700, province: 'Ho Chi Minh City', type: 'district' },
+    
+    // Common variations
+    { name: 'TP. Hồ Chí Minh', lat: 10.8231, lng: 106.6297, province: 'Ho Chi Minh City', type: 'city' },
+    { name: 'Ho Chi Minh City', lat: 10.8231, lng: 106.6297, province: 'Ho Chi Minh City', type: 'city' },
+    { name: 'HCMC', lat: 10.8231, lng: 106.6297, province: 'Ho Chi Minh City', type: 'city' },
+    { name: 'Saigon', lat: 10.8231, lng: 106.6297, province: 'Ho Chi Minh City', type: 'city' },
+    { name: 'Bien Hoa', lat: 10.9460, lng: 106.8234, province: 'Dong Nai', type: 'city' }
   ]
 
   const searchLocations = (query: string) => {
     if (!query.trim()) return []
-    return vietnameseLocations.filter(location => 
-      location.name.toLowerCase().includes(query.toLowerCase())
-    ).slice(0, 5)
+    
+    const normalizedQuery = query.toLowerCase()
+      .replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, 'a')
+      .replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, 'e')
+      .replace(/ì|í|ị|ỉ|ĩ/g, 'i')
+      .replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, 'o')
+      .replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, 'u')
+      .replace(/ỳ|ý|ỵ|ỷ|ỹ/g, 'y')
+      .replace(/đ/g, 'd')
+      .replace(/\s+/g, '')
+    
+    return vietnameseLocations.filter(location => {
+      const normalizedName = location.name.toLowerCase()
+        .replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, 'a')
+        .replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, 'e')
+        .replace(/ì|í|ị|ỉ|ĩ/g, 'i')
+        .replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, 'o')
+        .replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, 'u')
+        .replace(/ỳ|ý|ỵ|ỷ|ỹ/g, 'y')
+        .replace(/đ/g, 'd')
+        .replace(/\s+/g, '')
+      
+      return normalizedName.includes(normalizedQuery) || 
+             location.province.toLowerCase().replace(/\s+/g, '').includes(normalizedQuery) ||
+             normalizedName.startsWith(normalizedQuery) ||
+             location.name.toLowerCase().includes(query.toLowerCase())
+    }).slice(0, 8)
   }
 
   const calculateRoute = async () => {
@@ -106,15 +161,37 @@ export default function CombinedRouteOptimizerPage() {
     setIsCalculating(true)
     
     try {
-      const originLocation = vietnameseLocations.find(loc => 
-        loc.name.toLowerCase().includes(originQuery.toLowerCase())
-      )
-      const destinationLocation = vietnameseLocations.find(loc => 
-        loc.name.toLowerCase().includes(destinationQuery.toLowerCase())
-      )
+      // Find coordinates for origin and destination with better matching
+      const originLocation = vietnameseLocations.find(loc => {
+        const normalizedLoc = loc.name.toLowerCase().replace(/\s+/g, '')
+        const normalizedQuery = originQuery.toLowerCase().replace(/\s+/g, '')
+        return normalizedLoc.includes(normalizedQuery) || 
+               loc.name.toLowerCase().includes(originQuery.toLowerCase()) ||
+               normalizedLoc.startsWith(normalizedQuery)
+      })
+      
+      const destinationLocation = vietnameseLocations.find(loc => {
+        const normalizedLoc = loc.name.toLowerCase().replace(/\s+/g, '')
+        const normalizedQuery = destinationQuery.toLowerCase().replace(/\s+/g, '')
+        return normalizedLoc.includes(normalizedQuery) || 
+               loc.name.toLowerCase().includes(destinationQuery.toLowerCase()) ||
+               normalizedLoc.startsWith(normalizedQuery)
+      })
 
       if (!originLocation || !destinationLocation) {
-        alert(language === 'vi' ? 'Không tìm thấy địa điểm' : 'Location not found')
+        // Show available suggestions
+        const originSuggestions = searchLocations(originQuery)
+        const destSuggestions = searchLocations(destinationQuery)
+        
+        let message = language === 'vi' ? 'Không tìm thấy địa điểm:\n' : 'Location not found:\n'
+        if (!originLocation && originSuggestions.length > 0) {
+          message += `${language === 'vi' ? 'Gợi ý cho điểm xuất phát' : 'Origin suggestions'}: ${originSuggestions.map(s => s.name).join(', ')}\n`
+        }
+        if (!destinationLocation && destSuggestions.length > 0) {
+          message += `${language === 'vi' ? 'Gợi ý cho điểm đến' : 'Destination suggestions'}: ${destSuggestions.map(s => s.name).join(', ')}`
+        }
+        
+        alert(message)
         setIsCalculating(false)
         return
       }
