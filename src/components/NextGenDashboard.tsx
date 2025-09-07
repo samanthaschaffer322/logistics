@@ -22,6 +22,7 @@ import {
   LineChart, Line, PieChart, Pie, Cell, AreaChart, Area, RadarChart, PolarGrid,
   PolarAngleAxis, PolarRadiusAxis, Radar
 } from 'recharts'
+import FeatureNavigation from './FeatureNavigation'
 
 const NextGenDashboard = () => {
   const { user, logout } = useAuth()
@@ -207,9 +208,9 @@ const NextGenDashboard = () => {
               <Truck className="w-4 h-4 mr-2" />
               {language === 'vi' ? 'Đội xe AI' : 'AI Fleet'}
             </TabsTrigger>
-            <TabsTrigger value="predictions" className="text-slate-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-xl font-semibold h-12">
-              <Brain className="w-4 h-4 mr-2" />
-              {language === 'vi' ? 'Dự đoán AI' : 'AI Predictions'}
+            <TabsTrigger value="features" className="text-slate-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-xl font-semibold h-12">
+              <Navigation className="w-4 h-4 mr-2" />
+              {language === 'vi' ? 'Tất cả Tính năng' : 'All Features'}
             </TabsTrigger>
           </TabsList>
 
@@ -293,6 +294,11 @@ const NextGenDashboard = () => {
                 </Card>
               </motion.div>
             </div>
+          </TabsContent>
+
+          {/* All Features Tab */}
+          <TabsContent value="features" className="space-y-6">
+            <FeatureNavigation />
           </TabsContent>
         </Tabs>
       </main>
