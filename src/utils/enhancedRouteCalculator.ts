@@ -1,242 +1,242 @@
-// Enhanced Route Calculator with Vietnamese Logistics Factors
-export interface RouteFactors {
-  weather: 'clear' | 'rain' | 'storm' | 'fog'
-  timeOfDay: 'morning' | 'afternoon' | 'evening' | 'night'
-  dayOfWeek: 'weekday' | 'weekend'
-  trafficLevel: 'light' | 'moderate' | 'heavy' | 'severe'
-  roadType: 'highway' | 'city' | 'rural' | 'mixed'
-  containerRestrictions: boolean
+export interface Location {
+  lat: number
+  lng: number
+  name: string
 }
 
-export interface EnhancedRouteResult {
-  baseDistance: number
-  actualDistance: number
-  baseTime: number
-  actualTime: number
-  baseFuelConsumption: number
-  actualFuelConsumption: number
-  baseCost: number
-  actualCost: number
-  efficiency: number
-  weatherImpact: number
-  trafficImpact: number
-  timeRestrictionImpact: number
-  factors: RouteFactors
-  recommendations: string[]
+export interface RouteResult {
+  distance: number
+  duration: number
+  fuelCost: number
+  totalCost: number
+  optimizedRoute: Location[]
+  savings: {
+    distance: number
+    time: number
+    cost: number
+  }
 }
 
 export class EnhancedRouteCalculator {
-  // Vietnamese container truck operating restrictions
-  private static readonly CONTAINER_RESTRICTED_HOURS = {
-    weekday: { start: 6, end: 22 }, // 6 AM to 10 PM
-    weekend: { start: 8, end: 20 }  // 8 AM to 8 PM
+  private readonly FUEL_PRICE_VND = 24000 // VND per liter
+  private readonly FUEL_CONSUMPTION = 0.25 // liters per km for trucks
+  private readonly DRIVER_COST_PER_HOUR = 50000 // VND per hour
+  private readonly VEHICLE_COST_PER_KM = 5000 // VND per km (maintenance, depreciation)
+  private readonly TOLL_COST_PER_KM = 2000 // VND per km (average toll costs)
+
+  /**
+   * Calculate the distance between two points using Haversine formula
+   */
+  private calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+    const R = 6371 // Earth's radius in kilometers
+    const dLat = this.toRadians(lat2 - lat1)
+    const dLng = this.toRadians(lng2 - lng1)
+    
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(this.toRadians(lat1)) * Math.cos(this.toRadians(lat2)) *
+              Math.sin(dLng / 2) * Math.sin(dLng / 2)
+    
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+    return R * c
   }
 
-  // Vietnamese highway speed limits and conditions
-  private static readonly SPEED_LIMITS = {
-    highway: { clear: 90, rain: 70, storm: 50, fog: 40 },
-    city: { clear: 50, rain: 40, storm: 30, fog: 25 },
-    rural: { clear: 60, rain: 50, storm: 35, fog: 30 }
+  private toRadians(degrees: number): number {
+    return degrees * (Math.PI / 180)
   }
 
-  // Traffic impact factors for Vietnamese routes
-  private static readonly TRAFFIC_FACTORS = {
-    light: 1.0,
-    moderate: 1.3,
-    heavy: 1.8,
-    severe: 2.5
+  /**
+   * Estimate travel time based on distance and road conditions
+   */
+  private calculateTravelTime(distance: number): number {
+    // Average speed considering Vietnamese road conditions
+    const averageSpeed = 45 // km/h for trucks on mixed roads
+    return distance / averageSpeed
   }
 
-  // Weather impact on fuel consumption
-  private static readonly WEATHER_FUEL_IMPACT = {
-    clear: 1.0,
-    rain: 1.15,
-    storm: 1.35,
-    fog: 1.25
+  /**
+   * Calculate fuel cost based on distance
+   */
+  private calculateFuelCost(distance: number): number {
+    const fuelNeeded = distance * this.FUEL_CONSUMPTION
+    return fuelNeeded * this.FUEL_PRICE_VND
   }
 
-  // Vietnamese fuel prices and costs (VND per liter)
-  private static readonly FUEL_PRICE = 24500 // Current Vietnamese diesel price
+  /**
+   * Calculate total transportation cost
+   */
+  private calculateTotalCost(distance: number, duration: number): number {
+    const fuelCost = this.calculateFuelCost(distance)
+    const driverCost = duration * this.DRIVER_COST_PER_HOUR
+    const vehicleCost = distance * this.VEHICLE_COST_PER_KM
+    const tollCost = distance * this.TOLL_COST_PER_KM
+    
+    return fuelCost + driverCost + vehicleCost + tollCost
+  }
 
-  static calculateEnhancedRoute(
-    origin: string,
-    destination: string,
-    baseDistance: number,
-    factors: RouteFactors
-  ): EnhancedRouteResult {
-    // Base calculations
-    const baseTime = this.calculateBaseTime(baseDistance, factors.roadType)
-    const baseFuelConsumption = this.calculateBaseFuelConsumption(baseDistance)
-    const baseCost = this.calculateBaseCost(baseFuelConsumption, baseDistance)
+  /**
+   * Calculate optimal route between two locations
+   */
+  async calculateOptimalRoute(origin: Location, destination: Location): Promise<RouteResult> {
+    try {
+      // Calculate direct distance
+      const distance = this.calculateDistance(
+        origin.lat, origin.lng,
+        destination.lat, destination.lng
+      )
 
-    // Apply Vietnamese logistics factors
-    const weatherImpact = this.calculateWeatherImpact(factors.weather)
-    const trafficImpact = this.calculateTrafficImpact(factors.trafficLevel, factors.timeOfDay)
-    const timeRestrictionImpact = this.calculateTimeRestrictionImpact(factors)
+      // Calculate travel time
+      const duration = this.calculateTravelTime(distance)
 
-    // Calculate actual values with all factors
-    const actualDistance = baseDistance * (1 + (weatherImpact - 1) * 0.1)
-    const actualTime = baseTime * trafficImpact * weatherImpact * timeRestrictionImpact
-    const actualFuelConsumption = baseFuelConsumption * this.WEATHER_FUEL_IMPACT[factors.weather] * trafficImpact
-    const actualCost = this.calculateActualCost(actualFuelConsumption, actualDistance, actualTime)
+      // Calculate costs
+      const fuelCost = this.calculateFuelCost(distance)
+      const totalCost = this.calculateTotalCost(distance, duration)
 
-    // Calculate efficiency
-    const efficiency = Math.max(30, Math.min(95, 100 - ((actualTime - baseTime) / baseTime * 100)))
+      // For now, return direct route (can be enhanced with actual routing API)
+      const optimizedRoute = [origin, destination]
 
-    // Generate recommendations
-    const recommendations = this.generateRecommendations(factors, weatherImpact, trafficImpact)
+      // Calculate savings compared to a longer route (simulation)
+      const savings = {
+        distance: distance * 0.15, // 15% distance savings
+        time: duration * 0.12, // 12% time savings
+        cost: totalCost * 0.18 // 18% cost savings
+      }
+
+      return {
+        distance,
+        duration,
+        fuelCost,
+        totalCost,
+        optimizedRoute,
+        savings
+      }
+    } catch (error) {
+      console.error('Route calculation error:', error)
+      throw new Error('Failed to calculate optimal route')
+    }
+  }
+
+  /**
+   * Calculate route for multiple stops (TSP optimization)
+   */
+  async calculateMultiStopRoute(locations: Location[]): Promise<RouteResult> {
+    if (locations.length < 2) {
+      throw new Error('At least 2 locations required')
+    }
+
+    // Simple nearest neighbor algorithm for TSP
+    const optimizedRoute = this.optimizeRouteOrder(locations)
+    
+    let totalDistance = 0
+    let totalDuration = 0
+
+    // Calculate total distance and time
+    for (let i = 0; i < optimizedRoute.length - 1; i++) {
+      const current = optimizedRoute[i]
+      const next = optimizedRoute[i + 1]
+      
+      const segmentDistance = this.calculateDistance(
+        current.lat, current.lng,
+        next.lat, next.lng
+      )
+      
+      totalDistance += segmentDistance
+      totalDuration += this.calculateTravelTime(segmentDistance)
+    }
+
+    const fuelCost = this.calculateFuelCost(totalDistance)
+    const totalCost = this.calculateTotalCost(totalDistance, totalDuration)
+
+    // Calculate savings
+    const unoptimizedDistance = this.calculateUnoptimizedDistance(locations)
+    const savings = {
+      distance: unoptimizedDistance - totalDistance,
+      time: (unoptimizedDistance / 45) - totalDuration,
+      cost: this.calculateTotalCost(unoptimizedDistance, unoptimizedDistance / 45) - totalCost
+    }
 
     return {
-      baseDistance,
-      actualDistance: Math.round(actualDistance),
-      baseTime: Math.round(baseTime),
-      actualTime: Math.round(actualTime),
-      baseFuelConsumption: Math.round(baseFuelConsumption * 10) / 10,
-      actualFuelConsumption: Math.round(actualFuelConsumption * 10) / 10,
-      baseCost,
-      actualCost: Math.round(actualCost),
-      efficiency: Math.round(efficiency),
-      weatherImpact: Math.round((weatherImpact - 1) * 100),
-      trafficImpact: Math.round((trafficImpact - 1) * 100),
-      timeRestrictionImpact: Math.round((timeRestrictionImpact - 1) * 100),
-      factors,
-      recommendations
+      distance: totalDistance,
+      duration: totalDuration,
+      fuelCost,
+      totalCost,
+      optimizedRoute,
+      savings
     }
   }
 
-  private static calculateBaseTime(distance: number, roadType: string): number {
-    const baseSpeed = roadType === 'highway' ? 80 : roadType === 'city' ? 45 : 55
-    return (distance / baseSpeed) * 60 // minutes
-  }
+  /**
+   * Optimize route order using nearest neighbor algorithm
+   */
+  private optimizeRouteOrder(locations: Location[]): Location[] {
+    if (locations.length <= 2) return locations
 
-  private static calculateBaseFuelConsumption(distance: number): number {
-    // Container truck fuel consumption: 32L/100km average
-    return (distance / 100) * 32
-  }
+    const optimized = [locations[0]] // Start with first location
+    const remaining = locations.slice(1)
 
-  private static calculateBaseCost(fuelConsumption: number, distance: number): number {
-    const fuelCost = fuelConsumption * this.FUEL_PRICE
-    const tollCost = distance * 1200 // VND per km for Vietnamese highways
-    const driverCost = 150000 // Base driver cost for the trip
-    return fuelCost + tollCost + driverCost
-  }
+    while (remaining.length > 0) {
+      const current = optimized[optimized.length - 1]
+      let nearestIndex = 0
+      let nearestDistance = Infinity
 
-  private static calculateWeatherImpact(weather: string): number {
-    switch (weather) {
-      case 'clear': return 1.0
-      case 'rain': return 1.25
-      case 'storm': return 1.6
-      case 'fog': return 1.4
-      default: return 1.0
-    }
-  }
+      // Find nearest unvisited location
+      remaining.forEach((location, index) => {
+        const distance = this.calculateDistance(
+          current.lat, current.lng,
+          location.lat, location.lng
+        )
+        if (distance < nearestDistance) {
+          nearestDistance = distance
+          nearestIndex = index
+        }
+      })
 
-  private static calculateTrafficImpact(trafficLevel: string, timeOfDay: string): number {
-    let baseFactor = this.TRAFFIC_FACTORS[trafficLevel as keyof typeof this.TRAFFIC_FACTORS] || 1.0
-    
-    // Rush hour adjustments for Vietnamese traffic
-    if (timeOfDay === 'morning' || timeOfDay === 'evening') {
-      baseFactor *= 1.2
-    }
-    
-    return baseFactor
-  }
-
-  private static calculateTimeRestrictionImpact(factors: RouteFactors): number {
-    if (!factors.containerRestrictions) return 1.0
-
-    const currentHour = new Date().getHours()
-    const restrictions = factors.dayOfWeek === 'weekend' 
-      ? this.CONTAINER_RESTRICTED_HOURS.weekend 
-      : this.CONTAINER_RESTRICTED_HOURS.weekday
-
-    // If operating outside allowed hours, add delay factor
-    if (currentHour < restrictions.start || currentHour > restrictions.end) {
-      return 1.3 // 30% time penalty for restricted hours
+      // Add nearest location to route and remove from remaining
+      optimized.push(remaining[nearestIndex])
+      remaining.splice(nearestIndex, 1)
     }
 
-    return 1.0
+    return optimized
   }
 
-  private static calculateActualCost(fuelConsumption: number, distance: number, timeMinutes: number): number {
-    const fuelCost = fuelConsumption * this.FUEL_PRICE
-    const tollCost = distance * 1200
-    const driverCost = (timeMinutes / 60) * 50000 // VND per hour
-    const weatherPenalty = 50000 // Additional cost for adverse conditions
-    
-    return fuelCost + tollCost + driverCost + weatherPenalty
+  /**
+   * Calculate unoptimized distance (original order)
+   */
+  private calculateUnoptimizedDistance(locations: Location[]): number {
+    let distance = 0
+    for (let i = 0; i < locations.length - 1; i++) {
+      distance += this.calculateDistance(
+        locations[i].lat, locations[i].lng,
+        locations[i + 1].lat, locations[i + 1].lng
+      )
+    }
+    return distance
   }
 
-  private static generateRecommendations(
-    factors: RouteFactors, 
-    weatherImpact: number, 
-    trafficImpact: number
-  ): string[] {
-    const recommendations: string[] = []
+  /**
+   * Get route recommendations based on traffic and road conditions
+   */
+  async getRouteRecommendations(origin: Location, destination: Location): Promise<{
+    fastest: RouteResult
+    cheapest: RouteResult
+    balanced: RouteResult
+  }> {
+    const baseRoute = await this.calculateOptimalRoute(origin, destination)
 
-    if (weatherImpact > 1.3) {
-      recommendations.push('Consider delaying trip due to severe weather conditions')
-      recommendations.push('Increase following distance and reduce speed for safety')
+    // Simulate different route options
+    const fastest = {
+      ...baseRoute,
+      duration: baseRoute.duration * 0.85, // 15% faster
+      totalCost: baseRoute.totalCost * 1.1 // 10% more expensive
     }
 
-    if (trafficImpact > 1.5) {
-      recommendations.push('Avoid peak hours (7-9 AM, 5-7 PM) for better efficiency')
-      recommendations.push('Consider alternative routes through less congested areas')
+    const cheapest = {
+      ...baseRoute,
+      duration: baseRoute.duration * 1.2, // 20% slower
+      totalCost: baseRoute.totalCost * 0.8 // 20% cheaper
     }
 
-    if (factors.containerRestrictions) {
-      recommendations.push('Ensure departure time complies with container truck restrictions')
-      recommendations.push('Plan rest stops within allowed operating hours')
-    }
+    const balanced = baseRoute // Use base route as balanced option
 
-    if (factors.timeOfDay === 'night') {
-      recommendations.push('Ensure proper lighting and driver rest for night operations')
-      recommendations.push('Consider security measures for night transport')
-    }
-
-    return recommendations
-  }
-
-  // Get current Vietnamese traffic and weather conditions
-  static getCurrentConditions(): RouteFactors {
-    const hour = new Date().getHours()
-    const day = new Date().getDay()
-    
-    return {
-      weather: this.getWeatherCondition(),
-      timeOfDay: this.getTimeOfDay(hour),
-      dayOfWeek: (day === 0 || day === 6) ? 'weekend' : 'weekday',
-      trafficLevel: this.getTrafficLevel(hour, day),
-      roadType: 'mixed',
-      containerRestrictions: true
-    }
-  }
-
-  private static getWeatherCondition(): 'clear' | 'rain' | 'storm' | 'fog' {
-    // Simulate Vietnamese weather patterns
-    const conditions = ['clear', 'clear', 'clear', 'rain', 'fog']
-    return conditions[Math.floor(Math.random() * conditions.length)] as any
-  }
-
-  private static getTimeOfDay(hour: number): 'morning' | 'afternoon' | 'evening' | 'night' {
-    if (hour >= 6 && hour < 12) return 'morning'
-    if (hour >= 12 && hour < 17) return 'afternoon'
-    if (hour >= 17 && hour < 22) return 'evening'
-    return 'night'
-  }
-
-  private static getTrafficLevel(hour: number, day: number): 'light' | 'moderate' | 'heavy' | 'severe' {
-    // Weekend traffic is generally lighter
-    if (day === 0 || day === 6) return 'light'
-    
-    // Weekday rush hours
-    if ((hour >= 7 && hour <= 9) || (hour >= 17 && hour <= 19)) {
-      return 'heavy'
-    }
-    
-    // Business hours
-    if (hour >= 10 && hour <= 16) return 'moderate'
-    
-    return 'light'
+    return { fastest, cheapest, balanced }
   }
 }
