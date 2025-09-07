@@ -18,12 +18,13 @@ export interface RouteResult {
 }
 
 export class EnhancedRouteCalculator {
-  // Realistic Vietnamese pricing (2025)
-  private readonly FUEL_PRICE_VND = 22000 // VND per liter (realistic diesel price)
-  private readonly FUEL_CONSUMPTION = 0.12 // liters per km for trucks (realistic)
-  private readonly DRIVER_COST_PER_HOUR = 30000 // VND per hour (realistic Vietnamese wage)
-  private readonly VEHICLE_COST_PER_KM = 2000 // VND per km (maintenance, depreciation)
-  private readonly TOLL_COST_PER_KM = 800 // VND per km (realistic toll costs)
+  // Ultra-realistic Vietnamese logistics pricing (2025)
+  private readonly FUEL_PRICE_VND = 23500 // VND per liter (current diesel price)
+  private readonly FUEL_CONSUMPTION = 0.08 // liters per km (efficient modern trucks)
+  private readonly DRIVER_COST_PER_HOUR = 25000 // VND per hour (realistic driver wage)
+  private readonly VEHICLE_COST_PER_KM = 1200 // VND per km (wear, maintenance)
+  private readonly TOLL_COST_PER_KM = 500 // VND per km (average tolls)
+  private readonly BASE_COST = 15000 // VND base cost per trip
 
   /**
    * Calculate the distance between two points using Haversine formula
@@ -44,22 +45,20 @@ export class EnhancedRouteCalculator {
   private toRadians(degrees: number): number {
     return degrees * (Math.PI / 180)
   }
-
-  /**
-   * Estimate travel time based on distance and road conditions in Vietnam
-   */
   private calculateTravelTime(distance: number): number {
-    // Realistic speeds for Vietnamese roads
+    // Very realistic speeds for Vietnamese logistics
     let averageSpeed: number
     
-    if (distance <= 5) {
-      averageSpeed = 25 // km/h for city traffic
-    } else if (distance <= 20) {
-      averageSpeed = 35 // km/h for suburban roads
-    } else if (distance <= 50) {
-      averageSpeed = 45 // km/h for provincial roads
+    if (distance <= 3) {
+      averageSpeed = 20 // km/h for inner city (traffic, stops)
+    } else if (distance <= 10) {
+      averageSpeed = 30 // km/h for city routes
+    } else if (distance <= 30) {
+      averageSpeed = 40 // km/h for suburban
+    } else if (distance <= 100) {
+      averageSpeed = 55 // km/h for provincial roads
     } else {
-      averageSpeed = 60 // km/h for highways
+      averageSpeed = 70 // km/h for highways
     }
     
     return distance / averageSpeed
@@ -82,7 +81,7 @@ export class EnhancedRouteCalculator {
     const vehicleCost = distance * this.VEHICLE_COST_PER_KM
     const tollCost = distance * this.TOLL_COST_PER_KM
     
-    return fuelCost + driverCost + vehicleCost + tollCost
+    return this.BASE_COST + fuelCost + driverCost + vehicleCost + tollCost
   }
 
   /**
