@@ -79,46 +79,143 @@ export default function CombinedRouteOptimizerPage() {
     driverCost: 50000
   })
 
-  // Vietnamese locations database
+  // Comprehensive Southern Vietnam logistics locations database
   const vietnameseLocations = [
     // Major Cities
     { name: 'Hồ Chí Minh', lat: 10.8231, lng: 106.6297, province: 'Ho Chi Minh City', type: 'city' },
-    { name: 'Hà Nội', lat: 21.0285, lng: 105.8542, province: 'Hanoi', type: 'city' },
-    { name: 'Đà Nẵng', lat: 16.0471, lng: 108.2068, province: 'Da Nang', type: 'city' },
     { name: 'Cần Thơ', lat: 10.0452, lng: 105.7469, province: 'Can Tho', type: 'city' },
     { name: 'Biên Hòa', lat: 10.9460, lng: 106.8234, province: 'Dong Nai', type: 'city' },
+    { name: 'Vũng Tàu', lat: 10.3460, lng: 107.0843, province: 'Ba Ria Vung Tau', type: 'city' },
+    { name: 'Long Xuyên', lat: 10.3833, lng: 105.4333, province: 'An Giang', type: 'city' },
+    { name: 'Mỹ Tho', lat: 10.3600, lng: 106.3600, province: 'Tien Giang', type: 'city' },
+    { name: 'Rạch Giá', lat: 10.0120, lng: 105.0802, province: 'Kien Giang', type: 'city' },
+    { name: 'Cà Mau', lat: 9.1767, lng: 105.1524, province: 'Ca Mau', type: 'city' },
     
-    // Ports & Logistics Centers
+    // Major Ports - Ho Chi Minh City Area
     { name: 'Cảng Sài Gòn', lat: 10.7769, lng: 106.7009, province: 'Ho Chi Minh City', type: 'port' },
     { name: 'Cảng Cát Lái', lat: 10.7900, lng: 106.8100, province: 'Ho Chi Minh City', type: 'port' },
-    { name: 'Cat Lai', lat: 10.7900, lng: 106.8100, province: 'Ho Chi Minh City', type: 'port' },
-    { name: 'Cát Lái', lat: 10.7900, lng: 106.8100, province: 'Ho Chi Minh City', type: 'port' },
-    { name: 'Phú Hữu', lat: 10.7500, lng: 106.8200, province: 'Ho Chi Minh City', type: 'industrial' },
-    { name: 'Phu Huu', lat: 10.7500, lng: 106.8200, province: 'Ho Chi Minh City', type: 'industrial' },
-    { name: 'KCN Phú Hữu', lat: 10.7500, lng: 106.8200, province: 'Ho Chi Minh City', type: 'industrial' },
-    { name: 'Cảng Hải Phòng', lat: 20.8658, lng: 106.6881, province: 'Hai Phong', type: 'port' },
-    { name: 'Cảng Đà Nẵng', lat: 16.0678, lng: 108.2208, province: 'Da Nang', type: 'port' },
+    { name: 'Cat Lai Port', lat: 10.7900, lng: 106.8100, province: 'Ho Chi Minh City', type: 'port' },
+    { name: 'Cảng Tân Cảng', lat: 10.7650, lng: 106.7050, province: 'Ho Chi Minh City', type: 'port' },
+    { name: 'Cảng Hiệp Phước', lat: 10.7200, lng: 106.7500, province: 'Ho Chi Minh City', type: 'port' },
+    { name: 'Cảng Phú Hữu', lat: 10.7500, lng: 106.8200, province: 'Ho Chi Minh City', type: 'port' },
+    { name: 'Cảng Tân Thuận', lat: 10.7300, lng: 106.7100, province: 'Ho Chi Minh City', type: 'port' },
+    { name: 'Cảng Newport', lat: 10.7850, lng: 106.8050, province: 'Ho Chi Minh City', type: 'port' },
+    { name: 'Cảng SITV', lat: 10.7800, lng: 106.8000, province: 'Ho Chi Minh City', type: 'port' },
     
-    // Industrial Zones
-    { name: 'KCN Biên Hòa', lat: 10.9408, lng: 106.8228, province: 'Dong Nai', type: 'industrial' },
-    { name: 'KCN Long Thành', lat: 10.8167, lng: 107.0000, province: 'Dong Nai', type: 'industrial' },
-    { name: 'KCN Vsip Bình Dương', lat: 11.1271, lng: 106.6504, province: 'Binh Duong', type: 'industrial' },
+    // Dong Nai Ports
+    { name: 'Cảng Đồng Nai', lat: 10.9200, lng: 106.8500, province: 'Dong Nai', type: 'port' },
+    { name: 'Cảng Phước An', lat: 10.9100, lng: 106.8600, province: 'Dong Nai', type: 'port' },
+    { name: 'Cảng Long Bình', lat: 10.9000, lng: 106.8400, province: 'Dong Nai', type: 'port' },
+    
+    // Ba Ria Vung Tau Ports
+    { name: 'Cảng Vũng Tàu', lat: 10.3460, lng: 107.0843, province: 'Ba Ria Vung Tau', type: 'port' },
+    { name: 'Cảng Cái Mép', lat: 10.3200, lng: 107.0500, province: 'Ba Ria Vung Tau', type: 'port' },
+    { name: 'Cảng Thị Vải', lat: 10.3300, lng: 107.0600, province: 'Ba Ria Vung Tau', type: 'port' },
+    { name: 'Cảng SSIT', lat: 10.3250, lng: 107.0550, province: 'Ba Ria Vung Tau', type: 'port' },
+    { name: 'Cảng TCIT', lat: 10.3280, lng: 107.0580, province: 'Ba Ria Vung Tau', type: 'port' },
+    
+    // Mekong Delta Ports
+    { name: 'Cảng Cần Thơ', lat: 10.0452, lng: 105.7469, province: 'Can Tho', type: 'port' },
+    { name: 'Cảng Rạch Giá', lat: 10.0120, lng: 105.0802, province: 'Kien Giang', type: 'port' },
+    { name: 'Cảng Cà Mau', lat: 9.1767, lng: 105.1524, province: 'Ca Mau', type: 'port' },
+    { name: 'Cảng An Giang', lat: 10.3833, lng: 105.4333, province: 'An Giang', type: 'port' },
+    { name: 'Cảng Mỹ Tho', lat: 10.3600, lng: 106.3600, province: 'Tien Giang', type: 'port' },
+    { name: 'Cảng Vĩnh Long', lat: 10.2397, lng: 105.9571, province: 'Vinh Long', type: 'port' },
+    { name: 'Cảng Trà Vinh', lat: 9.9347, lng: 106.3256, province: 'Tra Vinh', type: 'port' },
+    { name: 'Cảng Sóc Trăng', lat: 9.6003, lng: 105.9800, province: 'Soc Trang', type: 'port' },
+    { name: 'Cảng Bạc Liêu', lat: 9.2945, lng: 105.7244, province: 'Bac Lieu', type: 'port' },
+    
+    // Industrial Zones & Warehouses - Ho Chi Minh City
     { name: 'KCN Tân Thuận', lat: 10.7300, lng: 106.7100, province: 'Ho Chi Minh City', type: 'industrial' },
     { name: 'KCN Hiệp Phước', lat: 10.7200, lng: 106.7500, province: 'Ho Chi Minh City', type: 'industrial' },
+    { name: 'KCN Phú Hữu', lat: 10.7500, lng: 106.8200, province: 'Ho Chi Minh City', type: 'industrial' },
+    { name: 'KCN Cát Lái', lat: 10.7900, lng: 106.8100, province: 'Ho Chi Minh City', type: 'industrial' },
+    { name: 'KCN Tân Bình', lat: 10.8000, lng: 106.6500, province: 'Ho Chi Minh City', type: 'industrial' },
+    { name: 'KCN Quận 7', lat: 10.7300, lng: 106.7100, province: 'Ho Chi Minh City', type: 'industrial' },
+    { name: 'KCN Quận 9', lat: 10.7500, lng: 106.8200, province: 'Ho Chi Minh City', type: 'industrial' },
     
-    // Districts & Areas in HCMC
-    { name: 'Quận 1', lat: 10.7769, lng: 106.7009, province: 'Ho Chi Minh City', type: 'district' },
-    { name: 'Quận 2', lat: 10.7900, lng: 106.8100, province: 'Ho Chi Minh City', type: 'district' },
-    { name: 'Quận 7', lat: 10.7300, lng: 106.7100, province: 'Ho Chi Minh City', type: 'district' },
-    { name: 'Quận 9', lat: 10.7500, lng: 106.8200, province: 'Ho Chi Minh City', type: 'district' },
-    { name: 'Thủ Đức', lat: 10.8500, lng: 106.7700, province: 'Ho Chi Minh City', type: 'district' },
+    // Warehouses - Ho Chi Minh City
+    { name: 'Kho Hiệp Phước', lat: 10.7200, lng: 106.7500, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Kho Cát Lái', lat: 10.7900, lng: 106.8100, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Kho Tân Thuận', lat: 10.7300, lng: 106.7100, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Kho Phú Hữu', lat: 10.7500, lng: 106.8200, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Kho Sóng Thần', lat: 10.8800, lng: 106.6200, province: 'Binh Duong', type: 'warehouse' },
+    { name: 'Kho Tân Cảng', lat: 10.7650, lng: 106.7050, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Kho Gemadept', lat: 10.7800, lng: 106.8000, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Kho Saigon Cargo', lat: 10.7750, lng: 106.7900, province: 'Ho Chi Minh City', type: 'warehouse' },
     
-    // Common variations
+    // Dong Nai Industrial Zones & Warehouses
+    { name: 'KCN Biên Hòa', lat: 10.9408, lng: 106.8228, province: 'Dong Nai', type: 'industrial' },
+    { name: 'KCN Long Thành', lat: 10.8167, lng: 107.0000, province: 'Dong Nai', type: 'industrial' },
+    { name: 'KCN Nhơn Trạch', lat: 10.7500, lng: 106.9000, province: 'Dong Nai', type: 'industrial' },
+    { name: 'KCN Long Đức', lat: 10.9200, lng: 106.8800, province: 'Dong Nai', type: 'industrial' },
+    { name: 'KCN Amata', lat: 10.9300, lng: 106.8500, province: 'Dong Nai', type: 'industrial' },
+    { name: 'Kho Biên Hòa', lat: 10.9408, lng: 106.8228, province: 'Dong Nai', type: 'warehouse' },
+    { name: 'Kho Long Thành', lat: 10.8167, lng: 107.0000, province: 'Dong Nai', type: 'warehouse' },
+    { name: 'Kho Nhơn Trạch', lat: 10.7500, lng: 106.9000, province: 'Dong Nai', type: 'warehouse' },
+    
+    // Binh Duong Industrial Zones & Warehouses
+    { name: 'KCN Vsip Bình Dương', lat: 11.1271, lng: 106.6504, province: 'Binh Duong', type: 'industrial' },
+    { name: 'KCN Mỹ Phước', lat: 11.1500, lng: 106.7000, province: 'Binh Duong', type: 'industrial' },
+    { name: 'KCN Đồng An', lat: 11.1200, lng: 106.6800, province: 'Binh Duong', type: 'industrial' },
+    { name: 'KCN Sóng Thần', lat: 10.8800, lng: 106.6200, province: 'Binh Duong', type: 'industrial' },
+    { name: 'Kho Vsip', lat: 11.1271, lng: 106.6504, province: 'Binh Duong', type: 'warehouse' },
+    { name: 'Kho Mỹ Phước', lat: 11.1500, lng: 106.7000, province: 'Binh Duong', type: 'warehouse' },
+    
+    // Ba Ria Vung Tau Industrial Zones
+    { name: 'KCN Phú Mỹ', lat: 10.3800, lng: 107.1000, province: 'Ba Ria Vung Tau', type: 'industrial' },
+    { name: 'KCN Cái Mép', lat: 10.3200, lng: 107.0500, province: 'Ba Ria Vung Tau', type: 'industrial' },
+    { name: 'KCN Đông Xuyên', lat: 10.3500, lng: 107.0800, province: 'Ba Ria Vung Tau', type: 'industrial' },
+    { name: 'Kho Phú Mỹ', lat: 10.3800, lng: 107.1000, province: 'Ba Ria Vung Tau', type: 'warehouse' },
+    { name: 'Kho Cái Mép', lat: 10.3200, lng: 107.0500, province: 'Ba Ria Vung Tau', type: 'warehouse' },
+    
+    // Mekong Delta Warehouses & Depots
+    { name: 'Kho Cần Thơ', lat: 10.0452, lng: 105.7469, province: 'Can Tho', type: 'warehouse' },
+    { name: 'Kho An Giang', lat: 10.3833, lng: 105.4333, province: 'An Giang', type: 'warehouse' },
+    { name: 'Kho Kiên Giang', lat: 10.0120, lng: 105.0802, province: 'Kien Giang', type: 'warehouse' },
+    { name: 'Kho Tiền Giang', lat: 10.3600, lng: 106.3600, province: 'Tien Giang', type: 'warehouse' },
+    { name: 'Kho Vĩnh Long', lat: 10.2397, lng: 105.9571, province: 'Vinh Long', type: 'warehouse' },
+    { name: 'Kho Đồng Tháp', lat: 10.4581, lng: 105.6189, province: 'Dong Thap', type: 'warehouse' },
+    { name: 'Kho Hậu Giang', lat: 9.7570, lng: 105.6412, province: 'Hau Giang', type: 'warehouse' },
+    { name: 'Kho Sóc Trăng', lat: 9.6003, lng: 105.9800, province: 'Soc Trang', type: 'warehouse' },
+    { name: 'Kho Bạc Liêu', lat: 9.2945, lng: 105.7244, province: 'Bac Lieu', type: 'warehouse' },
+    { name: 'Kho Cà Mau', lat: 9.1767, lng: 105.1524, province: 'Ca Mau', type: 'warehouse' },
+    
+    // Logistics Centers & Depots
+    { name: 'Trung tâm Logistics Sóng Thần', lat: 10.8800, lng: 106.6200, province: 'Binh Duong', type: 'logistics' },
+    { name: 'Trung tâm Logistics Cát Lái', lat: 10.7900, lng: 106.8100, province: 'Ho Chi Minh City', type: 'logistics' },
+    { name: 'Trung tâm Logistics Hiệp Phước', lat: 10.7200, lng: 106.7500, province: 'Ho Chi Minh City', type: 'logistics' },
+    { name: 'Trung tâm Logistics Tân Thuận', lat: 10.7300, lng: 106.7100, province: 'Ho Chi Minh City', type: 'logistics' },
+    { name: 'Trung tâm Logistics Biên Hòa', lat: 10.9408, lng: 106.8228, province: 'Dong Nai', type: 'logistics' },
+    { name: 'Trung tâm Logistics Long Thành', lat: 10.8167, lng: 107.0000, province: 'Dong Nai', type: 'logistics' },
+    { name: 'Trung tâm Logistics Cần Thơ', lat: 10.0452, lng: 105.7469, province: 'Can Tho', type: 'logistics' },
+    
+    // Fuel Depots
+    { name: 'Kho xăng dầu Nhà Bè', lat: 10.7000, lng: 106.7200, province: 'Ho Chi Minh City', type: 'fuel_depot' },
+    { name: 'Kho xăng dầu Cát Lái', lat: 10.7900, lng: 106.8100, province: 'Ho Chi Minh City', type: 'fuel_depot' },
+    { name: 'Kho xăng dầu Dung Quất', lat: 10.3500, lng: 107.0800, province: 'Ba Ria Vung Tau', type: 'fuel_depot' },
+    { name: 'Kho xăng dầu Cần Thơ', lat: 10.0452, lng: 105.7469, province: 'Can Tho', type: 'fuel_depot' },
+    
+    // Container Depots
+    { name: 'Bãi container Cát Lái', lat: 10.7900, lng: 106.8100, province: 'Ho Chi Minh City', type: 'container_depot' },
+    { name: 'Bãi container Hiệp Phước', lat: 10.7200, lng: 106.7500, province: 'Ho Chi Minh City', type: 'container_depot' },
+    { name: 'Bãi container Tân Cảng', lat: 10.7650, lng: 106.7050, province: 'Ho Chi Minh City', type: 'container_depot' },
+    { name: 'Bãi container Phú Hữu', lat: 10.7500, lng: 106.8200, province: 'Ho Chi Minh City', type: 'container_depot' },
+    { name: 'Bãi container Biên Hòa', lat: 10.9408, lng: 106.8228, province: 'Dong Nai', type: 'container_depot' },
+    { name: 'Bãi container Vũng Tàu', lat: 10.3460, lng: 107.0843, province: 'Ba Ria Vung Tau', type: 'container_depot' },
+    
+    // Common name variations
+    { name: 'Cat Lai', lat: 10.7900, lng: 106.8100, province: 'Ho Chi Minh City', type: 'port' },
+    { name: 'Phu Huu', lat: 10.7500, lng: 106.8200, province: 'Ho Chi Minh City', type: 'industrial' },
+    { name: 'Hiep Phuoc', lat: 10.7200, lng: 106.7500, province: 'Ho Chi Minh City', type: 'port' },
+    { name: 'Tan Thuan', lat: 10.7300, lng: 106.7100, province: 'Ho Chi Minh City', type: 'port' },
+    { name: 'Bien Hoa', lat: 10.9460, lng: 106.8234, province: 'Dong Nai', type: 'city' },
+    { name: 'Vung Tau', lat: 10.3460, lng: 107.0843, province: 'Ba Ria Vung Tau', type: 'city' },
+    { name: 'Can Tho', lat: 10.0452, lng: 105.7469, province: 'Can Tho', type: 'city' },
     { name: 'TP. Hồ Chí Minh', lat: 10.8231, lng: 106.6297, province: 'Ho Chi Minh City', type: 'city' },
     { name: 'Ho Chi Minh City', lat: 10.8231, lng: 106.6297, province: 'Ho Chi Minh City', type: 'city' },
     { name: 'HCMC', lat: 10.8231, lng: 106.6297, province: 'Ho Chi Minh City', type: 'city' },
-    { name: 'Saigon', lat: 10.8231, lng: 106.6297, province: 'Ho Chi Minh City', type: 'city' },
-    { name: 'Bien Hoa', lat: 10.9460, lng: 106.8234, province: 'Dong Nai', type: 'city' }
+    { name: 'Saigon', lat: 10.8231, lng: 106.6297, province: 'Ho Chi Minh City', type: 'city' }
   ]
 
   const searchLocations = (query: string) => {
