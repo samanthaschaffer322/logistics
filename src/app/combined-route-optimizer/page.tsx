@@ -118,6 +118,71 @@ export default function CombinedRouteOptimizerPage() {
     // Major Vietnamese Freight Companies
     { name: 'Viettel Post', lat: 10.7800, lng: 106.6950, province: 'Ho Chi Minh City', type: 'logistics' },
     { name: 'Kho Viettel Post', lat: 10.7800, lng: 106.6950, province: 'Ho Chi Minh City', type: 'warehouse' },
+    
+    // COMPREHENSIVE DEPOT & WAREHOUSE NETWORK
+    
+    // Long An Province - Major Logistics Hub
+    { name: 'Kho Long An', lat: 10.6950, lng: 106.2430, province: 'Long An', type: 'warehouse' },
+    { name: 'Long An Depot', lat: 10.6950, lng: 106.2430, province: 'Long An', type: 'depot' },
+    { name: 'Kho Tân An', lat: 10.7350, lng: 106.4200, province: 'Long An', type: 'warehouse' },
+    { name: 'Depot Tân An', lat: 10.7350, lng: 106.4200, province: 'Long An', type: 'depot' },
+    { name: 'Kho Đức Hòa', lat: 10.8800, lng: 106.3600, province: 'Long An', type: 'warehouse' },
+    { name: 'Depot Đức Hòa', lat: 10.8800, lng: 106.3600, province: 'Long An', type: 'depot' },
+    { name: 'Kho Bến Lức', lat: 10.6500, lng: 106.4800, province: 'Long An', type: 'warehouse' },
+    { name: 'Depot Bến Lức', lat: 10.6500, lng: 106.4800, province: 'Long An', type: 'depot' },
+    
+    // Ba Ria Vung Tau - Phu My Industrial Zone
+    { name: 'KCN Phú Mỹ', lat: 10.3800, lng: 107.1000, province: 'Ba Ria Vung Tau', type: 'industrial' },
+    { name: 'Phu My', lat: 10.3800, lng: 107.1000, province: 'Ba Ria Vung Tau', type: 'industrial' },
+    { name: 'Phú Mỹ', lat: 10.3800, lng: 107.1000, province: 'Ba Ria Vung Tau', type: 'industrial' },
+    { name: 'Kho Phú Mỹ', lat: 10.3800, lng: 107.1000, province: 'Ba Ria Vung Tau', type: 'warehouse' },
+    { name: 'Depot Phú Mỹ', lat: 10.3800, lng: 107.1000, province: 'Ba Ria Vung Tau', type: 'depot' },
+    { name: 'Cảng Phú Mỹ', lat: 10.3600, lng: 107.0800, province: 'Ba Ria Vung Tau', type: 'port' },
+    { name: 'Kho Vũng Tàu', lat: 10.3460, lng: 107.0840, province: 'Ba Ria Vung Tau', type: 'warehouse' },
+    { name: 'Depot Vũng Tàu', lat: 10.3460, lng: 107.0840, province: 'Ba Ria Vung Tau', type: 'depot' },
+    
+    // Dong Nai Province - Major Industrial Hub
+    { name: 'Kho Biên Hòa', lat: 10.9450, lng: 106.8240, province: 'Dong Nai', type: 'warehouse' },
+    { name: 'Depot Biên Hòa', lat: 10.9450, lng: 106.8240, province: 'Dong Nai', type: 'depot' },
+    { name: 'Kho Long Thành', lat: 10.8200, lng: 107.0000, province: 'Dong Nai', type: 'warehouse' },
+    { name: 'Depot Long Thành', lat: 10.8200, lng: 107.0000, province: 'Dong Nai', type: 'depot' },
+    { name: 'Kho Nhơn Trạch', lat: 10.7800, lng: 106.9500, province: 'Dong Nai', type: 'warehouse' },
+    { name: 'Depot Nhơn Trạch', lat: 10.7800, lng: 106.9500, province: 'Dong Nai', type: 'depot' },
+    { name: 'Kho Trảng Bom', lat: 10.9800, lng: 107.0200, province: 'Dong Nai', type: 'warehouse' },
+    { name: 'Depot Trảng Bom', lat: 10.9800, lng: 107.0200, province: 'Dong Nai', type: 'depot' },
+    
+    // Binh Duong Province - Industrial Centers
+    { name: 'Kho Thủ Dầu Một', lat: 10.9800, lng: 106.6500, province: 'Binh Duong', type: 'warehouse' },
+    { name: 'Depot Thủ Dầu Một', lat: 10.9800, lng: 106.6500, province: 'Binh Duong', type: 'depot' },
+    { name: 'Kho Dĩ An', lat: 10.9000, lng: 106.7700, province: 'Binh Duong', type: 'warehouse' },
+    { name: 'Depot Dĩ An', lat: 10.9000, lng: 106.7700, province: 'Binh Duong', type: 'depot' },
+    { name: 'Kho Thuận An', lat: 10.9200, lng: 106.6800, province: 'Binh Duong', type: 'warehouse' },
+    { name: 'Depot Thuận An', lat: 10.9200, lng: 106.6800, province: 'Binh Duong', type: 'depot' },
+    { name: 'Kho Bến Cát', lat: 11.1500, lng: 106.6000, province: 'Binh Duong', type: 'warehouse' },
+    { name: 'Depot Bến Cát', lat: 11.1500, lng: 106.6000, province: 'Binh Duong', type: 'depot' },
+    
+    // Tay Ninh Province - Border Logistics
+    { name: 'Kho Tây Ninh', lat: 11.3100, lng: 106.0980, province: 'Tay Ninh', type: 'warehouse' },
+    { name: 'Depot Tây Ninh', lat: 11.3100, lng: 106.0980, province: 'Tay Ninh', type: 'depot' },
+    { name: 'Kho Mộc Bài', lat: 11.1400, lng: 106.2200, province: 'Tay Ninh', type: 'warehouse' },
+    { name: 'Depot Mộc Bài', lat: 11.1400, lng: 106.2200, province: 'Tay Ninh', type: 'depot' },
+    
+    // An Giang Province - Mekong Delta Hub
+    { name: 'Kho Long Xuyên', lat: 10.3700, lng: 105.4350, province: 'An Giang', type: 'warehouse' },
+    { name: 'Depot Long Xuyên', lat: 10.3700, lng: 105.4350, province: 'An Giang', type: 'depot' },
+    { name: 'Kho Châu Đốc', lat: 10.7000, lng: 105.1200, province: 'An Giang', type: 'warehouse' },
+    { name: 'Depot Châu Đốc', lat: 10.7000, lng: 105.1200, province: 'An Giang', type: 'depot' },
+    
+    // Can Tho - Mekong Delta Center
+    { name: 'Kho Cần Thơ', lat: 10.0452, lng: 105.7469, province: 'Can Tho', type: 'warehouse' },
+    { name: 'Depot Cần Thơ', lat: 10.0452, lng: 105.7469, province: 'Can Tho', type: 'depot' },
+    { name: 'Cảng Cần Thơ', lat: 10.0300, lng: 105.7800, province: 'Can Tho', type: 'port' },
+    
+    // Tien Giang Province
+    { name: 'Kho Mỹ Tho', lat: 10.3600, lng: 106.3600, province: 'Tien Giang', type: 'warehouse' },
+    { name: 'Depot Mỹ Tho', lat: 10.3600, lng: 106.3600, province: 'Tien Giang', type: 'depot' },
+    { name: 'Kho Gò Công', lat: 10.3650, lng: 106.6700, province: 'Tien Giang', type: 'warehouse' },
+    { name: 'Depot Gò Công', lat: 10.3650, lng: 106.6700, province: 'Tien Giang', type: 'depot' },
     { name: 'Vietnam Post', lat: 10.7750, lng: 106.6900, province: 'Ho Chi Minh City', type: 'logistics' },
     { name: 'Kho Vietnam Post', lat: 10.7750, lng: 106.6900, province: 'Ho Chi Minh City', type: 'warehouse' },
     { name: 'Giao Hàng Nhanh', lat: 10.7700, lng: 106.6850, province: 'Ho Chi Minh City', type: 'logistics' },

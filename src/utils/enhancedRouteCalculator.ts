@@ -117,17 +117,19 @@ export class EnhancedRouteCalculator {
   private calculateTotalCost(distance: number, duration: number): number {
     const fuelCost = this.calculateFuelCost(distance)
     const driverCost = duration * this.getDriverCost()
-    const vehicleCost = distance * 2500 // VND per km (prime mover higher cost)
-    const tollCost = distance * 1200 // VND per km (prime mover tolls)
+    const vehicleCost = distance * 2000 // VND per km (more realistic for 100km)
+    const tollCost = distance * 800 // VND per km (highway tolls)
     
     const calculatedCost = fuelCost + driverCost + vehicleCost + tollCost
     
-    // Realistic prime mover charges (higher than container)
+    // More realistic pricing for different distances
     let minimumCharge: number
     if (distance <= 20) {
-      minimumCharge = 800000 // ₫800k for short prime mover hauls
+      minimumCharge = 800000 // ₫800k for short hauls
+    } else if (distance <= 50) {
+      minimumCharge = 1200000 // ₫1.2M for medium hauls
     } else if (distance <= 100) {
-      minimumCharge = 1200000 // ₫1.2M for medium hauls (65km = ₫1.2M)
+      minimumCharge = 1600000 // ₫1.6M for 100km (more realistic)
     } else {
       minimumCharge = 2200000 // ₫2.2M for long hauls
     }
