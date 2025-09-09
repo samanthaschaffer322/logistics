@@ -1,0 +1,18 @@
+name = "logiai-v4"
+compatibility_date = "2024-09-01"
+
+[env.production]
+name = "logiai-v4-production"
+
+[[env.production.routes]]
+pattern = "logiai.app/*"
+zone_name = "logiai.app"
+
+[build]
+command = "npm run build"
+cwd = "."
+watch_dir = "src"
+
+[build.upload]
+format = "directory"
+dir = "out"
