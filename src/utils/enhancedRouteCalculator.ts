@@ -115,15 +115,24 @@ export class EnhancedRouteCalculator {
   }
 
   private calculateTotalCost(distance: number, duration: number): number {
-    // Use live pricing for legacy calls
-    return this.calculateTotalCostLive(distance, duration).then(cost => cost).catch(() => {
-      // Fallback calculation
-      const fuelCost = this.calculateFuelCost(distance)
-      const driverCost = duration * 20000
-      const vehicleCost = distance * 1000
-      const tollCost = distance * 300
-      return 15000 + fuelCost + driverCost + vehicleCost + tollCost
-    }) as any
+    const fuelCost = this.calculateFuelCost(distance)
+    const driverCost = duration * this.getDriverCost()
+    const vehicleCost = distance * 2000 // VND per km (container truck maintenance)
+    const tollCost = distance * 1000 // VND per km (highway tolls)
+    
+    const calculatedCost = fuelCost + driverCost + vehicleCost + tollCost
+    
+    // Realistic minimum charges for container transport
+    let minimumCharge: number
+    if (distance <= 20) {
+      minimumCharge = 800000 // ₫800k for short container hauls
+    } else if (distance <= 100) {
+      minimumCharge = 1500000 // ₫1.5M for medium hauls
+    } else {
+      minimumCharge = 2500000 // ₫2.5M for long hauls
+    }
+    
+    return Math.max(calculatedCost, minimumCharge)
   }
 
   /**
