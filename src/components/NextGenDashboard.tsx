@@ -33,17 +33,41 @@ const NextGenDashboard = () => {
     activeShipments: 2847,
     onTimeDelivery: 98.5,
     fleetUtilization: 94.2,
-    costSavings: 2400000
+    costSavings: 2400000,
+    aiInsights: {
+      riskAlerts: 3,
+      optimizationOpportunities: 7,
+      predictiveMaintenanceAlerts: 2,
+      cashFlowHealth: 'Excellent'
+    },
+    businessMetrics: {
+      monthlyRevenue: 15600000000,
+      profitMargin: 18.5,
+      customerSatisfaction: 96.8,
+      operationalEfficiency: 92.3
+    }
   })
 
-  // Real-time data simulation
+  // Enhanced real-time data simulation with comprehensive business metrics
   useEffect(() => {
     const interval = setInterval(() => {
       setRealTimeData(prev => ({
         activeShipments: prev.activeShipments + Math.floor(Math.random() * 10 - 5),
         onTimeDelivery: Math.min(100, prev.onTimeDelivery + (Math.random() - 0.5) * 0.1),
         fleetUtilization: Math.min(100, prev.fleetUtilization + (Math.random() - 0.5) * 0.5),
-        costSavings: prev.costSavings + Math.floor(Math.random() * 10000 - 5000)
+        costSavings: prev.costSavings + Math.floor(Math.random() * 10000 - 5000),
+        aiInsights: {
+          riskAlerts: Math.max(0, prev.aiInsights.riskAlerts + Math.floor(Math.random() * 3 - 1)),
+          optimizationOpportunities: Math.max(0, prev.aiInsights.optimizationOpportunities + Math.floor(Math.random() * 3 - 1)),
+          predictiveMaintenanceAlerts: Math.max(0, prev.aiInsights.predictiveMaintenanceAlerts + Math.floor(Math.random() * 2 - 1)),
+          cashFlowHealth: ['Excellent', 'Good', 'Fair'][Math.floor(Math.random() * 3)]
+        },
+        businessMetrics: {
+          monthlyRevenue: prev.businessMetrics.monthlyRevenue + Math.floor(Math.random() * 1000000 - 500000),
+          profitMargin: Math.max(0, prev.businessMetrics.profitMargin + (Math.random() - 0.5) * 0.2),
+          customerSatisfaction: Math.min(100, prev.businessMetrics.customerSatisfaction + (Math.random() - 0.5) * 0.1),
+          operationalEfficiency: Math.min(100, prev.businessMetrics.operationalEfficiency + (Math.random() - 0.5) * 0.3)
+        }
       }))
     }, 5000)
     return () => clearInterval(interval)

@@ -28,21 +28,15 @@ interface Vehicle {
   fuelLevel: number
   mileage: number
   lastService: string
+  efficiency: number
+  predictedMaintenance: number
+  riskScore: number
+  aiRecommendations: string[]
   nextService: string
   engineHours: number
   tireCondition: 'good' | 'fair' | 'poor'
   brakeCondition: 'good' | 'fair' | 'poor'
   maintenanceCost: number
-  detailedMaintenance: {
-    thayNhot: { lastDate: string, nextDate: string, cost: number, status: 'due' | 'overdue' | 'completed' }
-    dangKiem: { lastDate: string, nextDate: string, cost: number, status: 'due' | 'overdue' | 'completed' }
-    kiemTraPhanh: { lastDate: string, nextDate: string, cost: number, status: 'due' | 'overdue' | 'completed' }
-    thayLop: { lastDate: string, nextDate: string, cost: number, status: 'due' | 'overdue' | 'completed' }
-    baoTriDongCo: { lastDate: string, nextDate: string, cost: number, status: 'due' | 'overdue' | 'completed' }
-    kiemTraDieuHoa: { lastDate: string, nextDate: string, cost: number, status: 'due' | 'overdue' | 'completed' }
-    thayLocDau: { lastDate: string, nextDate: string, cost: number, status: 'due' | 'overdue' | 'completed' }
-    kiemTraHopSo: { lastDate: string, nextDate: string, cost: number, status: 'due' | 'overdue' | 'completed' }
-  }
 }
 
 const FleetManagementPage: React.FC = () => {

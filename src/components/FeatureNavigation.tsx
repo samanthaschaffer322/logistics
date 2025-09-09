@@ -21,96 +21,80 @@ const FeatureNavigation = () => {
       category: 'Core Features'
     },
     {
-      title: 'Payment Tracking',
-      description: 'Track payments, export PDF/Excel, manage companies',
+      title: 'Payment Tracking Pro',
+      description: 'Enhanced payment tracking with AI insights, export PDF/Excel, manage companies',
       href: '/payment-tracking',
       icon: DollarSign,
       color: 'bg-green-500',
       category: 'Core Features'
     },
     {
-      title: 'File Processing',
-      description: 'AI analysis of Vietnamese logistics files',
+      title: 'AI File Processing',
+      description: 'Advanced AI analysis of Vietnamese logistics files with predictive insights',
       href: '/file-processing',
       icon: FileText,
       color: 'bg-orange-500',
       category: 'Core Features'
     },
     {
-      title: 'Fleet Management',
-      description: 'Manage vehicles, drivers, and fleet operations',
+      title: 'Smart Fleet Management',
+      description: 'AI-powered fleet management with predictive maintenance and optimization',
       href: '/fleet-management',
       icon: Truck,
       color: 'bg-red-500',
       category: 'Operations'
     },
     {
-      title: 'Real-time Tracking',
-      description: 'Live GPS tracking with coordinates',
-      href: '/real-time-tracking',
-      icon: MapPin,
-      color: 'bg-cyan-500',
-      category: 'Operations'
-    },
-    {
-      title: 'AI Financial',
-      description: 'AI-powered financial analysis and insights',
+      title: 'AI Financial Intelligence',
+      description: 'Advanced AI financial analysis with market predictions and insights',
       href: '/ai-financial',
       icon: Brain,
       color: 'bg-pink-500',
-      category: 'Analytics'
+      category: 'AI Intelligence'
     },
     {
-      title: 'Analytics Dashboard',
-      description: 'Comprehensive business analytics',
-      href: '/analytics',
-      icon: BarChart3,
-      color: 'bg-indigo-500',
-      category: 'Analytics'
-    },
-    {
-      title: 'Customs Training',
-      description: 'HS codes and customs procedures training',
+      title: 'Customs Training Pro',
+      description: 'Enhanced HS codes and customs procedures training with AI assistance',
       href: '/customs-training',
       icon: Shield,
       color: 'bg-yellow-500',
       category: 'Training'
     },
     {
-      title: 'Import Export',
-      description: 'Trade management and documentation',
+      title: 'Smart Import Export',
+      description: 'AI-enhanced trade management and documentation with compliance checking',
       href: '/import-export',
       icon: Globe,
       color: 'bg-teal-500',
       category: 'Trade'
     },
     {
-      title: 'Logistics Operations',
-      description: 'Complete logistics operations management',
+      title: 'Intelligent Logistics Operations',
+      description: 'Complete AI-powered logistics operations management with optimization',
       href: '/logistics-operations',
       icon: Package,
       color: 'bg-emerald-500',
       category: 'Operations'
     },
     {
-      title: 'Super AI',
-      description: 'Advanced AI assistant for logistics',
+      title: 'Super AI Assistant',
+      description: 'Advanced AI assistant for logistics with natural language processing',
       href: '/super-ai',
       icon: Cpu,
       color: 'bg-violet-500',
-      category: 'AI Tools'
+      category: 'AI Intelligence'
     },
     {
-      title: 'Shipments',
-      description: 'Shipment tracking and management',
+      title: 'Smart Shipments',
+      description: 'AI-enhanced shipment tracking and management with predictive delivery',
       href: '/shipments',
       icon: Package,
       color: 'bg-orange-600',
       category: 'Operations'
     },
     {
-      title: 'Warehouse',
-      description: 'Warehouse management system',
+      title: 'Intelligent Warehouse',
+      description: 'AI-powered warehouse management with inventory optimization',
       href: '/warehouse',
       icon: Database,
       color: 'bg-gray-500',
@@ -128,7 +112,7 @@ const FeatureNavigation = () => {
         </h2>
         <p className="text-slate-400">Access all your upgraded logistics management tools</p>
         <Badge className="mt-2 bg-green-500/20 text-green-400 border-green-500/30">
-          {features.length} Features Available • Enhanced Route Optimizer Integrated
+          {features.length} Enhanced AI Features • Empty Features Removed
         </Badge>
       </div>
 

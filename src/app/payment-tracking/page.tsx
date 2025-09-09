@@ -14,20 +14,49 @@ export default function PaymentTracking() {
   const [showForm, setShowForm] = useState(false)
   const [newCompany, setNewCompany] = useState({ name: '', company: '', amount: '' })
   const [librariesLoaded, setLibrariesLoaded] = useState(false)
+  const [aiInsights, setAiInsights] = useState(null)
+  const [showAiAnalysis, setShowAiAnalysis] = useState(false)
 
   console.log('🎯 Component rendering...')
 
   useEffect(() => {
     console.log('🆕 Loading companies...')
     const defaultData = [
-      { id: '1', name: 'Nguyen Van Long', company: 'Long Transport', amount: 45000000, status: 'overdue' },
-      { id: '2', name: 'Ngo Minh Gia', company: 'Gia Logistics', amount: 28500000, status: 'overdue' },
-      { id: '3', name: 'CN Company', company: 'CN', amount: 98000000, status: 'pending' },
-      { id: '4', name: 'Khang Phat', company: 'KP', amount: 78000000, status: 'pending' }
+      { id: '1', name: 'Nguyen Van Long', company: 'Long Transport', amount: 45000000, status: 'overdue', daysOverdue: 15, riskScore: 85 },
+      { id: '2', name: 'Ngo Minh Gia', company: 'Gia Logistics', amount: 28500000, status: 'overdue', daysOverdue: 8, riskScore: 65 },
+      { id: '3', name: 'CN Company', company: 'CN', amount: 98000000, status: 'pending', daysOverdue: 0, riskScore: 25 },
+      { id: '4', name: 'Khang Phat', company: 'KP', amount: 78000000, status: 'pending', daysOverdue: 0, riskScore: 30 }
     ]
     setCompanies(defaultData)
     console.log('💾 Loaded', defaultData.length, 'companies')
+    
+    // Generate AI insights
+    generateAiInsights(defaultData)
   }, [])
+
+  const generateAiInsights = (data) => {
+    const totalRevenue = data.reduce((sum, c) => sum + c.amount, 0)
+    const overdueAmount = data.filter(c => c.status === 'overdue').reduce((sum, c) => sum + c.amount, 0)
+    const avgRiskScore = data.reduce((sum, c) => sum + c.riskScore, 0) / data.length
+    const highRiskClients = data.filter(c => c.riskScore > 70).length
+    
+    const insights = {
+      cashFlowHealth: overdueAmount / totalRevenue < 0.3 ? 'Good' : 'At Risk',
+      collectionEfficiency: 100 - (overdueAmount / totalRevenue * 100),
+      riskLevel: avgRiskScore > 60 ? 'High' : avgRiskScore > 40 ? 'Medium' : 'Low',
+      recommendations: [
+        overdueAmount > 50000000 ? 'Prioritize collection of overdue payments (₫' + (overdueAmount/1000000).toFixed(0) + 'M at risk)' : null,
+        highRiskClients > 0 ? `Monitor ${highRiskClients} high-risk clients closely` : null,
+        'Consider offering early payment discounts to improve cash flow'
+      ].filter(Boolean),
+      predictions: {
+        nextMonthCollection: totalRevenue * 0.85,
+        riskOfDefault: avgRiskScore > 70 ? 'High' : 'Low'
+      }
+    }
+    
+    setAiInsights(insights)
+  }
 
   const exportPDF = () => {
     console.log('📄 PDF Export clicked!')
