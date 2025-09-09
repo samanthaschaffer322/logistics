@@ -696,35 +696,35 @@ const EnhancedImportExportCenter: React.FC = () => {
                 Automation & File Learning
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-6">
+            <CardContent className="p-6 bg-slate-800/50">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-4">
-                  <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                    <Brain className="w-5 h-5 text-purple-600" />
+                  <h3 className="font-semibold text-slate-100 flex items-center gap-2">
+                    <Brain className="w-5 h-5 text-purple-400" />
                     AI Learning Progress
                   </h3>
                   
                   <div className="space-y-3">
                     <div>
                       <div className="flex justify-between text-sm mb-1">
-                        <span className="text-gray-600">Document Classification</span>
-                        <span className="font-medium">95%</span>
+                        <span className="text-slate-300">Document Classification</span>
+                        <span className="font-medium text-slate-100">95%</span>
                       </div>
                       <Progress value={95} className="h-2" />
                     </div>
                     
                     <div>
                       <div className="flex justify-between text-sm mb-1">
-                        <span className="text-gray-600">Compliance Detection</span>
-                        <span className="font-medium">88%</span>
+                        <span className="text-slate-300">Compliance Detection</span>
+                        <span className="font-medium text-slate-100">88%</span>
                       </div>
                       <Progress value={88} className="h-2" />
                     </div>
                     
                     <div>
                       <div className="flex justify-between text-sm mb-1">
-                        <span className="text-gray-600">Risk Assessment</span>
-                        <span className="font-medium">92%</span>
+                        <span className="text-slate-300">Risk Assessment</span>
+                        <span className="font-medium text-slate-100">92%</span>
                       </div>
                       <Progress value={92} className="h-2" />
                     </div>
@@ -732,26 +732,26 @@ const EnhancedImportExportCenter: React.FC = () => {
                 </div>
 
                 <div className="space-y-4">
-                  <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                    <Sparkles className="w-5 h-5 text-blue-600" />
+                  <h3 className="font-semibold text-slate-100 flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-blue-400" />
                     Automation Rules
                   </h3>
                   
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <span className="text-sm font-medium text-gray-700">Auto-classify documents</span>
+                    <div className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg border border-slate-600">
+                      <span className="text-sm font-medium text-slate-200">Auto-classify documents</span>
                       <Switch defaultChecked />
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <span className="text-sm font-medium text-gray-700">Risk alerts</span>
+                    <div className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg border border-slate-600">
+                      <span className="text-sm font-medium text-slate-200">Risk alerts</span>
                       <Switch defaultChecked />
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <span className="text-sm font-medium text-gray-700">Compliance monitoring</span>
+                    <div className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg border border-slate-600">
+                      <span className="text-sm font-medium text-slate-200">Compliance monitoring</span>
                       <Switch defaultChecked />
                     </div>
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <span className="text-sm font-medium text-gray-700">Cost optimization suggestions</span>
+                    <div className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg border border-slate-600">
+                      <span className="text-sm font-medium text-slate-200">Cost optimization suggestions</span>
                       <Switch defaultChecked />
                     </div>
                   </div>
