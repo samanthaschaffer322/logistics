@@ -109,6 +109,12 @@ export default function CombinedRouteOptimizerPage() {
     
     // Comprehensive Vietnamese Logistics Companies & Facilities (500+ locations)
     
+    // Specific Company Warehouses & Logistics Centers
+    { name: 'Kho Chim En', lat: 10.8500, lng: 106.7800, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Chim En', lat: 10.8500, lng: 106.7800, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Kho Chim Én', lat: 10.8500, lng: 106.7800, province: 'Ho Chi Minh City', type: 'warehouse' },
+    { name: 'Chim Én', lat: 10.8500, lng: 106.7800, province: 'Ho Chi Minh City', type: 'warehouse' },
+    
     // Major Vietnamese Freight Companies
     { name: 'Viettel Post', lat: 10.7800, lng: 106.6950, province: 'Ho Chi Minh City', type: 'logistics' },
     { name: 'Kho Viettel Post', lat: 10.7800, lng: 106.6950, province: 'Ho Chi Minh City', type: 'warehouse' },
@@ -519,8 +525,14 @@ export default function CombinedRouteOptimizerPage() {
              loc.name.toLowerCase().includes(name.toLowerCase()) ||
              normalizedLoc.startsWith(normalizedQuery) ||
              (name.toLowerCase().includes('long an') && loc.name.toLowerCase().includes('long an')) ||
-             (name.toLowerCase().includes('cat lai') && loc.name.toLowerCase().includes('cát lái'))
+             (name.toLowerCase().includes('cat lai') && loc.name.toLowerCase().includes('cát lái')) ||
+             (name.toLowerCase().includes('chim en') && loc.name.toLowerCase().includes('chim en')) ||
+             (name.toLowerCase().includes('chim en') && loc.name.toLowerCase().includes('chim én')) ||
+             (name.toLowerCase().includes('phu my') && loc.name.toLowerCase().includes('phú mỹ')) ||
+             (name.toLowerCase().includes('phu my') && loc.name.toLowerCase().includes('phu my'))
     })
+    
+    console.log(`🔍 Searching for: "${name}" → Found: ${location?.name || 'Not found'}`)
     
     setMultiStops(multiStops.map(stop => 
       stop.id === id ? { ...stop, name, lat: location?.lat || 0, lng: location?.lng || 0 } : stop
