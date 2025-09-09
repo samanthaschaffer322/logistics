@@ -42,7 +42,7 @@ export class EnhancedRouteCalculator {
    * Get realistic Vietnamese driver wages
    */
   private getDriverCost(): number {
-    return 30000 // VND per hour (realistic for container drivers)
+    return 40000 // VND per hour (realistic for prime mover drivers)
   }
 
   /**
@@ -117,19 +117,19 @@ export class EnhancedRouteCalculator {
   private calculateTotalCost(distance: number, duration: number): number {
     const fuelCost = this.calculateFuelCost(distance)
     const driverCost = duration * this.getDriverCost()
-    const vehicleCost = distance * 1200 // VND per km (more realistic)
-    const tollCost = distance * 600 // VND per km (realistic tolls)
+    const vehicleCost = distance * 2500 // VND per km (prime mover higher cost)
+    const tollCost = distance * 1200 // VND per km (prime mover tolls)
     
     const calculatedCost = fuelCost + driverCost + vehicleCost + tollCost
     
-    // More realistic minimum charges for container transport
+    // Realistic prime mover charges (higher than container)
     let minimumCharge: number
     if (distance <= 20) {
-      minimumCharge = 500000 // ₫500k for short hauls
+      minimumCharge = 800000 // ₫800k for short prime mover hauls
     } else if (distance <= 100) {
-      minimumCharge = 800000 // ₫800k for medium hauls (62km = ₫800k)
+      minimumCharge = 1200000 // ₫1.2M for medium hauls (65km = ₫1.2M)
     } else {
-      minimumCharge = 1500000 // ₫1.5M for long hauls
+      minimumCharge = 2200000 // ₫2.2M for long hauls
     }
     
     return Math.max(calculatedCost, minimumCharge)

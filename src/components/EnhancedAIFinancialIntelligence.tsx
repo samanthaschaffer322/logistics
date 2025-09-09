@@ -524,7 +524,44 @@ const EnhancedAIFinancialIntelligence: React.FC = () => {
             </AlertDescription>
           </Alert>
           <div className="text-center py-8">
-            <p className="text-gray-500">Financial Advisor view coming soon...</p>
+            <div className="space-y-6">
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200">
+                <h3 className="text-lg font-semibold text-green-800 mb-4 flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5" />
+                  Tư vấn đầu tư & Dòng tiền
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-green-700">Khuyến nghị đầu tư:</span>
+                      <span className="font-semibold text-green-800">Mở rộng đội xe</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-green-700">Dự báo ROI:</span>
+                      <span className="font-semibold text-green-800">18.5%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-green-700">Thời gian hoàn vốn:</span>
+                      <span className="font-semibold text-green-800">14 tháng</span>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-green-700">Dòng tiền dự kiến:</span>
+                      <span className="font-semibold text-green-800">+₫2.8B/năm</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-green-700">Rủi ro đánh giá:</span>
+                      <span className="font-semibold text-yellow-600">Trung bình</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-green-700">Tối ưu chi phí:</span>
+                      <span className="font-semibold text-green-800">-12% nhiên liệu</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </TabsContent>
         
@@ -536,7 +573,44 @@ const EnhancedAIFinancialIntelligence: React.FC = () => {
             </AlertDescription>
           </Alert>
           <div className="text-center py-8">
-            <p className="text-gray-500">Business Analyst view coming soon...</p>
+            <div className="space-y-6">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200">
+                <h3 className="text-lg font-semibold text-blue-800 mb-4 flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5" />
+                  Phân tích KPI & Xu hướng thị trường
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-blue-700">Hiệu suất vận tải:</span>
+                      <span className="font-semibold text-blue-800">94.2%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-blue-700">Tăng trưởng doanh thu:</span>
+                      <span className="font-semibold text-green-600">+15.8%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-blue-700">Thị phần khu vực:</span>
+                      <span className="font-semibold text-blue-800">8.3%</span>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex justify-between">
+                      <span className="text-blue-700">Dự báo Q4 2024:</span>
+                      <span className="font-semibold text-green-600">Tích cực</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-blue-700">Xu hướng giá nhiên liệu:</span>
+                      <span className="font-semibold text-red-600">Tăng 3%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-blue-700">Cơ hội mở rộng:</span>
+                      <span className="font-semibold text-blue-800">Cao</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </TabsContent>
       </Tabs>
