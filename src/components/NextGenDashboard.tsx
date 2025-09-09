@@ -215,22 +215,10 @@ const NextGenDashboard = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full grid-cols-5 bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-2 h-16">
+          <TabsList className="grid w-full grid-cols-2 bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-2 h-16">
             <TabsTrigger value="overview" className="text-slate-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-xl font-semibold h-12">
               <BarChart3 className="w-4 h-4 mr-2" />
               {language === 'vi' ? 'Tổng quan AI' : 'AI Overview'}
-            </TabsTrigger>
-            <TabsTrigger value="operations" className="text-slate-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-xl font-semibold h-12">
-              <Activity className="w-4 h-4 mr-2" />
-              {language === 'vi' ? 'Vận hành thông minh' : 'Smart Operations'}
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="text-slate-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-xl font-semibold h-12">
-              <TrendingUp className="w-4 h-4 mr-2" />
-              {language === 'vi' ? 'Phân tích AI' : 'AI Analytics'}
-            </TabsTrigger>
-            <TabsTrigger value="fleet" className="text-slate-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-xl font-semibold h-12">
-              <Truck className="w-4 h-4 mr-2" />
-              {language === 'vi' ? 'Đội xe AI' : 'AI Fleet'}
             </TabsTrigger>
             <TabsTrigger value="features" className="text-slate-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white rounded-xl font-semibold h-12">
               <Navigation className="w-4 h-4 mr-2" />
