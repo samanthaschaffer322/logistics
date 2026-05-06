@@ -13,6 +13,12 @@ interface UserCredentials {
 // Authorized users with correct credentials
 const AUTHORIZED_USERS: UserCredentials[] = [
   {
+    email: 'adav9x4',
+    password: 'SecureAdmin2025!!',
+    role: 'admin',
+    name: 'Administrator'
+  },
+  {
     email: 'admin@trucking.com',
     password: 'SecureAdmin2025!',
     role: 'admin',

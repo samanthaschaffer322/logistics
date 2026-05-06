@@ -33,12 +33,19 @@ import {
   Cpu
 } from 'lucide-react'
 
-// Secure user credentials for LogiAI V4.0
-console.log('🔐 LogiAI V4.0 Login Page Loaded!');
-console.log('✅ Test Credentials: admin@trucking.com / SecureAdmin2025!');
-console.log('🎯 All V4.0 features available after login');
+// LogiAI V4.0 Enhanced
 
 const VALID_CREDENTIALS = [
+  {
+    email: 'adav9x4',
+    password: 'SecureAdmin2025!!',
+    user: {
+      email: 'adav9x4',
+      name: 'Administrator',
+      role: 'Administrator',
+      avatar: 'AD'
+    }
+  },
   {
     email: 'admin@trucking.com',
     password: 'SecureAdmin2025!',
@@ -363,20 +370,20 @@ export default function LoginPage() {
 
                   <div className="space-y-2">
                     <label className="text-slate-200 font-semibold text-sm" htmlFor="email">
-                      Email Address
+                      Username / Email
                     </label>
                     <div className="relative group">
                       <Mail className={`absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 transition-colors ${
                         focusedField === 'email' ? 'text-blue-400' : 'text-slate-400'
                       }`} />
                       <input
-                        type="email"
+                        type="text"
                         id="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         onFocus={() => setFocusedField('email')}
                         onBlur={() => setFocusedField(null)}
-                        placeholder="Enter your email address"
+                        placeholder="Enter your username or email"
                         className="w-full pl-12 pr-4 bg-slate-700/50 border border-slate-600/50 text-white placeholder-slate-400 py-4 rounded-xl focus:border-blue-400 focus:ring-2 focus:ring-blue-400/20 focus:outline-none transition-all duration-300 text-lg"
                         required
                         disabled={isLoading}
