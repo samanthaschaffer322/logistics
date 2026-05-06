@@ -1,4 +1,4 @@
-name = "logiai-v4"
+name = "logistics-next-gen"
 compatibility_date = "2024-09-01"
 
 [env.production]

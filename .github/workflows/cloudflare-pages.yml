@@ -33,7 +33,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          projectName: logiai-v4
+          projectName: logistics-next-gen
           directory: out
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
           wranglerVersion: '3'
