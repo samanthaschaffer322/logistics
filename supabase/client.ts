@@ -1,34 +1,14 @@
-// Mock Supabase client for static export compatibility
+import { createClient } from '@supabase/supabase-js'
 
-export const supabase = {
-  from: (table: string) => ({
-    select: (columns?: string) => ({
-      eq: (column: string, value: any) => ({
-        data: [],
-        error: null
-      }),
-      data: [],
-      error: null
-    }),
-    insert: (data: any) => ({
-      data: null,
-      error: null
-    }),
-    update: (data: any) => ({
-      eq: (column: string, value: any) => ({
-        data: null,
-        error: null
-      })
-    }),
-    delete: () => ({
-      eq: (column: string, value: any) => ({
-        data: null,
-        error: null
-      })
-    })
-  })
-}
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-export const isSupabaseConfigured = false
+export const isSupabaseConfigured = !!(url && key && !url.includes('your-project'))
+
+export const supabase = isSupabaseConfigured
+  ? createClient(url, key)
+  : ({
+      from: () => ({ select: () => ({ data: [], error: null }), insert: () => ({ data: null, error: null }), update: () => ({ eq: () => ({ data: null, error: null }) }), delete: () => ({ eq: () => ({ data: null, error: null }) }) })
+    } as any)
 
 export default supabase
